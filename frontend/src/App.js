@@ -1,10 +1,13 @@
-import logo from './logo.svg';
-import './App.css';
-import ProcedureForm from './procedureTemplateForm';
+import toast, { Toaster } from "react-hot-toast";
+import Navbar from "./components/navbar.jsx";
+const notify = () => toast("Here is your toast.");
 
 function App() {
   return (
-    <ProcedureForm></ProcedureForm>
+    <>
+      <Toaster />
+      <Navbar />
+    </>
   );
 }
 
