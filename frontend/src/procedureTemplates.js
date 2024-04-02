@@ -8,11 +8,11 @@ const SearchBar = () => {
   const handleClearInput = () => setInputValue("");
 
   return (
-    <div className="inline-flex items-center rounded-full text-2xl border-2 border-[#A30000] bg-[#F5F5DC] p-2 min-width relative">
-      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#8E0000]">
+    <div className="inline-flex items-center rounded-full text-xl border-2 border-[#A30000] bg-[#F5F5DC] p-2 min-width relative">
+      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#8E0000]">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-7 w-7 text-white"
+          className="h-6 w-6 text-white"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -29,7 +29,7 @@ const SearchBar = () => {
         type="search"
         placeholder="Search for procedure templates"
         className="bg-transparent border-none outline-none placeholder-[#A30000] text-[#A30000] pl-2"
-        style={{ minWidth: "350px" }}
+        style={{ minWidth: "300px" }}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
       />
@@ -59,11 +59,11 @@ const SearchBar = () => {
 
 const CreateTemplateButton = () => {
   return (
-    <button className="flex items-center text-2xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#A30000] border-2 border-[#A30000] rounded-full hover:bg-[#ede9d4]">
+    <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#A30000] border-2 border-[#A30000] rounded-full hover:bg-[#ede9d4]">
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="45"
-        height="45"
+        width="36"
+        height="36"
         fill="#8E0000"
         className="bi bi-clipboard-plus mr-2"
         viewBox="0 0 16 16"
@@ -115,7 +115,7 @@ const ProcedureTable = () => {
       {
         name: "Radiation Therapy",
         description:
-          "A cancer treatment that uses high doses of radiation to kill cancer cells and shrink tumors in the body.",
+          "A cancer treatment that uses high doses of radiation to kill cancer cells and shrink/prevent tumors in the body",
         resources:
           "Linear Accelerator, CT Simulator, Radiation Therapy Machine, Shielding Material",
         roles:
@@ -127,7 +127,7 @@ const ProcedureTable = () => {
       {
         name: "Ultrasound Imaging",
         description:
-          "Diagnostic technique that uses high-frequency sound waves to produce images of the body.",
+          "A diagnostic technique that uses high-frequency sound waves to produce images of the body for treatment planning.",
         resources: "Ultrasound Machine, Gel for Skin Contact",
         roles: "Sonographer, Radiologist, Ultrasound Technician",
         time: "45 minutes",
@@ -137,7 +137,7 @@ const ProcedureTable = () => {
       {
         name: "Vaccination",
         description:
-          "The administration of a vaccine to help the immune system develop protection from a disease.",
+          "The administration of a vaccine to help the immune system develop protection from a disease which prevents flu.",
         resources: "Vaccine, Syringes, Bandages, Vaccine Refrigeration Unit",
         roles: "Nurse, Medical Assistant",
         time: "10 minutes",
@@ -272,7 +272,7 @@ const ProcedureTable = () => {
             tableLayout: "fixed",
             borderCollapse: "separate",
             borderSpacing: "0 1px",
-            fontSize: "1.5rem",
+            fontSize: "1.25rem",
             textAlign: "center",
           }}
         >
@@ -365,14 +365,14 @@ const ProcedureTable = () => {
         <button
           onClick={() => previousPage()}
           disabled={!canPreviousPage}
-          className="flex items-center justify-center text-2xl px-4 py-2 bg-[#F5F5DC] text-[#A30000] border-2 border-[#A30000] rounded-full hover:bg-[#ede9d4] mr-2"
+          className="flex items-center justify-center text-xl px-4 py-2 bg-[#F5F5DC] text-[#A30000] border-2 border-[#A30000] rounded-full hover:bg-[#ede9d4] mr-2"
         >
           Previous Page
         </button>
         <button
           onClick={() => nextPage()}
           disabled={!canNextPage}
-          className="flex items-center justify-center text-2xl px-4 py-2 bg-[#F5F5DC] text-[#A30000] border-2 border-[#A30000] rounded-full hover:bg-[#ede9d4]"
+          className="flex items-center justify-center text-xl px-4 py-2 bg-[#F5F5DC] text-[#A30000] border-2 border-[#A30000] rounded-full hover:bg-[#ede9d4]"
         >
           Next Page
         </button>
@@ -384,7 +384,7 @@ const ProcedureTable = () => {
 const ProcedureTemplateManagement = () => {
   return (
     <div className="flex flex-col items-center space-y-4 relative">
-      <h1 className="text-5xl text-[#A30000] text-center underline font-bold mt-5">
+      <h1 className="text-4xl text-[#A30000] text-center underline font-bold mt-5">
         Procedure Template Management
       </h1>
       <div className="absolute right-8">

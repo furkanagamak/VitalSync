@@ -20,11 +20,11 @@ import "./App.css";
 
 const ModifyTemplateButton = () => {
   return (
-    <button className="flex items-center text-2xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
+    <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="40"
-        height="40"
+        width="36"
+        height="36"
         fill="#8E0000"
         className="bi bi-pencil mr-2"
         viewBox="0 0 16 16"
@@ -38,11 +38,11 @@ const ModifyTemplateButton = () => {
 
 const GoBackButton = () => {
   return (
-    <button className="flex items-center text-2xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
+    <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="45"
-        height="45"
+        width="35"
+        height="35"
         fill="currentColor"
         class="bi bi-arrow-left mr-2"
         viewBox="0 0 16 16"
@@ -91,7 +91,7 @@ const ProcedureForm = () => {
 
   const theme = createTheme({
     typography: {
-      fontSize: 12,
+      fontSize: 10,
       button: {
         textTransform: "none",
       },
@@ -358,7 +358,7 @@ const ProcedureForm = () => {
             onChange={handleResourceChange}
             inputProps={{ min: 1, style: { color: "#8E0000" } }}
             InputLabelProps={{ style: { color: "#8E0000" } }}
-            style={{ width: "400px" }}
+            style={{ width: "345px" }}
           />
           <Button
             variant="outlined"
@@ -389,7 +389,7 @@ const ProcedureForm = () => {
             <List
               className="custom-scrollbar"
               style={{
-                maxHeight: "150px",
+                maxHeight: "125px",
                 overflowY: "auto",
                 backgroundColor: "white",
                 border: "1px solid #8E0000",
@@ -498,7 +498,7 @@ const ProcedureForm = () => {
             <List
               className="custom-scrollbar"
               style={{
-                maxHeight: "150px",
+                maxHeight: "125px",
                 overflowY: "auto",
                 backgroundColor: "white",
                 border: "1px solid #8E0000",
@@ -570,7 +570,7 @@ const ModifyProcedureTemplateForm = () => {
           alignItems: "center",
           justifyContent: "center",
           position: "relative",
-          marginTop: "2rem",
+          marginTop: "1.2rem",
           marginBottom: "2rem",
         }}
       >
@@ -579,8 +579,8 @@ const ModifyProcedureTemplateForm = () => {
         </div>
         <h1
           style={{
-            fontSize: "2.5rem",
-            lineHeight: "1",
+            fontSize: "2.25rem",
+            lineHeight: "2.5rem",
             textAlign: "center",
             textDecoration: "underline",
             color: "#8E0000",
