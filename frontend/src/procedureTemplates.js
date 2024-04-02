@@ -127,7 +127,7 @@ const ProcedureTable = () => {
       {
         name: "Ultrasound Imaging",
         description:
-          "A diagnostic technique that uses high-frequency sound waves to produce images of the body for treatment planning.",
+          "A diagnostic technique that uses high-frequency sound waves to produce images of the body for treatment.",
         resources: "Ultrasound Machine, Gel for Skin Contact",
         roles: "Sonographer, Radiologist, Ultrasound Technician",
         time: "45 minutes",
@@ -137,7 +137,7 @@ const ProcedureTable = () => {
       {
         name: "Vaccination",
         description:
-          "The administration of a vaccine to help the immune system develop protection from a disease which prevents flu.",
+          "The administration of a vaccine to help the immune system develop protection from a disease like flu.",
         resources: "Vaccine, Syringes, Bandages, Vaccine Refrigeration Unit",
         roles: "Nurse, Medical Assistant",
         time: "10 minutes",
