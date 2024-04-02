@@ -312,6 +312,7 @@ const ProcedureForm = () => {
             marginBottom: "20px",
           }}
         >
+          <div style={{ display: "flex", flexGrow: 2, gap: "10px" }}>
           <FormControl fullWidth>
             <InputLabel id="resourcetype" style={{ color: "#8E0000" }}>
               Resource Type
@@ -350,6 +351,7 @@ const ProcedureForm = () => {
               ))}
             </Select>
           </FormControl>
+          </div>
           <TextField
             label="Quantity"
             type="number"
@@ -358,7 +360,6 @@ const ProcedureForm = () => {
             onChange={handleResourceChange}
             inputProps={{ min: 1, style: { color: "#8E0000" } }}
             InputLabelProps={{ style: { color: "#8E0000" } }}
-            style={{ width: "345px" }}
           />
           <Button
             variant="outlined"
@@ -441,6 +442,7 @@ const ProcedureForm = () => {
         )}
 
         <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+          <div style={{ display: "flex", flexGrow: 2, gap: "10px" }}>
           <FormControl fullWidth>
             <InputLabel id="rolename" style={{ color: "#8E0000" }}>
               Role Name
@@ -460,6 +462,7 @@ const ProcedureForm = () => {
               ))}
             </Select>
           </FormControl>
+          </div>
           <TextField
             label="Quantity"
             type="number"
