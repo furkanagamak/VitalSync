@@ -369,6 +369,7 @@ const ProcedureForm = () => {
               backgroundColor: "white",
               borderColor: "#8E0000",
               minWidth: "150px",
+              fontSize: "0.9rem",
             }}
             onClick={addResource}
           >
@@ -480,6 +481,7 @@ const ProcedureForm = () => {
               backgroundColor: "white",
               borderColor: "#8E0000",
               minWidth: "150px",
+              fontSize: "0.9rem",
             }}
             onClick={addRole}
           >

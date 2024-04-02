@@ -10,7 +10,7 @@ function App() {
     <>
       <Toaster />
       <Navbar />
-      <ProcedureTemplateManagement />
+      <CreateProcedureTemplateForm />
     </>
   );
 }
