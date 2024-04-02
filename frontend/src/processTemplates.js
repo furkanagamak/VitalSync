@@ -84,8 +84,41 @@ const ProcessTable = () => {
   const data = React.useMemo(
     () => [
       { 
-        
-      }
+        name: "Appendectomy",
+        description: "The standard process for performing an appendectomy, which is the surgical removal of the appendix.",
+        sections: "Preoperative, Intraoperative, Postoperative",
+        procedures: "Fasting, IV Access, General Anesthesia, Appendix Removal, Pain Management, Postoperative Monitoring",
+      },
+      {
+        name: "Cholecystectomy",
+        description: "The standard process for performing a cholecystectomy, which is the surgical removal of the gallbladder.",
+        sections: "Preoperative, Intraoperative, Postoperative",
+        procedures: "Fasting, IV Access, General Anesthesia, Gallbladder Removal, Pain Management, Postoperative Monitoring",
+      },
+      {
+        name: "Hysterectomy",
+        description: "The standard process for performing a hysterectomy, which is the surgical removal of the uterus.",
+        sections: "Preoperative, Intraoperative, Postoperative",
+        procedures: "Fasting, IV Access, General Anesthesia, Uterus Removal, Pain Management, Postoperative Monitoring",
+      },
+      {
+        name: "Laminectomy",
+        description: "The standard process for performing a laminectomy, which is the surgical removal of the lamina.",
+        sections: "Preoperative, Intraoperative, Postoperative",
+        procedures: "Fasting, IV Access, General Anesthesia, Lamina Removal, Pain Management, Postoperative Monitoring",
+      },
+      {
+        name: "Mastectomy",
+        description: "The standard process for performing a mastectomy, which is the surgical removal of the breast.",
+        sections: "Preoperative, Intraoperative, Postoperative",
+        procedures: "Fasting, IV Access, General Anesthesia, Breast Removal, Pain Management, Postoperative Monitoring",
+      },
+      {
+        name: "Nephrectomy",
+        description: "The standard process for performing a nephrectomy, which is the surgical removal of the kidney.",
+        sections: "Preoperative, Intraoperative, Postoperative",
+        procedures: "Fasting, IV Access, General Anesthesia, Kidney Removal, Pain Management, Postoperative Monitoring",
+      },
     ],
     []
   );
