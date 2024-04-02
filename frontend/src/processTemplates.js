@@ -238,7 +238,7 @@ const ProcessTable = () => {
             tableLayout: "fixed",
             borderCollapse: "separate",
             borderSpacing: "0 1px",
-            fontSize: "1.25rem",
+            fontSize: "1.32rem",
             textAlign: "center",
           }}
         >
@@ -326,7 +326,7 @@ const ProcessTable = () => {
         </table>
       </div>
       <div
-        style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}
+        style={{ display: "flex", justifyContent: "center", marginTop: "30px",}}
       >
         <button
           onClick={() => previousPage()}

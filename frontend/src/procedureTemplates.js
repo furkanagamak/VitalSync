@@ -360,7 +360,7 @@ const ProcedureTable = () => {
         </table>
       </div>
       <div
-        style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}
+        style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}
       >
         <button
           onClick={() => previousPage()}
