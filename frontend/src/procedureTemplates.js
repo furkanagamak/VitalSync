@@ -115,7 +115,7 @@ const ProcedureTable = () => {
       {
         name: "Radiation Therapy",
         description:
-          "A cancer treatment that uses high doses of radiation to kill cancer cells and shrink/prevent tumors in the body",
+          "A cancer treatment that uses high doses of radiation to kill cancer cells and shrink/prevent tumors in the body.",
         resources:
           "Linear Accelerator, CT Simulator, Radiation Therapy Machine, Shielding Material",
         roles:
