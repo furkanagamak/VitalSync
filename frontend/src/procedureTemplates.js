@@ -246,7 +246,7 @@ const ProcedureTable = () => {
     const ProcedureTemplateManagement = () => {
         return (
           <div className="flex flex-col items-center space-y-4 relative">
-            <h1 className="text-4xl text-[#A30000] text-center underline font-bold mt-5">Procedure Template Management</h1>
+            <h1 className="text-5xl text-[#A30000] text-center underline font-bold mt-5">Procedure Template Management</h1>
             <div className="absolute right-8">
               <CreateTemplateButton />
             </div>
