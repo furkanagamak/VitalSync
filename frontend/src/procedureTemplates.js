@@ -8,7 +8,7 @@ const SearchBar = () => {
   const handleClearInput = () => setInputValue("");
 
   return (
-    <div className="inline-flex items-center rounded-full text-xl border-2 border-[#A30000] bg-[#F5F5DC] p-2 min-width relative">
+    <div className="inline-flex items-center rounded-full text-xl border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative">
       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#8E0000]">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -28,7 +28,7 @@ const SearchBar = () => {
       <input
         type="search"
         placeholder="Search for procedure templates"
-        className="bg-transparent border-none outline-none placeholder-[#A30000] text-[#A30000] pl-2"
+        className="bg-transparent border-none outline-none placeholder-[#8E0000] text-[#8E0000] pl-2"
         style={{ minWidth: "300px" }}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
@@ -36,7 +36,7 @@ const SearchBar = () => {
       {inputValue && (
         <button
           onClick={handleClearInput}
-          className="absolute right-4 text-[#A30000]"
+          className="absolute right-4 text-[#8E0000]"
           style={{ outline: "none" }}
         >
           <svg
@@ -59,7 +59,7 @@ const SearchBar = () => {
 
 const CreateTemplateButton = () => {
   return (
-    <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#A30000] border-2 border-[#A30000] rounded-full hover:bg-[#ede9d4]">
+    <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="36"
@@ -285,7 +285,7 @@ const ProcedureTable = () => {
                     style={{
                       ...column.style,
                       color: "#8E0000",
-                      borderBottom: "1px solid #A30000",
+                      borderBottom: "1px solid #8E0000",
                       padding: "10px",
                       minWidth: column.minWidth,
                     }}
@@ -344,7 +344,7 @@ const ProcedureTable = () => {
                         {...cell.getCellProps()}
                         style={{
                           ...cell.column.style,
-                          borderBottom: "1px solid #A30000",
+                          borderBottom: "1px solid #8E0000",
                           padding: "10px",
                           verticalAlign: "middle",
                         }}
@@ -365,14 +365,14 @@ const ProcedureTable = () => {
         <button
           onClick={() => previousPage()}
           disabled={!canPreviousPage}
-          className="flex items-center justify-center text-xl px-4 py-2 bg-[#F5F5DC] text-[#A30000] border-2 border-[#A30000] rounded-full hover:bg-[#ede9d4] mr-2"
+          className="flex items-center justify-center text-xl px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4] mr-2"
         >
           Previous Page
         </button>
         <button
           onClick={() => nextPage()}
           disabled={!canNextPage}
-          className="flex items-center justify-center text-xl px-4 py-2 bg-[#F5F5DC] text-[#A30000] border-2 border-[#A30000] rounded-full hover:bg-[#ede9d4]"
+          className="flex items-center justify-center text-xl px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
         >
           Next Page
         </button>
@@ -384,7 +384,7 @@ const ProcedureTable = () => {
 const ProcedureTemplateManagement = () => {
   return (
     <div className="flex flex-col items-center space-y-4 relative">
-      <h1 className="text-4xl text-[#A30000] text-center underline font-bold mt-5">
+      <h1 className="text-4xl text-[#8E0000] text-center underline font-bold mt-5">
         Procedure Template Management
       </h1>
       <div className="absolute right-8">
