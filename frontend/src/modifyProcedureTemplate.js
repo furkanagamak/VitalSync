@@ -91,7 +91,7 @@ const ProcedureForm = () => {
 
   const theme = createTheme({
     typography: {
-      fontSize: 10,
+      fontSize: 12,
       button: {
         textTransform: "none",
       },
@@ -243,6 +243,7 @@ const ProcedureForm = () => {
           borderRadius: "5px",
           padding: "20px",
           marginTop: "10px",
+          marginBottom: "30px",
         }}
       >
         <Typography
@@ -552,16 +553,6 @@ const ProcedureForm = () => {
           </>
         )}
       </div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          marginTop: "20px",
-          marginBottom: "20px",
-        }}
-      >
-        <ModifyTemplateButton />
-      </div>
     </ThemeProvider>
   );
 };
@@ -581,6 +572,9 @@ const ModifyProcedureTemplateForm = () => {
       >
         <div style={{ position: "absolute", left: "2rem" }}>
           <GoBackButton />
+        </div>
+        <div style={{ position: "absolute", right: "2rem" }}>
+          <ModifyTemplateButton />
         </div>
         <h1
           style={{
