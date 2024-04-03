@@ -15,7 +15,7 @@ function App() {
     <>
       <Toaster />
       <Navbar />
-      <ModifySectionForm />
+      <ModifyProcessTemplateForm />
     </>
   );
 }

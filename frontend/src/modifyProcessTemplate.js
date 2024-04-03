@@ -199,6 +199,16 @@ const SectionTable = () => {
         description: "Procedures administered after the surgery.",
         procedures: "Pain Management, Postoperative Monitoring",
       },
+      {
+        name: "Discharge",
+        description: "Procedures administered before the patient leaves the hospital.",
+        procedures: "Discharge Instructions, Follow-up Appointment",
+      },
+      {
+        name: "Miscellaneous",
+        description: "Other procedures.",
+        procedures: "Change Dressing, Administer Medication",
+      }
     ],
     []
   );
@@ -337,6 +347,7 @@ const SectionTable = () => {
           backgroundColor: "#F5F5DC",
           display: "flex",
           flexDirection: "column",
+          marginBottom: "10px",
         }}
       >
         <h1
@@ -357,6 +368,7 @@ const SectionTable = () => {
             justifyContent: "center",
             maxHeight: "30vh",
             paddingRight: "20px",
+            minHeight: "30vh",
           }}
         >
           <table

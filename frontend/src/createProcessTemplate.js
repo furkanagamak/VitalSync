@@ -327,6 +327,7 @@ const SectionTable = () => {
           backgroundColor: "#F5F5DC",
           display: "flex",
           flexDirection: "column",
+          marginBottom: "10px",
         }}
       >
         <h1
@@ -347,6 +348,7 @@ const SectionTable = () => {
             justifyContent: "center",
             maxHeight: "30vh",
             paddingRight: "20px",
+            minHeight: "30vh",
           }}
         >
           <table
