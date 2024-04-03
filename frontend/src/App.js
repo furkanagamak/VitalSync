@@ -6,6 +6,8 @@ import ModifyProcedureTemplateForm from "./modifyProcedureTemplate.js";
 import ProcessTemplateManagement from "./processTemplates.js";
 import CreateProcessTemplateForm from "./createProcessTemplate.js";
 import ModifyProcessTemplateForm from "./modifyProcessTemplate.js";
+import AddSectionForm from "./addSection.js";
+import ModifySectionForm from "./modifySection.js";
 const notify = () => toast("Here is your toast.");
 
 function App() {
@@ -13,7 +15,7 @@ function App() {
     <>
       <Toaster />
       <Navbar />
-      <ModifyProcessTemplateForm />
+      <ModifySectionForm />
     </>
   );
 }
