@@ -62,8 +62,8 @@ const GoBackButton = () => {
 
 const SectionForm = () => {
   const [section, setSection] = useState({
-    name: "",
-    description: "",
+    name: "Intraoperative",
+    description: "Procedures administered during the surgery.",
     procedureName: "",
   });
 
@@ -293,21 +293,12 @@ const SectionTable = () => {
       {
         name: "General Anesthesia",
         description:
-          "A state of controlled unconsciousness during which a patient is asleep and unaware of their surroundings.",
+          "A state of controlled unconsciousness during which a patient is asleep.",
         resources:
           "Anesthesia Machine, Monitoring System, Propofol, Suction Device",
         roles: "Anesthesiologist, Anesthesia Technician, Nurse Anesthetist",
         time: "45 minutes",
         notes: "NPO (nothing by mouth) for 8 hours before the procedure.",
-      },
-      {
-        name: "Appendix Removal",
-        description:
-          "A surgical procedure to remove the appendix when it is inflamed or infected.",
-        resources: "Scalpel, Forceps, Suture Kit, Laparoscope",
-        roles: "Surgeon, Surgical Assistant, Scrub Nurse, Circulating Nurse",
-        time: "60 minutes",
-        notes: "Patient must be informed of the risks of the procedure.",
       },
       {
         name: "Appendix Removal",
