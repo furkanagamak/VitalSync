@@ -14,7 +14,7 @@ const ResourceDeleteModal = ({ resource, onDelete, onCancel }) => {
             onClick={onCancel}
             className="px-4 py-2 rounded-md hover:underline"
           >
-            Cancel
+            01662d Cancel
           </button>
           <button
             onClick={onDelete}
