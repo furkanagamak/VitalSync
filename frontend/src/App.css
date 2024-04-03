@@ -32,3 +32,21 @@ input[type=number] {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #8E0000;
 }
+
+.scrollbar1::-webkit-scrollbar {
+  width: 16px;
+}
+
+.scrollbar1::-webkit-scrollbar-track {
+  border-radius: 8px;
+  background-color: white;
+  border: 1px solid #A30000;
+}
+
+.scrollbar1::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  background-color: #8E0000;
+}
+

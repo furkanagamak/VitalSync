@@ -4,6 +4,8 @@ import ProcedureTemplateManagement from "./procedureTemplates.js";
 import CreateProcedureTemplateForm from "./createProcedureTemplate.js";
 import ModifyProcedureTemplateForm from "./modifyProcedureTemplate.js";
 import ProcessTemplateManagement from "./processTemplates.js";
+import CreateProcessTemplateForm from "./createProcessTemplate.js";
+import ModifyProcessTemplateForm from "./modifyProcessTemplate.js";
 const notify = () => toast("Here is your toast.");
 
 function App() {
@@ -11,7 +13,7 @@ function App() {
     <>
       <Toaster />
       <Navbar />
-      <ProcessTemplateManagement />
+      <ModifyProcessTemplateForm />
     </>
   );
 }
