@@ -14,7 +14,7 @@ const Navbar = () => {
 const Header = () => {
   return (
     <div className="w-32 flex justify-evenly items-center font-semibold text-2xl mx-2">
-      <img src="/logo.png" className="w-12 h-12" />
+      <img src="/logo.png" className="w-12 h-12" alt="logo" />
       <div className="">
         <h1 className="mr-2">Vital</h1>
         <h1 className="ml-2">Sync</h1>
