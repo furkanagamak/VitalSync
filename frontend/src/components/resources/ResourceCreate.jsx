@@ -129,7 +129,7 @@ const ResourceForm = ({
       >
         <div className="mb-4 flex">
           <div className="w-1/2">
-            <label className="block text-[#8e0000] text-lg font-bold mb-2">
+            <label className="block text-primary text-lg font-bold mb-2">
               Name
             </label>
             <input
@@ -141,7 +141,7 @@ const ResourceForm = ({
             />
           </div>
           <div className="ml-8 w-1/2">
-            <label className="block text-[#8e0000] text-lg font-bold mb-2">
+            <label className="block text-primary text-lg font-bold mb-2">
               Type
             </label>
             <div className="flex items-center text-primary">
@@ -159,7 +159,7 @@ const ResourceForm = ({
           </div>
         </div>
         <div className="mb-4">
-          <label className="block text-[#8e0000] text-lg font-bold mb-2">
+          <label className="block text-primary text-lg font-bold mb-2">
             Location
           </label>
           <input
@@ -171,7 +171,7 @@ const ResourceForm = ({
           />
         </div>
         <div className="mb-4">
-          <label className="block text-[#8e0000] text-lg font-bold mb-2">
+          <label className="block text-primary text-lg font-bold mb-2">
             Description
           </label>
           <textarea
@@ -182,7 +182,7 @@ const ResourceForm = ({
           />
         </div>
         <div className="mb-4">
-          <label className="block text-[#8e0000] text-lg font-bold mb-2">
+          <label className="block text-primary text-lg font-bold mb-2">
             Unique Identifier (Optional)
           </label>
           <input
