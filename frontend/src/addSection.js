@@ -415,6 +415,7 @@ const SectionTable = () => {
           maxWidth: "90%",
           margin: "auto",
           padding: "20px",
+          paddingBottom: "10px",
           backgroundColor: "#F5F5DC",
           display: "flex",
           flexDirection: "column",
