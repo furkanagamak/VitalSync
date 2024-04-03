@@ -462,6 +462,7 @@ const SectionTable = () => {
             justifyContent: "center",
             maxHeight: "28vh",
             paddingRight: "20px",
+            minHeight: "28vh",
           }}
         >
           <table
