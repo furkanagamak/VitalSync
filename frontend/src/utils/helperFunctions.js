@@ -32,3 +32,39 @@ export const timeAgo = (date) => {
   const years = Math.floor(months / 12);
   return `${years} year${years !== 1 ? "s" : ""} ago`;
 };
+
+export function calculateTimeUntilDate(targetDate) {
+  // Get the current date and time
+  const currentDate = new Date();
+
+  // Calculate the difference in milliseconds
+  const difference = targetDate.getTime() - currentDate.getTime();
+
+  // Calculate the difference in days
+  const differenceInDays = difference / (1000 * 3600 * 24);
+
+  // If the difference is greater than a day, return the date
+  if (differenceInDays > 1) {
+    // Format the date as mm/dd/yy
+    const formattedDate = `${
+      targetDate.getMonth() + 1
+    }/${targetDate.getDate()}/${targetDate.getFullYear() % 100}`;
+    return formattedDate;
+  }
+
+  // If the difference is less than or equal to a day, calculate the time difference
+  const differenceInSeconds = difference / 1000;
+  const hours = Math.floor(differenceInSeconds / 3600);
+  const minutes = Math.floor((differenceInSeconds % 3600) / 60);
+
+  // Format the time until the date
+  if (hours > 0) {
+    if (minutes > 0) {
+      return `in ${hours} hours and ${minutes} minutes`;
+    } else {
+      return `in ${hours} hour(s)`;
+    }
+  } else {
+    return `in ${minutes} minutes`;
+  }
+}
