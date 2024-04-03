@@ -142,7 +142,7 @@ const ProcedureTable = () => {
         roles: "Nurse, Medical Assistant",
         time: "10 minutes",
         notes:
-          "Patients may experience mild side effects such as soreness at the injection site, fever, or fatigue.",
+          "Patients may experience mild side effects such as soreness at the injection site.",
       },
     ],
     []
