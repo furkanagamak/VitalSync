@@ -1,4 +1,6 @@
 import { CiBellOn } from "react-icons/ci";
+import { useState } from "react";
+import NotificationDropDown from "./notifications/NotificationDropDown";
 
 const Navbar = () => {
   return (
@@ -46,10 +48,22 @@ const UserNav = () => {
 };
 
 const Notifications = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const flickDropDown = () => {
+    setIsOpen((isOpen) => !isOpen);
+  };
+
   return (
-    <div className="flex items-center ml-2 mr-4">
-      <CiBellOn className="h-12 w-12 text-black bg-white rounded-full" />
-    </div>
+    <>
+      <button className="flex items-center ml-2 mr-4" onClick={flickDropDown}>
+        <CiBellOn className="h-12 w-12 text-black bg-white rounded-full" />
+      </button>
+      {isOpen && (
+        <div className="absolute right-0 top-20">
+          <NotificationDropDown />
+        </div>
+      )}
+    </>
   );
 };
 
