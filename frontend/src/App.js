@@ -1,6 +1,6 @@
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "./components/navbar.jsx";
-import BoardProcessView from "./components/mainmenu/BoardProcessView";
+import ProcessDetails from "./components/ProcessDetails";
 
 const notify = () => toast("Here is your toast.");
 
@@ -9,7 +9,7 @@ function App() {
     <>
       <Toaster />
       <Navbar />
-      <BoardProcessView />
+      <ProcessDetails />
     </>
   );
 }
