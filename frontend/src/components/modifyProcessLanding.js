@@ -11,6 +11,8 @@ import ModifyStaffAssignments from "./modifyStaffAssignments";
 import ModifyResourceAssignments from "./modifyResourceAssignments";
 import ReviewResourceAssignments from "./reviewResourceAssignments";
 import ReviewStaffAssignments from "./reviewStaffAssignments";
+import PendingStaffModify from "./pendingStaffModify";
+import PendingResourceModify from "./pendingResourceModify";
 
 
 
@@ -254,7 +256,7 @@ const handleProceedStaffAssignments = () => {
             <ReviewStaffAssignments 
                 processName="Radical Prostatectomy"
                 onBack={() => setCurrentView('modifyStaffAssignments')}
-                onProceed={() => setCurrentView('modifyProcess')}
+                onProceed={() => setCurrentView('pendingStaffModify')}
             />
         );
         
@@ -263,6 +265,24 @@ const handleProceedStaffAssignments = () => {
             <ReviewResourceAssignments 
                 processName="Radical Prostatectomy"
                 onBack={() => setCurrentView('modifyResourceAssignments')}
+                onProceed={() => setCurrentView('pendingResourceModify')}
+            />
+        );
+    }
+    else if (currentView === 'pendingStaffModify') {
+        return (
+            <PendingStaffModify 
+                processName="Radical Prostatectomy"
+                onBack={() => setCurrentView('reviewStaffAssignments')}
+                onProceed={() => setCurrentView('modifyProcess')}
+            />
+        );
+        
+    } else if (currentView === 'pendingResourceModify') {
+        return (
+            <PendingResourceModify 
+                processName="Radical Prostatectomy"
+                onBack={() => setCurrentView('reviewResourceAssignments')}
                 onProceed={() => setCurrentView('modifyProcess')}
             />
         );

@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
+import { FaCheck } from "react-icons/fa";
+import { MdOutlineOpenInNew } from 'react-icons/md';
+
 
 const sections = [
     {
@@ -66,25 +69,23 @@ const sections = [
     },
   ];
 
-function NavButtons({ onBack, onProceed }) {
+  function NavButtons({ onBack, onProceed }) {
     return (
-          <div className="flex justify-between items-center mb-5">
-                    <button className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center" onClick={onBack}>
-                    <FaArrowLeft className="mr-2" />
-                    Go Back
-                    </button>
-                    <h1 className="text-primary text-3xl font-bold">Review Resource Assignments</h1>
-                    <button
-                    className="hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-7 py-5 text-4xl"
-                    onClick={onProceed}
-                    >
-                    Proceed
-                </button>
-            </div>)
+        <div className="flex justify-between items-center mb-5">
+            <button className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center" onClick={onBack}>
+                <FaArrowLeft className="mr-2" />
+                Go Back
+            </button>
+            <h1 className="text-primary text-3xl font-bold">Pending Staff Modification</h1>
+            <button className="hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-7 py-5 text-4xl" onClick={onProceed}>
+                Proceed
+            </button>
+        </div>
+    );
 }
 
-export function ReviewStaffAssignments({ onBack, onProceed }) {
-  const [openSections, setOpenSections] = useState(new Set(sections.map(section => section.name))); // Start with all sections open
+export function PendingStaffModify({ onBack, onProceed }) {
+  const [openSections, setOpenSections] = useState(new Set(sections.map(section => section.name)));
 
   const toggleSection = (sectionName) => {
     const updatedSections = new Set(openSections);
@@ -98,7 +99,7 @@ export function ReviewStaffAssignments({ onBack, onProceed }) {
 
   return (
     <div className="container mx-auto p-8">
-      <NavButtons onBack={onBack} onProceed={onProceed}></NavButtons>
+      <NavButtons onBack={onBack} onProceed={onProceed} />
       <div className="bg-secondary border-red-600 border-2 rounded-md p-4">
         <p className="text-left text-lg italic mb-7">
           Confirm the following staff assignments for procedures in all sections:
@@ -115,15 +116,10 @@ export function ReviewStaffAssignments({ onBack, onProceed }) {
             {openSections.has(section.name) && (
               <div className="bg-white mt-2 p-4 rounded-md">
                 {section.procedures.map((procedure, idx) => (
-                  <div key={idx} className={`py-2 ${idx < section.procedures.length - 1 ? 'border-b' : ''} border-primary`}>
-                    <span className='font-bold text-xl'>{procedure.title}</span>
-                    <div>
-                      {procedure.assignedStaff.map((staff, staffIdx) => (
-                        <div key={staffIdx} className="flex justify-between my-2">
-                          <span className="text-lg ml-10">{staff.role}:</span>
-                          <span className="text-primary text-xl font-bold mr-8">{staff.name}</span>
-                        </div>
-                      ))}
+                  <div key={idx} className={`flex justify-between items-center py-2 ${idx < section.procedures.length - 1 ? 'border-b' : ''} border-primary`}>
+                    <span className='text-2xl'>{procedure.title}</span>
+                    <div className={`flex items-center text-2xl font-bold ${procedure.assignedStaff.length > 0 ? 'text-green-500' : 'text-highlightRed'}`}>
+                      {procedure.assignedStaff.length > 0 ? <><FaCheck className="mr-2" />Assigned</> : <><MdOutlineOpenInNew className="mr-2" />Assignments Required</>}
                     </div>
                   </div>
                 ))}
@@ -136,4 +132,4 @@ export function ReviewStaffAssignments({ onBack, onProceed }) {
   );
 }
 
-export default ReviewStaffAssignments;
+export default PendingStaffModify;

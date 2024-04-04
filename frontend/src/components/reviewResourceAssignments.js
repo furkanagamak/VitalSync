@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
 
-// Mock data for sections - replace or enhance with actual data mechanism
 const sections = [
     {
         name: 'Preoperative',
