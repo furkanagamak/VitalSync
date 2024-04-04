@@ -46,8 +46,8 @@ const GoBackButton = () => {
     <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="35"
-        height="35"
+        width="36"
+        height="36"
         fill="currentColor"
         class="bi bi-arrow-left mr-2"
         viewBox="0 0 16 16"
