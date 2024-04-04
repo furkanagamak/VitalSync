@@ -23,7 +23,7 @@ import "./TemplateStyles.css";
 const CreateTemplateButton = () => {
   return (
     <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
-      <TbLayoutGridAdd className= "mr-2 size-10" />
+      <TbLayoutGridAdd className="mr-2 size-10" />
       Create Template
     </button>
   );
@@ -174,11 +174,7 @@ const ProcessForm = () => {
 };
 
 const SectionTable = () => {
-  const data = React.useMemo(
-    () => [
-    ],
-    []
-  );
+  const data = React.useMemo(() => [], []);
 
   const columns = React.useMemo(
     () => [

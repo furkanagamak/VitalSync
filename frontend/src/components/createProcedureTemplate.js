@@ -308,44 +308,44 @@ const ProcedureForm = () => {
           }}
         >
           <div style={{ display: "flex", flexGrow: 2, gap: "10px" }}>
-          <FormControl fullWidth>
-            <InputLabel id="resourcetype" style={{ color: "#8E0000" }}>
-              Resource Type
-            </InputLabel>
-            <Select
-              labelId="resourcetype"
-              label="Resource Type"
-              value={newResource.type}
-              name="type"
-              onChange={handleResourceChange}
-              style={{ color: "#8E0000" }}
-            >
-              {resourceTypes.map((type, index) => (
-                <MenuItem key={index} value={type}>
-                  {type}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel id="resourcename" style={{ color: "#8E0000" }}>
-              Resource Name
-            </InputLabel>
-            <Select
-              labelId="resourcename"
-              label="Resource Name"
-              value={newResource.name}
-              name="name"
-              onChange={handleResourceChange}
-              style={{ color: "#8E0000" }}
-            >
-              {resourceNames.map((name, index) => (
-                <MenuItem key={index} value={name}>
-                  {name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="resourcetype" style={{ color: "#8E0000" }}>
+                Resource Type
+              </InputLabel>
+              <Select
+                labelId="resourcetype"
+                label="Resource Type"
+                value={newResource.type}
+                name="type"
+                onChange={handleResourceChange}
+                style={{ color: "#8E0000" }}
+              >
+                {resourceTypes.map((type, index) => (
+                  <MenuItem key={index} value={type}>
+                    {type}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="resourcename" style={{ color: "#8E0000" }}>
+                Resource Name
+              </InputLabel>
+              <Select
+                labelId="resourcename"
+                label="Resource Name"
+                value={newResource.name}
+                name="name"
+                onChange={handleResourceChange}
+                style={{ color: "#8E0000" }}
+              >
+                {resourceNames.map((name, index) => (
+                  <MenuItem key={index} value={name}>
+                    {name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </div>
           <TextField
             label="Quantity"
@@ -439,25 +439,25 @@ const ProcedureForm = () => {
 
         <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
           <div style={{ display: "flex", flexGrow: 2, gap: "10px" }}>
-          <FormControl fullWidth>
-            <InputLabel id="rolename" style={{ color: "#8E0000" }}>
-              Role Name
-            </InputLabel>
-            <Select
-              labelId="rolename"
-              label="Role Name"
-              value={newRole.name}
-              name="name"
-              onChange={handleRoleChange}
-              style={{ color: "#8E0000" }}
-            >
-              {roleNames.map((name, index) => (
-                <MenuItem key={index} value={name}>
-                  {name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="rolename" style={{ color: "#8E0000" }}>
+                Role Name
+              </InputLabel>
+              <Select
+                labelId="rolename"
+                label="Role Name"
+                value={newRole.name}
+                name="name"
+                onChange={handleRoleChange}
+                style={{ color: "#8E0000" }}
+              >
+                {roleNames.map((name, index) => (
+                  <MenuItem key={index} value={name}>
+                    {name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </div>
           <TextField
             label="Quantity"

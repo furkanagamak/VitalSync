@@ -61,7 +61,8 @@ const GoBackButton = () => {
 const ProcessForm = () => {
   const [process, setProcess] = useState({
     name: "Appendectomy",
-    description: "The standard process for performing an appendectomy, which is the surgical removal of the appendix.",
+    description:
+      "The standard process for performing an appendectomy, which is the surgical removal of the appendix.",
   });
 
   const theme = createTheme({
@@ -201,14 +202,15 @@ const SectionTable = () => {
       },
       {
         name: "Discharge",
-        description: "Procedures administered before the patient leaves the hospital.",
+        description:
+          "Procedures administered before the patient leaves the hospital.",
         procedures: "Discharge Instructions, Follow-up Appointment",
       },
       {
         name: "Miscellaneous",
         description: "Other procedures.",
         procedures: "Change Dressing, Administer Medication",
-      }
+      },
     ],
     []
   );

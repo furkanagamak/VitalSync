@@ -61,7 +61,7 @@ const SearchBar = () => {
 const CreateTemplateButton = () => {
   return (
     <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
-      <TbLayoutGridAdd className= "mr-2 size-10" />
+      <TbLayoutGridAdd className="mr-2 size-10" />
       Create Template
     </button>
   );
@@ -70,41 +70,53 @@ const CreateTemplateButton = () => {
 const ProcessTable = () => {
   const data = React.useMemo(
     () => [
-      { 
+      {
         name: "Appendectomy",
-        description: "The standard process for performing an appendectomy, which is the surgical removal of the appendix.",
+        description:
+          "The standard process for performing an appendectomy, which is the surgical removal of the appendix.",
         sections: "Preoperative, Intraoperative, Postoperative",
-        procedures: "Fasting, IV Access, General Anesthesia, Appendix Removal, Pain Management, Postoperative Monitoring",
+        procedures:
+          "Fasting, IV Access, General Anesthesia, Appendix Removal, Pain Management, Postoperative Monitoring",
       },
       {
         name: "Cholecystectomy",
-        description: "The standard process for performing a cholecystectomy, which is the surgical removal of the gallbladder.",
+        description:
+          "The standard process for performing a cholecystectomy, which is the surgical removal of the gallbladder.",
         sections: "Preoperative, Intraoperative, Postoperative",
-        procedures: "Fasting, IV Access, General Anesthesia, Gallbladder Removal, Pain Management, Postoperative Monitoring",
+        procedures:
+          "Fasting, IV Access, General Anesthesia, Gallbladder Removal, Pain Management, Postoperative Monitoring",
       },
       {
         name: "Hysterectomy",
-        description: "The standard process for performing a hysterectomy, which is the surgical removal of the uterus.",
+        description:
+          "The standard process for performing a hysterectomy, which is the surgical removal of the uterus.",
         sections: "Preoperative, Intraoperative, Postoperative",
-        procedures: "Fasting, IV Access, General Anesthesia, Uterus Removal, Pain Management, Postoperative Monitoring",
+        procedures:
+          "Fasting, IV Access, General Anesthesia, Uterus Removal, Pain Management, Postoperative Monitoring",
       },
       {
         name: "Laminectomy",
-        description: "The standard process for performing a laminectomy, which is the surgical removal of the lamina.",
+        description:
+          "The standard process for performing a laminectomy, which is the surgical removal of the lamina.",
         sections: "Preoperative, Intraoperative, Postoperative",
-        procedures: "Fasting, IV Access, General Anesthesia, Lamina Removal, Pain Management, Postoperative Monitoring",
+        procedures:
+          "Fasting, IV Access, General Anesthesia, Lamina Removal, Pain Management, Postoperative Monitoring",
       },
       {
         name: "Mastectomy",
-        description: "The standard process for performing a mastectomy, which is the surgical removal of the breast.",
+        description:
+          "The standard process for performing a mastectomy, which is the surgical removal of the breast.",
         sections: "Preoperative, Intraoperative, Postoperative",
-        procedures: "Fasting, IV Access, General Anesthesia, Breast Removal, Pain Management, Postoperative Monitoring",
+        procedures:
+          "Fasting, IV Access, General Anesthesia, Breast Removal, Pain Management, Postoperative Monitoring",
       },
       {
         name: "Nephrectomy",
-        description: "The standard process for performing a nephrectomy, which is the surgical removal of the kidney.",
+        description:
+          "The standard process for performing a nephrectomy, which is the surgical removal of the kidney.",
         sections: "Preoperative, Intraoperative, Postoperative",
-        procedures: "Fasting, IV Access, General Anesthesia, Kidney Removal, Pain Management, Postoperative Monitoring",
+        procedures:
+          "Fasting, IV Access, General Anesthesia, Kidney Removal, Pain Management, Postoperative Monitoring",
       },
     ],
     []
@@ -313,7 +325,7 @@ const ProcessTable = () => {
         </table>
       </div>
       <div
-        style={{ display: "flex", justifyContent: "center", marginTop: "30px",}}
+        style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}
       >
         <button
           onClick={() => previousPage()}
