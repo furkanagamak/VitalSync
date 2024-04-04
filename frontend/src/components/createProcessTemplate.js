@@ -19,10 +19,13 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useTable, useSortBy, usePagination } from "react-table";
 import { TbLayoutGridAdd } from "react-icons/tb";
 import "./TemplateStyles.css";
+import toast, { Toaster } from "react-hot-toast";
+
+const notify = () => toast.success("Process Template Created!");
 
 const CreateTemplateButton = () => {
   return (
-    <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
+    <button onClick={notify} className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
       <TbLayoutGridAdd className="mr-2 size-10" />
       Create Template
     </button>

@@ -17,10 +17,13 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
 import "./TemplateStyles.css";
+import toast, { Toaster } from "react-hot-toast";
+
+const notify = () => toast.success("Procedure Template Modified!");
 
 const ModifyTemplateButton = () => {
   return (
-    <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
+    <button onClick={notify} className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="36"
