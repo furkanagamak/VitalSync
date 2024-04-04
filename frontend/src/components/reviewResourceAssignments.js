@@ -71,7 +71,7 @@ const sections = [
       },
     ];
 
-    function navButtons({ onBack, onProceed }) {
+    function NavButtons({ onBack, onProceed }) {
         return (
               <div className="flex justify-between items-center mb-5">
                         <button className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center" onClick={onBack}>
@@ -104,7 +104,7 @@ const sections = [
       
         return (
             <div className="container mx-auto p-8">
-              <navButtons onBack={onBack} onProceed={onProceed}></navButtons>
+              <NavButtons onBack={onBack} onProceed={onProceed}></NavButtons>
               <div className="bg-secondary border-red-600 border-2 rounded-md p-4">
                 <p className="text-left text-lg italic mb-7">
                   Confirm the following staff assignments for procedures in all sections:
