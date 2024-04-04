@@ -86,8 +86,8 @@ const ProcedureForm = () => {
 
   // Hardcoded data for the dropdowns
   const resourceTypes = ["Equipment", "Space"];
-  const resourceNames = ["Projector", "Room", "Laptop"];
-  const roleNames = ["Technician", "Manager", "Coordinator"];
+  const resourceNames = ["MRI Machine", "X-Ray Machine", "Operating Room"]
+  const roleNames = ["Surgeon", "Nurse", "Anesthesiologist"];
 
   const theme = createTheme({
     typography: {

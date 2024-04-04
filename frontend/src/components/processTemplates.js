@@ -325,19 +325,28 @@ const ProcessTable = () => {
         </table>
       </div>
       <div
-        style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginTop: "30px",
+          marginBottom: "20px",
+        }}
       >
         <button
           onClick={() => previousPage()}
           disabled={!canPreviousPage}
-          className="flex items-center justify-center text-xl px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4] mr-2"
+          className={`flex items-center justify-center text-xl px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4] mr-2 ${
+            !canPreviousPage ? "opacity-50 cursor-not-allowed" : ""
+          }`}
         >
           Previous Page
         </button>
         <button
           onClick={() => nextPage()}
           disabled={!canNextPage}
-          className="flex items-center justify-center text-xl px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
+          className={`flex items-center justify-center text-xl px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4] ${
+            !canNextPage ? "opacity-50 cursor-not-allowed" : ""
+          }`}
         >
           Next Page
         </button>
