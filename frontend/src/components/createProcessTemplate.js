@@ -17,22 +17,14 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTable, useSortBy, usePagination } from "react-table";
-import "./App.css";
+import { TbLayoutGridAdd } from "react-icons/tb";
+import "./TemplateStyles.css";
 
-const ModifyTemplateButton = () => {
+const CreateTemplateButton = () => {
   return (
     <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="36"
-        height="36"
-        fill="#8E0000"
-        className="bi bi-pencil mr-2"
-        viewBox="0 0 16 16"
-      >
-        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
-      </svg>
-      Modify Template
+      <TbLayoutGridAdd className= "mr-2 size-10" />
+      Create Template
     </button>
   );
 };
@@ -60,8 +52,8 @@ const GoBackButton = () => {
 
 const ProcessForm = () => {
   const [process, setProcess] = useState({
-    name: "Appendectomy",
-    description: "The standard process for performing an appendectomy, which is the surgical removal of the appendix.",
+    name: "",
+    description: "",
   });
 
   const theme = createTheme({
@@ -184,31 +176,6 @@ const ProcessForm = () => {
 const SectionTable = () => {
   const data = React.useMemo(
     () => [
-      {
-        name: "Preoperative",
-        description: "Procedures administered before the surgery.",
-        procedures: "Fasting, IV Access",
-      },
-      {
-        name: "Intraoperative",
-        description: "Procedures administered during the surgery.",
-        procedures: "General Anesthesia, Appendix Removal",
-      },
-      {
-        name: "Postoperative",
-        description: "Procedures administered after the surgery.",
-        procedures: "Pain Management, Postoperative Monitoring",
-      },
-      {
-        name: "Discharge",
-        description: "Procedures administered before the patient leaves the hospital.",
-        procedures: "Discharge Instructions, Follow-up Appointment",
-      },
-      {
-        name: "Miscellaneous",
-        description: "Other procedures.",
-        procedures: "Change Dressing, Administer Medication",
-      }
     ],
     []
   );
@@ -466,7 +433,7 @@ const SectionTable = () => {
   );
 };
 
-const ModifyProcessTemplateForm = () => {
+const CreateProcessTemplateForm = () => {
   return (
     <div>
       <div
@@ -483,7 +450,7 @@ const ModifyProcessTemplateForm = () => {
           <GoBackButton />
         </div>
         <div style={{ position: "absolute", right: "2rem" }}>
-          <ModifyTemplateButton />
+          <CreateTemplateButton />
         </div>
         <h1
           style={{
@@ -494,7 +461,7 @@ const ModifyProcessTemplateForm = () => {
             color: "#8E0000",
           }}
         >
-          Modify Process Template
+          Create New Process Template
         </h1>
       </div>
       <ProcessForm />
@@ -503,4 +470,4 @@ const ModifyProcessTemplateForm = () => {
   );
 };
 
-export default ModifyProcessTemplateForm;
+export default CreateProcessTemplateForm;

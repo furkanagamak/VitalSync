@@ -19,7 +19,7 @@ import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTable, useSortBy, usePagination } from "react-table";
 import Autocomplete from "@mui/material/Autocomplete";
-import "./App.css";
+import "./TemplateStyles.css";
 
 const AddSectionButton = () => {
   return (

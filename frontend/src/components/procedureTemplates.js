@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useTable, useSortBy, usePagination } from "react-table";
-import { TbLayoutGridAdd } from "react-icons/tb";
-import "./App.css";
+import "./TemplateStyles.css";
 
 const SearchBar = () => {
   const [inputValue, setInputValue] = useState("");
@@ -28,9 +27,9 @@ const SearchBar = () => {
       </div>
       <input
         type="search"
-        placeholder="Search for process templates"
+        placeholder="Search for procedure templates"
         className="bg-transparent border-none outline-none placeholder-[#8E0000] text-[#8E0000] pl-2"
-        style={{ minWidth: "275px" }}
+        style={{ minWidth: "300px" }}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
       />
@@ -61,50 +60,89 @@ const SearchBar = () => {
 const CreateTemplateButton = () => {
   return (
     <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
-      <TbLayoutGridAdd className= "mr-2 size-10" />
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="36"
+        height="36"
+        fill="#8E0000"
+        className="bi bi-clipboard-plus mr-2"
+        viewBox="0 0 16 16"
+      >
+        <path
+          fillRule="evenodd"
+          d="M8 7a.5.5 0 0 1 .5.5V9H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V10H6a.5.5 0 0 1 0-1h1.5V7.5A.5.5 0 0 1 8 7"
+        />
+        <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z" />
+        <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z" />
+      </svg>
       Create Template
     </button>
   );
 };
 
-const ProcessTable = () => {
+const ProcedureTable = () => {
   const data = React.useMemo(
     () => [
-      { 
-        name: "Appendectomy",
-        description: "The standard process for performing an appendectomy, which is the surgical removal of the appendix.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures: "Fasting, IV Access, General Anesthesia, Appendix Removal, Pain Management, Postoperative Monitoring",
+      {
+        name: "General Anesthesia",
+        description:
+          "A state of controlled unconsciousness during which a patient is asleep and unaware of their surroundings.",
+        resources:
+          "Anesthesia Machine, Monitoring System, Propofol, Suction Device",
+        roles: "Anesthesiologist, Anesthesia Technician, Nurse Anesthetist",
+        time: "45 minutes",
+        notes: "NPO (nothing by mouth) for 8 hours before the procedure.",
       },
       {
-        name: "Cholecystectomy",
-        description: "The standard process for performing a cholecystectomy, which is the surgical removal of the gallbladder.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures: "Fasting, IV Access, General Anesthesia, Gallbladder Removal, Pain Management, Postoperative Monitoring",
+        name: "MRI Scan",
+        description:
+          "Imaging technique that uses magnetic fields and radio waves to produce detailed images of the body.",
+        resources: "MRI Machine, Contrast Agent, Patient Gown, Earplugs",
+        roles: "Radiologist, MRI Technologist",
+        time: "30 minutes",
+        notes: "Remove all metal objects before the scan.",
       },
       {
-        name: "Hysterectomy",
-        description: "The standard process for performing a hysterectomy, which is the surgical removal of the uterus.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures: "Fasting, IV Access, General Anesthesia, Uterus Removal, Pain Management, Postoperative Monitoring",
+        name: "Physical Therapy",
+        description:
+          "A treatment method aiming to alleviate pain and restore movement and function to patients affected by injury.",
+        resources: "Treatment Space, Therapeutic Equipment",
+        roles: "Physical Therapist, Physical Therapy Assistant",
+        time: "55 minutes",
+        notes:
+          "Wear comfortable clothing and footwear to facilitate movement during the session.",
       },
       {
-        name: "Laminectomy",
-        description: "The standard process for performing a laminectomy, which is the surgical removal of the lamina.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures: "Fasting, IV Access, General Anesthesia, Lamina Removal, Pain Management, Postoperative Monitoring",
+        name: "Radiation Therapy",
+        description:
+          "A cancer treatment that uses high doses of radiation to kill cancer cells and shrink/prevent tumors in the body.",
+        resources:
+          "Linear Accelerator, CT Simulator, Radiation Therapy Machine, Shielding Material",
+        roles:
+          "Radiation Therapist, Dosimetrist, Medical Physicist, Radiation Oncology Nurse",
+        time: "25 minutes",
+        notes:
+          "Patients may experience fatigue and skin changes in the treated area.",
       },
       {
-        name: "Mastectomy",
-        description: "The standard process for performing a mastectomy, which is the surgical removal of the breast.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures: "Fasting, IV Access, General Anesthesia, Breast Removal, Pain Management, Postoperative Monitoring",
+        name: "Ultrasound Imaging",
+        description:
+          "A diagnostic technique that uses high-frequency sound waves to produce images of the body for treatment.",
+        resources: "Ultrasound Machine, Gel for Skin Contact",
+        roles: "Sonographer, Radiologist, Ultrasound Technician",
+        time: "45 minutes",
+        notes:
+          "Wear loose-fitting clothing and comfortable shoes for the procedure.",
       },
       {
-        name: "Nephrectomy",
-        description: "The standard process for performing a nephrectomy, which is the surgical removal of the kidney.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures: "Fasting, IV Access, General Anesthesia, Kidney Removal, Pain Management, Postoperative Monitoring",
+        name: "Vaccination",
+        description:
+          "The administration of a vaccine to help the immune system develop protection from a disease like flu.",
+        resources: "Vaccine, Syringes, Bandages, Vaccine Refrigeration Unit",
+        roles: "Nurse, Medical Assistant",
+        time: "10 minutes",
+        notes:
+          "Patients may experience mild side effects such as soreness at the injection site.",
       },
     ],
     []
@@ -122,13 +160,22 @@ const ProcessTable = () => {
         accessor: "description",
       },
       {
-        Header: "Sections",
-        accessor: "sections",
+        Header: "Resources",
+        accessor: "resources",
         style: { backgroundColor: "#F5F5DC" },
       },
       {
-        Header: "Procedures",
-        accessor: "procedures",
+        Header: "Roles",
+        accessor: "roles",
+      },
+      {
+        Header: "Estimated Time",
+        accessor: "time",
+        style: { backgroundColor: "#F5F5DC" },
+      },
+      {
+        Header: "Special Notes",
+        accessor: "notes",
       },
       {
         Header: "Actions",
@@ -225,7 +272,7 @@ const ProcessTable = () => {
             tableLayout: "fixed",
             borderCollapse: "separate",
             borderSpacing: "0 1px",
-            fontSize: "1.32rem",
+            fontSize: "1.25rem",
             textAlign: "center",
           }}
         >
@@ -313,7 +360,7 @@ const ProcessTable = () => {
         </table>
       </div>
       <div
-        style={{ display: "flex", justifyContent: "center", marginTop: "30px",}}
+        style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}
       >
         <button
           onClick={() => previousPage()}
@@ -334,21 +381,21 @@ const ProcessTable = () => {
   );
 };
 
-const ProcessTemplateManagement = () => {
+const ProcedureTemplateManagement = () => {
   return (
     <div className="flex flex-col items-center space-y-4 relative">
       <h1 className="text-4xl text-[#8E0000] text-center underline font-bold mt-5">
-        Process Template Management
+        Procedure Template Management
       </h1>
       <div className="absolute right-8">
         <CreateTemplateButton />
       </div>
       <SearchBar />
       <div>
-        <ProcessTable />
+        <ProcedureTable />
       </div>
     </div>
   );
 };
 
-export default ProcessTemplateManagement;
+export default ProcedureTemplateManagement;

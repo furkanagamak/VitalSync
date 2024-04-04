@@ -1,13 +1,13 @@
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "./components/navbar.jsx";
-import ProcedureTemplateManagement from "./procedureTemplates.js";
-import CreateProcedureTemplateForm from "./createProcedureTemplate.js";
-import ModifyProcedureTemplateForm from "./modifyProcedureTemplate.js";
-import ProcessTemplateManagement from "./processTemplates.js";
-import CreateProcessTemplateForm from "./createProcessTemplate.js";
-import ModifyProcessTemplateForm from "./modifyProcessTemplate.js";
-import AddSectionForm from "./createSection.js";
-import ModifySectionForm from "./modifySection.js";
+import ProcedureTemplateManagement from "./components/procedureTemplates.js";
+import CreateProcedureTemplateForm from "./components/createProcedureTemplate.js";
+import ModifyProcedureTemplateForm from "./components/modifyProcedureTemplate.js";
+import ProcessTemplateManagement from "./components/processTemplates.js";
+import CreateProcessTemplateForm from "./components/createProcessTemplate.js";
+import ModifyProcessTemplateForm from "./components/modifyProcessTemplate.js";
+import AddSectionForm from "./components/createSection.js";
+import ModifySectionForm from "./components/modifySection.js";
 const notify = () => toast("Here is your toast.");
 
 function App() {

@@ -16,9 +16,9 @@ import {
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
-import "./App.css";
+import "./TemplateStyles.css";
 
-const CreateTemplateButton = () => {
+const ModifyTemplateButton = () => {
   return (
     <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
       <svg
@@ -26,17 +26,12 @@ const CreateTemplateButton = () => {
         width="36"
         height="36"
         fill="#8E0000"
-        className="bi bi-clipboard-plus mr-2"
+        className="bi bi-pencil mr-2"
         viewBox="0 0 16 16"
       >
-        <path
-          fillRule="evenodd"
-          d="M8 7a.5.5 0 0 1 .5.5V9H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V10H6a.5.5 0 0 1 0-1h1.5V7.5A.5.5 0 0 1 8 7"
-        />
-        <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z" />
-        <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z" />
+        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
       </svg>
-      Create Template
+      Modify Template
     </button>
   );
 };
@@ -46,8 +41,8 @@ const GoBackButton = () => {
     <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="36"
-        height="36"
+        width="35"
+        height="35"
         fill="currentColor"
         class="bi bi-arrow-left mr-2"
         viewBox="0 0 16 16"
@@ -64,13 +59,24 @@ const GoBackButton = () => {
 
 const ProcedureForm = () => {
   const [procedure, setProcedure] = useState({
-    name: "",
-    description: "",
-    estimatedTime: "",
-    specialInstructions: "",
+    name: "General Anesthesia",
+    description:
+      "A state of controlled unconsciousness during which a patient is asleep and unaware of their surroundings.",
+    estimatedTime: "45",
+    specialInstructions:
+      "NPO (nothing by mouth) for 8 hours before the procedure.",
   });
-  const [resources, setResources] = useState([]);
-  const [roles, setRoles] = useState([]);
+  const [resources, setResources] = useState([
+    { type: "Equipment", name: "Anesthesia Machine", quantity: 1 },
+    { type: "Equipment", name: "Monitoring System", quantity: 1 },
+    { type: "Equipment", name: "Propofol", quantity: 1 },
+    { type: "Equipment", name: "Suction Device", quantity: 1 },
+  ]);
+  const [roles, setRoles] = useState([
+    { name: "Anesthesiologist", quantity: 1 },
+    { name: "Anesthesia Technician", quantity: 1 },
+    { name: "Nurse Anesthetist", quantity: 2 },
+  ]);
   const [newResource, setNewResource] = useState({
     type: "",
     name: "",
@@ -222,7 +228,7 @@ const ProcedureForm = () => {
     setRoles(newRoles);
   };
 
-  const createTemplate = () => {
+  const modifyTemplate = () => {
     console.log({ procedure, resources, roles });
   };
 
@@ -551,7 +557,7 @@ const ProcedureForm = () => {
   );
 };
 
-const CreateProcedureTemplateForm = () => {
+const ModifyProcedureTemplateForm = () => {
   return (
     <div>
       <div
@@ -568,7 +574,7 @@ const CreateProcedureTemplateForm = () => {
           <GoBackButton />
         </div>
         <div style={{ position: "absolute", right: "2rem" }}>
-          <CreateTemplateButton />
+          <ModifyTemplateButton />
         </div>
         <h1
           style={{
@@ -579,7 +585,7 @@ const CreateProcedureTemplateForm = () => {
             color: "#8E0000",
           }}
         >
-          Create New Procedure Template
+          Modify Procedure Template
         </h1>
       </div>
       <ProcedureForm />
@@ -587,4 +593,4 @@ const CreateProcedureTemplateForm = () => {
   );
 };
 
-export default CreateProcedureTemplateForm;
+export default ModifyProcedureTemplateForm;
