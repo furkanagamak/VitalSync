@@ -30,6 +30,7 @@ import { ProcessManagementContainer } from "./components/processManagement/proce
 import CreateProcessForm from "./components/processManagement/containedProcessForm.js";
 import ContainedProcessModify from "./components/processManagement/containedProcessModify.js";
 import ProcessDetailsPreview from "./components/processManagement/previewProcess.js";
+import CompletedProcess from "./components/completedProcess.jsx";
 
 import Resources from "./components/resources/Resources";
 import AssignedProcesses from "./components/mainmenu/AssignedProcesses";
@@ -188,6 +189,17 @@ function App() {
               </>
             }
           />
+
+          <Route
+            path="/recordProcess"
+            element={
+              <>
+                <Navbar />
+                <CompletedProcess />
+              </>
+            }
+          />
+
           <Route
             path="/ProcedureTemplateManagement"
             element={
