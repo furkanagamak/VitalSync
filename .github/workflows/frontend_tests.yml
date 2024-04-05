@@ -9,18 +9,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Install npm dependencies, cache them correctly
-      # and run all Cypress tests
+      - name: Clear Cache
+        run: rm -rf ./frontend/node_modules/.cache
+        working-directory: ./frontend
+
       - name: Install Dependencies
         run: npm ci
         working-directory: ./frontend
 
-      # Start the server in the background
       - name: Start Server
         run: npm start &
         working-directory: ./frontend
-        env:
-          CI: true
+
+      - name: Wait for Server
+        run: npx wait-on http://localhost:3000
+        working-directory: ./frontend
 
       - name: Cypress run
         uses: cypress-io/github-action@v6
