@@ -276,6 +276,7 @@ const ProcedureForm = () => {
           value={procedure.name}
           onChange={handleInputChange}
           margin="normal"
+          id="name"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
         />
@@ -288,6 +289,7 @@ const ProcedureForm = () => {
           value={procedure.description}
           onChange={handleInputChange}
           margin="normal"
+          id="description"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
         />
@@ -298,6 +300,7 @@ const ProcedureForm = () => {
           value={procedure.estimatedTime}
           onChange={handleInputChange}
           margin="normal"
+          id="estimatedTime"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{
             style: { color: "#8E0000" },
@@ -319,6 +322,7 @@ const ProcedureForm = () => {
           value={procedure.specialInstructions}
           onChange={handleInputChange}
           margin="normal"
+          id="specialInstructions"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
         />
