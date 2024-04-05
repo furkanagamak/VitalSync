@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
+import { useNavigate } from 'react-router-dom';
+
 
 const sections = [
     {
@@ -88,9 +90,19 @@ const sections = [
     }
 
 
-    export function ReviewResourceAssignments({ onBack, onProceed }) {
+    export function ReviewResourceAssignments() {
         const [openSections, setOpenSections] = useState(new Set(sections.map(section => section.name))); // Start with all sections open
       
+          const navigate = useNavigate();
+
+          const handleGoBack = () => {
+            navigate("/processManagement/modifyProcess/resourceAssignments");
+          };
+
+          const handleProceed = () => {
+            navigate("/processManagement/modifyProcess/landing");
+          };
+
         const toggleSection = (sectionName) => {
           const updatedSections = new Set(openSections);
           if (updatedSections.has(sectionName)) {
@@ -103,10 +115,10 @@ const sections = [
       
         return (
             <div className="container mx-auto p-8">
-              <NavButtons onBack={onBack} onProceed={onProceed}></NavButtons>
+              <NavButtons onBack={handleGoBack} onProceed={handleProceed}></NavButtons>
               <div className="bg-secondary border-red-600 border-2 rounded-md p-4">
                 <p className="text-left text-lg italic mb-7">
-                  Confirm the following staff assignments for procedures in all sections:
+                  Confirm the following resource assignments for procedures in all sections:
                 </p>
               {sections.map((section, index) => (
                 <div key={index} className="mt-4">
