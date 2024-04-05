@@ -171,7 +171,6 @@ const Table = ({ resources, navToEditResource }) => {
       {
         Header: "Description",
         accessor: "description",
-        disableSortBy: true,
       },
       {
         Header: "Location",

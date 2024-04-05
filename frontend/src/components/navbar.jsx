@@ -28,8 +28,6 @@ const Header = () => {
 };
 
 const Tabs = () => {
-  const navigate = useNavigate(); 
-  const navigateToRoster = () => navigate('/Roster');
   return (
     <div className="hidden md:flex border-x-2 border-white text-2xl flex text-center">
       <section className="border-r-2 px-8 flex pb-2">
@@ -43,12 +41,6 @@ const Tabs = () => {
 };
 
 const UserNav = () => {
-  const navigate = useNavigate();
-
-  const handleNavigate = () => {
-    navigate('/Profile');
-  };
-
   return (
     <div className="ml-auto flex space-x-4 items-center mx-2">
       <p className="hidden md:block text-2xl">John Smith</p>
@@ -69,7 +61,7 @@ const Notifications = () => {
         <CiBellOn className="h-12 w-12 text-black bg-white rounded-full" />
       </button>
       {isOpen && (
-        <div className="absolute right-0 top-20">
+        <div className="absolute right-0 top-20 z-10">
           <NotificationDropDown />
         </div>
       )}
