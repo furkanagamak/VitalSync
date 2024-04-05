@@ -1,0 +1,47 @@
+name: Run Frontend Tests and Deploy
+on:
+  push:
+    branches: [main]
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18.x"
+        
+      - name: Cache Modules
+        uses: actions/cache@v2
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-frontend-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-frontend-
+
+      - name: Install Dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Run Cypress Tests
+        run: |
+          cd frontend
+          npx cypress run
+
+
+
+
+  deploy:
+    needs: cypress-run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        if: github.ref == 'refs/heads/main'
+        env:
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
