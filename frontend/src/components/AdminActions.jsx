@@ -10,30 +10,36 @@ const AdminActions = () => {
       </section>
       <section className="text-xl font-semibold space-y-8 my-8">
         <section className="grid grid-cols-3">
-          <Link 
-            to="/ProcessTemplateManagement" 
+          <Link
+            to="/ProcessTemplateManagement"
             className="flex flex-col justify-center items-center"
           >
             <img src="/svg/processTemplates.svg" alt="logo" />
             <h1>Process</h1>
             <h1>Templates</h1>
           </Link>
-          <Link 
-            to="/ProcedureTemplateManagement" 
+          <Link
+            to="/ProcedureTemplateManagement"
             className="flex flex-col justify-center items-center"
           >
             <img src="/svg/procedureTemplates.svg" alt="logo" />
             <h1>Procedure</h1>
             <h1>Templates</h1>
           </Link>
-          <Link className="flex flex-col justify-center items-center">
+          <Link
+            to="/recordLookup"
+            className="flex flex-col justify-center items-center"
+          >
             <img src="/svg/processRecords.svg" alt="logo" />
             <h1>Process</h1>
             <h1>Records</h1>
           </Link>
         </section>
         <section className="grid grid-cols-3">
-          <Link className="flex flex-col justify-center items-center">
+          <Link
+            to="/activeProcesses"
+            className="flex flex-col justify-center items-center"
+          >
             <img src="/svg/processManagement.svg" alt="logo" />
             <h1>Process</h1>
             <h1>Management</h1>

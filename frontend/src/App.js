@@ -46,103 +46,105 @@ const notify = () => toast("Here is your toast.");
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/RecoveryPage" element={<RecoveryPage />} />
+    <>
+      <Toaster />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/RecoveryPage" element={<RecoveryPage />} />
 
-        <Route
-          path="/Roster"
-          element={
-            <>
-              <Navbar />
-              <Roster />
-            </>
-          }
-        />
-        <Route
-          path="/Profile"
-          element={
-            <>
-              <Navbar />
-              <Profile />
-            </>
-          }
-        />
-      </Routes>
-      <Routes>
-        <Route
-          path="/home"
-          element={
-            <>
-              <Navbar />
-              <AssignedProcesses />
-            </>
-          }
-        />
-        <Route
-          path="/adminActions"
-          element={
-            <>
-              <Navbar />
-              <AdminActions />
-            </>
-          }
-        />
-        <Route
-          path="/createAccount"
-          element={
-            <>
-              <Navbar />
-              <CreateAccount />
-            </>
-          }
-        />
-        <Route
-          path="/resources"
-          element={
-            <>
-              <Navbar />
-              <Resources />
-            </>
-          }
-        />
-        <Route
-          path="/resources/create"
-          element={
-            <>
-              <Navbar />
-              <ResourceCreate />
-            </>
-          }
-        />
-        <Route
-          path="/notifications"
-          element={
-            <>
-              <Navbar />
-              <NotificationBox />
-            </>
-          }
-        />
-        <Route
-          path="/boardProcess"
-          element={
-            <>
-              <Navbar />
-              <BoardProcessView />
-            </>
-          }
-        />
-        <Route
-          path="/processDetails"
-          element={
-            <>
-              <Navbar />
-              <ProcessDetails />
-            </>
-          }
-        />
+          <Route
+            path="/Roster"
+            element={
+              <>
+                <Navbar />
+                <Roster />
+              </>
+            }
+          />
+          <Route
+            path="/Profile"
+            element={
+              <>
+                <Navbar />
+                <Profile />
+              </>
+            }
+          />
+        </Routes>
+        <Routes>
+          <Route
+            path="/home"
+            element={
+              <>
+                <Navbar />
+                <AssignedProcesses />
+              </>
+            }
+          />
+          <Route
+            path="/adminActions"
+            element={
+              <>
+                <Navbar />
+                <AdminActions />
+              </>
+            }
+          />
+          <Route
+            path="/createAccount"
+            element={
+              <>
+                <Navbar />
+                <CreateAccount />
+              </>
+            }
+          />
+          <Route
+            path="/resources"
+            element={
+              <>
+                <Navbar />
+                <Resources />
+              </>
+            }
+          />
+          <Route
+            path="/resources/create"
+            element={
+              <>
+                <Navbar />
+                <ResourceCreate />
+              </>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <>
+                <Navbar />
+                <NotificationBox />
+              </>
+            }
+          />
+          <Route
+            path="/boardProcess"
+            element={
+              <>
+                <Navbar />
+                <BoardProcessView />
+              </>
+            }
+          />
+          <Route
+            path="/processDetails"
+            element={
+              <>
+                <Navbar />
+                <ProcessDetails />
+              </>
+            }
+          />
 
         <Route
           path="/modifyProcess/landing"
