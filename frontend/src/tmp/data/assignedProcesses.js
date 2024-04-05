@@ -6,8 +6,8 @@ const assignedProcesses = [
     myProcedure: {
       procedureName: "Pelvic Ultrasound",
       location: "Room 170A",
-      timeStart: "2024-04-03T20:30:00",
-      timeEnd: "2024-04-03T21:30:00",
+      timeStart: "2024-04-05T20:30:00",
+      timeEnd: "2024-04-05T21:30:00",
     },
     currentProcedure: "Pre-Operative Consultation",
     patientName: "May Mary",
