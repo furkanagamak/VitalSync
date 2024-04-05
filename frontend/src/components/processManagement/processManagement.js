@@ -21,19 +21,16 @@ const StyledTab = styled(Tab)(({ theme }) => ({
   
 
 export function ProcessManagementContainer() {
-    const [tabValue, setTabValue] = useState(0);
-
-    const navigate = useNavigate();
-    const location = useLocation();
-    const currentTab = location.pathname.split('/')[2]; // This assumes your URL structure is consistent
-    
-    const currentCategory = location.pathname.split('/')[2]; 
-    const tabPaths = ["modifyProcess", "newProcess"];
-  const currentTabIndex = tabPaths.indexOf(currentCategory) !== -1 ? tabPaths.indexOf(currentCategory) : 0;
-
-    const handleChange = (event, newValue) => {
-        navigate(`/processManagement/${tabPaths[newValue]}`);
-    };
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentCategory = location.pathname.split('/')[2]; 
+  const tabPaths = ["modifyProcess", "newProcess/processTemplates"];
+  
+  const currentTabIndex = tabPaths.indexOf(currentCategory);
+  
+  const handleChange = (event, newValue) => {
+      navigate(`/processManagement/${tabPaths[newValue]}`);
+  };
 
   
   return (

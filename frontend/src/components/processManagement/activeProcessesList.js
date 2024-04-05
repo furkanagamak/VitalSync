@@ -211,7 +211,22 @@ const exampleProcesses = [
             page={page} 
             onChange={handleChange} 
             showFirstButton 
-            showLastButton />
+            showLastButton 
+            sx={{
+              ".MuiPaginationItem-root": {
+                color: '8e0000', // Assuming this is your primary color in Tailwind
+              },
+              ".Mui-selected": {
+                backgroundColor: '#8e0000',
+                color: '#white',
+                '&:hover': {
+                  backgroundColor: '#8e0000', // A darker shade for hover state
+                },
+              },
+              ".MuiPaginationItem-ellipsis": {
+                color: '#8e0000', // Adjust if needed
+              }
+            }}/>
         </Stack>
       </div>
     );
