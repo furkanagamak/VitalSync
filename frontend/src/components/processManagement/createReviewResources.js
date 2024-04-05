@@ -109,7 +109,7 @@ const sections = [
         };
       
         const handleProceed = () => {
-          navigate("/processManagement/newProcess/confirm");
+          navigate("/processManagement/newProcess/preview");
         };
 
         return (

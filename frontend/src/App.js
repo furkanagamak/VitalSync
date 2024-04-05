@@ -29,6 +29,7 @@ import ReviewResourceAssignments from "./components/processManagement/reviewReso
 import { ProcessManagementContainer } from "./components/processManagement/processManagement.js";
 import CreateProcessForm from "./components/processManagement/containedProcessForm.js";
 import ContainedProcessModify from "./components/processManagement/containedProcessModify.js";
+import ProcessDetailsPreview from "./components/processManagement/previewProcess.js";
 
 import Resources from "./components/resources/Resources";
 import AssignedProcesses from "./components/mainmenu/AssignedProcesses";
@@ -175,6 +176,7 @@ function App() {
                 <Route path="newProcess/pendingResourceAssignments" element={<PendingNewResources />} />
                 <Route path="newProcess/reviewStaffAssignments" element={<CreateReviewStaffAssignments />} />
                 <Route path="newProcess/reviewResourceAssignments" element={<CreateReviewResourceAssignments />} />
+                <Route path="newProcess/preview" element={<ProcessDetailsPreview />} />
         </Route>
 
           <Route
