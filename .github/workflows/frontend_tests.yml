@@ -17,8 +17,10 @@ jobs:
       - name: Cache Modules
         uses: actions/cache@v2
         with:
-          path: frontend/node_modules
-          key: ${{ runner.os }}-frontend-${{ hashFiles('frontend/package-lock.json') }}
+          path: |
+            frontend/node_modules
+            ~/.cache/Cypress
+          key: ${{ runner.os }}-frontend-${{ hashFiles('frontend/package-lock.json') }}-${{ hashFiles('**/cypress.json') }}
           restore-keys: |
             ${{ runner.os }}-frontend-
 
