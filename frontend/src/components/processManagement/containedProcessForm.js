@@ -12,44 +12,33 @@ import {
   ListItemText,
   IconButton,
   Typography,
-  Grid,
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTable, useSortBy, usePagination } from "react-table";
-import Autocomplete from "@mui/material/Autocomplete";
+import { TbLayoutGridAdd } from "react-icons/tb";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
-const notify = () => toast.success("Section Added!");
+const notify = () => toast.success("Process Template Created!");
 
-const AddSectionButton = () => {
+const CreateTemplateButton = () => {
   const navigate = useNavigate();
 
-  const handleAddSectionClick = () => {
-    navigate("/processManagement/modifyProcess/landing");
+  const handleCreateClick = () => {
+    navigate("/processManagement/newProcess/patientForm");
     notify();
   };
 
   return (
     <button
-      onClick={handleAddSectionClick}
+      onClick={handleCreateClick}
       className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="36"
-        height="36"
-        fill="currentColor"
-        class="bi bi-plus-circle mr-3"
-        viewBox="0 0 16 16"
-      >
-        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-      </svg>
-      Add Section
+      <TbLayoutGridAdd className="mr-2 size-10" />
+      Create Template
     </button>
   );
 };
@@ -58,7 +47,7 @@ const GoBackButton = () => {
   const navigate = useNavigate();
 
   const handleGoBackClick = () => {
-    navigate("/processManagement/modifyProcess/landing");
+    navigate("/processManagement/newProcess/processTemplates");
   };
 
   return (
@@ -84,18 +73,11 @@ const GoBackButton = () => {
   );
 };
 
-const SectionForm = () => {
-  const [section, setSection] = useState({
+const ProcessForm = () => {
+  const [process, setProcess] = useState({
     name: "",
     description: "",
-    procedureName: "",
   });
-
-  const [procedureOptions, setProcedureOptions] = useState([
-    "General Anesthesia",
-    "MRI Scan",
-    "Physical Therapy",
-  ]);
 
   const theme = createTheme({
     typography: {
@@ -155,33 +137,16 @@ const SectionForm = () => {
           },
         },
       },
-      MuiAutocomplete: {
-        styleOverrides: {
-          root: {
-            color: "#8E0000",
-          },
-        },
-      },
     },
   });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setSection({ ...section, [name]: value });
-  };
-
-  const handleProcedureChange = (event, newValue) => {
-    setSection({ ...section, procedureName: newValue });
+    setProcess({ ...process, [name]: value });
   };
 
   const createTemplate = () => {
-    console.log({ section });
-  };
-
-  const navigate = useNavigate();
-
-  const handleCreateProcedureTemplateClick = () => {
-    navigate("/CreateProcedureTemplateForm");
+    console.log({ process });
   };
 
   return (
@@ -202,13 +167,13 @@ const SectionForm = () => {
           variant="h5"
           style={{ color: "#8E0000", marginBottom: "5px", fontWeight: "bold" }}
         >
-          Section Details
+          Process Template Details
         </Typography>
         <TextField
           fullWidth
-          label="Section Name"
+          label="Process Name"
           name="name"
-          value={section.name}
+          value={process.name}
           onChange={handleInputChange}
           margin="normal"
           InputLabelProps={{ style: { color: "#8E0000" } }}
@@ -220,99 +185,12 @@ const SectionForm = () => {
           rows={4}
           label="Description"
           name="description"
-          value={section.description}
+          value={process.description}
           onChange={handleInputChange}
           margin="normal"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
         />
-
-        <Grid container spacing={3} alignItems="center">
-          <Grid item xs>
-            <Autocomplete
-              id="procedure-name"
-              value={section.procedureName}
-              onChange={handleProcedureChange}
-              onInputChange={(event, newInputValue) => {
-                setProcedureOptions([
-                  "General Anesthesia",
-                  "MRI Scan",
-                  "Physical Therapy",
-                ]);
-              }}
-              options={procedureOptions}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Procedure Name"
-                  placeholder="Search for procedure templates to add to the section."
-                  margin="normal"
-                  fullWidth
-                  InputLabelProps={{
-                    ...params.InputLabelProps,
-                    style: { color: "#8E0000" },
-                  }}
-                  inputProps={{
-                    ...params.inputProps,
-                    style: { color: "#8E0000" },
-                  }}
-                />
-              )}
-            />
-          </Grid>
-          <Grid item>
-            <Button
-              variant="outlined"
-              startIcon={
-                <AddCircleOutlineIcon
-                  style={{ color: "#8E0000", fontSize: "1.5rem" }}
-                />
-              }
-              style={{
-                color: "#8E0000",
-                backgroundColor: "white",
-                borderColor: "#8E0000",
-                minWidth: "100px",
-                fontSize: "0.9rem",
-                textTransform: "none",
-                marginRight: "120px",
-              }}
-            >
-              Add Procedure
-            </Button>
-            <Button
-              onClick={handleCreateProcedureTemplateClick}
-              variant="outlined"
-              startIcon={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="currentColor"
-                  class="bi bi-clipboard-plus"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M8 7a.5.5 0 0 1 .5.5V9H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V10H6a.5.5 0 0 1 0-1h1.5V7.5A.5.5 0 0 1 8 7"
-                  />
-                  <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z" />
-                  <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z" />
-                </svg>
-              }
-              style={{
-                color: "#8E0000",
-                backgroundColor: "white",
-                borderColor: "#8E0000",
-                minWidth: "100px",
-                fontSize: "0.9rem",
-                textTransform: "none",
-              }}
-            >
-              Create New Procedure Template
-            </Button>
-          </Grid>
-        </Grid>
       </div>
     </ThemeProvider>
   );
@@ -320,6 +198,15 @@ const SectionForm = () => {
 
 const SectionTable = () => {
   const data = React.useMemo(() => [], []);
+  const navigate = useNavigate();
+
+  const handleAddSectionClick = () => {
+    navigate("/AddSectionForm");
+  };
+
+  const handleModifySectionClick = () => {
+    navigate("/ModifySectionForm");
+  };
 
   const columns = React.useMemo(
     () => [
@@ -333,22 +220,9 @@ const SectionTable = () => {
         accessor: "description",
       },
       {
-        Header: "Resources",
-        accessor: "resources",
+        Header: "Procedures",
+        accessor: "procedures",
         style: { backgroundColor: "#F5F5DC" },
-      },
-      {
-        Header: "Roles",
-        accessor: "roles",
-      },
-      {
-        Header: "Estimated Time",
-        accessor: "time",
-        style: { backgroundColor: "#F5F5DC" },
-      },
-      {
-        Header: "Special Notes",
-        accessor: "notes",
       },
       {
         Header: "Actions",
@@ -407,6 +281,27 @@ const SectionTable = () => {
               </svg>
             </button>
             <button
+              onClick={handleModifySectionClick}
+              style={{
+                background: "none",
+                border: "none",
+                padding: "0",
+                cursor: "pointer",
+                marginRight: "10px",
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                fill="#8E0000"
+                className="bi bi-pencil"
+                viewBox="0 0 16 16"
+              >
+                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
+              </svg>
+            </button>
+            <button
               style={{
                 background: "none",
                 border: "none",
@@ -445,7 +340,6 @@ const SectionTable = () => {
           maxWidth: "90%",
           margin: "auto",
           padding: "20px",
-          paddingBottom: "10px",
           backgroundColor: "#F5F5DC",
           display: "flex",
           flexDirection: "column",
@@ -460,7 +354,7 @@ const SectionTable = () => {
             fontWeight: "bold",
           }}
         >
-          Selected Procedures
+          Selected Sections
         </h1>
         <div
           className="scrollbar1"
@@ -468,9 +362,9 @@ const SectionTable = () => {
             overflowX: "auto",
             display: "flex",
             justifyContent: "center",
-            maxHeight: "28vh",
+            maxHeight: "30vh",
             paddingRight: "20px",
-            minHeight: "28vh",
+            minHeight: "30vh",
           }}
         >
           <table
@@ -540,12 +434,36 @@ const SectionTable = () => {
             </tbody>
           </table>
         </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            paddingTop: "10px",
+            marginRight: "35px",
+          }}
+        >
+          <Button
+            onClick={handleAddSectionClick}
+            variant="outlined"
+            startIcon={<AddCircleOutlineIcon style={{ color: "#8E0000" }} />}
+            style={{
+              color: "#8E0000",
+              backgroundColor: "white",
+              borderColor: "#8E0000",
+              minWidth: "100px",
+              fontSize: "0.9rem",
+              textTransform: "none",
+            }}
+          >
+            Add Section
+          </Button>
+        </div>
       </div>
     </>
   );
 };
 
-const ContainedNewSection = () => {
+const CreateProcessForm = () => {
   return (
     <div>
       <div
@@ -562,7 +480,7 @@ const ContainedNewSection = () => {
           <GoBackButton />
         </div>
         <div style={{ position: "absolute", right: "2rem" }}>
-          <AddSectionButton />
+          <CreateTemplateButton />
         </div>
         <h1
           style={{
@@ -573,13 +491,13 @@ const ContainedNewSection = () => {
             color: "#8E0000",
           }}
         >
-          Add New Section
+          Create New Process Template
         </h1>
       </div>
-      <SectionForm />
+      <ProcessForm />
       <SectionTable />
     </div>
   );
 };
 
-export default ContainedNewSection;
+export default CreateProcessForm;

@@ -1,10 +1,10 @@
 import React, {useState, useEffect } from 'react';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
 import { BiSolidDownArrow } from "react-icons/bi";
-import { FaArrowLeft } from 'react-icons/fa';
+import { FaArrowLeft, FaCheck, FaRegCalendarTimes } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 
-// Mock data for roles - replace with actual data retrieval mechanism
 const roles = [
   { 
     name: "Lead Surgeon",
@@ -58,7 +58,6 @@ const roles = [
         Actions: 'Assign',
       },
     ],
-    assigned: "Gregory House"
   },
   { 
     name: "Anesthesiologist", 
@@ -76,7 +75,6 @@ const roles = [
         Actions: 'Assign',
       },
     ],
-    assigned: "Alex Karev"
   },
   { 
     name: "Operating Room Nurse", 
@@ -94,37 +92,41 @@ const roles = [
         Actions: 'Assign',
       },
     ],
-    assigned: "Meredith Grey"
   },
 ];
 
 export function RoleDropdownContent({ role }) {
   return (
-    <div className="flex mx-10 mb-5">
-      <div className="w-1/3 text-3xl mt-20">
+    <div className="flex mx-10 ">
+      <div className="flex flex-col w-2/5 text-3xl mt-5">
         <p>Currently Assigned:</p>
-        <p className="text-primary">{role.assigned}</p>
+        <p className="text-primary mb-2">{role.assigned}</p>
+        <button
+          className="bg-primary text-white rounded-full px-5 py-3 text-xl shadow self-start border-black border-2 mt-16"
+        >
+          Auto-Assign
+        </button>
       </div>
-      <div className="w-3/4 lg:w-3/4 ml-5">
+      <div className="w-3/5 ml-5">
         <p className="text-highlightGreen text-2xl mb-3 mt-5">Available Qualified Staff:</p>
         <div className="border-gray-400 border-2 rounded-lg p-3 overflow-y-auto" style={{ maxHeight: '12rem' }}> {/* 3 rows approximately 3rem each */}
           <table className="w-full text-left">
             <thead className="border-b border-primary">
               <tr>
-                <th className="text-primary">Name <BiSolidDownArrow /></th>
-                <th className="text-primary">Title <BiSolidDownArrow /></th>
-                <th className="text-primary">ID <BiSolidDownArrow /></th>
-                <th className="text-primary">Actions</th>
+                <th className="text-primary text-2xl">Name <BiSolidDownArrow /></th>
+                <th className="text-primary text-2xl">Title <BiSolidDownArrow /></th>
+                <th className="text-primary text-2xl">ID <BiSolidDownArrow /></th>
+                <th className="text-primary text-2xl">Actions</th>
               </tr>
             </thead>
             <tbody>
               {role.staff.map((staff, index) => (
                 <tr key={index} className={`border-b border-black ${index === role.staff.length - 1 ? 'border-b-0' : ''}`}>
-                  <td className="py-2">{staff.Name}</td>
+                  <td className="py-2 text-2xl">{staff.Name}</td>
                   <td>{staff.Title}</td>
                   <td>{staff.ID}</td>
                   <td>
-                    <button className="bg-green-500 hover:bg-green-700 text-white border-black border-2 rounded-full px-3 py-1">
+                    <button className="text-xl bg-green-500 hover:bg-green-700 text-white border-black border-2 rounded-full px-3 py-1">
                       Assign
                     </button>
                   </td>
@@ -141,11 +143,21 @@ export function RoleDropdownContent({ role }) {
 
 export function CreateStaffAssignments({ processName, onBack, onProceed }) {
   const [openRoles, setOpenRoles] = useState(new Set());
+  const navigate = useNavigate();
 
   useEffect(() => {
     const allRoles = new Set(roles.map(role => role.name));
-    setOpenRoles(allRoles);
+    //setOpenRoles(allRoles);
   }, []);
+
+  const handleGoBack = () => {
+    navigate("/processManagement/newProcess/pendingStaffAssignments");
+  };
+
+  const handleProceed = () => {
+    navigate("/processManagement/newProcess/pendingStaffAssignments");
+  };
+
 
   const toggleRole = (roleName) => {
     const newOpenRoles = new Set(openRoles);
@@ -163,7 +175,7 @@ export function CreateStaffAssignments({ processName, onBack, onProceed }) {
         <button
           className="ml-5 hover:bg-red-900 border-black border-2 flex items-center justify-center bg-primary text-white rounded-full px-5 py-2 text-xl shadow"
           style={{ maxWidth: '30%' }}
-          onClick={onBack}
+          onClick={handleGoBack}
         >
           <FaArrowLeft className="mr-3" />
           Go Back
@@ -172,7 +184,7 @@ export function CreateStaffAssignments({ processName, onBack, onProceed }) {
         <button
           className="mr-10 mt-5 hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-10 py-5 text-4xl"
           style={{ maxWidth: '30%' }}
-          onClick={onProceed}
+          onClick={handleProceed}
         >
           Proceed
         </button>
@@ -180,14 +192,21 @@ export function CreateStaffAssignments({ processName, onBack, onProceed }) {
 
       <div className="container mx-auto p-8">
         <div className="pb-4 mb-4 border-b-2 border-black">
-          <h2 className="text-4xl font-bold">{"Radial Prostatectomy"}<span className="text-primary" > - Modify Staff Assignments</span></h2>
+          <h2 className="text-4xl font-bold">{"Radial Prostatectomy"}<span className="text-primary" > - Complete Staff Assignments</span></h2>
         </div>
 
         <div>
           {roles.map((role) => (
             <div key={role.name} className="py-10 border-b border-primary">
               <div className="flex justify-between items-center">
-                <p className="text-3xl font-bold">{role.name}</p>
+              <div className="text-3xl font-bold flex items-center">
+                  <span>{role.name}</span>
+                  {role.assigned ? (
+                    <FaCheck className="text-green-500 ml-4 text-4xl" />
+                  ) : (
+                    <FaRegCalendarTimes className="text-highlightRed ml-4 text-4xl" />
+                  )}
+                </div>
                 <button onClick={() => toggleRole(role.name)} className="flex items-center">
                   {openRoles.has(role.name) ?  <BsChevronUp className='text-4xl' /> : <BsChevronDown className='text-4xl' />}
                 </button>

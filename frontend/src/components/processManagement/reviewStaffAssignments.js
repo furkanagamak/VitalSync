@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
+import { useNavigate } from 'react-router-dom';
+
 
 const sections = [
     {
@@ -67,23 +69,23 @@ const sections = [
   ];
 
 function NavButtons({ onBack, onProceed }) {
-    return (
-          <div className="flex justify-between items-center mb-5">
-                    <button className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center" onClick={onBack}>
-                    <FaArrowLeft className="mr-2" />
-                    Go Back
-                    </button>
-                    <h1 className="text-primary text-3xl font-bold">Review Resource Assignments</h1>
-                    <button
-                    className="hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-7 py-5 text-4xl"
-                    onClick={onProceed}
-                    >
-                    Proceed
-                </button>
-            </div>)
+  return (
+      <div className="flex justify-between items-center mb-5">
+          <button className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center" onClick={onBack}>
+              <FaArrowLeft className="mr-2" />
+                Go Back
+         </button>
+            <h1 className="text-primary text-3xl font-bold">Review Staff Assignments</h1>
+         <button
+              className="hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-7 py-5 text-4xl"
+              onClick={onProceed}
+                >
+                Proceed
+          </button>
+    </div>)
 }
 
-export function ReviewStaffAssignments({ onBack, onProceed }) {
+export function ReviewStaffAssignments() {
   const [openSections, setOpenSections] = useState(new Set(sections.map(section => section.name))); // Start with all sections open
 
   const toggleSection = (sectionName) => {
@@ -96,9 +98,20 @@ export function ReviewStaffAssignments({ onBack, onProceed }) {
     setOpenSections(updatedSections);
   };
 
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    navigate("/processManagement/modifyProcess/staffAssignments");
+  };
+
+  const handleProceed = () => {
+    navigate("/processManagement/modifyProcess/landing");
+  };
+
+
   return (
     <div className="container mx-auto p-8">
-      <NavButtons onBack={onBack} onProceed={onProceed}></NavButtons>
+      <NavButtons onBack={handleGoBack} onProceed={handleProceed}></NavButtons>
       <div className="bg-secondary border-red-600 border-2 rounded-md p-4">
         <p className="text-left text-lg italic mb-7">
           Confirm the following staff assignments for procedures in all sections:
