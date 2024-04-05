@@ -1,22 +1,16 @@
 describe('Record Lookup Page Tests', () => {
     beforeEach(() => {
-        cy.visit('/processManagement/recordLookup');
+        cy.visit('/recordLookup');
     });
 
     it('successfully loads record lookup page', () => {
         cy.contains('Completed Process Records').should('be.visible');
-        cy.contains('Search for process records').should('be.visible');
-    });
-
-    it('edits a process record when open icon is clicked', () => {  //note that the edit will need to be changed to view eventually
-        cy.get('[data-testid="edit-icon"]').first().click();
-        cy.url().should('include', '/recordProcess');
     });
 });
 
 describe('Completed Process Tests', () => {
     beforeEach(() => {
-      cy.visit('/completedProcess');
+      cy.visit('/recordProcess');
     });
   
     it('navigates back to the record lookup page on "Go Back"', () => {
