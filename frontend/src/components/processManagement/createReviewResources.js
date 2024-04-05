@@ -117,7 +117,7 @@ const sections = [
               <NavButtons onBack={handleGoBack} onProceed={handleProceed}></NavButtons>
               <div className="bg-secondary border-red-600 border-2 rounded-md p-4">
                 <p className="text-left text-lg italic mb-7">
-                  Confirm the following staff assignments for procedures in all sections:
+                  Confirm the following resource assignments for procedures in all sections:
                 </p>
               {sections.map((section, index) => (
                 <div key={index} className="mt-4">
