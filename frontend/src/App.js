@@ -1,15 +1,16 @@
 import toast, { Toaster } from "react-hot-toast";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, Navigate} from "react-router-dom";
 import Navbar from "./components/navbar.jsx";
 import Login from "./components/Login.js";
 import RecoveryPage from "./components/RecoveryPage.js";
 import Roster from "./components/Roster.js";
 import Profile from "./components/Profile.js";
+
 import { ActiveProcessesList } from "./components/processManagement/activeProcessesList.js";
 import { ModifyProcessLanding } from "./components/processManagement/modifyProcessLanding.js";
 import ContainedNewSection from "./components/processManagement/containedNewSection.js";
-import ContainedNewProcedureList from "./components/processManagement/containedProcedureList.js";
-import ContainedNewProcedure from "./components/processManagement/containedNewProcedure.js";
+import ContainedProcedureTemplateList from "./components/processManagement/containedProcedureList.js";
+import ContainedCreateProcedureTemplateForm from "./components/processManagement/containedNewProcedure.js";
 import ModifyStaffAssignments from "./components/processManagement/modifyStaffAssignments.js";
 import ModifyResourceAssignments from "./components/processManagement/modifyResourceAssignments.js";
 import PendingStaffModify from "./components/processManagement/pendingStaffModify.js";
@@ -25,6 +26,12 @@ import CreateReviewResourceAssignments from "./components/processManagement/crea
 import CompletedProcessRecords from "./components/completedProcessRecords.js";
 import ReviewStaffAssignments from "./components/processManagement/reviewStaffAssignments.js";
 import ReviewResourceAssignments from "./components/processManagement/reviewResourceAssignments.js";
+import { ProcessManagementContainer } from "./components/processManagement/processManagement.js";
+import CreateProcessForm from "./components/processManagement/containedProcessForm.js";
+import ContainedProcessModify from "./components/processManagement/containedProcessModify.js";
+import ProcessDetailsPreview from "./components/processManagement/previewProcess.js";
+import CompletedProcess from "./components/completedProcess.jsx";
+
 import Resources from "./components/resources/Resources";
 import AssignedProcesses from "./components/mainmenu/AssignedProcesses";
 import BoardProcessView from "./components/mainmenu/BoardProcessView";
@@ -34,14 +41,14 @@ import CreateAccount from "./components/CreateAccount";
 import ResourceCreate from "./components/resources/ResourceCreate";
 import NotificationBox from "./components/notifications/NotificationBox";
 
-import ProcedureTemplateManagement from "./components/processManagement/procedureTemplates.js";
-import ProcessTemplateManagementq from "./components/processManagement/processTemplates.js";
-import CreateProcedureTemplateForm from "./components/processManagement/createProcedureTemplate.js";
-import CreateProcessTemplateForm from "./components/processManagement/createProcessTemplate.js";
-import AddSectionForm from "./components/processManagement/createSection.js";
+import ProcedureTemplateManagement from "./components/procedureTemplates.js";
+import ProcessTemplateManagementq from "./components/processTemplates.js";
+import CreateProcedureTemplateForm from "./components/createProcedureTemplate.js";
+import CreateProcessTemplateForm from "./components/createProcessTemplate.js";
+import AddSectionForm from "./components/createSection.js";
 import ModifyProcedureTemplateForm from "./components/processManagement/modifyProcedureTemplate.js";
-import ModifyProcessTemplateForm from "./components/processManagement/modifyProcessTemplate.js";
-import ModifySectionForm from "./components/processManagement/modifySection.js";
+import ModifyProcessTemplateForm from "./components/modifyProcessTemplate.js";
+import ModifySectionForm from "./components/modifySection.js";
 const notify = () => toast("Here is your toast.");
 
 function App() {
@@ -146,168 +153,33 @@ function App() {
             }
           />
 
-          <Route
-            path="/modifyProcess/landing"
-            element={
-              <>
-                <Navbar />
-                <ModifyProcessLanding />
-              </>
-            }
-          />
-          <Route
-            path="/modifyProcess/addSection"
-            element={
-              <>
-                <Navbar />
-                <ContainedNewSection />
-              </>
-            }
-          />
-          <Route
-            path="/modifyProcess/addProcedure"
-            element={
-              <>
-                <Navbar />
-                <ContainedNewProcedureList />
-              </>
-            }
-          />
-          <Route
-            path="/modifyProcess/modifyProcedure"
-            element={
-              <>
-                <Navbar />
-                <ContainedNewProcedure />
-              </>
-            }
-          />
-          <Route
-            path="/modifyProcess/staffAssignments"
-            element={
-              <>
-                <Navbar />
-                <ModifyStaffAssignments />
-              </>
-            }
-          />
-          <Route
-            path="/modifyProcess/resourceAssignments"
-            element={
-              <>
-                <Navbar />
-                <ModifyResourceAssignments />
-              </>
-            }
-          />
-          <Route
-            path="/modifyProcess/pendingStaffAssignments"
-            element={
-              <>
-                <Navbar />
-                <PendingStaffModify />
-              </>
-            }
-          />
-          <Route
-            path="/modifyProcess/pendingResourceAssignments"
-            element={
-              <>
-                <Navbar />
-                <PendingResourceModify />
-              </>
-            }
-          />
-          <Route
-            path="/modifyProcess/reviewStaffAssignments"
-            element={
-              <>
-                <Navbar />
-                <ReviewStaffAssignments />
-              </>
-            }
-          />
-          <Route
-            path="/modifyProcess/reviewResourceAssignments"
-            element={
-              <>
-                <Navbar />
-                <ReviewResourceAssignments />
-              </>
-            }
-          />
-          <Route
-            path="/newProcess/processTemplates"
-            element={
-              <>
-                <Navbar />
-                <ProcessTable />
-              </>
-            }
-          />
-          <Route
-            path="/newProcess/patientForm"
-            element={
-              <>
-                <Navbar />
-                <PatientInformationForm />
-              </>
-            }
-          />
-          <Route
-            path="/newProcess/staffAssignments"
-            element={
-              <>
-                <Navbar />
-                <CreateStaffAssignments />
-              </>
-            }
-          />
-          <Route
-            path="/newProcess/resourceAssignments"
-            element={
-              <>
-                <Navbar />
-                <CreateResourceAssignments />
-              </>
-            }
-          />
-          <Route
-            path="/newProcess/pendingStaffAssignments"
-            element={
-              <>
-                <Navbar />
-                <PendingNewStaff />
-              </>
-            }
-          />
-          <Route
-            path="/newProcess/pendingResourceAssignments"
-            element={
-              <>
-                <Navbar />
-                <PendingNewResources />
-              </>
-            }
-          />
-          <Route
-            path="/newProcess/reviewStaffAssignments"
-            element={
-              <>
-                <Navbar />
-                <CreateReviewStaffAssignments />
-              </>
-            }
-          />
-          <Route
-            path="/newProcess/reviewResourceAssignments"
-            element={
-              <>
-                <Navbar />
-                <CreateReviewResourceAssignments />
-              </>
-            }
-          />
+          <Route path="/processManagement" element={<ProcessManagementContainer />}>
+                <Route index element={<Navigate replace to="modifyProcess/activeProcesses" />} />
+                <Route path="modifyProcess/landing" element={<ModifyProcessLanding />} />
+                <Route path="modifyProcess/addSection" element={<ContainedNewSection />} />
+                <Route path="modifyProcess/addProcedure" element={<ContainedProcedureTemplateList />} />
+                <Route path="modifyProcess/modifyProcedure" element={<ContainedCreateProcedureTemplateForm />} />
+                <Route path="modifyProcess/staffAssignments" element={<ModifyStaffAssignments />} />
+                <Route path="modifyProcess/resourceAssignments" element={<ModifyResourceAssignments />} />
+                <Route path="modifyProcess/pendingStaffAssignments" element={<PendingStaffModify />} />
+                <Route path="modifyProcess/pendingResourceAssignments" element={<PendingResourceModify />} />
+                <Route path="modifyProcess/reviewStaffAssignments" element={<ReviewStaffAssignments />} />
+                <Route path="modifyProcess/reviewResourceAssignments" element={<ReviewResourceAssignments />} />
+                <Route path="modifyProcess/activeProcesses" element={<ActiveProcessesList />} />
+                <Route path="newProcess/processTemplates" element={<ProcessTable />} />
+                <Route path="newProcess/processTemplateForm" element={<CreateProcessForm />} />
+                <Route path="newProcess/processTemplateModifyForm" element={<ContainedProcessModify />} />
+                <Route path="newProcess/addSection" element={<ContainedNewSection />} />
+                <Route path="newProcess/patientForm" element={<PatientInformationForm />} />
+                <Route path="newProcess/staffAssignments" element={<CreateStaffAssignments />} />
+                <Route path="newProcess/resourceAssignments" element={<CreateResourceAssignments />} />
+                <Route path="newProcess/pendingStaffAssignments" element={<PendingNewStaff />} />
+                <Route path="newProcess/pendingResourceAssignments" element={<PendingNewResources />} />
+                <Route path="newProcess/reviewStaffAssignments" element={<CreateReviewStaffAssignments />} />
+                <Route path="newProcess/reviewResourceAssignments" element={<CreateReviewResourceAssignments />} />
+                <Route path="newProcess/preview" element={<ProcessDetailsPreview />} />
+        </Route>
+
           <Route
             path="/recordLookup"
             element={
@@ -317,6 +189,17 @@ function App() {
               </>
             }
           />
+
+          <Route
+            path="/recordProcess"
+            element={
+              <>
+                <Navbar />
+                <CompletedProcess />
+              </>
+            }
+          />
+
           <Route
             path="/ProcedureTemplateManagement"
             element={

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
+import { useNavigate } from 'react-router-dom';
+
 
 const sections = [
     {
@@ -73,7 +75,7 @@ function NavButtons({ onBack, onProceed }) {
                     <FaArrowLeft className="mr-2" />
                     Go Back
                     </button>
-                    <h1 className="text-primary text-3xl font-bold">Review Resource Assignments</h1>
+                    <h1 className="text-primary text-3xl font-bold">Review Staff Assignments</h1>
                     <button
                     className="hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-7 py-5 text-4xl"
                     onClick={onProceed}
@@ -85,6 +87,7 @@ function NavButtons({ onBack, onProceed }) {
 
 export function CreateReviewStaffAssignments({ onBack, onProceed }) {
   const [openSections, setOpenSections] = useState(new Set(sections.map(section => section.name))); // Start with all sections open
+  const navigate = useNavigate();
 
   const toggleSection = (sectionName) => {
     const updatedSections = new Set(openSections);
@@ -96,9 +99,17 @@ export function CreateReviewStaffAssignments({ onBack, onProceed }) {
     setOpenSections(updatedSections);
   };
 
+  const handleGoBack = () => {
+    navigate("/processManagement/newProcess/pendingResourceAssignments");
+  };
+
+  const handleProceed = () => {
+    navigate("/processManagement/newProcess/reviewResourceAssignments");
+  };
+
   return (
     <div className="container mx-auto p-8">
-      <NavButtons onBack={onBack} onProceed={onProceed}></NavButtons>
+      <NavButtons onBack={handleGoBack} onProceed={handleProceed}></NavButtons>
       <div className="bg-secondary border-red-600 border-2 rounded-md p-4">
         <p className="text-left text-lg italic mb-7">
           Confirm the following staff assignments for procedures in all sections:

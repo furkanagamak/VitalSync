@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaArrowLeft, FaCheck } from 'react-icons/fa';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
 import { MdOutlineOpenInNew } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
 
 const sections = [
     {
@@ -78,7 +79,7 @@ function NavButtons({ onBack, onProceed }) {
                 <FaArrowLeft className="mr-2" />
                 Go Back
             </button>
-            <h1 className="text-primary text-3xl font-bold">Pending Resource Modification</h1>
+            <h1 className="text-primary text-4xl font-bold">Pending Resource Assignments</h1>
             <button className="hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-7 py-5 text-4xl" onClick={onProceed}>
                 Proceed
             </button>
@@ -86,7 +87,7 @@ function NavButtons({ onBack, onProceed }) {
     );
 }
 
-export function PendingResourceModify({ onBack, onProceed }) {
+export function PendingResourceModify() {
   const [openSections, setOpenSections] = useState(new Set(sections.map(section => section.name)));
 
   const toggleSection = (sectionName) => {
@@ -99,41 +100,52 @@ export function PendingResourceModify({ onBack, onProceed }) {
     setOpenSections(updatedSections);
   };
 
+  const navigate = useNavigate();
+  const handleGoBack = () => {
+    navigate("/processManagement/modifyProcess/pendingStaffAssignments");
+  };
+
+  const handleProceed = () => {
+    navigate("/processManagement/");
+  };
+
   return (
     <div className="container mx-auto p-8">
-      <NavButtons onBack={onBack} onProceed={onProceed} />
+      <NavButtons onBack={handleGoBack} onProceed={handleProceed} />
       <div className="bg-secondary border-red-600 border-2 rounded-md p-4">
         <p className="text-left text-lg italic mb-7">
-          Confirm the status of resource assignments for all procedures:
+          Confirm the status of resource assignments for procedures in all sections:
         </p>
         {sections.map((section, index) => (
-          <div key={index} className="mt-4">
-            <button
-              className="flex justify-between items-center w-full bg-primary text-white py-2 px-4 rounded-md text-2xl"
-              onClick={() => toggleSection(section.name)}
-            >
-              {section.name}
-              {openSections.has(section.name) ? <BsChevronUp /> : <BsChevronDown />}
-            </button>
-            {openSections.has(section.name) && (
-              <div className="bg-white mt-2 p-4 rounded-md">
-                {section.procedures.map((procedure, idx) => (
-                  <div key={idx} className="flex justify-between items-center py-2 border-primary">
-                    <span className="text-2xl">{procedure.title}</span>
-                    {procedure.requiredResources.map((resource, resourceIdx) => (
-                      <div key={resourceIdx} className="text-2xl font-bold ml-10">
-                        <span className={`${resource.assignedResourceID ? 'text-green-500 flex items-center' : 'text-highlightRed flex items-center'}`}>
-                          {resource.assignedResourceID ? <FaCheck className="mr-2" /> : <MdOutlineOpenInNew className="mr-2" />}
-                          {resource.assignedResourceID ? 'Assigned' : 'Assignments Required'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+  <div key={index} className="mt-4">
+    <button
+      className="flex justify-between items-center w-full bg-primary text-white py-2 px-4 rounded-md text-2xl"
+      onClick={() => toggleSection(section.name)}
+    >
+      {section.name}
+      {openSections.has(section.name) ? <BsChevronUp /> : <BsChevronDown />}
+    </button>
+    {openSections.has(section.name) && (
+      <div className="bg-white mt-2 p-4 rounded-md">
+        {section.procedures.map((procedure, idx) => {
+          const isFullyAssigned = procedure.requiredResources.every(resource => resource.assignedResourceID);
+
+          const borderClass = idx < section.procedures.length - 1 ? "border-b border-black" : "";
+
+          return (
+            <div key={idx} className={`flex justify-between items-center py-2 ${borderClass}`}>
+              <span className="text-2xl">{procedure.title}</span>
+              <span className={`${isFullyAssigned ? 'text-green-500' : 'text-highlightRed underline'} text-2xl font-bold flex items-center`}>
+                {isFullyAssigned ? <FaCheck className="mr-2" /> : <MdOutlineOpenInNew className="mr-2" />}
+                {isFullyAssigned ? 'Assigned' : 'Assignments Required'}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </div>
+))}
       </div>
     </div>
   );
