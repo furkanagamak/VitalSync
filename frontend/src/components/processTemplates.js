@@ -2,6 +2,9 @@ import React, { useState, useMemo } from "react";
 import { useTable, useSortBy, usePagination } from "react-table";
 import { TbLayoutGridAdd } from "react-icons/tb";
 import "./TemplateStyles.css";
+import toast, { Toaster } from "react-hot-toast";
+
+const notify = () => toast.success("Process Template Deleted!");
 
 const SearchBar = () => {
   const [inputValue, setInputValue] = useState("");
@@ -173,6 +176,7 @@ const ProcessTable = () => {
               </svg>
             </button>
             <button
+              onClick={notify}
               style={{
                 background: "none",
                 border: "none",

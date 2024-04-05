@@ -1,6 +1,9 @@
 import React, { useState, useMemo } from "react";
 import { useTable, useSortBy, usePagination } from "react-table";
 import "./TemplateStyles.css";
+import toast, { Toaster } from "react-hot-toast";
+
+const notify = () => toast.success("Procedure Template Deleted!");
 
 const SearchBar = () => {
   const [inputValue, setInputValue] = useState("");
@@ -208,6 +211,7 @@ const ProcedureTable = () => {
               </svg>
             </button>
             <button
+              onClick={notify}
               style={{
                 background: "none",
                 border: "none",
