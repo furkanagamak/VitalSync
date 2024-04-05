@@ -67,7 +67,7 @@ const CreateTemplateButton = () => {
   );
 };
 
-const ProcessTable = (props) => {
+const ContainedNewSection = (props) => {
   const data = React.useMemo(
     () => [
       {
@@ -338,4 +338,4 @@ const ProcessTable = (props) => {
   );
 };
 
-export default ProcessTable;
+export default ContainedNewSection;
