@@ -21,10 +21,6 @@ jobs:
         run: npm start &
         working-directory: ./frontend
 
-      - name: Wait for Server
-        run: npx wait-on http://localhost:3000
-        working-directory: ./frontend
-
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
