@@ -5,8 +5,7 @@ import { useState } from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { FaSearch } from "react-icons/fa";
 import { useTheme } from '@mui/material/styles';
-
-
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 const theme = createTheme({
     palette: {
@@ -135,47 +134,19 @@ const exampleProcesses = [
   ];
 
   function SearchBar() {
-
     return (
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      padding: '20px', 
-      marginBottom: '20px' 
-    }}>
-      <div style={{
-        position: 'relative', 
-        width: '20%'
-      }}>
-        <input
-          type="search"
-          placeholder="Search by Process ID or Patient Name"
-          style={{
-            padding: '15px 40px 15px 15px',
-            width: '100%',
-            margin: '10px 0',
-            background: theme.palette.secondary.main,
-            color: theme.palette.primary.main,
-            border: `3px solid ${theme.palette.primary.main}`,
-            borderRadius: '25px',
-            fontSize: '1.2rem',
-          }}
-        />
-        <FaSearch 
-          style={{ 
-            position: 'absolute',
-            right: '20px', 
-            top: '50%',
-            transform: 'translateY(-50%)',
-            color: theme.palette.primary.main, 
-            fontSize: '1.7rem',
-          }}
-        />
+      <div className="flex justify-center items-center p-5 mb-5 mt-5">
+        <div className="relative w-2/5">
+          <input
+            type="search"
+            placeholder="Search by Process ID or Patient Name"
+            className="w-full p-3.5 pl-5 pr-10 bg-beige-200 text-primary border-2 border-primary rounded-full text-lg leading-tight focus:outline-none"
+          />
+          <FaSearch className="absolute right-5 top-1/2 transform -translate-y-1/2 text-primary text-xl" />
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
   
 
 
@@ -207,12 +178,17 @@ const exampleProcesses = [
   
 
   
-  export function ActiveProcessesList({ onModifyClick }) {
-    const [tabValue, setTabValue] = useState(0);
+  export function ActiveProcessesList() {
     const [page, setPage] = useState(1);
+    const navigate = useNavigate(); 
+
 
     const handleChange = (event, value) => {
         setPage(value);
+    };
+
+    const handleModifyClick = (processId) => {
+      navigate(`/processManagement/modifyProcess/landing`);
     };
 
     const indexOfLastItem = page * 8;
@@ -220,23 +196,23 @@ const exampleProcesses = [
     const currentItems = exampleProcesses.slice(indexOfFirstItem, indexOfLastItem);
 
     return (
-        <div>
-            <SearchBar></SearchBar>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-10 py-5">
-                {currentItems.map((process, index) => (
-                    <ProcessCell key={index} process={process} onModifyClick={() => onModifyClick(process.processId)} />
-                ))}
-            </div>
-            <Stack spacing={2} alignItems="center" className="py-5">
-                <Pagination 
-                    color = "primary"
-                    size = "large"
-                    count={Math.ceil(exampleProcesses.length / 8)} 
-                    page={page} 
-                    onChange={handleChange} 
-                    showFirstButton 
-                    showLastButton />
-            </Stack>
+      <div>
+        <SearchBar />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-10 py-5">
+          {currentItems.map((process, index) => (
+            <ProcessCell key={index} process={process} onModifyClick={() => handleModifyClick(process.processId)} />
+          ))}
         </div>
+        <Stack spacing={2} alignItems="center" className="py-5">
+          <Pagination 
+            color="primary"
+            size="large"
+            count={Math.ceil(exampleProcesses.length / 8)} 
+            page={page} 
+            onChange={handleChange} 
+            showFirstButton 
+            showLastButton />
+        </Stack>
+      </div>
     );
-}
+  }

@@ -2,6 +2,8 @@ import React, {useState, useEffect } from 'react';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
 import { BiSolidDownArrow } from "react-icons/bi";
 import { FaArrowLeft } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+
 
 
 // Mock data for roles - replace with actual data retrieval mechanism
@@ -140,6 +142,15 @@ export function RoleDropdownContent({ role }) {
 
 
 export function ModifyStaffAssignments({ processName, onBack, onProceed }) {
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    navigate("/processManagement/modifyProcess/landing");
+  };
+
+  const handleProceed = () => {
+    navigate("/processManagement/modifyProcess/reviewStaffAssignments");
+  };
   const [openRoles, setOpenRoles] = useState(new Set());
 
   useEffect(() => {
@@ -163,7 +174,7 @@ export function ModifyStaffAssignments({ processName, onBack, onProceed }) {
         <button
           className="ml-5 hover:bg-red-900 border-black border-2 flex items-center justify-center bg-primary text-white rounded-full px-5 py-2 text-xl shadow"
           style={{ maxWidth: '30%' }}
-          onClick={onBack}
+          onClick={handleGoBack}
         >
           <FaArrowLeft className="mr-3" />
           Go Back
@@ -172,7 +183,7 @@ export function ModifyStaffAssignments({ processName, onBack, onProceed }) {
         <button
           className="mr-10 mt-5 hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-10 py-5 text-4xl"
           style={{ maxWidth: '30%' }}
-          onClick={onProceed}
+          onClick={handleProceed}
         >
           Proceed
         </button>
