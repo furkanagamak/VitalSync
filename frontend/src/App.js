@@ -35,14 +35,14 @@ import ResourceCreate from "./components/resources/ResourceCreate";
 import NotificationBox from "./components/notifications/NotificationBox";
 import { ProcessManagementContainer } from "./components/processManagement/processManagement.js";
 
-import ProcedureTemplateManagement from "./components/processManagement/procedureTemplates.js";
-import ProcessTemplateManagementq from "./components/processManagement/processTemplates.js";
-import CreateProcedureTemplateForm from "./components/processManagement/createProcedureTemplate.js";
-import CreateProcessTemplateForm from "./components/processManagement/createProcessTemplate.js";
-import AddSectionForm from "./components/processManagement/createSection.js";
+import ProcedureTemplateManagement from "./components/procedureTemplates.js";
+import ProcessTemplateManagementq from "./components/processTemplates.js";
+import CreateProcedureTemplateForm from "./components/createProcedureTemplate.js";
+import CreateProcessTemplateForm from "./components/createProcessTemplate.js";
+import AddSectionForm from "./components/createSection.js";
 import ModifyProcedureTemplateForm from "./components/processManagement/modifyProcedureTemplate.js";
-import ModifyProcessTemplateForm from "./components/processManagement/modifyProcessTemplate.js";
-import ModifySectionForm from "./components/processManagement/modifySection.js";
+import ModifyProcessTemplateForm from "./components/modifyProcessTemplate.js";
+import ModifySectionForm from "./components/modifySection.js";
 const notify = () => toast("Here is your toast.");
 
 function App() {
