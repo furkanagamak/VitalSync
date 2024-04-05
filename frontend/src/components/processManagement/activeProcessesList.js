@@ -28,7 +28,7 @@ const exampleProcesses = [
     },
     {
         patient: 'May Mary',
-        processType: 'radial Prostatectomy',
+        processType: 'Radical Prostatectomy',
         processId: '23585',
         currentProcedure: 'Consultation',
         nextProcedure: 'Pelvic Ultrasound'

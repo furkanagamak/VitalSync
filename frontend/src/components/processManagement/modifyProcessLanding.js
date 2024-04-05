@@ -8,6 +8,10 @@ import { MdOutlineOpenInNew } from "react-icons/md";
 import { HiMiniArrowsUpDown } from "react-icons/hi2";
 import { FiPlusCircle } from 'react-icons/fi';
 import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
+import ProcessDeleteModal from "./processDeleteModal";
+
+const notify = () => toast.success("Process successfully deleted! Affected staff have been notified.");
 
 
 const sections = [
@@ -71,6 +75,18 @@ function ProcedureDropdown(){
 export function ModifyProcessLanding() {
   const [openSections, setOpenSections] = useState(new Set());
   const [currentView, setCurrentView] = useState('modifyProcess'); // State to manage views
+  
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  
+    const handleDelete = () => {
+      setShowDeleteModal(false);
+      notify();
+      navigate("/processManagement/modifyProcess/activeProcesses")
+    };
+  
+    const handleCancel = () => {
+      setShowDeleteModal(false);
+    };
 
   const navigate = useNavigate();
 
@@ -79,7 +95,8 @@ export function ModifyProcessLanding() {
   };
 
   const handleSaveChanges = () => {
-    navigate("/processManagement/modifyProcess/pendingStaffAssignments");
+    notify();
+    navigate("/processManagement/modifyProcess/activeProcesses");
   };
 
   const handleReviewResourceAssignments = () => {
@@ -121,6 +138,14 @@ export function ModifyProcessLanding() {
   if (currentView === 'modifyProcess') {
 
   return (
+  <>{showDeleteModal && (
+    <ProcessDeleteModal
+    processName={"Radical Prostatectomy"}
+    patientName={"May Mary"}
+      onDelete={handleDelete}
+      onCancel={handleCancel}
+    />
+  )}
     <div className="flex flex-col gap-6 py-14">     {/*Header*/}
     
         <div className="flex justify-between items-start text-4xl">
@@ -243,15 +268,16 @@ export function ModifyProcessLanding() {
       <div className="flex justify-evenly items-center mt-10 p-4 w-2/5 mx-auto">
       <button 
           className="bg-red-600 hover:bg-highlightRed text-white text-3xl py-3 px-5 rounded-full border-black border-2" 
-          onClick={handleGoBack}>
-            Delete Process
+          onClick={() => setShowDeleteModal(true)}> 
+          Delete Process
         </button>
         <button 
           className="bg-highlightGreen hover:bg-green-600 text-white text-3xl py-3 px-5 rounded-full border-black border-2" 
           onClick={handleSaveChanges}>
           Save Changes
     </button>
-</div>
     </div>
+    </div>
+    </>
   );}    
 }

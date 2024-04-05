@@ -24,13 +24,16 @@ export function ProcessManagementContainer() {
   const navigate = useNavigate();
   const location = useLocation();
   const currentCategory = location.pathname.split('/')[2]; 
-  const tabPaths = ["modifyProcess", "newProcess/processTemplates"];
-  
-  const currentTabIndex = tabPaths.indexOf(currentCategory);
-  
+  const basePath = location.pathname.split('/').slice(0, 3).join('/');
+  const tabPaths = [
+    "/processManagement/modifyProcess/activeProcesses", 
+    "/processManagement/newProcess/processTemplates"
+  ];    
+  const currentTabIndex = tabPaths.findIndex(path => basePath.startsWith(path.split("/").slice(0, 3).join("/")));
+
   const handleChange = (event, newValue) => {
-      navigate(`/processManagement/${tabPaths[newValue]}`);
-  };
+    navigate(tabPaths[newValue]);
+};
 
   
   return (
@@ -42,7 +45,7 @@ export function ProcessManagementContainer() {
           <Tabs
             variant="fullWidth"
             className="bg-primary rounded-t-2xl p-3" 
-            value={currentTabIndex}
+            value={currentTabIndex !== -1 ? currentTabIndex : 0}
             onChange={handleChange}
             centered
             TabIndicatorProps={{

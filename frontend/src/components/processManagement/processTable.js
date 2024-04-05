@@ -161,7 +161,7 @@ const ProcessTableNew = () => {
           const navigate = useNavigate();
 
           const handleEditClick = () => {
-            navigate("processManagement/newProcess/processTemplateModifyForm");
+            navigate("/processManagement/newProcess/processTemplateModifyForm");
           };
 
           return (

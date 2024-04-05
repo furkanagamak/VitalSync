@@ -2,6 +2,9 @@ import tmpProcessDetails from "./processDetailsNew";
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { FaArrowLeft } from "react-icons/fa6";
+import toast, { Toaster } from "react-hot-toast";
+
+const notify = () => toast.success("Process succesfully created! Assigned staff have been notified.");
 
 
 const ProcessDetailsPreview = ({ id }) => {
@@ -13,6 +16,7 @@ const ProcessDetailsPreview = ({ id }) => {
   };
 
   const handleConfirm = () => {
+    notify();
     navigate("/processManagement/");
   };
 
