@@ -33,9 +33,9 @@ function ProcedureDropdown(){
 
   const navigate = useNavigate();
 
-  const handleAddNewProcedure = () => navigate("/processManagement/modifyProcess/addProcedure");
+  const handleAddNewProcedure = () => navigate("/processManagement/modifyProcess/modifyProcedure");
 
-  const handleUseExistingTemplate = () => navigate("/processManagement/modifyProcess/modifyProcedure");
+  const handleUseExistingTemplate = () => navigate("/processManagement/modifyProcess/addProcedure");
 
     const [isOpen, setIsOpen] = useState(true);
 
@@ -242,12 +242,12 @@ export function ModifyProcessLanding({ onModifyClick, onBack }) {
       </div>
       <div className="flex justify-evenly items-center mt-10 p-4 w-2/5 mx-auto">
       <button 
-          className="bg-red-600 hover:bg-highlightRed text-white text-3xl py-3 px-5 rounded-full" 
+          className="bg-red-600 hover:bg-highlightRed text-white text-3xl py-3 px-5 rounded-full border-black border-2" 
           onClick={handleGoBack}>
             Delete Process
         </button>
         <button 
-          className="bg-highlightGreen hover:bg-green-600 text-white text-3xl py-3 px-5 rounded-full" 
+          className="bg-highlightGreen hover:bg-green-600 text-white text-3xl py-3 px-5 rounded-full border-black border-2" 
           onClick={handleSaveChanges}>
           Save Changes
     </button>

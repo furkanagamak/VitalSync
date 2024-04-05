@@ -1,126 +1,325 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import {
+  TextField,
+  Button,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Typography,
+  Grid,
+} from "@mui/material";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useTable, useSortBy, usePagination } from "react-table";
-import { TbLayoutGridAdd } from "react-icons/tb";
+import Autocomplete from "@mui/material/Autocomplete";
 import "./TemplateStyles.css";
+import toast, { Toaster } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
-const SearchBar = () => {
-  const [inputValue, setInputValue] = useState("");
+const notify = () => toast.success("Section Added!");
 
-  const handleClearInput = () => setInputValue("");
+const AddSectionButton = () => {
+  const navigate = useNavigate();
+
+  const handleAddSectionClick = () => {
+    navigate("/processManagement/modifyProcess/landing");
+    notify();
+  };
 
   return (
-    <div className="inline-flex items-center rounded-full text-xl border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative">
-      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#8E0000]">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 text-white"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-      </div>
-      <input
-        type="search"
-        placeholder="Search for process templates"
-        className="bg-transparent border-none outline-none placeholder-[#8E0000] text-[#8E0000] pl-2"
-        style={{ minWidth: "275px" }}
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-      />
-      {inputValue && (
-        <button
-          onClick={handleClearInput}
-          className="absolute right-4 text-[#8E0000]"
-          style={{ outline: "none" }}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-      )}
-    </div>
-  );
-};
-
-const CreateTemplateButton = () => {
-  return (
-    <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
-      <TbLayoutGridAdd className="mr-2 size-10" />
-      Create Template
+    <button
+      onClick={handleAddSectionClick}
+      className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="36"
+        height="36"
+        fill="currentColor"
+        class="bi bi-plus-circle mr-3"
+        viewBox="0 0 16 16"
+      >
+        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+      </svg>
+      Add Section
     </button>
   );
 };
 
-const ContainedNewSection = (props) => {
-  const data = React.useMemo(
-    () => [
-      {
-        name: "Appendectomy",
-        description:
-          "The standard process for performing an appendectomy, which is the surgical removal of the appendix.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Appendix Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        name: "Cholecystectomy",
-        description:
-          "The standard process for performing a cholecystectomy, which is the surgical removal of the gallbladder.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Gallbladder Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        name: "Hysterectomy",
-        description:
-          "The standard process for performing a hysterectomy, which is the surgical removal of the uterus.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Uterus Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        name: "Laminectomy",
-        description:
-          "The standard process for performing a laminectomy, which is the surgical removal of the lamina.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Lamina Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        name: "Mastectomy",
-        description:
-          "The standard process for performing a mastectomy, which is the surgical removal of the breast.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Breast Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        name: "Nephrectomy",
-        description:
-          "The standard process for performing a nephrectomy, which is the surgical removal of the kidney.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Kidney Removal, Pain Management, Postoperative Monitoring",
-      },
-    ],
-    []
+const GoBackButton = () => {
+  const navigate = useNavigate();
+
+  const handleGoBackClick = () => {
+    navigate("/processManagement/modifyProcess/landing");
+  };
+
+  return (
+    <button
+      onClick={handleGoBackClick}
+      className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="36"
+        height="36"
+        fill="currentColor"
+        class="bi bi-arrow-left mr-2"
+        viewBox="0 0 16 16"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"
+        />
+      </svg>
+      Go Back
+    </button>
   );
+};
+
+const SectionForm = () => {
+  const [section, setSection] = useState({
+    name: "",
+    description: "",
+    procedureName: "",
+  });
+
+  const [procedureOptions, setProcedureOptions] = useState([
+    "General Anesthesia",
+    "MRI Scan",
+    "Physical Therapy",
+  ]);
+
+  const theme = createTheme({
+    typography: {
+      fontSize: 12,
+      button: {
+        textTransform: "none",
+      },
+    },
+    palette: {
+      primary: {
+        main: "#8E0000",
+      },
+    },
+    components: {
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#8E0000",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#8E0000",
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#8E0000",
+            },
+            backgroundColor: "white",
+          },
+          input: {
+            "&.MuiOutlinedInput-inputMultiline": {
+              backgroundColor: "white",
+            },
+          },
+        },
+      },
+      MuiSelect: {
+        styleOverrides: {
+          iconOutlined: {
+            color: "#8E0000",
+          },
+          select: {
+            color: "#8E0000",
+          },
+        },
+      },
+      MuiSvgIcon: {
+        styleOverrides: {
+          root: {
+            color: "#8E0000",
+          },
+        },
+      },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: {
+            color: "#8E0000",
+          },
+        },
+      },
+      MuiAutocomplete: {
+        styleOverrides: {
+          root: {
+            color: "#8E0000",
+          },
+        },
+      },
+    },
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setSection({ ...section, [name]: value });
+  };
+
+  const handleProcedureChange = (event, newValue) => {
+    setSection({ ...section, procedureName: newValue });
+  };
+
+  const createTemplate = () => {
+    console.log({ section });
+  };
+
+  const navigate = useNavigate();
+
+  const handleCreateProcedureTemplateClick = () => {
+    navigate("/CreateProcedureTemplateForm");
+  };
+
+  return (
+    <ThemeProvider theme={theme}>
+      <div
+        style={{
+          maxWidth: "90%",
+          margin: "auto",
+          backgroundColor: "#F5F5DC",
+          border: "2px solid #8E0000",
+          borderRadius: "5px",
+          padding: "20px",
+          marginTop: "10px",
+          marginBottom: "30px",
+        }}
+      >
+        <Typography
+          variant="h5"
+          style={{ color: "#8E0000", marginBottom: "5px", fontWeight: "bold" }}
+        >
+          Section Details
+        </Typography>
+        <TextField
+          fullWidth
+          label="Section Name"
+          name="name"
+          value={section.name}
+          onChange={handleInputChange}
+          margin="normal"
+          InputLabelProps={{ style: { color: "#8E0000" } }}
+          inputProps={{ style: { color: "#8E0000" } }}
+        />
+        <TextField
+          fullWidth
+          multiline
+          rows={4}
+          label="Description"
+          name="description"
+          value={section.description}
+          onChange={handleInputChange}
+          margin="normal"
+          InputLabelProps={{ style: { color: "#8E0000" } }}
+          inputProps={{ style: { color: "#8E0000" } }}
+        />
+
+        <Grid container spacing={3} alignItems="center">
+          <Grid item xs>
+            <Autocomplete
+              id="procedure-name"
+              value={section.procedureName}
+              onChange={handleProcedureChange}
+              onInputChange={(event, newInputValue) => {
+                setProcedureOptions([
+                  "General Anesthesia",
+                  "MRI Scan",
+                  "Physical Therapy",
+                ]);
+              }}
+              options={procedureOptions}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Procedure Name"
+                  placeholder="Search for procedure templates to add to the section."
+                  margin="normal"
+                  fullWidth
+                  InputLabelProps={{
+                    ...params.InputLabelProps,
+                    style: { color: "#8E0000" },
+                  }}
+                  inputProps={{
+                    ...params.inputProps,
+                    style: { color: "#8E0000" },
+                  }}
+                />
+              )}
+            />
+          </Grid>
+          <Grid item>
+            <Button
+              variant="outlined"
+              startIcon={
+                <AddCircleOutlineIcon
+                  style={{ color: "#8E0000", fontSize: "1.5rem" }}
+                />
+              }
+              style={{
+                color: "#8E0000",
+                backgroundColor: "white",
+                borderColor: "#8E0000",
+                minWidth: "100px",
+                fontSize: "0.9rem",
+                textTransform: "none",
+                marginRight: "120px",
+              }}
+            >
+              Add Procedure
+            </Button>
+            <Button
+              onClick={handleCreateProcedureTemplateClick}
+              variant="outlined"
+              startIcon={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="currentColor"
+                  class="bi bi-clipboard-plus"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M8 7a.5.5 0 0 1 .5.5V9H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V10H6a.5.5 0 0 1 0-1h1.5V7.5A.5.5 0 0 1 8 7"
+                  />
+                  <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z" />
+                  <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z" />
+                </svg>
+              }
+              style={{
+                color: "#8E0000",
+                backgroundColor: "white",
+                borderColor: "#8E0000",
+                minWidth: "100px",
+                fontSize: "0.9rem",
+                textTransform: "none",
+              }}
+            >
+              Create New Procedure Template
+            </Button>
+          </Grid>
+        </Grid>
+      </div>
+    </ThemeProvider>
+  );
+};
+
+const SectionTable = () => {
+  const data = React.useMemo(() => [], []);
 
   const columns = React.useMemo(
     () => [
@@ -134,13 +333,22 @@ const ContainedNewSection = (props) => {
         accessor: "description",
       },
       {
-        Header: "Sections",
-        accessor: "sections",
+        Header: "Resources",
+        accessor: "resources",
         style: { backgroundColor: "#F5F5DC" },
       },
       {
-        Header: "Procedures",
-        accessor: "procedures",
+        Header: "Roles",
+        accessor: "roles",
+      },
+      {
+        Header: "Estimated Time",
+        accessor: "time",
+        style: { backgroundColor: "#F5F5DC" },
+      },
+      {
+        Header: "Special Notes",
+        accessor: "notes",
       },
       {
         Header: "Actions",
@@ -153,188 +361,224 @@ const ContainedNewSection = (props) => {
             }}
           >
             <button
-             onClick={() => props.nextCreatePage('patient')}
-            style={{
-                    background: "none",
-                    border: "none",
-                    padding: "0",
-                    cursor: "pointer",
-                    marginRight: "10px",
-                }}
-                >
+              style={{
+                background: "none",
+                border: "none",
+                padding: "0",
+                cursor: "pointer",
+                marginRight: "10px",
+              }}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="40"
-                height="40"
+                width="32"
+                height="32"
                 fill="#8E0000"
-                className="bi bi-pencil"
+                class="bi bi-arrow-up"
                 viewBox="0 0 16 16"
               >
-                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
+                <path
+                  fill-rule="evenodd"
+                  d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5"
+                />
               </svg>
             </button>
-            
+            <button
+              style={{
+                background: "none",
+                border: "none",
+                padding: "0",
+                cursor: "pointer",
+                marginRight: "10px",
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                fill="#8E0000"
+                class="bi bi-arrow-down"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1"
+                />
+              </svg>
+            </button>
+            <button
+              style={{
+                background: "none",
+                border: "none",
+                padding: "0",
+                cursor: "pointer",
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                fill="#8E0000"
+                className="bi bi-trash3"
+                viewBox="0 0 16 16"
+              >
+                <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5" />
+              </svg>
+            </button>
           </div>
         ),
         disableSortBy: true,
-        style: { backgroundColor: "#F5F5DC" },
       },
     ],
     []
   );
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    prepareRow,
-    page,
-    canPreviousPage,
-    canNextPage,
-    nextPage,
-    previousPage,
-    pageOptions,
-    state: { pageIndex },
-  } = useTable(
-    { columns, data, initialState: { pageSize: 3 } },
-    useSortBy,
-    usePagination
-  );
+  const { getTableProps, getTableBodyProps, headerGroups, prepareRow, rows } =
+    useTable({ columns, data });
 
   return (
     <>
       <div
         style={{
-          maxWidth: "95%",
+          border: "2px solid #8E0000",
+          borderRadius: "5px",
+          maxWidth: "90%",
           margin: "auto",
-          overflowX: "auto",
+          padding: "20px",
+          paddingBottom: "10px",
+          backgroundColor: "#F5F5DC",
           display: "flex",
-          justifyContent: "center",
+          flexDirection: "column",
+          marginBottom: "10px",
         }}
       >
-        <table
-          {...getTableProps()}
+        <h1
           style={{
-            width: "100%",
-            height: "100%",
-            tableLayout: "fixed",
-            borderCollapse: "separate",
-            borderSpacing: "0 1px",
-            fontSize: "1.32rem",
             textAlign: "center",
+            color: "#8E0000",
+            fontSize: "1.29rem",
+            fontWeight: "bold",
           }}
         >
-          <thead>
-            {headerGroups.map((headerGroup) => (
-              <tr {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column) => (
-                  <th
-                    {...column.getHeaderProps(column.getSortByToggleProps())}
-                    style={{
-                      ...column.style,
-                      color: "#8E0000",
-                      borderBottom: "1px solid #8E0000",
-                      padding: "10px",
-                      minWidth: column.minWidth,
-                    }}
-                  >
-                    <div
+          Selected Procedures
+        </h1>
+        <div
+          className="scrollbar1"
+          style={{
+            overflowX: "auto",
+            display: "flex",
+            justifyContent: "center",
+            maxHeight: "28vh",
+            paddingRight: "20px",
+            minHeight: "28vh",
+          }}
+        >
+          <table
+            {...getTableProps()}
+            style={{
+              width: "100%",
+              height: "100%",
+              tableLayout: "fixed",
+              borderCollapse: "separate",
+              borderSpacing: "0 1px",
+              fontSize: "0.9rem",
+              textAlign: "center",
+              marginBottom: "1rem",
+            }}
+          >
+            <thead>
+              {headerGroups.map((headerGroup) => (
+                <tr {...headerGroup.getHeaderGroupProps()}>
+                  {headerGroup.headers.map((column) => (
+                    <th
+                      {...column.getHeaderProps()}
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        ...column.style,
+                        color: "#8E0000",
+                        borderBottom: "1px solid #8E0000",
+                        padding: "10px",
+                        minWidth: column.minWidth,
                       }}
                     >
-                      {column.render("Header")}
-                      <span style={{ marginLeft: "3px", textAlign: "center" }}>
-                        {column.isSorted ? (
-                          column.isSortedDesc ? (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="22"
-                              height="22"
-                              fill="#8E0000"
-                              className="bi bi-caret-down-fill"
-                              viewBox="0 0 16 16"
-                            >
-                              <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z" />
-                            </svg>
-                          ) : (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="22"
-                              height="22"
-                              fill="#8E0000"
-                              className="bi bi-caret-up-fill"
-                              viewBox="0 0 16 16"
-                            >
-                              <path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z" />
-                            </svg>
-                          )
-                        ) : (
-                          ""
-                        )}
-                      </span>
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody {...getTableBodyProps()}>
-            {page.map((row) => {
-              prepareRow(row);
-              return (
-                <tr {...row.getRowProps()}>
-                  {row.cells.map((cell) => {
-                    return (
-                      <td
-                        {...cell.getCellProps()}
+                      <div
                         style={{
-                          ...cell.column.style,
-                          borderBottom: "1px solid #8E0000",
-                          padding: "10px",
-                          verticalAlign: "middle",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
-                        {cell.render("Cell")}
-                      </td>
-                    );
-                  })}
+                        {column.render("Header")}
+                      </div>
+                    </th>
+                  ))}
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              ))}
+            </thead>
+            <tbody {...getTableBodyProps()}>
+              {rows.map((row) => {
+                prepareRow(row);
+                return (
+                  <tr {...row.getRowProps()}>
+                    {row.cells.map((cell) => {
+                      return (
+                        <td
+                          {...cell.getCellProps()}
+                          style={{
+                            ...cell.column.style,
+                            borderBottom: "1px solid #8E0000",
+                            padding: "10px",
+                            verticalAlign: "middle",
+                          }}
+                        >
+                          {cell.render("Cell")}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
+    </>
+  );
+};
+
+const ContainedNewSection = () => {
+  return (
+    <div>
       <div
         style={{
           display: "flex",
+          alignItems: "center",
           justifyContent: "center",
-          marginTop: "30px",
-          marginBottom: "20px",
+          position: "relative",
+          marginTop: "1.2rem",
+          marginBottom: "2rem",
         }}
       >
-        <button
-          onClick={() => previousPage()}
-          disabled={!canPreviousPage}
-          className={`flex items-center justify-center text-xl px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4] mr-2 ${
-            !canPreviousPage ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+        <div style={{ position: "absolute", left: "2rem" }}>
+          <GoBackButton />
+        </div>
+        <div style={{ position: "absolute", right: "2rem" }}>
+          <AddSectionButton />
+        </div>
+        <h1
+          style={{
+            fontSize: "2.25rem",
+            lineHeight: "2.5rem",
+            textAlign: "center",
+            textDecoration: "underline",
+            color: "#8E0000",
+          }}
         >
-          Previous Page
-        </button>
-        <button
-          onClick={() => nextPage()}
-          disabled={!canNextPage}
-          className={`flex items-center justify-center text-xl px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4] ${
-            !canNextPage ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-          Next Page
-        </button>
+          Add New Section
+        </h1>
       </div>
-    </>
+      <SectionForm />
+      <SectionTable />
+    </div>
   );
 };
 

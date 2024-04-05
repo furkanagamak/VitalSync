@@ -8,8 +8,8 @@ import Profile from "./components/Profile.js";
 import { ActiveProcessesList } from "./components/processManagement/activeProcessesList.js";
 import { ModifyProcessLanding } from "./components/processManagement/modifyProcessLanding.js";
 import ContainedNewSection from "./components/processManagement/containedNewSection.js";
-import ContainedNewProcedureList from "./components/processManagement/containedProcedureList.js";
-import ContainedNewProcedure from "./components/processManagement/containedNewProcedure.js";
+import ContainedProcedureTemplateList from "./components/processManagement/containedProcedureList.js";
+import ContainedCreateProcedureTemplateForm from "./components/processManagement/containedNewProcedure.js";
 import ModifyStaffAssignments from "./components/processManagement/modifyStaffAssignments.js";
 import ModifyResourceAssignments from "./components/processManagement/modifyResourceAssignments.js";
 import PendingStaffModify from "./components/processManagement/pendingStaffModify.js";
@@ -151,8 +151,8 @@ function App() {
                 <Route index element={<Navigate replace to="modifyProcess/activeProcesses" />} />
                 <Route path="modifyProcess/landing" element={<ModifyProcessLanding />} />
                 <Route path="modifyProcess/addSection" element={<ContainedNewSection />} />
-                <Route path="modifyProcess/addProcedure" element={<ContainedNewProcedureList />} />
-                <Route path="modifyProcess/modifyProcedure" element={<ContainedNewProcedure />} />
+                <Route path="modifyProcess/addProcedure" element={<ContainedProcedureTemplateList />} />
+                <Route path="modifyProcess/modifyProcedure" element={<ContainedCreateProcedureTemplateForm />} />
                 <Route path="modifyProcess/staffAssignments" element={<ModifyStaffAssignments />} />
                 <Route path="modifyProcess/resourceAssignments" element={<ModifyResourceAssignments />} />
                 <Route path="modifyProcess/pendingStaffAssignments" element={<PendingStaffModify />} />
