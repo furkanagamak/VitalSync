@@ -37,16 +37,13 @@ jobs:
           cd frontend
           npx cypress run
 
-
-
-
   deploy:
     needs: cypress-run
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy
-        if: github.ref == 'refs/heads/main'
-        env:
-          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
-        run: |
-          curl "$deploy_url"
+      - name: Deploy to Render
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{ secrets.MY_RENDER_SERVICE_ID }}
+          api-key: ${{ secrets.MY_RENDER_API_KEY }}
+          wait-for-success: true
