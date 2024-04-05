@@ -127,7 +127,11 @@ const Searchbar = ({ setTextFilter }) => {
 
 const CreateNewButton = () => {
   return (
-    <Link to="/resources/create" className="w-1/4 flex justify-center">
+    <Link
+      to="/resources/create"
+      className="w-1/4 flex justify-center"
+      id="createNewResourceBtn"
+    >
       <button className="bg-primary text-white text-lg font-semibold rounded-md w-32 py-2">
         Create New Resources
       </button>
@@ -147,6 +151,7 @@ const Filters = ({ tabFilter, setTabFilter }) => {
             tabFilter === filter ? "text-red-600" : "text-black"
           }`}
           onClick={() => setTabFilter(filter)}
+          id={`${filter}Filter`}
         >
           {filter}
           {tabFilter === filter && (

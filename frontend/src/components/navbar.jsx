@@ -24,7 +24,11 @@ const Header = () => {
   };
 
   return (
-    <div className="w-32 flex justify-evenly items-center font-semibold text-2xl mx-2 cursor-pointer" onClick={handleNavigate}>
+    <div
+      id="navHeader"
+      className="w-32 flex justify-evenly items-center font-semibold text-2xl mx-2 cursor-pointer"
+      onClick={handleNavigate}
+    >
       <img src="/logo.png" className="w-12 h-12" alt="logo" />
       <div>
         <h1 className="mr-2">Vital</h1>
@@ -65,6 +69,7 @@ const UserNav = () => {
     <div
       className="ml-auto space-x-4 flex items-center mx-2 cursor-pointer"
       onClick={handleNavigate}
+      id="userNav"
     >
       <p className="text-2xl hidden md:block">John Smith</p>
       <img src="/profileicon.png" className="h-12 w-12" />
@@ -80,12 +85,16 @@ const Notifications = () => {
 
   return (
     <>
-      <button className="flex items-center ml-2 mr-4" onClick={flickDropDown}>
+      <button
+        id="notificationsBtn"
+        className="flex items-center ml-2 mr-4"
+        onClick={flickDropDown}
+      >
         <CiBellOn className="h-12 w-12 text-black bg-white rounded-full" />
       </button>
       {isOpen && (
         <div className="absolute right-0 top-20 z-10">
-          <NotificationDropDown />
+          <NotificationDropDown closeDropDown={() => setIsOpen(false)} />
         </div>
       )}
     </>

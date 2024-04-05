@@ -8,8 +8,9 @@ import { FiAlertTriangle } from "react-icons/fi";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 
 import { timeAgo } from "../../utils/helperFunctions";
+import { Link } from "react-router-dom";
 
-const NotificationDropDown = ({ navToNotificationBox }) => {
+const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
   const [notifications, setNotifications] = useState(null);
 
   useEffect(() => {
@@ -26,12 +27,14 @@ const NotificationDropDown = ({ navToNotificationBox }) => {
         if (i <= 3) return <NotificationDDItem notification={notification} />;
         else return <></>;
       })}
-      <button
+      <Link
+        to="/notifications"
         className="flex justify-center text-black"
-        onClick={navToNotificationBox}
+        id="notificationsBoxBtn"
+        onClick={closeDropDown}
       >
         <HiOutlineDotsVertical className="h-8 w-8" />
-      </button>
+      </Link>
     </div>
   );
 };
