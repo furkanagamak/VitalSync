@@ -5,6 +5,8 @@ import Tab from '@mui/material/Tab';
 import { styled } from "@mui/material/styles";
 import { ActiveProcessesList } from "./activeProcessesList";
 import { ModifyProcessLanding } from "./modifyProcessLanding";
+import  ProcessTable  from "./processTable";
+import PatientForm from "./patientForm";
 
 const StyledTab = styled(Tab)(({ theme }) => ({
     color: "white",
@@ -22,8 +24,12 @@ const StyledTab = styled(Tab)(({ theme }) => ({
 export function ProcessManagementContainer() {
     const [tabValue, setTabValue] = useState(0);
     const [viewStack, setViewStack] = useState(['list']);
+    const [newViewStack, setNewViewStack] = useState(['list']);
+
 
     const currentView = viewStack[viewStack.length - 1]; // Current view is the last item in the stack
+    const currentNewView = newViewStack[newViewStack.length - 1]; // Current view is the last item in the stack
+
 
 
     const handleModifyClick = (processId) => {
@@ -37,6 +43,22 @@ export function ProcessManagementContainer() {
         setViewStack(newStack);
     };
 
+    const nextPage = (processId) => {
+        setViewStack([...viewStack, 'patient']);
+    };
+
+    const nextCreatePage = (processId) => {
+        setNewViewStack([...newViewStack, 'patient']);
+    };
+
+    const handleNewBack = () => {
+        // Pop the current view from the stack to go back
+        const newStack = [...viewStack];
+        newStack.pop();
+        setViewStack(newStack);
+    };
+
+    
     return (
         <div className="flex flex-col items-center justify-center mt-10">
             <div className="flex flex-col items-center w-full lg:m-0">
@@ -73,8 +95,9 @@ export function ProcessManagementContainer() {
                 <div className="w-full lg:w-11/12 bg-secondary rounded-b-lg min-h-[82vh] border-t-8 border-primary rounded-2xl">
                 {tabValue === 0 && currentView === 'list' && <ActiveProcessesList onModifyClick={handleModifyClick} />}
                 {tabValue === 0 && currentView === 'modify' && <ModifyProcessLanding onBack={handleBack} />}
-                {/* Include back handlers to other components as well */}
-                {tabValue === 1 && <div>Start New Process Content</div>}
+                {tabValue === 1 && currentView === 'list' && <ProcessTable nextCreatePage={nextCreatePage} />}
+                {tabValue === 1 && currentView === 'patient' && <PatientForm nextPage={nextPage}/>}
+
             </div>
             </div>
         </div>
