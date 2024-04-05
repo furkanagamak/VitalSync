@@ -41,7 +41,7 @@ function MyComponent() {
 
   const handleSignIn = () => {
     if (email === 'johnsmith@sbu.com' && password === 'sbu1234') {
-      navigate('/Roster');
+      navigate('/home');
     } else {
       setError('Incorrect ID or password.');
     }
