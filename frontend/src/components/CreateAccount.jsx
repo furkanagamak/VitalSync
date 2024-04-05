@@ -45,6 +45,10 @@ const CreateAccount = ({ navToAdminActions }) => {
     setAccCreatePage("form2");
   };
 
+  const navToCredentials = () => {
+    setAccCreatePage("credentials");
+  };
+
   return (
     <>
       {accCreatePage === "type" && (
@@ -69,7 +73,11 @@ const CreateAccount = ({ navToAdminActions }) => {
           handleChange={handleChange}
           handleSubmit={handleSubmit}
           navToForm1={navToForm1}
+          navToCredentials={navToCredentials}
         />
+      )}
+      {accCreatePage === "credentials" && (
+        <DisplayCredentials email={formData.email} password={`abcdef`} />
       )}
     </>
   );
@@ -268,7 +276,13 @@ const Form1 = ({
   );
 };
 
-const Form2 = ({ formData, handleChange, handleSubmit, navToForm1 }) => {
+const Form2 = ({
+  formData,
+  handleChange,
+  handleSubmit,
+  navToForm1,
+  navToCredentials,
+}) => {
   return (
     <div className="py-8 px-4">
       <section className="flex justify-center items-center relative py-4">
@@ -344,11 +358,35 @@ const Form2 = ({ formData, handleChange, handleSubmit, navToForm1 }) => {
             type="submit"
             className="bg-highlightGreen text-white py-2 px-4 rounded-md ml-auto"
             id="submitBtn"
+            onClick={navToCredentials}
           >
             Submit
           </button>
         </div>
       </form>
+    </div>
+  );
+};
+
+const DisplayCredentials = ({ email, password }) => {
+  return (
+    <div className="mx-auto max-w-lg bg-[#f5f5dc] p-8 space-y-8">
+      <section className="text-primary text-2xl space-y-4">
+        <h1 className="text-center">
+          You have successfully created your account!
+        </h1>
+        <h1>Here are your credentials:</h1>
+      </section>
+      <section className="text-lg">
+        <div className="flex space-x-10">
+          <h1 className="text-primary underline">Email: </h1>
+          <p>example@123.com</p>
+        </div>
+        <div className="flex space-x-2">
+          <h1 className="text-primary underline">Password: </h1>
+          <p>{password}</p>
+        </div>
+      </section>
     </div>
   );
 };
