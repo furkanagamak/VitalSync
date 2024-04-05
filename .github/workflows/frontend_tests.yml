@@ -27,6 +27,11 @@ jobs:
           cd frontend
           npm install
 
+      - name: Start Server
+        run: |
+          cd frontend
+          npm start &
+
       - name: Run Cypress Tests
         run: |
           cd frontend
