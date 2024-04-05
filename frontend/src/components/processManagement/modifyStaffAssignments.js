@@ -138,7 +138,7 @@ export function RoleDropdownContent({ role }) {
 }
 
 
-export function ModifyStaffAssignments({ processName, onBack, onProceed }) {
+export function ModifyStaffAssignments() {
   const navigate = useNavigate();
 
   const handleGoBack = () => {

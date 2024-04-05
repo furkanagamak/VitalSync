@@ -85,7 +85,7 @@ function NavButtons({ onBack, onProceed }) {
     </div>)
 }
 
-export function ReviewStaffAssignments({ onBack, onProceed }) {
+export function ReviewStaffAssignments() {
   const [openSections, setOpenSections] = useState(new Set(sections.map(section => section.name))); // Start with all sections open
 
   const toggleSection = (sectionName) => {

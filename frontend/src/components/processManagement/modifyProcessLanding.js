@@ -68,7 +68,7 @@ function ProcedureDropdown(){
 };
 
 
-export function ModifyProcessLanding({ onModifyClick, onBack }) {
+export function ModifyProcessLanding() {
   const [openSections, setOpenSections] = useState(new Set());
   const [currentView, setCurrentView] = useState('modifyProcess'); // State to manage views
 

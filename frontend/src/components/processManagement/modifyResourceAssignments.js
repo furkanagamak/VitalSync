@@ -106,7 +106,7 @@ export function ResourceDropdownContent({ resource }) {
 }
 
 
-export function ModifyResourceAssignments({ processName, onBack, onProceed }) {
+export function ModifyResourceAssignments() {
   const [openResources, setOpenResources] = useState(new Set());
   const navigate = useNavigate();
 
