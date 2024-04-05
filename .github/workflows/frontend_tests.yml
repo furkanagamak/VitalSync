@@ -44,8 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Render
-        uses: bankfliptech/deploy-to-render@v1
-        with:
-          serviceId: ${{ secrets.MY_RENDER_SERVICE_ID }}
-          apiKey: ${{ secrets.MY_RENDER_API_KEY }}
-          deployHookURL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        env:
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
