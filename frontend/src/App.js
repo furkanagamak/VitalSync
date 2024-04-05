@@ -1,5 +1,4 @@
 import toast, { Toaster } from "react-hot-toast";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/navbar.jsx";
 import Resources from "./components/resources/Resources";
 
