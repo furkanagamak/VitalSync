@@ -183,7 +183,7 @@ export function ModifyProcessLanding({ onModifyClick, onBack }) {
             {openSections.has(section.name) && (
               <div className="p-4 flex">
                 {/* Left Section Content */}
-                <div className="w-1/5 ml-10 ">
+                <div className="w-1/5 ml-10 mr-8">
                   <div className="flex flex-col w-full mt-5">
                     <div className="flex items-center">
                       <p className="text-primary text-3xl font-bold mb-4 underline">Description</p>
@@ -196,14 +196,14 @@ export function ModifyProcessLanding({ onModifyClick, onBack }) {
                     />
                   </div>
                   <div className="flex flex-col mt-4">
-                    <button className="flex items-center bg-highlightGreen text-white rounded-full px-6 py-4 text-2xl mb-2 w-4/5 mt-5"
+                    <button className="flex items-center bg-highlightGreen text-white rounded-full px-6 py-4 text-2xl mb-2 w-full mt-5"
                     onClick={handleReviewResourceAssignments} >
                       <MdOutlineOpenInNew className="text-white text-4xl ml-3 mr-10" />
                       Resource Assignments
                     </button>
-                    <button className="flex items-center bg-highlightGreen text-white rounded-full px-4 py-4 text-2xl w-4/5 mt-5 mb-10"
+                    <button className="flex items-center bg-highlightGreen text-white rounded-full px-4 py-4 text-2xl w-full mt-5 mb-10"
                      onClick={handleReviewStaffAssignments} >
-                      <MdOutlineOpenInNew className="text-white text-4xl ml-3 mr-10" />
+                      <MdOutlineOpenInNew className="text-white text-3xl ml-3 mr-10" />
                       Staff Assignments
                     </button>
                   </div>
@@ -222,9 +222,9 @@ export function ModifyProcessLanding({ onModifyClick, onBack }) {
                         <button className="text-highlightGreen underline text-xl mr-10" onClick={handleModifyResourceAssignments}>Resource Assignments</button>
                         <button className="text-highlightGreen underline text-xl mr-10" onClick={handleModifyStaffAssignments}>Staff Assignments</button>
                         <span className="flex items-center">
-                          <button onClick={handleModifyProcedure} className ="text-primary text-3xl ml-2">Modify</button>
-                          <MdOutlineOpenInNew className="text-primary ml-1 mr-6 text-4xl" />
-                          <FaTrashAlt className="text-primary mx-2 text-4xl" />
+                          <button onClick={handleModifyProcedure} className ="text-primary text-2xl ml-2">Modify</button>
+                          <MdOutlineOpenInNew className="text-primary ml-1 mr-6 text-3xl" />
+                          <FaTrashAlt className="text-primary mx-2 text-3xl" />
                         </span>
                       </div>
                     ))}

@@ -159,7 +159,7 @@ export function ModifyResourceAssignments({ processName, onBack, onProceed }) {
 
       <div className="container mx-auto p-8">
         <div className="pb-4 mb-4 border-b-2 border-black">
-          <h2 className="text-4xl font-bold">{processName}<span className="text-primary" > - Modify Resource Assignments</span></h2>
+          <h2 className="text-4xl font-bold">{"Radial Prostatectomy"}<span className="text-primary" > - Modify Resource Assignments</span></h2>
         </div>
 
         <div>
