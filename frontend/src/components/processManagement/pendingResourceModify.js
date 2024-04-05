@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaArrowLeft, FaCheck } from 'react-icons/fa';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
 import { MdOutlineOpenInNew } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
 
 const sections = [
     {
@@ -86,7 +87,7 @@ function NavButtons({ onBack, onProceed }) {
     );
 }
 
-export function PendingResourceModify({ onBack, onProceed }) {
+export function PendingResourceModify() {
   const [openSections, setOpenSections] = useState(new Set(sections.map(section => section.name)));
 
   const toggleSection = (sectionName) => {
@@ -99,9 +100,18 @@ export function PendingResourceModify({ onBack, onProceed }) {
     setOpenSections(updatedSections);
   };
 
+  const navigate = useNavigate();
+  const handleGoBack = () => {
+    navigate("/processManagement/modifyProcess/pendingStaffAssignments");
+  };
+
+  const handleProceed = () => {
+    navigate("/processManagement/");
+  };
+
   return (
     <div className="container mx-auto p-8">
-      <NavButtons onBack={onBack} onProceed={onProceed} />
+      <NavButtons onBack={handleGoBack} onProceed={handleProceed} />
       <div className="bg-secondary border-red-600 border-2 rounded-md p-4">
         <p className="text-left text-lg italic mb-7">
           Confirm the status of resource assignments for all procedures:

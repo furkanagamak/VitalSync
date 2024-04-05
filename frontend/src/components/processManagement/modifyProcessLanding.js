@@ -79,7 +79,7 @@ export function ModifyProcessLanding({ onModifyClick, onBack }) {
   };
 
   const handleSaveChanges = () => {
-    navigate("/processManagement/modifyProcess/activeProcesses");
+    navigate("/processManagement/modifyProcess/pendingStaffAssignments");
   };
 
   const handleReviewResourceAssignments = () => {
