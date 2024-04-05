@@ -125,7 +125,7 @@ function ScheduleImage() {
 
 function MyComponent() {
   return (
-    <div className="flex flex-col items-center pt-20 pr-5 pb-8 pl-14 bg-white max-md:pl-5">
+    <div className="flex flex-col items-center pt-10 pr-5 pb-8 pl-14 bg-white max-md:pl-5">
         <button className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-red-800 rounded-lg border border-solid border-neutral-600">
           Terminate Account
         </button>

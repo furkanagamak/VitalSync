@@ -5,8 +5,9 @@ import { useTable, useSortBy, usePagination } from "react-table";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaPen, FaTrashAlt } from "react-icons/fa";
 import { MdArrowDropDown, MdArrowDropUp } from "react-icons/md";
+import { Link } from "react-router-dom";
 
-const ResourceView = ({ navToCreateResource, navToEditResource }) => {
+const ResourceView = ({ navToEditResource }) => {
   // all resources
   const [resources, setResources] = useState(null);
 
@@ -78,7 +79,7 @@ const ResourceView = ({ navToCreateResource, navToEditResource }) => {
           Resources
         </div>
         <Searchbar setTextFilter={setTextFilter} />
-        <CreateNewButton navToCreateResource={navToCreateResource} />
+        <CreateNewButton />
       </section>
       <section className="flex">
         <Filters tabFilter={tabFilter} setTabFilter={setTabFilter} />
@@ -124,16 +125,13 @@ const Searchbar = ({ setTextFilter }) => {
   );
 };
 
-const CreateNewButton = ({ navToCreateResource }) => {
+const CreateNewButton = () => {
   return (
-    <div className="w-1/4 flex justify-center">
-      <button
-        className="bg-primary text-white text-lg font-semibold rounded-md w-32 py-2"
-        onClick={navToCreateResource}
-      >
+    <Link to="/resources/create" className="w-1/4 flex justify-center">
+      <button className="bg-primary text-white text-lg font-semibold rounded-md w-32 py-2">
         Create New Resources
       </button>
-    </div>
+    </Link>
   );
 };
 

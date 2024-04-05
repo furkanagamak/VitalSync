@@ -6,6 +6,7 @@ import { MdOutlineInfo } from "react-icons/md";
 import { FaArrowLeft } from "react-icons/fa";
 import { calculateTimeUntilDate } from "../../utils/helperFunctions";
 import ProcessChat from "../ProcessChat";
+import { Link } from "react-router-dom";
 
 const BoardProcessView = ({ id, navToDashboard }) => {
   const [process, setProcess] = useState(null);
@@ -59,9 +60,9 @@ const BoardProcessHeader = ({
     <div className="flex flex-col md:flex-row justify-between p-4 border-b-2 border-black space-y-4">
       <section className="flex flex-col space-y-2 justify-center items-center relative">
         <p className="text-sm">Back to Dashboard</p>
-        <button>
+        <Link to="/home">
           <FaArrowLeft className="w-8 h-8" />
-        </button>
+        </Link>
       </section>
       <section className="text-2xl">
         <div className="flex">
@@ -92,9 +93,9 @@ const BoardProcessHeader = ({
           >
             <BsChatLeftText className="w-8 h-8" />
           </button>
-          <button className="border-l-2 border-black">
+          <Link to="/processDetails" className="border-l-2 border-black">
             <MdOutlineInfo className="w-8 h-8" />
-          </button>
+          </Link>
         </div>
       </section>
     </div>

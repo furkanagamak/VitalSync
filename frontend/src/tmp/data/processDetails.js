@@ -61,7 +61,7 @@ const processDetails = {
             spaces: ["Room 305D", "Surgery Bed"],
           },
           peopleAssigned: ["007"],
-          peopleCompleted: ["007"],
+          peopleCompleted: [],
         },
         {
           procedureName: "Prostate Removal",
@@ -108,7 +108,7 @@ const processDetails = {
             spaces: ["Room 006B", "Patient Bed"],
           },
           peopleAssigned: ["007"],
-          peopleCompleted: ["007"],
+          peopleCompleted: [],
         },
       ],
     },

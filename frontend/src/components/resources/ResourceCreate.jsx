@@ -3,6 +3,7 @@ import { useState } from "react";
 import { MdOutlineMedicalServices } from "react-icons/md";
 import { IoPersonOutline } from "react-icons/io5";
 import { LuBedDouble } from "react-icons/lu";
+import { Link } from "react-router-dom";
 
 const ResourceCreate = ({ navToViewResource }) => {
   const [resourceCreatePage, setResourceCreatePage] = useState("type");
@@ -70,9 +71,13 @@ const SelectType = ({ navToViewResource, makeTypeSelection }) => {
   return (
     <div>
       <section className="flex justify-center items-center relative py-4">
-        <button onClick={navToViewResource} className="absolute left-4">
+        <Link
+          to="/resources"
+          onClick={navToViewResource}
+          className="absolute left-4"
+        >
           <FaArrowLeft className="h-6 w-6" />
-        </button>
+        </Link>
         <h1 className="text-primary text-3xl font-semibold">
           Create New Resources
         </h1>
