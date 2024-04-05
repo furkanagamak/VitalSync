@@ -198,7 +198,7 @@ export function ModifyProcessLanding() {
             <div className="flex justify-between items-center p-10">
               <p className="text-3xl font-bold">{section.name}</p>
               <div className="flex items-center">
-                <button onClick={() => toggleSection(section.name)} className="flex items-center">
+                <button id="openSection" onClick={() => toggleSection(section.name)} className="flex items-center">
                   {openSections.has(section.name) ? <BsChevronUp className="text-4xl cursor-pointer" /> : <BsChevronDown className="text-4xl cursor-pointer" />}
                 </button>
                 <FaTrashAlt className="text-3xl ml-10 text-primary" />

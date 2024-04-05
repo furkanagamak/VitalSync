@@ -218,11 +218,11 @@ const exampleProcesses = [
             showLastButton 
             sx={{
               ".MuiPaginationItem-root": {
-                color: '8e0000', 
+                color: '#8e0000', 
               },
               ".Mui-selected": {
                 backgroundColor: '#8e0000',
-                color: '#white',
+                color: 'white',
                 '&:hover': {
                   backgroundColor: '#8e0000', 
                 },
