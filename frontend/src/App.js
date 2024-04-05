@@ -1,7 +1,7 @@
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "./components/navbar.jsx";
-import { ProcessManagementContainer } from "./components/processManagement.js";
-import  PatientForm  from "./components/patientForm.js"
+import Resources from "./components/resources/Resources";
+
 const notify = () => toast("Here is your toast.");
 
 function App() {
@@ -9,7 +9,7 @@ function App() {
     <>
       <Toaster />
       <Navbar />
-      <PatientForm></PatientForm>
+      <Resources />
     </>
   );
 }
