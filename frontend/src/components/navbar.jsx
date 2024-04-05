@@ -2,6 +2,7 @@ import { CiBellOn } from "react-icons/ci";
 import { useState } from "react";
 import { IoMenu } from "react-icons/io5";
 import NotificationDropDown from "./notifications/NotificationDropDown";
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   return (
@@ -28,10 +29,12 @@ const Header = () => {
 };
 
 const Tabs = () => {
+  const navigate = useNavigate(); 
+  const navigateToRoster = () => navigate('/Roster');
   return (
-    <div className="hidden md:flex border-x-2 border-white text-2xl flex text-center">
-      <section className="border-r-2 px-8 flex pb-2">
-        <p className="my-auto ">Roster</p>
+    <div className="border-x-2 border-white text-2xl flex text-center">
+      <section className="border-r-2 px-8 flex pb-2" onClick={navigateToRoster}>
+        <p className="my-auto">Roster</p>
       </section>
       <section className="px-8 flex pb-2">
         <p className="my-auto">Admin Actions</p>
@@ -41,9 +44,15 @@ const Tabs = () => {
 };
 
 const UserNav = () => {
+  const navigate = useNavigate();
+
+  const handleNavigate = () => {
+    navigate('/Profile');
+  };
+
   return (
-    <div className="ml-auto flex space-x-4 items-center mx-2">
-      <p className="hidden md:block text-2xl">John Smith</p>
+    <div className="ml-auto flex space-x-4 items-center mx-2"  onClick={handleNavigate}>
+      <p className="text-2xl">John Smith</p>
       <img src="/logo512.png" className="h-12 w-12" />
     </div>
   );
