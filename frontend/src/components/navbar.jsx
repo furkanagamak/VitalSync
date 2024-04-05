@@ -3,7 +3,6 @@ import { useState } from "react";
 import { IoMenu } from "react-icons/io5";
 import NotificationDropDown from "./notifications/NotificationDropDown";
 import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
 
 const Navbar = () => {
   return (
@@ -18,17 +17,20 @@ const Navbar = () => {
 };
 
 const Header = () => {
+  const navigate = useNavigate();
+
+  const handleNavigate = () => {
+    navigate("/home");
+  };
+
   return (
-    <Link
-      to="/home"
-      className="w-32 flex justify-evenly items-center font-semibold text-2xl mx-2"
-    >
+    <div className="w-32 flex justify-evenly items-center font-semibold text-2xl mx-2 cursor-pointer" onClick={handleNavigate}>
       <img src="/logo.png" className="w-12 h-12" alt="logo" />
-      <div className="">
+      <div>
         <h1 className="mr-2">Vital</h1>
         <h1 className="ml-2">Sync</h1>
       </div>
-    </Link>
+    </div>
   );
 };
 
@@ -61,11 +63,11 @@ const UserNav = () => {
 
   return (
     <div
-      className="ml-auto space-x-4 flex items-center mx-2"
+      className="ml-auto space-x-4 flex items-center mx-2 cursor-pointer"
       onClick={handleNavigate}
     >
       <p className="text-2xl hidden md:block">John Smith</p>
-      <img src="/logo512.png" className="h-12 w-12" />
+      <img src="/profileicon.png" className="h-12 w-12" />
     </div>
   );
 };
