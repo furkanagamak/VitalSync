@@ -3,6 +3,7 @@ import { useState } from "react";
 import { IoMenu } from "react-icons/io5";
 import NotificationDropDown from "./notifications/NotificationDropDown";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   return (
@@ -18,13 +19,16 @@ const Navbar = () => {
 
 const Header = () => {
   return (
-    <div className="w-32 flex justify-evenly items-center font-semibold text-2xl mx-2">
+    <Link
+      to="/home"
+      className="w-32 flex justify-evenly items-center font-semibold text-2xl mx-2"
+    >
       <img src="/logo.png" className="w-12 h-12" alt="logo" />
       <div className="">
         <h1 className="mr-2">Vital</h1>
         <h1 className="ml-2">Sync</h1>
       </div>
-    </div>
+    </Link>
   );
 };
 
