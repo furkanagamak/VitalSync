@@ -242,7 +242,7 @@ function ScheduleCalendar({ onScheduleChange }) {
   return (
     <div >
       <div className="flex items-center justify-center">
-      <div className="text-3xl font-bold text-center" >Febuary 2024</div>
+      <div className="text-3xl font-bold text-center" >February 2024</div>
       <img
           loading="lazy"
           src="/dateicon.png"
