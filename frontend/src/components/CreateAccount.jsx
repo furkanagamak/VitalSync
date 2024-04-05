@@ -1,6 +1,7 @@
 import React from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const CreateAccount = ({ navToAdminActions }) => {
   const [accCreatePage, setAccCreatePage] = useState("type");
@@ -86,9 +87,13 @@ const SelectAccType = ({ navToAdminActions, makeAccTypeSelection }) => {
   return (
     <div>
       <section className="flex justify-center items-center relative py-4">
-        <button onClick={navToAdminActions} className="absolute left-4">
+        <Link
+          to="/adminActions"
+          onClick={navToAdminActions}
+          className="absolute left-4"
+        >
           <FaArrowLeft className="h-6 w-6" />
-        </button>
+        </Link>
         <h1 className="text-primary text-3xl font-semibold">
           Create New Account
         </h1>
