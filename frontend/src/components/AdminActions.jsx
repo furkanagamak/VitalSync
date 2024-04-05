@@ -37,7 +37,7 @@ const AdminActions = () => {
         </section>
         <section className="grid grid-cols-3">
           <Link
-            to="/activeProcesses"
+            to="/modifyProcess/activeProcesses"
             className="flex flex-col justify-center items-center"
           >
             <img src="/svg/processManagement.svg" alt="logo" />
