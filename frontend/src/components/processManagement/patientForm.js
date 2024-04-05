@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 
 
 function PatientInformationForm({ onBack, onProceed }) {
-  // Form submission handler
   const handleSubmit = (event) => {
     event.preventDefault();
     onProceed();
@@ -195,9 +194,6 @@ function PatientInformationForm({ onBack, onProceed }) {
             />
           </div>
 
-
-          
-          {/* Repeat for other fields */}
           <button 
             type="submit" 
             onClick = {handleProceed}

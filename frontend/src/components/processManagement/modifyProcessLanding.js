@@ -127,8 +127,8 @@ export function ModifyProcessLanding({ onModifyClick, onBack }) {
             {/* Left Section- Go Back button and Add Section */}
             <div className="flex flex-col gap-4 w-1/3">
                 <button 
-                    className="flex items-center justify-center bg-primary text-white rounded-full px-10 py-5 mb-12 mt-10 ml-12 text-4xl"
-                    style={{ paddingLeft: '30px', maxWidth: '50%' }}
+                    className="flex items-center justify-center bg-primary text-white rounded-full px-6 py-4 mb-12 mt-5 ml-12 text-3xl border-black border-2"
+                    style={{ paddingLeft: '20px', maxWidth: '50%' }}
                     onClick={handleGoBack}
                 >   
                     <FaArrowLeft className="mr-12" />Go Back

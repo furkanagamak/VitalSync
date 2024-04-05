@@ -4,9 +4,6 @@ import { BiSolidDownArrow } from "react-icons/bi";
 import { FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-
-
-// Mock data for roles - replace with actual data retrieval mechanism
 const roles = [
   { 
     name: "Lead Surgeon",
