@@ -135,7 +135,7 @@ export function PendingResourceModify() {
           return (
             <div key={idx} className={`flex justify-between items-center py-2 ${borderClass}`}>
               <span className="text-2xl">{procedure.title}</span>
-              <span className={`${isFullyAssigned ? 'text-green-500' : 'text-highlightRed'} text-2xl font-bold flex items-center`}>
+              <span className={`${isFullyAssigned ? 'text-green-500' : 'text-highlightRed underline'} text-2xl font-bold flex items-center`}>
                 {isFullyAssigned ? <FaCheck className="mr-2" /> : <MdOutlineOpenInNew className="mr-2" />}
                 {isFullyAssigned ? 'Assigned' : 'Assignments Required'}
               </span>

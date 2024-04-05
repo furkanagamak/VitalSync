@@ -16,7 +16,7 @@ function PatientInformationForm({ onBack, onProceed }) {
   };
 
   const handleProceed = () => {
-    navigate("/processManagement/newProcess/staffAssignments");
+    navigate("/processManagement/newProcess/pendingStaffAssignments");
   };
 
   return (

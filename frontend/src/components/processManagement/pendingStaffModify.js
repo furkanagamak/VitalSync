@@ -130,7 +130,7 @@ export function PendingStaffModify() {
                 {section.procedures.map((procedure, idx) => (
                   <div key={idx} className={`flex justify-between items-center py-2 ${idx < section.procedures.length - 1 ? 'border-b' : ''} border-black`}>
                     <span className='text-2xl'>{procedure.title}</span>
-                    <div className={`flex items-center text-2xl font-bold ${procedure.assignedStaff.length > 0 ? 'text-green-500' : 'text-highlightRed'}`}>
+                    <div className={`flex items-center text-2xl font-bold ${procedure.assignedStaff.length > 0 ? 'text-green-500' : 'text-highlightRed underline'}`}>
                       {procedure.assignedStaff.length > 0 ? <><FaCheck className="mr-2" />Assigned</> : <><MdOutlineOpenInNew className="mr-2" />Assignments Required</>}
                     </div>
                   </div>
