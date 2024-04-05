@@ -7,29 +7,19 @@ const Resources = () => {
   const [resourcePages, setResoucePages] = useState("View");
   const [targetResource, setTargetResource] = useState(null);
 
-  const navToCreateResource = () => {
-    setResoucePages("Create");
+  const navToEditResource = (resource) => {
+    setTargetResource(resource);
+    setResoucePages("Edit");
   };
 
   const navToViewResource = () => {
     setResoucePages("View");
   };
 
-  const navToEditResource = (resource) => {
-    setTargetResource(resource);
-    setResoucePages("Edit");
-  };
-
   return (
     <>
       {resourcePages === "View" && (
-        <ResourceView
-          navToCreateResource={navToCreateResource}
-          navToEditResource={navToEditResource}
-        />
-      )}
-      {resourcePages === "Create" && (
-        <ResourceCreate navToViewResource={navToViewResource} />
+        <ResourceView navToEditResource={navToEditResource} />
       )}
       {resourcePages === "Edit" && (
         <ResourceEdit

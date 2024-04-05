@@ -1,6 +1,7 @@
 import tmpAssignedProcesses from "../../tmp/data/assignedProcesses";
 import { useState, useEffect } from "react";
 import { calculateTimeUntilDate } from "../../utils/helperFunctions";
+import { Link } from "react-router-dom";
 
 const AssignedProcesses = () => {
   const [assignedProcesses, setAssignedProcesses] = useState(null);
@@ -77,7 +78,9 @@ const Process = ({ process }) => {
   return (
     <div className="bg-primary text-white p-4 rounded-3xl flex flex-col md:grid grid-cols-10 space-x-4 drop-shadow-lg">
       <section className="col-start-1 col-end-3 text-center md:space-y-4 border-b-2 md:border-r-2 md:border-b-0 border-white">
-        <h1 className="text-2xl">{myProcedure.procedureName}</h1>
+        <Link to="/boardProcess" className="text-2xl hover:underline">
+          {myProcedure.procedureName}
+        </Link>
         <h1 className="text-lg">
           {calculateTimeUntilDate(myProcedureStartDate)}
         </h1>

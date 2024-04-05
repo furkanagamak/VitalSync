@@ -7,7 +7,6 @@ import Login from "./components/Login.js";
 import RecoveryPage from "./components/RecoveryPage.js";
 import Roster from "./components/Roster.js";
 import Profile from "./components/Profile.js";
-import ResourceView from "./components/resources/ResourceView";
 import AssignedProcesses from "./components/mainmenu/AssignedProcesses";
 import BoardProcessView from "./components/mainmenu/BoardProcessView";
 import ProcessDetails from "./components/ProcessDetails";
@@ -77,7 +76,7 @@ function App() {
           element={
             <>
               <Navbar />
-              <ResourceView />
+              <Resources />
             </>
           }
         />
