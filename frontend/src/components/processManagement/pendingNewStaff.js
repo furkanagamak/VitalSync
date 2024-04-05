@@ -154,6 +154,13 @@ export function PendingNewStaff() {
             )}
           </div>
         ))}
+      <div className="flex justify-center mt-6">
+          <button
+            className="bg-primary text-white rounded-full px-6 py-2 text-xl shadow hover:bg-primary-dark"
+          >
+            Auto-Assign All
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -155,7 +155,7 @@ export function CreateStaffAssignments({ processName, onBack, onProceed }) {
   };
 
   const handleProceed = () => {
-    navigate("/processManagement/newProcess/reviewStaffAssignments");
+    navigate("/processManagement/newProcess/pendingStaffAssignments");
   };
 
 

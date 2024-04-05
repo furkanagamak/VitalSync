@@ -116,7 +116,7 @@ export function CreateResourceAssignments() {
   };
 
   const handleProceed = () => {
-    navigate("/processManagement/newProcess/reviewResourceAssignments");
+    navigate("/processManagement/newProcess/pendingResourceAssignments");
   };
 
   useEffect(() => {

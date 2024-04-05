@@ -75,7 +75,7 @@ function NavButtons({ onBack, onProceed }) {
               <FaArrowLeft className="mr-2" />
                 Go Back
          </button>
-            <h1 className="text-primary text-3xl font-bold">Review Resource Assignments</h1>
+            <h1 className="text-primary text-3xl font-bold">Review Staff Assignments</h1>
          <button
               className="hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-7 py-5 text-4xl"
               onClick={onProceed}
