@@ -75,8 +75,8 @@ const Process = ({ process }) => {
   const myProcedureStartDate = new Date(myProcedure.timeStart);
 
   return (
-    <div className="bg-primary text-white p-4 rounded-3xl grid grid-cols-10 space-x-4 drop-shadow-lg">
-      <section className="col-start-1 col-end-3 text-center space-y-4 border-r-2 border-white">
+    <div className="bg-primary text-white p-4 rounded-3xl flex flex-col md:grid grid-cols-10 space-x-4 drop-shadow-lg">
+      <section className="col-start-1 col-end-3 text-center md:space-y-4 border-b-2 md:border-r-2 md:border-b-0 border-white">
         <h1 className="text-2xl">{myProcedure.procedureName}</h1>
         <h1 className="text-lg">
           {calculateTimeUntilDate(myProcedureStartDate)}
@@ -90,7 +90,7 @@ const Process = ({ process }) => {
           <p>{myProcedure.location}</p>
         </div>
       </section>
-      <section className="col-start-3 col-end-8 flex flex-col justify-center space-y-8 text-2xl">
+      <section className="mt-2 md:mt-0 col-start-3 col-end-8 flex flex-col justify-center md:space-y-8 text-2xl">
         <div className="flex">
           <h1 className="underline mr-4">Patient:</h1>
           <p>{process.patientName}</p>
@@ -100,7 +100,7 @@ const Process = ({ process }) => {
           <p>{process.processName}</p>
         </div>
       </section>
-      <section className="col-start-8 col-end-11 flex flex-col justify-evenly items-center text-center text-xl">
+      <section className="col-start-8 col-end-11 flex flex-col justify-evenly md:items-center mt-2 md:mt-0 text-xl">
         <div>
           <h1 className="underline">Current Procedure:</h1>
           <p>{process.currentProcedure}</p>

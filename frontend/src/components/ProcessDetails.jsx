@@ -19,7 +19,7 @@ const ProcessDetails = ({ id }) => {
         <p>PROCESS ID: {process.processId}</p>
       </section>
       <section className="bg-secondary rounded-2xl p-8 space-y-8">
-        <section className="flex justify-between">
+        <section className="flex flex-col justify-between space-y-4 md:flex-row">
           <section className="text-primary text-2xl space-y-6 w-1/2">
             <div className="flex space-x-2">
               <h1 className="underline underline-offset-4">Process:</h1>
@@ -48,7 +48,7 @@ const ProcessDetails = ({ id }) => {
               <p>{process.totalProcedures}</p>
             </div>
           </section>
-          <section className="w-1/2">
+          <section className="md:w-1/2">
             <ProcessChat />
           </section>
         </section>
@@ -99,11 +99,11 @@ const Procedure = ({ procedure }) => {
 
   return (
     <div
-      className={`bg-primary rounded-3xl text-white flex text-xl ${
+      className={`bg-primary rounded-3xl text-white flex  flex-col md:flex-row text-xl ${
         userInPeopleAssigned ? "border-8 border-green-500" : ""
       } ${isCompleted ? "opacity-35" : ""}`}
     >
-      <section className="border-r-2 border-white p-8 space-y-2 w-1/2">
+      <section className="border-b-2 md:border-r-2 md:border-b-2 p-8 space-y-2 md:w-1/2">
         <div className="flex space-x-2">
           <h1 className="underline underline-offset-4">Name:</h1>
           <p>{procedure.procedureName}</p>
@@ -122,11 +122,11 @@ const Procedure = ({ procedure }) => {
           <p className="text-highlightGreen">You have completed this task!</p>
         )}
         {!userInPeopleCompleted && userInPeopleAssigned && (
-          <button className="text-highlightGreen">Mark as Completed</button>
+          <button className="text-highlightGreen">Mark as Completed ✅</button>
         )}
       </section>
-      <section className="grid grid-cols-3 w-1/2">
-        <section className="col-start-1 col-end-2 p-4 border-r-2 flex flex-col items-center">
+      <section className="flex flex-col md:grid grid-cols-3 md:w-1/2">
+        <section className="col-start-1 col-end-2 p-4 border-b-2 md:border-r-2 md:border-b-0 flex flex-col items-center space-y-2">
           <h1 className="underline">People Involved:</h1>
           <ul className="list-disc">
             {procedure.resources.personnel.map((name) => (
@@ -134,7 +134,7 @@ const Procedure = ({ procedure }) => {
             ))}
           </ul>
         </section>
-        <section className="col-start-2 col-end-3 p-4 border-r-2 flex flex-col items-center">
+        <section className="col-start-2 col-end-3 p-4 border-b-2 md:border-r-2 md:border-b-0 flex flex-col items-center space-y-2">
           <h1 className="underline">Equipments Used</h1>
           <ul className="list-disc">
             {procedure.resources.equipments.map((equipment) => (
@@ -142,7 +142,7 @@ const Procedure = ({ procedure }) => {
             ))}
           </ul>
         </section>
-        <section className="col-start-3 col-end-4 p-4 flex flex-col items-center">
+        <section className="col-start-3 col-end-4 p-4 flex flex-col items-center space-y-2">
           <h1 className="underline">Space used</h1>
           <ul className="list-disc">
             {procedure.resources.spaces.map((space) => (

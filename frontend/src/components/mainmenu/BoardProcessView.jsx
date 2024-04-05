@@ -56,7 +56,7 @@ const BoardProcessHeader = ({
   boardProcessPage,
 }) => {
   return (
-    <div className="flex justify-between p-4 border-b-2 border-black">
+    <div className="flex flex-col md:flex-row justify-between p-4 border-b-2 border-black space-y-4">
       <section className="flex flex-col space-y-2 justify-center items-center relative">
         <p className="text-sm">Back to Dashboard</p>
         <button>
@@ -74,10 +74,10 @@ const BoardProcessHeader = ({
         </div>
       </section>
       <section className="flex flex-col justify-between space-y-4">
-        <div className="text-sm ml-auto text-right">
+        <div className="text-sm md:ml-auto">
           <p>PROCESS ID: {processId}</p>
         </div>
-        <div className="flex space-x-2 my-2">
+        <div className="flex space-x-2 my-2 justify-center">
           <button
             className={`border-r-2 border-black ${
               boardProcessPage === "procedures" ? "text-red-500" : ""
@@ -124,8 +124,8 @@ const Procedure = ({ procedure, currUser }) => {
   const procedureStartDate = new Date(procedure.timeStart);
 
   return (
-    <div className="bg-primary text-white p-4 rounded-3xl grid grid-cols-10 space-x-4 drop-shadow-lg">
-      <section className="col-start-1 col-end-3 text-center space-y-4 border-r-2 border-white flex flex-col justify-evenly">
+    <div className="bg-primary text-white p-4 rounded-3xl flex flex-col md:grid grid-cols-10 space-y-4 space-x-4 drop-shadow-lg">
+      <section className="col-start-1 col-end-3 text-center space-y-4 md:border-r-2 border-white flex flex-col justify-evenly">
         <h1 className="text-2xl">{procedure.procedureName}</h1>
         <div>
           <h1 className="text-lg">
@@ -151,7 +151,7 @@ const Procedure = ({ procedure, currUser }) => {
           <p>{procedure.description}</p>
         </div>
       </section>
-      <section className="col-start-8 col-end-11 flex flex-col justify-evenly items-center text-center text-xl">
+      <section className="col-start-8 col-end-11 flex flex-col justify-evenly md:items-center space-y-2 md:space-y-0 text-center text-xl">
         <div className="flex space-x-4">
           <h1 className="underline">People Assigned:</h1>
           <p>{procedure.peopleAssigned.length}</p>

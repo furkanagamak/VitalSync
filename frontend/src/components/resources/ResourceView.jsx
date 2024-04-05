@@ -73,7 +73,7 @@ const ResourceView = ({ navToCreateResource, navToEditResource }) => {
   if (displayingResources === null) return <div>Loading Resources ...</div>;
   return (
     <div>
-      <section className="flex my-8 w-full">
+      <section className="flex flex-col md:flex-row items-center space-y-4 my-8 w-full">
         <div className="w-1/4 text-center text-primary text-3xl font-semibold">
           Resources
         </div>
