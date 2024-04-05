@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
+import { useNavigate } from 'react-router-dom';
+
 
 const sections = [
     {
@@ -96,9 +98,20 @@ export function ReviewStaffAssignments({ onBack, onProceed }) {
     setOpenSections(updatedSections);
   };
 
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    navigate("/processManagement/modifyProcess/staffAssignments");
+  };
+
+  const handleProceed = () => {
+    navigate("/processManagement/modifyProcess/landing");
+  };
+
+
   return (
     <div className="container mx-auto p-8">
-      <NavButtons onBack={onBack} onProceed={onProceed}></NavButtons>
+      <NavButtons onBack={handleGoBack} onProceed={handleProceed}></NavButtons>
       <div className="bg-secondary border-red-600 border-2 rounded-md p-4">
         <p className="text-left text-lg italic mb-7">
           Confirm the following staff assignments for procedures in all sections:
