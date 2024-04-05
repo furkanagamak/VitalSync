@@ -34,6 +34,14 @@ import CreateAccount from "./components/CreateAccount";
 import ResourceCreate from "./components/resources/ResourceCreate";
 import NotificationBox from "./components/notifications/NotificationBox";
 
+import ProcedureTemplateManagement from "./components/procedureTemplates.js";
+import ProcessTemplateManagementq from "./components/processTemplates.js";
+import CreateProcedureTemplateForm from "./components/createProcedureTemplate.js";
+import CreateProcessTemplateForm from "./components/createProcessTemplate.js";
+import AddSectionForm from "./components/createSection.js";
+import ModifyProcedureTemplateForm from "./components/modifyProcedureTemplate.js";
+import ModifyProcessTemplateForm from "./components/modifyProcessTemplate.js";
+import ModifySectionForm from "./components/modifySection.js";
 const notify = () => toast("Here is your toast.");
 
 function App() {
@@ -307,6 +315,62 @@ function App() {
             </>
           }
         />
+                <Route path="/ProcedureTemplateManagement" element={
+          <>
+          <Toaster />
+          <Navbar />
+          <ProcedureTemplateManagement />
+          </>
+        }/>
+        <Route path="/ProcessTemplateManagement" element={
+          <>
+          <Toaster />
+          <Navbar />
+          <ProcessTemplateManagementq />
+          </>
+        }/>
+        <Route path="/CreateProcedureTemplateForm" element={
+          <>
+          <Toaster />
+          <Navbar />
+          <CreateProcedureTemplateForm />
+          </>
+        }/>
+        <Route path="/CreateProcessTemplateForm" element={
+          <>
+          <Toaster />
+          <Navbar />
+          <CreateProcessTemplateForm />
+          </>
+        }/>
+        <Route path="/AddSectionForm" element={
+          <>
+          <Toaster />
+          <Navbar />
+          <AddSectionForm />
+          </>
+        }/>
+        <Route path="/ModifyProcedureTemplateForm" element={
+          <>
+          <Toaster />
+          <Navbar />
+          <ModifyProcedureTemplateForm />
+          </>
+        }/>
+        <Route path="/ModifyProcessTemplateForm" element={
+          <>
+          <Toaster />
+          <Navbar />
+          <ModifyProcessTemplateForm />
+          </>
+        }/>
+        <Route path="/ModifySectionForm" element={
+          <>
+          <Toaster />
+          <Navbar />
+          <ModifySectionForm />
+          </>
+        }/>
       </Routes>
     </BrowserRouter>
   );

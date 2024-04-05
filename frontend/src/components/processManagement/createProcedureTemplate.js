@@ -18,13 +18,21 @@ import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const notify = () => toast.success("Procedure Template Created!");
 
 const CreateTemplateButton = () => {
+  const navigate = useNavigate();
+
+  const handleCreateClick = () => {
+    navigate("/ProcedureTemplateManagement");
+    notify();
+  };
+
   return (
     <button
-      onClick={notify}
+      onClick={handleCreateClick}
       className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
     >
       <svg
@@ -48,8 +56,17 @@ const CreateTemplateButton = () => {
 };
 
 const GoBackButton = () => {
+  const navigate = useNavigate();
+
+  const handleGoBackClick = () => {
+    navigate("/ProcedureTemplateManagement");
+  };
+
   return (
-    <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
+    <button
+      onClick={handleGoBackClick}
+      className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="36"
@@ -86,7 +103,7 @@ const ProcedureForm = () => {
 
   // Hardcoded data for the dropdowns
   const resourceTypes = ["Equipment", "Space"];
-  const resourceNames = ["MRI Machine", "X-Ray Machine", "Operating Room"]
+  const resourceNames = ["MRI Machine", "X-Ray Machine", "Operating Room"];
   const roleNames = ["Surgeon", "Nurse", "Anesthesiologist"];
 
   const theme = createTheme({
