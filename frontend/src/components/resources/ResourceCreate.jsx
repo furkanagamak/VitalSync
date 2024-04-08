@@ -71,11 +71,7 @@ const SelectType = ({ navToViewResource, makeTypeSelection }) => {
   return (
     <div>
       <section className="flex justify-center items-center relative py-4">
-        <Link
-          to="/resources"
-          onClick={navToViewResource}
-          className="absolute left-4"
-        >
+        <Link to="/resources" className="absolute left-4">
           <FaArrowLeft className="h-6 w-6" />
         </Link>
         <h1 className="text-primary text-3xl font-semibold">
@@ -91,6 +87,7 @@ const SelectType = ({ navToViewResource, makeTypeSelection }) => {
         <button
           className="flex flex-col items-center"
           onClick={selectEquipment}
+          id="selectEquipmentsBtn"
         >
           <MdOutlineMedicalServices className="w-8 h-8" />
           <p>Equipments</p>
@@ -98,13 +95,18 @@ const SelectType = ({ navToViewResource, makeTypeSelection }) => {
         <button
           className="flex flex-col items-center"
           onClick={selectPersonnel}
+          id="selectPersonnelBtn"
         >
           <IoPersonOutline className="w-8 h-8" />
           <p>Personnel</p>
         </button>
-        <button className="flex flex-col items-center" onClick={selectSpace}>
+        <button
+          className="flex flex-col items-center"
+          onClick={selectSpace}
+          id="selectSpacesBtn"
+        >
           <LuBedDouble className="w-8 h-8" />
-          <p>Resources</p>
+          <p>Spaces</p>
         </button>
       </section>
     </div>
@@ -121,7 +123,11 @@ const ResourceForm = ({
   return (
     <div className="py-8 px-4">
       <section className="flex justify-center items-center relative py-4">
-        <button onClick={navToTypeSelection} className="absolute left-4">
+        <button
+          onClick={navToTypeSelection}
+          className="absolute left-4"
+          id="backToSeleResTypeBtn"
+        >
           <FaArrowLeft className="h-6 w-6" />
         </button>
         <h1 className="text-primary text-3xl font-semibold">
@@ -143,6 +149,7 @@ const ResourceForm = ({
               value={formData.name}
               onChange={handleChange}
               className="shadow rounded w-full py-2 px-3"
+              id="nameInp"
             />
           </div>
           <div className="ml-8 w-1/2">
@@ -173,6 +180,7 @@ const ResourceForm = ({
             value={formData.location}
             onChange={handleChange}
             className="shadow rounded w-full py-2 px-3"
+            id="locationInp"
           />
         </div>
         <div className="mb-4">
@@ -184,6 +192,7 @@ const ResourceForm = ({
             value={formData.description}
             onChange={handleChange}
             className="shadow border rounded w-full py-2 px-3"
+            id="descriptionInp"
           />
         </div>
         <div className="mb-4">
@@ -196,12 +205,14 @@ const ResourceForm = ({
             value={formData.uniqueIdentifier}
             onChange={handleChange}
             className="shadow rounded w-full py-2 px-3"
+            id="uniqueIdentifierInp"
           />
         </div>
         <div className="mt-6 flex">
           <button
             type="submit"
             className="bg-highlightGreen text-white py-2 px-4 rounded-md ml-auto"
+            id="submitBtn"
           >
             Submit
           </button>

@@ -49,6 +49,7 @@ import AddSectionForm from "./components/createSection.js";
 import ModifyProcedureTemplateForm from "./components/processManagement/modifyProcedureTemplate.js";
 import ModifyProcessTemplateForm from "./components/modifyProcessTemplate.js";
 import ModifySectionForm from "./components/modifySection.js";
+
 const notify = () => toast("Here is your toast.");
 
 function App() {

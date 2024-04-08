@@ -60,7 +60,7 @@ const BoardProcessHeader = ({
     <div className="flex flex-col md:flex-row justify-between p-4 border-b-2 border-black space-y-4">
       <section className="flex flex-col space-y-2 justify-center items-center relative">
         <p className="text-sm">Back to Dashboard</p>
-        <Link to="/home">
+        <Link to="/home" id="homeBtn">
           <FaArrowLeft className="w-8 h-8" />
         </Link>
       </section>
@@ -84,16 +84,22 @@ const BoardProcessHeader = ({
               boardProcessPage === "procedures" ? "text-red-500" : ""
             }`}
             onClick={navToProcedures}
+            id="proceduresBtn"
           >
             <GoChecklist className="w-8 h-8" />
           </button>
           <button
             className={boardProcessPage === "chat" ? "text-red-500" : ""}
             onClick={navToChat}
+            id="chatBtn"
           >
             <BsChatLeftText className="w-8 h-8" />
           </button>
-          <Link to="/processDetails" className="border-l-2 border-black">
+          <Link
+            to="/processDetails"
+            className="border-l-2 border-black"
+            id="processDetailsBtn"
+          >
             <MdOutlineInfo className="w-8 h-8" />
           </Link>
         </div>
@@ -105,7 +111,7 @@ const BoardProcessHeader = ({
 const BoardProcessProcedures = ({ procedures }) => {
   const currUser = "001";
   return (
-    <div className="p-8">
+    <div className="p-8" id="boardProcessProcedures">
       <section className="text-2xl mb-4">
         <h1 className="flex">
           Procedures to complete:{" "}
@@ -179,7 +185,7 @@ const Procedure = ({ procedure, currUser }) => {
 
 const BoardProcessChat = () => {
   return (
-    <div className="p-8 w-3/4 mx-auto">
+    <div className="p-8 w-3/4 mx-auto" id="boardProcessChat">
       <ProcessChat />
     </div>
   );

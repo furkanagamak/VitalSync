@@ -91,6 +91,7 @@ const SelectAccType = ({ navToAdminActions, makeAccTypeSelection }) => {
           to="/adminActions"
           onClick={navToAdminActions}
           className="absolute left-4"
+          id="selectAccTypeBackBtn"
         >
           <FaArrowLeft className="h-6 w-6" />
         </Link>
@@ -105,12 +106,14 @@ const SelectAccType = ({ navToAdminActions, makeAccTypeSelection }) => {
       </section>
       <section className="flex space-x-12 justify-center text-primary text-xl">
         <button
+          id="selectStaffBtn"
           className="flex flex-col items-center bg-primary text-white py-2 px-4"
           onClick={selectStaff}
         >
           Staff
         </button>
         <button
+          id="selectAdminBtn"
           className="flex flex-col items-center bg-primary text-white py-2 px-4"
           onClick={selectAdmin}
         >
@@ -132,7 +135,11 @@ const Form1 = ({
   return (
     <div className="py-8 px-4">
       <section className="flex justify-center items-center relative py-4">
-        <button onClick={navToTypeSelection} className="absolute left-4">
+        <button
+          onClick={navToTypeSelection}
+          className="absolute left-4"
+          id="form1BackBtn"
+        >
           <FaArrowLeft className="h-6 w-6" />
         </button>
         <div className="flex flex-col justify-center items-center text-primary">
@@ -155,6 +162,7 @@ const Form1 = ({
               value={formData.firstName}
               onChange={handleChange}
               className="shadow rounded w-full py-2 px-3"
+              id="firstNameInp"
             />
           </div>
           <div className="pl-4 w-1/4">
@@ -178,6 +186,7 @@ const Form1 = ({
             value={formData.lastName}
             onChange={handleChange}
             className="shadow rounded w-full py-2 px-3"
+            id="lastNameInp"
           />
         </div>
         <div className="mb-4">
@@ -189,6 +198,7 @@ const Form1 = ({
             value={formData.degree}
             onChange={handleChange}
             className="shadow rounded w-full py-2 px-3"
+            id="degreeInp"
           >
             <option value="">Select Degree</option>
             <option value="bachelors">Bachelors</option>
@@ -207,6 +217,7 @@ const Form1 = ({
             value={formData.department}
             onChange={handleChange}
             className="shadow rounded w-full py-2 px-3"
+            id="departmentInp"
           />
         </div>
         <div className="mb-4">
@@ -219,6 +230,7 @@ const Form1 = ({
             value={formData.position}
             onChange={handleChange}
             className="shadow rounded w-full py-2 px-3"
+            id="positionInp"
           />
         </div>
         <div className="flex">
@@ -231,6 +243,7 @@ const Form1 = ({
               value={formData.eligibleRoles}
               onChange={handleChange}
               className="shadow rounded w-full py-2 px-3"
+              id="eligibleRolesInp"
             >
               <option value="">Select Role</option>
               <option value="physician">Physician</option>
@@ -244,6 +257,7 @@ const Form1 = ({
               type="submit"
               className="bg-primary text-white rounded-md ml-auto h-fit py-2 px-4"
               onClick={navToForm2}
+              id="nextBtn"
             >
               Next
             </button>
@@ -258,7 +272,11 @@ const Form2 = ({ formData, handleChange, handleSubmit, navToForm1 }) => {
   return (
     <div className="py-8 px-4">
       <section className="flex justify-center items-center relative py-4">
-        <button onClick={navToForm1} className="absolute left-4">
+        <button
+          onClick={navToForm1}
+          className="absolute left-4"
+          id="form2BackBtn"
+        >
           <FaArrowLeft className="h-6 w-6" />
         </button>
         <h1 className="text-primary text-3xl font-semibold">
@@ -279,6 +297,7 @@ const Form2 = ({ formData, handleChange, handleSubmit, navToForm1 }) => {
             value={formData.phoneNumber}
             onChange={handleChange}
             className="shadow rounded w-full py-2 px-3"
+            id="phoneNumberInp"
           />
         </div>
         <div className="mb-4">
@@ -291,6 +310,7 @@ const Form2 = ({ formData, handleChange, handleSubmit, navToForm1 }) => {
             value={formData.email}
             onChange={handleChange}
             className="shadow rounded w-full py-2 px-3"
+            id="emailInp"
           />
         </div>
         <div className="mb-4">
@@ -303,6 +323,7 @@ const Form2 = ({ formData, handleChange, handleSubmit, navToForm1 }) => {
             value={formData.officePhoneNumber}
             onChange={handleChange}
             className="shadow rounded w-full py-2 px-3"
+            id="officePhoneNumberInp"
           />
         </div>
         <div className="mb-4">
@@ -315,12 +336,14 @@ const Form2 = ({ formData, handleChange, handleSubmit, navToForm1 }) => {
             value={formData.officeLocation}
             onChange={handleChange}
             className="shadow rounded w-full py-2 px-3"
+            id="officeLocationInp"
           />
         </div>
         <div className="mt-6 flex">
           <button
             type="submit"
             className="bg-highlightGreen text-white py-2 px-4 rounded-md ml-auto"
+            id="submitBtn"
           >
             Submit
           </button>
