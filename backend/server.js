@@ -147,12 +147,10 @@ app.post("/createAccount", async (req, res) => {
           });
 
           await newAccount.save();
-          res
-            .status(201)
-            .send({
-              message: "Account created successfully",
-              accountId: newAccount._id,
-            });
+          res.status(201).send({
+            message: "Account created successfully",
+            accountId: newAccount._id,
+          });
         }
       });
     });
@@ -167,7 +165,9 @@ app.post("/login", async (req, res) => {
 
     // Check if the cookie is already set
     if (req.cookies.accountId) {
-      return res.status(400).send({ message: "Already logged in" });
+      // Send the Account document to the frontend
+      const account = await Account.findById(req.cookies.accountId);
+      return res.status(200).send({ message: "Already logged in", account });
     }
 
     // Check if an account with the given email exists
@@ -192,7 +192,8 @@ app.post("/login", async (req, res) => {
           secure: true,
         });
 
-        res.status(200).send({ message: "Login successful" });
+        // Send the Account document to the frontend
+        res.status(200).send({ message: "Login successful", account });
       } else {
         res.status(400).send({ message: "Incorrect password" });
       }
