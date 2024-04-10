@@ -30,6 +30,7 @@ function ImageUploader({ onClose, setImgUrl }) {
           {
             method: "PUT",
             body: formData,
+            credentials: "include",
           }
         );
 

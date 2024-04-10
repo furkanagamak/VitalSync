@@ -63,47 +63,64 @@ app.get("/", (req, res) => {
 });
 
 app.put("/user/profilePicture", upload.single("image"), async (req, res) => {
-  const currUser = await Account.findOne({ email: "john.doe@example.com" });
-  if (!currUser) return res.status(404).send("User does not exist!");
+  try {
+    const accountId = req.cookies.accountId;
+    if (!accountId) {
+      return res.status(400).send({ message: "User not logged in" });
+    }
 
-  // puts image into s3
-  const profileUrlName = currUser.email + "." + req.file.mimetype.split("/")[1];
-  const putCommand = new PutObjectCommand({
-    Bucket: bucketName,
-    Key: profileUrlName,
-    Body: req.file.buffer,
-    ContentType: req.file.mimetype,
-  });
-  await s3.send(putCommand);
-  currUser.profileUlr = profileUrlName;
-  currUser.save();
+    const currUser = await Account.findOne({ _id: accountId });
+    if (!currUser) return res.status(404).send("User does not exist!");
 
-  // prepares new url
-  const getCommand = new GetObjectCommand({
-    Bucket: bucketName,
-    Key: profileUrlName,
-  });
-  const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
+    // puts image into s3
+    const profileUrlName =
+      currUser.email + "." + req.file.mimetype.split("/")[1];
+    const putCommand = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: profileUrlName,
+      Body: req.file.buffer,
+      ContentType: req.file.mimetype,
+    });
+    await s3.send(putCommand);
+    currUser.profileUrl = profileUrlName;
+    await currUser.save();
 
-  res.status(200).send(
-    JSON.stringify({
-      message: "Your profile image has been updated!",
-      url: url,
-    })
-  );
+    // prepares new url
+    const getCommand = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: profileUrlName,
+    });
+    const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
+
+    res.status(200).send(
+      JSON.stringify({
+        message: "Your profile image has been updated!",
+        url: url,
+      })
+    );
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
 });
 
 app.get("/user/profilePicture/url/:id", async (req, res) => {
-  const user = await Account.findOne({ _id: req.params.id });
-  if (!user) return res.status(404).send("User not found");
+  try {
+    if (!req.params.id) return res.status(404).send("No profile pic");
+    console.log(req.params.id);
+    const user = await Account.findOne({ _id: req.params.id });
+    if (!user) return res.status(404).send("User not found");
 
-  const command = new GetObjectCommand({
-    Bucket: bucketName,
-    Key: user.profileUrl,
-  });
-  const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    const command = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: user.profileUrl,
+    });
+    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
 
-  res.status(200).send(url);
+    res.status(200).send(url);
+  } catch (error) {
+    res.status(500).send(error);
+  }
 });
 
 const server = http.createServer(app);
@@ -219,6 +236,25 @@ app.post("/createAccount", async (req, res) => {
   }
 });
 
+const transformAccount = async (account) => {
+  let url = account.profileUrl;
+  if (account.profileUrl !== "") {
+    const getCommand = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: account.profileUrl,
+    });
+    url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
+  }
+
+  return {
+    id: account._id,
+    firstName: account.firstName,
+    lastName: account.lastName,
+    accountType: account.accountType,
+    profileUrl: url,
+  };
+};
+
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -227,7 +263,8 @@ app.post("/login", async (req, res) => {
     if (req.cookies.accountId) {
       // Send the Account document to the frontend
       const account = await Account.findById(req.cookies.accountId);
-      return res.status(200).send({ message: "Already logged in", account });
+      const resAcc = await transformAccount(account);
+      return res.status(200).send({ message: "Already logged in", resAcc });
     }
 
     // Check if an account with the given email exists
@@ -237,7 +274,7 @@ app.post("/login", async (req, res) => {
     }
 
     // Compare the password
-    bcrypt.compare(password, account.password, (err, result) => {
+    bcrypt.compare(password, account.password, async (err, result) => {
       if (err) {
         return res
           .status(500)
@@ -251,14 +288,15 @@ app.post("/login", async (req, res) => {
           sameSite: "none",
           secure: true,
         });
-
         // Send the Account document to the frontend
-        res.status(200).send({ message: "Login successful", account });
+        const resAcc = await transformAccount(account);
+        res.status(200).send({ message: "Login successful", resAcc });
       } else {
         res.status(400).send({ message: "Incorrect password" });
       }
     });
   } catch (error) {
+    console.log(error);
     res.status(400).send({ message: "Error logging in", error });
   }
 });
