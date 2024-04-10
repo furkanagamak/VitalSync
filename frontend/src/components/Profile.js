@@ -26,7 +26,7 @@ function ImageUploader({ onClose, setImgUrl }) {
 
       try {
         const response = await fetch(
-          `${process.env.REACT_APP_BACKEND_URI}/user/profilePicture`,
+          `${process.env.REACT_APP_API_BASE_URL}/user/profilePicture`,
           {
             method: "PUT",
             body: formData,
@@ -580,7 +580,7 @@ function MyComponent() {
     };
 
     fetchUserImg();
-  }, [imgUrl]);
+  }, [imgUrl, id]);
 
   // Handles the transition to the account termination confirmation modal
   const handleTerminateAccount = () => setShowTerminationModal(true);
