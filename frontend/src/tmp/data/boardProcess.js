@@ -5,7 +5,7 @@ const boardProcess = {
   proceduresLeft: [
     {
       procedureName: "Pelvic Ultrasound",
-      timeStart: "2024-04-04T14:30:00",
+      timeStart: "2024-04-05T18:30:00",
       location: "Room 170A",
       specialInstructions: "None",
       description:
@@ -15,7 +15,7 @@ const boardProcess = {
     },
     {
       procedureName: "Anesthesia",
-      timeStart: "2024-04-04T16:00:00",
+      timeStart: "2024-04-05T20:00:00",
       location: "Room 350C",
       specialInstructions: "None",
       description:
@@ -25,7 +25,7 @@ const boardProcess = {
     },
     {
       procedureName: "Anesthesia",
-      timeStart: "2024-04-04T16:00:00",
+      timeStart: "2024-04-05T21:00:00",
       location: "Room 350C",
       specialInstructions: "None",
       description:
@@ -35,7 +35,7 @@ const boardProcess = {
     },
     {
       procedureName: "Orthopedic Surgery",
-      timeStart: "2024-04-05T10:30:00",
+      timeStart: "2024-04-05T22:30:00",
       location: "Operating Room 2",
       specialInstructions:
         "Check for any allergies before administering anesthesia.",

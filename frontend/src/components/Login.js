@@ -1,5 +1,7 @@
 import * as React from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
 
 function Checkbox({ label }) {
   return (
@@ -35,9 +37,9 @@ function ForgotPasswordLink({ label, to }) {
 
 function MyComponent() {
   const navigate = useNavigate();
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [error, setError] = React.useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleSignIn = () => {
     if (email === 'johnsmith@sbu.com' && password === 'sbu1234') {

@@ -175,7 +175,7 @@ const Procedure = ({ procedure, currUser }) => {
         {!procedure.peopleCompleted.includes(currUser) &&
           procedure.peopleAssigned.includes(currUser) && (
             <button className="text-highlightGreen underline">
-              Mark as completed
+              Mark as completed ✅
             </button>
           )}
       </section>
