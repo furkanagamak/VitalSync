@@ -165,6 +165,11 @@ app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Check if the cookie is already set
+    if (req.cookies.accountId) {
+      return res.status(400).send({ message: "Already logged in" });
+    }
+
     // Check if an account with the given email exists
     const account = await Account.findOne({ email: email });
     if (!account) {
