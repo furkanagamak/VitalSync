@@ -168,6 +168,14 @@ app.post('/login', async (req, res) => {
   }
 });
 
+app.post('/logout', (req, res) => {
+  // Clear the accountId cookie
+  res.clearCookie('accountId', { sameSite: 'none', secure: true });
+
+  res.status(200).send({ message: 'Logout successful' });
+});
+
+
 const PORT = 5000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
