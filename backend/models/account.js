@@ -8,7 +8,7 @@ const accountSchema = new mongoose.Schema({
   accountType: {
     type: String,
     required: true,
-    enum: ["staff", "Hospital  Admin", "System Admin"],
+    enum: ["Staff", "Hospital Admin", "System Admin"],
   },
   position: { type: String, required: true },
   department: { type: String, required: true },
