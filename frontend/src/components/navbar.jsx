@@ -3,6 +3,8 @@ import { useState } from "react";
 import { IoMenu } from "react-icons/io5";
 import NotificationDropDown from "./notifications/NotificationDropDown";
 import { useNavigate } from "react-router-dom";
+import { TbLogout } from "react-icons/tb";
+import { useAuth } from "../providers/authProvider";
 
 const Navbar = () => {
   return (
@@ -11,6 +13,7 @@ const Navbar = () => {
       <Tabs />
       <UserNav />
       <Notifications />
+      <LogoutButton />
       <Menu />
     </nav>
   );
@@ -98,6 +101,30 @@ const Notifications = () => {
         </div>
       )}
     </>
+  );
+};
+
+const LogoutButton = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to logout", error);
+    }
+  };
+
+  return (
+    <button 
+      id="logoutbtn" 
+      onClick={handleLogout} 
+      className="flex items-center ml-0 mr-4"
+    >
+      <TbLogout className="h-12 w-12 text-black bg-white rounded-full p-1.5" />
+    </button>
   );
 };
 

@@ -35,6 +35,7 @@ export const AuthProvider = ({ children }) => {
         "Logout error:",
         error.response?.data?.message || error.message
       );
+      throw error;
     }
   };
 
