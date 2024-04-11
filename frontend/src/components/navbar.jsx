@@ -22,7 +22,7 @@ const Navbar = () => {
       />
       <Notifications />
       <LogoutButton />
-      <Menu />
+      <Menu userType={user.accountType} />
     </nav>
   );
 };
@@ -162,7 +162,7 @@ const LogoutButton = () => {
   );
 };
 
-const Menu = () => {
+const Menu = ({ userType }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const triggerIsOpen = () => {
@@ -179,13 +179,15 @@ const Menu = () => {
         <IoMenu className="w-12 h-12 text-white" />
       </button>
       {isOpen && (
-        <div className="absolute right-0 top-20 bg-primary text-2xl text-center z-10 flex flex-col">
+        <div className="md:hidden absolute right-0 top-20 bg-primary text-2xl text-center z-10 flex flex-col">
           <button onClick={navigateToRoster} className="border-b-2 p-2">
             Roster
           </button>
-          <button onClick={navigateToAdminActions} className="border-b-2 p-2">
-            Admin Actions
-          </button>
+          {userType === "admin" && (
+            <button onClick={navigateToAdminActions} className="border-b-2 p-2">
+              Admin Actions
+            </button>
+          )}
         </div>
       )}
     </>

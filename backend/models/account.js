@@ -8,7 +8,7 @@ const accountSchema = new mongoose.Schema({
   accountType: {
     type: String,
     required: true,
-    enum: ["staff", "hospital admin", "system Admin"],
+    enum: ["staff", "hospital admin", "system admin"],
   },
   profileUrl: { type: String, default: "" },
   isTerminated: { type: Boolean, default: false },
