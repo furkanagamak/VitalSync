@@ -107,7 +107,6 @@ app.put("/user/profilePicture", upload.single("image"), async (req, res) => {
 app.get("/user/profilePicture/url/:id", async (req, res) => {
   try {
     if (!req.params.id) return res.status(404).send("No profile pic");
-    console.log(req.params.id);
     const user = await Account.findOne({ _id: req.params.id });
     if (!user) return res.status(404).send("User not found");
 
@@ -259,14 +258,6 @@ app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check if the cookie is already set
-    if (req.cookies.accountId) {
-      // Send the Account document to the frontend
-      const account = await Account.findById(req.cookies.accountId);
-      const resAcc = await transformAccount(account);
-      return res.status(200).send({ message: "Already logged in", resAcc });
-    }
-
     // Check if an account with the given email exists
     const account = await Account.findOne({ email: email });
     if (!account) {
@@ -290,7 +281,7 @@ app.post("/login", async (req, res) => {
         });
         // Send the Account document to the frontend
         const resAcc = await transformAccount(account);
-        res.status(200).send({ message: "Login successful", resAcc });
+        res.status(200).send({ message: "Login successful", account: resAcc });
       } else {
         res.status(400).send({ message: "Incorrect password" });
       }
@@ -306,6 +297,22 @@ app.post("/logout", (req, res) => {
   res.clearCookie("accountId", { sameSite: "none", secure: true });
 
   res.status(200).send({ message: "Logout successful" });
+});
+
+app.get("/checkLogin", async (req, res) => {
+  // Check if the cookie is already set
+  if (req.cookies.accountId) {
+    // Send the Account document to the frontend
+    const account = await Account.findById(req.cookies.accountId);
+    const resAcc = await transformAccount(account);
+    return res.status(200).send({
+      message: "Already logged in",
+      account: resAcc,
+      isLoggedIn: true,
+    });
+  } else {
+    return res.status(200).send({ isLoggedIn: false });
+  }
 });
 
 const PORT = 5000;

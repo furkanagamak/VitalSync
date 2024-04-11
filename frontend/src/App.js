@@ -62,311 +62,313 @@ const notify = () => toast("Here is your toast.");
 function App() {
   return (
     <>
-    <AuthProvider>
       <Toaster />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/RecoveryPage" element={<RecoveryPage />} />
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/RecoveryPage" element={<RecoveryPage />} />
 
-          <Route
-            path="/Roster"
-            element={
-              <>
-                <Navbar />
-                <Roster />
-              </>
-            }
-          />
-          <Route
-            path="/Profile/:id"
-            element={
-              <>
-                <Navbar />
-                <Profile />
-              </>
-            }
-          />
-        </Routes>
-        <Routes>
-          <Route
-            path="/home"
-            element={
-              <>
-                <Navbar />
-                <AssignedProcesses />
-              </>
-            }
-          />
-          <Route
-            path="/adminActions"
-            element={
-              <>
-                <Navbar />
-                <AdminActions />
-              </>
-            }
-          />
-          <Route
-            path="/createAccount"
-            element={
-              <>
-                <Navbar />
-                <CreateAccount />
-              </>
-            }
-          />
-          <Route
-            path="/resources"
-            element={
-              <>
-                <Navbar />
-                <Resources />
-              </>
-            }
-          />
-          <Route
-            path="/resources/create"
-            element={
-              <>
-                <Navbar />
-                <ResourceCreate />
-              </>
-            }
-          />
-          <Route
-            path="/notifications"
-            element={
-              <>
-                <Navbar />
-                <NotificationBox />
-              </>
-            }
-          />
-          <Route
-            path="/boardProcess"
-            element={
-              <>
-                <Navbar />
-                <BoardProcessView />
-              </>
-            }
-          />
-          <Route
-            path="/processDetails"
-            element={
-              <>
-                <Navbar />
-                <ProcessDetails />
-              </>
-            }
-          />
+            <Route
+              path="/Roster"
+              element={
+                <>
+                  <Navbar />
+                  <Roster />
+                </>
+              }
+            />
+            <Route
+              path="/Profile/:id"
+              element={
+                <>
+                  <Navbar />
+                  <Profile />
+                </>
+              }
+            />
+          </Routes>
+          <Routes>
+            <Route
+              path="/home"
+              element={
+                <>
+                  <Navbar />
+                  <AssignedProcesses />
+                </>
+              }
+            />
+            <Route
+              path="/adminActions"
+              element={
+                <>
+                  <Navbar />
+                  <AdminActions />
+                </>
+              }
+            />
+            <Route
+              path="/createAccount"
+              element={
+                <>
+                  <Navbar />
+                  <CreateAccount />
+                </>
+              }
+            />
+            <Route
+              path="/resources"
+              element={
+                <>
+                  <Navbar />
+                  <Resources />
+                </>
+              }
+            />
+            <Route
+              path="/resources/create"
+              element={
+                <>
+                  <Navbar />
+                  <ResourceCreate />
+                </>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <>
+                  <Navbar />
+                  <NotificationBox />
+                </>
+              }
+            />
+            <Route
+              path="/boardProcess"
+              element={
+                <>
+                  <Navbar />
+                  <BoardProcessView />
+                </>
+              }
+            />
+            <Route
+              path="/processDetails"
+              element={
+                <>
+                  <Navbar />
+                  <ProcessDetails />
+                </>
+              }
+            />
 
-          <Route
-            path="/processManagement"
-            element={<ProcessManagementContainer />}
-          >
             <Route
-              index
-              element={<Navigate replace to="modifyProcess/activeProcesses" />}
-            />
-            <Route
-              path="modifyProcess/landing"
-              element={<ModifyProcessLanding />}
-            />
-            <Route
-              path="modifyProcess/addSection"
-              element={<ContainedNewSection />}
-            />
-            <Route
-              path="modifyProcess/addProcedure"
-              element={<ContainedProcedureTemplateList />}
-            />
-            <Route
-              path="modifyProcess/modifyProcedure"
-              element={<ContainedCreateProcedureTemplateForm />}
-            />
-            <Route
-              path="modifyProcess/staffAssignments"
-              element={<ModifyStaffAssignments />}
-            />
-            <Route
-              path="modifyProcess/resourceAssignments"
-              element={<ModifyResourceAssignments />}
-            />
-            <Route
-              path="modifyProcess/pendingStaffAssignments"
-              element={<PendingStaffModify />}
-            />
-            <Route
-              path="modifyProcess/pendingResourceAssignments"
-              element={<PendingResourceModify />}
-            />
-            <Route
-              path="modifyProcess/reviewStaffAssignments"
-              element={<ReviewStaffAssignments />}
-            />
-            <Route
-              path="modifyProcess/reviewResourceAssignments"
-              element={<ReviewResourceAssignments />}
-            />
-            <Route
-              path="modifyProcess/activeProcesses"
-              element={<ActiveProcessesList />}
-            />
-            <Route
-              path="newProcess/processTemplates"
-              element={<ProcessTable />}
-            />
-            <Route
-              path="newProcess/processTemplateForm"
-              element={<CreateProcessForm />}
-            />
-            <Route
-              path="newProcess/processTemplateModifyForm"
-              element={<ContainedProcessModify />}
-            />
-            <Route
-              path="newProcess/addSection"
-              element={<ContainedNewSection />}
-            />
-            <Route
-              path="newProcess/patientForm"
-              element={<PatientInformationForm />}
-            />
-            <Route
-              path="newProcess/staffAssignments"
-              element={<CreateStaffAssignments />}
-            />
-            <Route
-              path="newProcess/resourceAssignments"
-              element={<CreateResourceAssignments />}
-            />
-            <Route
-              path="newProcess/pendingStaffAssignments"
-              element={<PendingNewStaff />}
-            />
-            <Route
-              path="newProcess/pendingResourceAssignments"
-              element={<PendingNewResources />}
-            />
-            <Route
-              path="newProcess/reviewStaffAssignments"
-              element={<CreateReviewStaffAssignments />}
-            />
-            <Route
-              path="newProcess/reviewResourceAssignments"
-              element={<CreateReviewResourceAssignments />}
-            />
-            <Route
-              path="newProcess/preview"
-              element={<ProcessDetailsPreview />}
-            />
-          </Route>
+              path="/processManagement"
+              element={<ProcessManagementContainer />}
+            >
+              <Route
+                index
+                element={
+                  <Navigate replace to="modifyProcess/activeProcesses" />
+                }
+              />
+              <Route
+                path="modifyProcess/landing"
+                element={<ModifyProcessLanding />}
+              />
+              <Route
+                path="modifyProcess/addSection"
+                element={<ContainedNewSection />}
+              />
+              <Route
+                path="modifyProcess/addProcedure"
+                element={<ContainedProcedureTemplateList />}
+              />
+              <Route
+                path="modifyProcess/modifyProcedure"
+                element={<ContainedCreateProcedureTemplateForm />}
+              />
+              <Route
+                path="modifyProcess/staffAssignments"
+                element={<ModifyStaffAssignments />}
+              />
+              <Route
+                path="modifyProcess/resourceAssignments"
+                element={<ModifyResourceAssignments />}
+              />
+              <Route
+                path="modifyProcess/pendingStaffAssignments"
+                element={<PendingStaffModify />}
+              />
+              <Route
+                path="modifyProcess/pendingResourceAssignments"
+                element={<PendingResourceModify />}
+              />
+              <Route
+                path="modifyProcess/reviewStaffAssignments"
+                element={<ReviewStaffAssignments />}
+              />
+              <Route
+                path="modifyProcess/reviewResourceAssignments"
+                element={<ReviewResourceAssignments />}
+              />
+              <Route
+                path="modifyProcess/activeProcesses"
+                element={<ActiveProcessesList />}
+              />
+              <Route
+                path="newProcess/processTemplates"
+                element={<ProcessTable />}
+              />
+              <Route
+                path="newProcess/processTemplateForm"
+                element={<CreateProcessForm />}
+              />
+              <Route
+                path="newProcess/processTemplateModifyForm"
+                element={<ContainedProcessModify />}
+              />
+              <Route
+                path="newProcess/addSection"
+                element={<ContainedNewSection />}
+              />
+              <Route
+                path="newProcess/patientForm"
+                element={<PatientInformationForm />}
+              />
+              <Route
+                path="newProcess/staffAssignments"
+                element={<CreateStaffAssignments />}
+              />
+              <Route
+                path="newProcess/resourceAssignments"
+                element={<CreateResourceAssignments />}
+              />
+              <Route
+                path="newProcess/pendingStaffAssignments"
+                element={<PendingNewStaff />}
+              />
+              <Route
+                path="newProcess/pendingResourceAssignments"
+                element={<PendingNewResources />}
+              />
+              <Route
+                path="newProcess/reviewStaffAssignments"
+                element={<CreateReviewStaffAssignments />}
+              />
+              <Route
+                path="newProcess/reviewResourceAssignments"
+                element={<CreateReviewResourceAssignments />}
+              />
+              <Route
+                path="newProcess/preview"
+                element={<ProcessDetailsPreview />}
+              />
+            </Route>
 
-          <Route
-            path="/recordLookup"
-            element={
-              <>
-                <Navbar />
-                <CompletedProcessRecords />
-              </>
-            }
-          />
+            <Route
+              path="/recordLookup"
+              element={
+                <>
+                  <Navbar />
+                  <CompletedProcessRecords />
+                </>
+              }
+            />
 
-          <Route
-            path="/recordProcess"
-            element={
-              <>
-                <Navbar />
-                <CompletedProcess />
-              </>
-            }
-          />
+            <Route
+              path="/recordProcess"
+              element={
+                <>
+                  <Navbar />
+                  <CompletedProcess />
+                </>
+              }
+            />
 
-          <Route
-            path="/ProcedureTemplateManagement"
-            element={
-              <>
-                <Toaster />
-                <Navbar />
-                <ProcedureTemplateManagement />
-              </>
-            }
-          />
-          <Route
-            path="/ProcessTemplateManagement"
-            element={
-              <>
-                <Toaster />
-                <Navbar />
-                <ProcessTemplateManagementq />
-              </>
-            }
-          />
-          <Route
-            path="/CreateProcedureTemplateForm"
-            element={
-              <>
-                <Toaster />
-                <Navbar />
-                <CreateProcedureTemplateForm />
-              </>
-            }
-          />
-          <Route
-            path="/CreateProcessTemplateForm"
-            element={
-              <>
-                <Toaster />
-                <Navbar />
-                <CreateProcessTemplateForm />
-              </>
-            }
-          />
-          <Route
-            path="/AddSectionForm"
-            element={
-              <>
-                <Toaster />
-                <Navbar />
-                <AddSectionForm />
-              </>
-            }
-          />
-          <Route
-            path="/ModifyProcedureTemplateForm"
-            element={
-              <>
-                <Toaster />
-                <Navbar />
-                <ModifyProcedureTemplateForm />
-              </>
-            }
-          />
-          <Route
-            path="/ModifyProcessTemplateForm"
-            element={
-              <>
-                <Toaster />
-                <Navbar />
-                <ModifyProcessTemplateForm />
-              </>
-            }
-          />
-          <Route
-            path="/ModifySectionForm"
-            element={
-              <>
-                <Toaster />
-                <Navbar />
-                <ModifySectionForm />
-              </>
-            }
-          />
-        </Routes>
+            <Route
+              path="/ProcedureTemplateManagement"
+              element={
+                <>
+                  <Toaster />
+                  <Navbar />
+                  <ProcedureTemplateManagement />
+                </>
+              }
+            />
+            <Route
+              path="/ProcessTemplateManagement"
+              element={
+                <>
+                  <Toaster />
+                  <Navbar />
+                  <ProcessTemplateManagementq />
+                </>
+              }
+            />
+            <Route
+              path="/CreateProcedureTemplateForm"
+              element={
+                <>
+                  <Toaster />
+                  <Navbar />
+                  <CreateProcedureTemplateForm />
+                </>
+              }
+            />
+            <Route
+              path="/CreateProcessTemplateForm"
+              element={
+                <>
+                  <Toaster />
+                  <Navbar />
+                  <CreateProcessTemplateForm />
+                </>
+              }
+            />
+            <Route
+              path="/AddSectionForm"
+              element={
+                <>
+                  <Toaster />
+                  <Navbar />
+                  <AddSectionForm />
+                </>
+              }
+            />
+            <Route
+              path="/ModifyProcedureTemplateForm"
+              element={
+                <>
+                  <Toaster />
+                  <Navbar />
+                  <ModifyProcedureTemplateForm />
+                </>
+              }
+            />
+            <Route
+              path="/ModifyProcessTemplateForm"
+              element={
+                <>
+                  <Toaster />
+                  <Navbar />
+                  <ModifyProcessTemplateForm />
+                </>
+              }
+            />
+            <Route
+              path="/ModifySectionForm"
+              element={
+                <>
+                  <Toaster />
+                  <Navbar />
+                  <ModifySectionForm />
+                </>
+              }
+            />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
-      </AuthProvider>
     </>
   );
 }
