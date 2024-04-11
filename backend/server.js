@@ -401,11 +401,11 @@ app.post("/verifyOtp", async (req, res) => {
 
       // OTP verification successful
       return res.status(200).send({
-        message: "OTP verified successfully. You can now reset your password.",
+        message: "OTP code verified successfully. You can now reset your password.",
       });
     } else {
       // OTP invalid or expired
-      return res.status(400).send({ message: "Invalid or expired OTP." });
+      return res.status(400).send({ message: "Invalid or expired OTP code." });
     }
   } catch (error) {
     res.status(500).send({ message: "Error processing request.", error });
