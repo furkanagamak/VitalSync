@@ -1,16 +1,27 @@
 import { CiBellOn } from "react-icons/ci";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { IoMenu } from "react-icons/io5";
 import NotificationDropDown from "./notifications/NotificationDropDown";
 import { useNavigate } from "react-router-dom";
+import { TbLogout } from "react-icons/tb";
+import { useAuth } from "../providers/authProvider.js";
 
 const Navbar = () => {
+  const { user, fetchImg } = useAuth();
+  if (!user) return "error loading user!";
   return (
     <nav className="h-20 bg-primary flex text-white">
       <Header />
-      <Tabs />
-      <UserNav />
+      <Tabs userType={user.accountType} />
+      <UserNav
+        id={user.id}
+        firstName={user.firstName}
+        lastName={user.lastName}
+        profileUrl={user.profileUrl}
+        fetchImg={fetchImg}
+      />
       <Notifications />
+      <LogoutButton />
       <Menu />
     </nav>
   );
@@ -38,7 +49,7 @@ const Header = () => {
   );
 };
 
-const Tabs = () => {
+const Tabs = ({ userType }) => {
   const navigate = useNavigate();
   const navigateToRoster = () => navigate("/Roster");
   const navigateToAdminActions = () => navigate("/adminActions");
@@ -49,21 +60,45 @@ const Tabs = () => {
           Roster
         </button>
       </section>
-      <section className="px-8 flex pb-2">
-        <button onClick={navigateToAdminActions} className="my-auto">
-          Admin Actions
-        </button>
-      </section>
+      {userType === "admin" && (
+        <section className="px-8 flex pb-2">
+          <button onClick={navigateToAdminActions} className="my-auto">
+            Admin Actions
+          </button>
+        </section>
+      )}
     </div>
   );
 };
 
-const UserNav = () => {
+const UserNav = ({ id, firstName, lastName, profileUrl, fetchImg }) => {
+  const [url, setUrl] = useState("/profileicon.png");
   const navigate = useNavigate();
 
   const handleNavigate = () => {
-    navigate("/Profile");
+    navigate(`/Profile/${id}`);
   };
+
+  useEffect(() => {
+    const fetchUserImg = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.REACT_APP_API_BASE_URL}/user/profilePicture/url/${id}`
+        );
+
+        const txt = await res.text();
+        if (res.ok) {
+          if (txt !== "") setUrl(txt);
+        } else {
+          console.log("server responded with error text ", txt);
+        }
+      } catch (e) {
+        console.log("fetch profile image fail");
+      }
+    };
+
+    fetchUserImg();
+  }, [profileUrl, id, fetchImg]);
 
   return (
     <div
@@ -71,8 +106,10 @@ const UserNav = () => {
       onClick={handleNavigate}
       id="userNav"
     >
-      <p className="text-2xl hidden md:block">John Smith</p>
-      <img src="/profileicon.png" className="h-12 w-12" />
+      <p className="text-2xl hidden md:block">{`${firstName} ${lastName}`}</p>
+      <div className="h-12 w-12 overflow-hidden rounded-full">
+        <img src={url} alt="Profile" className="h-full w-full object-cover" />
+      </div>
     </div>
   );
 };
@@ -98,6 +135,30 @@ const Notifications = () => {
         </div>
       )}
     </>
+  );
+};
+
+const LogoutButton = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to logout", error);
+    }
+  };
+
+  return (
+    <button
+      id="logoutbtn"
+      onClick={handleLogout}
+      className="flex items-center ml-0 mr-4"
+    >
+      <TbLogout className="h-12 w-12 text-black bg-white rounded-full p-1.5" />
+    </button>
   );
 };
 

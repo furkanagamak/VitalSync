@@ -119,8 +119,10 @@ const BoardProcessProcedures = ({ procedures }) => {
         </h1>
       </section>
       <section className="flex flex-col space-y-8">
-        {procedures.map((procedure) => {
-          return <Procedure procedure={procedure} currUser={currUser} />;
+        {procedures.map((procedure, i) => {
+          return (
+            <Procedure key={i} procedure={procedure} currUser={currUser} />
+          );
         })}
       </section>
     </div>

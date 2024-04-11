@@ -8,8 +8,10 @@ const accountSchema = new mongoose.Schema({
   accountType: {
     type: String,
     required: true,
-    enum: ["staff", "Hospital  Admin", "System Admin"],
+    enum: ["staff", "hospital admin", "system Admin"],
   },
+  profileUrl: { type: String, default: "" },
+  isTerminated: { type: Boolean, default: false },
   position: { type: String, required: true },
   department: { type: String, required: true },
   degree: { type: String, required: true },
@@ -50,6 +52,11 @@ const accountSchema = new mongoose.Schema({
     ],
   },
   unavailableTimes: [{ start: Date, end: Date, reason: String }],
+  otp: {
+    code: { type: String, default: null },
+    expiry: { type: Date, default: null },
+    used: { type: Boolean, default: false },
+  },
 });
 
 module.exports = mongoose.model("Account", accountSchema);
