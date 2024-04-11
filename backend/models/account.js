@@ -50,6 +50,11 @@ const accountSchema = new mongoose.Schema({
     ],
   },
   unavailableTimes: [{ start: Date, end: Date, reason: String }],
+  otp: {
+    code: { type: String, default: null },
+    expiry: { type: Date, default: null },
+    used: { type: Boolean, default: false }
+  }
 });
 
 module.exports = mongoose.model("Account", accountSchema);
