@@ -315,6 +315,133 @@ app.get("/checkLogin", async (req, res) => {
   }
 });
 
+app.post("/forgotPassword", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Check if an account with the given email exists
+    const account = await Account.findOne({ email: email });
+    if (!account) {
+      return res.status(400).send({ message: "Account not found." });
+    }
+
+    // Generate a random OTP code
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // Set OTP expiry time (15 minutes from now)
+    const otpExpiry = new Date(new Date().getTime() + 15 * 60000);
+
+    // Update the account with the OTP code and expiry
+    await Account.findByIdAndUpdate(account._id, {
+      otp: {
+        code: otpCode,
+        expiry: otpExpiry,
+        used: false,
+      },
+    });
+
+    // Send email with the OTP code
+    const mailOptions = {
+      from: "vitalsync2024@gmail.com",
+      to: email,
+      subject: "VitalSync Password Reset",
+      html: `
+        <div style="font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 16px; color: #333;">
+          <h2>Password Reset Request</h2>
+          <p>Hello <strong>${account.firstName} ${account.lastName}</strong>,</p>
+          <p>You have requested to reset your password. Use the following OTP code to proceed:</p>
+          <h3>${otpCode}</h3>
+          <p>Please note that this code will expire in 15 minutes.</p>
+          <p>If you did not request a password reset, please ignore this email or contact our support team.</p>
+          <p>Best Regards,</p>
+          <p>The VitalSync Team</p>
+        </div>
+      `,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return res.status(500).send({ message: "Error sending email.", error });
+      } else {
+        res.status(200).send({
+          message: "OTP sent to your email.",
+        });
+      }
+    });
+  } catch (error) {
+    res.status(500).send({ message: "Error processing request.", error });
+  }
+});
+
+app.post("/verifyOtp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    // Find the account by email
+    const account = await Account.findOne({ email: email });
+    if (!account) {
+      return res.status(400).send({ message: "Account not found." });
+    }
+
+    // Check if the OTP is provided and matches the one stored, and is not expired
+    const currentTime = new Date();
+    if (
+      account.otp.code === otp &&
+      account.otp.expiry > currentTime &&
+      !account.otp.used
+    ) {
+      // Mark OTP as used to prevent reuse
+      await Account.findByIdAndUpdate(account._id, {
+        "otp.used": true,
+      });
+
+      // OTP verification successful
+      return res
+        .status(200)
+        .send({
+          message:
+            "OTP verified successfully. You can now reset your password.",
+        });
+    } else {
+      // OTP invalid or expired
+      return res.status(400).send({ message: "Invalid or expired OTP." });
+    }
+  } catch (error) {
+    res.status(500).send({ message: "Error processing request.", error });
+  }
+});
+
+app.post("/resetPassword", async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    // Find the account by email
+    const account = await Account.findOne({ email: email });
+    if (!account) {
+      return res.status(400).send({ message: "Account not found" });
+    }
+
+    // Hash the new password
+    bcrypt.hash(newPassword, saltRounds, async (err, hash) => {
+      if (err) {
+        return res.status(500).send({ message: "Error hashing new password", error: err });
+      }
+
+      // Update the account with the new hashed password
+      await Account.findByIdAndUpdate(account._id, {
+        password: hash,
+        // Clear the otp field to signify the process is complete
+        "otp.code": null,
+        "otp.expiry": null,
+        "otp.used": false
+      });
+
+      res.status(200).send({ message: "Password reset successfully" });
+    });
+  } catch (error) {
+    res.status(500).send({ message: "Error resetting password", error });
+  }
+});
+
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
