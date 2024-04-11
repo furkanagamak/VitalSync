@@ -5,6 +5,9 @@ import { useAuth } from "../providers/authProvider.js";
 import axios from "axios";
 import { useReducer } from "react";
 
+const notify = () => toast.success("Profile successfully updated.");
+const notifyErr = () => toast.error("There was an error updating the profile.");
+
 function ImageUploader({ onClose, setImgUrl }) {
   const fileTypes = ["PNG", "JPEG", "GIF", "JPG"];
   const [fileName, setFileName] = useState("");
@@ -270,7 +273,27 @@ function ContactInfo({ user }) {
   }, [user]);  
 
 
-  const handleSaveChanges = () => setEditMode(false);
+  const handleSaveChanges = async () => {
+    console.log("Updating user with ID:", user.userId);
+
+    const updateData = {
+      cellNo,
+      officeNo,
+      email,
+      office
+    };
+
+
+    try {
+      const response = await axios.put(`/user/${user.userId}`, updateData);
+      notify();
+      setEditMode(false); 
+      console.log(response.data);
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      notifyErr();
+    }
+  };
 
   const handleResetPasswordClick = () => setShowResetPasswordModal(true);
 
@@ -328,10 +351,10 @@ function ContactInfo({ user }) {
       )}
       <div className="flex gap-5 justify-between items-start mt-24 text-sm font-medium text-neutral-600 max-md:pr-5 max-md:mt-10">
         <button
-          onClick={() => setEditMode(!editMode)}
-          className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
+        onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
+        className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
         >
-          {editMode ? "Save Changes" : "Change Contact Info"}
+          {editMode ? "Save Changes" : "Edit Contact Info"}
         </button>
         <button
           onClick={handleResetPasswordClick}
@@ -371,6 +394,30 @@ function ProfileDetails({ user }) {
       setDepartment(user.department);
     }
   }, [user]);
+
+  const handleSaveChanges = async () => {
+    console.log("Updating user with ID:", user.userId);
+
+    const [firstName, lastName] = name.split(' ');
+    const updateData = {
+      firstName,
+      lastName,
+      degree: designation,
+      position: specialty,
+      department
+    };
+
+
+    try {
+      const response = await axios.put(`/user/${user.userId}`, updateData);
+      notify();
+      setEditMode(false); // Optionally reset edit mode
+      console.log(response.data);
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      notifyErr();
+    }
+  };
 
   return (
     <div className="flex flex-col grow gap-4 border-r border-black max-md:flex-wrap max-md:mt-10">
@@ -418,7 +465,7 @@ function ProfileDetails({ user }) {
         )}
       </div>
       <button
-        onClick={() => setEditMode(!editMode)}
+        onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
         className="px-5 py-1 text-sm font-medium text-neutral-600 bg-zinc-300 border border-solid border-neutral-600 rounded-lg self-start mt-auto"
       >
         {editMode ? "Save Changes" : "Edit Profile"}

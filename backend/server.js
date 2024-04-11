@@ -564,6 +564,22 @@ app.get('/user/:userId', async (req, res) => {
   }
 });
 
+app.put('/user/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const updateData = req.body;
+
+  try {
+    const updatedUser = await Account.findByIdAndUpdate(userId, updateData, { new: true });
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ message: 'Profile updated successfully', user: updatedUser });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ message: 'Error updating user', error: error.message });
+  }
+})
+
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
