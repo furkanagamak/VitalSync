@@ -7,7 +7,7 @@ import { TbLogout } from "react-icons/tb";
 import { useAuth } from "../providers/authProvider.js";
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user, fetchImg } = useAuth();
   if (!user) return "error loading user!";
   return (
     <nav className="h-20 bg-primary flex text-white">
@@ -18,6 +18,7 @@ const Navbar = () => {
         firstName={user.firstName}
         lastName={user.lastName}
         profileUrl={user.profileUrl}
+        fetchImg={fetchImg}
       />
       <Notifications />
       <LogoutButton />
@@ -68,8 +69,8 @@ const Tabs = () => {
   );
 };
 
-const UserNav = ({ id, firstName, lastName, profileUrl }) => {
-  const [url, setUrl] = useState("/profilepic.png");
+const UserNav = ({ id, firstName, lastName, profileUrl, fetchImg }) => {
+  const [url, setUrl] = useState("/profileicon.png");
   const navigate = useNavigate();
 
   const handleNavigate = () => {
@@ -80,12 +81,12 @@ const UserNav = ({ id, firstName, lastName, profileUrl }) => {
     const fetchUserImg = async () => {
       try {
         const res = await fetch(
-          `${process.env.REACT_APP_BACKEND_URI}/user/profilePicture/url/${id}`
+          `${process.env.REACT_APP_API_BASE_URL}/user/profilePicture/url/${id}`
         );
 
         const txt = await res.text();
         if (res.ok) {
-          setUrl(txt);
+          if (txt !== "") setUrl(txt);
         } else {
           console.log("server responded with error text ", txt);
         }
@@ -95,7 +96,7 @@ const UserNav = ({ id, firstName, lastName, profileUrl }) => {
     };
 
     fetchUserImg();
-  }, [profileUrl, id]);
+  }, [profileUrl, id, fetchImg]);
 
   return (
     <div

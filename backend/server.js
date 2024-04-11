@@ -300,18 +300,23 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/checkLogin", async (req, res) => {
-  // Check if the cookie is already set
-  if (req.cookies.accountId) {
-    // Send the Account document to the frontend
-    const account = await Account.findById(req.cookies.accountId);
-    const resAcc = await transformAccount(account);
-    return res.status(200).send({
-      message: "Already logged in",
-      account: resAcc,
-      isLoggedIn: true,
-    });
-  } else {
-    return res.status(200).send({ isLoggedIn: false });
+  try {
+    // Check if the cookie is already set
+    if (req.cookies.accountId) {
+      // Send the Account document to the frontend
+      const account = await Account.findById(req.cookies.accountId);
+      const resAcc = await transformAccount(account);
+      return res.status(200).send({
+        message: "Already logged in",
+        account: resAcc,
+        isLoggedIn: true,
+      });
+    } else {
+      return res.status(200).send({ isLoggedIn: false });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Error");
   }
 });
 
@@ -395,12 +400,9 @@ app.post("/verifyOtp", async (req, res) => {
       });
 
       // OTP verification successful
-      return res
-        .status(200)
-        .send({
-          message:
-            "OTP verified successfully. You can now reset your password.",
-        });
+      return res.status(200).send({
+        message: "OTP verified successfully. You can now reset your password.",
+      });
     } else {
       // OTP invalid or expired
       return res.status(400).send({ message: "Invalid or expired OTP." });
@@ -423,7 +425,9 @@ app.post("/resetPassword", async (req, res) => {
     // Hash the new password
     bcrypt.hash(newPassword, saltRounds, async (err, hash) => {
       if (err) {
-        return res.status(500).send({ message: "Error hashing new password", error: err });
+        return res
+          .status(500)
+          .send({ message: "Error hashing new password", error: err });
       }
 
       // Update the account with the new hashed password
@@ -432,7 +436,7 @@ app.post("/resetPassword", async (req, res) => {
         // Clear the otp field to signify the process is complete
         "otp.code": null,
         "otp.expiry": null,
-        "otp.used": false
+        "otp.used": false,
       });
 
       res.status(200).send({ message: "Password reset successfully" });

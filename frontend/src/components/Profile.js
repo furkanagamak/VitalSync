@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useAuth } from "../providers/authProvider.js";
 
 function ImageUploader({ onClose, setImgUrl }) {
   const fileTypes = ["PNG", "JPEG", "GIF", "JPG"];
   const [fileName, setFileName] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
+  const { id } = useParams();
+  const { user, triggerNavImgRefetch } = useAuth();
   const navigate = useNavigate();
 
   const handleFileSelection = (event) => {
@@ -37,6 +40,7 @@ function ImageUploader({ onClose, setImgUrl }) {
         if (response.ok) {
           const data = await response.json();
           setImgUrl(data.url);
+          triggerNavImgRefetch();
           toast.success(data.message);
           onClose();
         } else {
@@ -565,7 +569,7 @@ function MyComponent() {
     const fetchUserImg = async () => {
       try {
         const res = await fetch(
-          `${process.env.REACT_APP_BACKEND_URI}/user/profilePicture/url/${id}`
+          `${process.env.REACT_APP_API_BASE_URL}/user/profilePicture/url/${id}`
         );
 
         const txt = await res.text();

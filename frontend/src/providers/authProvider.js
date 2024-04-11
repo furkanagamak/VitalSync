@@ -11,8 +11,12 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-
+  const [fetchImg, setFetchImg] = useState(false);
   const navigate = useNavigate();
+
+  const triggerNavImgRefetch = () => {
+    setFetchImg((fetchImg) => !fetchImg);
+  };
 
   const login = async (email, password) => {
     try {
@@ -45,10 +49,9 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const fetchCheckLogin = async () => {
-      console.log("FCL");
       try {
         const res = await fetch(
-          `${process.env.REACT_APP_BACKEND_URI}/checkLogin`,
+          `${process.env.REACT_APP_API_BASE_URL}/checkLogin`,
           {
             credentials: "include",
           }
@@ -58,6 +61,7 @@ export const AuthProvider = ({ children }) => {
           const data = await res.json();
           if (data.isLoggedIn) {
             setUser(data.account);
+            navigate("/home");
           } else {
             navigate("/");
           }
@@ -75,7 +79,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, fetchImg, triggerNavImgRefetch, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
