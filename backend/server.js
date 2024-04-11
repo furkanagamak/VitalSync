@@ -97,11 +97,11 @@ app.put("/user/profilePicture", upload.single("image"), async (req, res) => {
   try {
     const accountId = req.cookies.accountId;
     if (!accountId) {
-      return res.status(400).send({ message: "User not logged in" });
+      return res.status(400).send("User not logged in");
     }
 
     const currUser = await Account.findOne({ _id: accountId });
-    if (!currUser) return res.status(404).send("User does not exist!");
+    if (!currUser) return res.status(404).send("User does not exist! Malfo");
 
     // puts image into s3
     const profileUrlName =
@@ -531,3 +531,5 @@ const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+module.exports = app;
