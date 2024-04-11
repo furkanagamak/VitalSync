@@ -329,7 +329,7 @@ const transformAccount = async (account) => {
     id: account._id,
     firstName: account.firstName,
     lastName: account.lastName,
-    accountType: account.accountType === "staff" ?? "admin",
+    accountType: account.accountType === "staff" ? "staff" : "admin",
     profileUrl: url,
   };
 };
