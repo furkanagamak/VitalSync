@@ -562,7 +562,7 @@ function MyComponent() {
   const [terminationConfirmed, setTerminationConfirmed] = useState(false);
   const [incorrectName, setIncorrectName] = useState(false);
   const [view, setView] = useState("profile"); // 'profile' or 'changeAvailability'
-  const [imgUrl, setImgUrl] = useState("/profilepic.png");
+  const [imgUrl, setImgUrl] = useState("/profileicon.png");
   const { id } = useParams();
 
   useEffect(() => {

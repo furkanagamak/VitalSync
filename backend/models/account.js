@@ -8,7 +8,7 @@ const accountSchema = new mongoose.Schema({
   accountType: {
     type: String,
     required: true,
-    enum: ["Staff", "Hospital Admin", "System Admin"],
+    enum: ["staff", "hospital admin", "system Admin"],
   },
   profileUrl: { type: String, default: "" },
   isTerminated: { type: Boolean, default: false },
@@ -55,8 +55,8 @@ const accountSchema = new mongoose.Schema({
   otp: {
     code: { type: String, default: null },
     expiry: { type: Date, default: null },
-    used: { type: Boolean, default: false }
-  }
+    used: { type: Boolean, default: false },
+  },
 });
 
 module.exports = mongoose.model("Account", accountSchema);

@@ -23,6 +23,7 @@ const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const Account = require("./models/account.js");
+const Role = require("./models/role.js");
 
 dotenv.config();
 
@@ -39,7 +40,37 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("MongoDB Connected."))
+  .then(() => {
+    console.log("MongoDB Connected.");
+    console.log("Iniitializing roles");
+    const rolesToAdd = [
+      { name: "physician", uniqueIdentifier: "physician" },
+      { name: "nurse", uniqueIdentifier: "nurse" },
+      { name: "surgeon", uniqueIdentifier: "surgeon" },
+      { name: "other", uniqueIdentifier: "other" },
+    ];
+
+    // Function to add roles if they do not exist
+    const addRolesIfNeeded = async () => {
+      try {
+        for (const roleData of rolesToAdd) {
+          const existingRole = await Role.findOne({ name: roleData.name });
+          if (!existingRole) {
+            const newRole = new Role(roleData);
+            await newRole.save();
+            console.log(`Role '${roleData.name}' added successfully.`);
+          } else {
+            console.log(`Role '${roleData.name}' already exists.`);
+          }
+        }
+      } catch (error) {
+        console.error("Error adding roles:", error);
+      }
+    };
+
+    // Call the function to add roles
+    addRolesIfNeeded();
+  })
   .catch((err) => {
     console.error("Database connection error:", err);
     process.exit(1);
@@ -137,6 +168,11 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const isValidEmail = (email) => {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+};
+
 app.post("/createAccount", async (req, res) => {
   try {
     const {
@@ -153,13 +189,61 @@ app.post("/createAccount", async (req, res) => {
       eligibleRoles,
     } = req.body;
 
+    // permission checks
+    // const currUID = req.cookies.accountId;
+    // if (!currUID) {
+    //   return res.status(401).send("You are not authorized to use this feature");
+    // }
+    // const currUser = await Account.find({ _id: currUID });
+    // if (!currUser)
+    //   return res
+    //     .status(400)
+    //     .send("Malformed session, please logout and sign in again!");
+    // if (currUser.accountType === "staff")
+    //   return res
+    //     .status(401)
+    //     .send("You are not authorized to use this feature!");
+    // if (
+    //   accountType === "hospital admin" &&
+    //   currUser.accountType !== "system admin"
+    // )
+    //   return res
+    //     .status(401)
+    //     .send(
+    //       "You need to ask an system admin to create this type of account!"
+    //     );
+
+    // Check if any required field is missing or empty
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !accountType ||
+      !position ||
+      !department ||
+      !degree ||
+      !phoneNumber ||
+      !eligibleRoles
+    ) {
+      return res
+        .status(400)
+        .send(
+          "All fields except officePhoneNumber and officeLocation are required."
+        );
+    }
+
+    if (!isValidEmail) {
+      return res.status(400).send("invalid email provided");
+    }
+
     // Check if an account with the given email already exists
     const accountExists = await Account.findOne({ email: email });
     if (accountExists) {
-      return res
-        .status(400)
-        .send({ message: "An account with this email already exists." });
+      return res.status(400).send("An account with this email already exists.");
     }
+
+    const inpRole = await Role.findOne({ name: eligibleRoles });
+    if (!inpRole) return res.status(400).send("queried role doesn't exists");
 
     // Generate a random password
     const password = crypto.randomBytes(8).toString("hex");
@@ -167,9 +251,7 @@ app.post("/createAccount", async (req, res) => {
     // Hash the password
     bcrypt.hash(password, saltRounds, async (err, hash) => {
       if (err) {
-        return res
-          .status(500)
-          .send({ message: "Error hashing password", error: err });
+        return res.status(500).send("Error hashing password");
       }
 
       // Send email with the plain password
@@ -202,9 +284,7 @@ app.post("/createAccount", async (req, res) => {
 
       transporter.sendMail(mailOptions, async (error, info) => {
         if (error) {
-          return res
-            .status(500)
-            .send({ message: "Error sending email", error });
+          return res.status(500).send("Error sending email");
         } else {
           // Create and save the new account
           const newAccount = new Account({
@@ -219,7 +299,7 @@ app.post("/createAccount", async (req, res) => {
             phoneNumber,
             officePhoneNumber,
             officeLocation,
-            eligibleRoles,
+            eligibleRoles: inpRole,
           });
 
           await newAccount.save();
@@ -231,7 +311,7 @@ app.post("/createAccount", async (req, res) => {
       });
     });
   } catch (error) {
-    res.status(400).send({ message: "Error creating account", error });
+    res.status(400).send("Error creating account");
   }
 });
 
@@ -249,7 +329,7 @@ const transformAccount = async (account) => {
     id: account._id,
     firstName: account.firstName,
     lastName: account.lastName,
-    accountType: account.accountType,
+    accountType: account.accountType === "staff" ?? "admin",
     profileUrl: url,
   };
 };
@@ -401,7 +481,8 @@ app.post("/verifyOtp", async (req, res) => {
 
       // OTP verification successful
       return res.status(200).send({
-        message: "OTP code verified successfully. You can now reset your password.",
+        message:
+          "OTP code verified successfully. You can now reset your password.",
       });
     } else {
       // OTP invalid or expired

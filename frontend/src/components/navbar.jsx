@@ -12,7 +12,7 @@ const Navbar = () => {
   return (
     <nav className="h-20 bg-primary flex text-white">
       <Header />
-      <Tabs />
+      <Tabs userType={user.accountType} />
       <UserNav
         id={user.id}
         firstName={user.firstName}
@@ -49,7 +49,7 @@ const Header = () => {
   );
 };
 
-const Tabs = () => {
+const Tabs = ({ userType }) => {
   const navigate = useNavigate();
   const navigateToRoster = () => navigate("/Roster");
   const navigateToAdminActions = () => navigate("/adminActions");
@@ -60,11 +60,13 @@ const Tabs = () => {
           Roster
         </button>
       </section>
-      <section className="px-8 flex pb-2">
-        <button onClick={navigateToAdminActions} className="my-auto">
-          Admin Actions
-        </button>
-      </section>
+      {userType === "admin" && (
+        <section className="px-8 flex pb-2">
+          <button onClick={navigateToAdminActions} className="my-auto">
+            Admin Actions
+          </button>
+        </section>
+      )}
     </div>
   );
 };
