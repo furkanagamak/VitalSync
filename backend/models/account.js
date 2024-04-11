@@ -10,6 +10,8 @@ const accountSchema = new mongoose.Schema({
     required: true,
     enum: ["Staff", "Hospital Admin", "System Admin"],
   },
+  profileUrl: { type: String, default: "" },
+  isTerminated: { type: Boolean, default: false },
   position: { type: String, required: true },
   department: { type: String, required: true },
   degree: { type: String, required: true },

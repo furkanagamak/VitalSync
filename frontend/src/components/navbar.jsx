@@ -1,17 +1,24 @@
 import { CiBellOn } from "react-icons/ci";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { IoMenu } from "react-icons/io5";
 import NotificationDropDown from "./notifications/NotificationDropDown";
 import { useNavigate } from "react-router-dom";
 import { TbLogout } from "react-icons/tb";
-import { useAuth } from "../providers/authProvider";
+import { useAuth } from "../providers/authProvider.js";
 
 const Navbar = () => {
+  const { user } = useAuth();
+  if (!user) return "error loading user!";
   return (
     <nav className="h-20 bg-primary flex text-white">
       <Header />
       <Tabs />
-      <UserNav />
+      <UserNav
+        id={user.id}
+        firstName={user.firstName}
+        lastName={user.lastName}
+        profileUrl={user.profileUrl}
+      />
       <Notifications />
       <LogoutButton />
       <Menu />
@@ -61,12 +68,34 @@ const Tabs = () => {
   );
 };
 
-const UserNav = () => {
+const UserNav = ({ id, firstName, lastName, profileUrl }) => {
+  const [url, setUrl] = useState("/profilepic.png");
   const navigate = useNavigate();
 
   const handleNavigate = () => {
-    navigate("/Profile");
+    navigate(`/Profile/${id}`);
   };
+
+  useEffect(() => {
+    const fetchUserImg = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.REACT_APP_BACKEND_URI}/user/profilePicture/url/${id}`
+        );
+
+        const txt = await res.text();
+        if (res.ok) {
+          setUrl(txt);
+        } else {
+          console.log("server responded with error text ", txt);
+        }
+      } catch (e) {
+        console.log("fetch profile image fail");
+      }
+    };
+
+    fetchUserImg();
+  }, [profileUrl, id]);
 
   return (
     <div
@@ -74,8 +103,10 @@ const UserNav = () => {
       onClick={handleNavigate}
       id="userNav"
     >
-      <p className="text-2xl hidden md:block">John Smith</p>
-      <img src="/profileicon.png" className="h-12 w-12" />
+      <p className="text-2xl hidden md:block">{`${firstName} ${lastName}`}</p>
+      <div className="h-12 w-12 overflow-hidden rounded-full">
+        <img src={url} alt="Profile" className="h-full w-full object-cover" />
+      </div>
     </div>
   );
 };
@@ -118,9 +149,9 @@ const LogoutButton = () => {
   };
 
   return (
-    <button 
-      id="logoutbtn" 
-      onClick={handleLogout} 
+    <button
+      id="logoutbtn"
+      onClick={handleLogout}
       className="flex items-center ml-0 mr-4"
     >
       <TbLogout className="h-12 w-12 text-black bg-white rounded-full p-1.5" />
