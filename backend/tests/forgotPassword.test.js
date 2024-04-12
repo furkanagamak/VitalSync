@@ -5,7 +5,7 @@ const {
   } = require("../server.js");
   const request = require("supertest");
   const mongoose = require("mongoose");
-  const Account = require("../models/account");  // Assuming your account model is exported from here
+  const Account = require("../models/account");
   
   describe("POST /forgotPassword password reset endpoint testing", () => {
     let server;
@@ -34,8 +34,7 @@ const {
   
       expect(res.status).toBe(200);
       expect(res.body.message).toBe("OTP sent to your email.");
-  
-      // Optionally, check the database to ensure OTP code and expiry are set
+
       const updatedAccount = await Account.findOne({ email: dummyEmail });
       expect(updatedAccount.otp.code).not.toBeNull();
       expect(updatedAccount.otp.expiry).not.toBeNull();
