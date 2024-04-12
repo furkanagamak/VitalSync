@@ -64,13 +64,11 @@ export const AuthProvider = ({ children }) => {
             console.log(window.location.pathname);
             if (
               window.location.pathname === "/" ||
-              window.location.pathname === "/RecoveryPage"
+              window.location.pathname === "/recoveryPage"
             )
               navigate("/home");
           } else {
-            if(window.location.pathname !== "/RecoveryPage") {
             navigate("/");
-            }
           }
         } else {
           navigate("/");
