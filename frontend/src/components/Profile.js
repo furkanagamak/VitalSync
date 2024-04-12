@@ -15,6 +15,7 @@ import styled from 'styled-components';
 const notify = () => toast.success("Profile successfully updated.");
 const notifyErr = () => toast.error("There was an error updating the profile.");
 
+
 function ImageUploader({ onClose, setImgUrl }) {
   const fileTypes = ["PNG", "JPEG", "GIF", "JPG"];
   const [fileName, setFileName] = useState("");
@@ -161,16 +162,44 @@ function PasswordResetConfirmation({ onClose }) {
   );
 }
 
-function ConfirmResetPasswordModal({ onClose, onConfirm }) {
+function ConfirmResetPasswordModal({ user,onClose, onConfirm }) {
   const [currentPassword, setCurrentPassword] = useState('');
 
   const handlePasswordChange = (event) => {
     setCurrentPassword(event.target.value);
   };
 
-  const handleSubmit = () => {
-    onConfirm(); 
+  const handleSubmit = async () => {
+    if (!currentPassword) {
+      toast.error("Please enter your current password.");
+      return;
+    }
+  
+    if (!user || !user.userId) {
+      toast.error("User information is not available.");
+      return;
+    }
+  
+    try {
+      console.log('User ID is:', user.userId);
+      const response = await axios.post('/verify-password', {
+        userId: user.userId,
+        password: currentPassword
+      });
+  
+      if (response.data.isPasswordCorrect) {
+        onConfirm();
+        toast.success("Password verified successfully!");
+      } else {
+        toast.error("Incorrect password. Please try again.");
+      }
+    } catch (error) {
+      console.error('Error verifying password:', error);
+      toast.error("Failed to verify password. Please try again.");
+    }
   };
+  
+  
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
@@ -307,6 +336,8 @@ function ContactInfo({ user }) {
   const [errors, setErrors] = useState({});
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
   const [showPasswordResetConfirmation, setShowPasswordResetConfirmation] = useState(false);
+  const { currentUser } = useAuth();
+
 
   useEffect(() => {
     if (user) {
@@ -373,6 +404,9 @@ function ContactInfo({ user }) {
     setShowPasswordResetConfirmation(true);
   };
 
+ 
+  console.log("profile is",user?.userId)
+
   return (
     <div className="flex flex-col mt-1.5 text-3xl text-black max-md:mt-10">
       <h2 className="text-4xl text-left text-red-800">Contact Information</h2>
@@ -429,15 +463,20 @@ function ContactInfo({ user }) {
         >
           {editMode ? "Save Changes" : "Edit Contact Info"}
         </button>
+        {currentUser?.userId !== user?.userId && (
+          
+
         <button
           onClick={handleResetPasswordClick}
           className="justify-center px-2 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
         >
           Reset Password
         </button>
+      )}
       </div>
       {showResetPasswordModal && (
         <ConfirmResetPasswordModal
+          user={user}
           onClose={() => setShowResetPasswordModal(false)}
           onConfirm={handleResetPasswordConfirm}
         />
