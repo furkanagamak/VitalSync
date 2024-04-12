@@ -297,7 +297,7 @@ const Form1 = ({
               id="firstNameInp"
               InputLabelProps={{ style: { color: "#8E0000" } }}
               inputProps={{ style: { color: "#8E0000" } }}
-              className="shadow rounded w-full"
+              className="shadow rounded w-11/12"
             />
           </div>
           <div className="text-center w-1/4">
