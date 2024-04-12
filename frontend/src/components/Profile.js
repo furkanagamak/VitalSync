@@ -4,6 +4,16 @@ import toast from "react-hot-toast";
 import { useAuth } from "../providers/authProvider.js";
 import axios from "axios";
 import { useReducer } from "react";
+import { DateRangePicker } from 'rsuite';
+import 'rsuite/dist/rsuite.min.css'; 
+import { TextField, FormControl, Select, MenuItem, InputLabel, Button } from '@mui/material';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import styled from 'styled-components';
+
+
+
+
 
 const notify = () => toast.success("Profile successfully updated.");
 const notifyErr = () => toast.error("There was an error updating the profile.");
@@ -282,6 +292,7 @@ function ContactInfo({ user }) {
   const [officeNo, setOfficeNo] = useState('');
   const [email, setEmail] = useState('');
   const [office, setOffice] = useState('');
+  const [errors, setErrors] = useState({});
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
   const [showPasswordResetConfirmation, setShowPasswordResetConfirmation] = useState(false);
 
@@ -292,28 +303,54 @@ function ContactInfo({ user }) {
       setEmail(user.email || '');
       setOffice(user.officeLocation || '');
     }
-  }, [user]);  
+  }, [user]);
 
+  const validatePhoneNumber = (number) => {
+    return /^\d{3}-\d{3}-\d{4}$/.test(number);
+  };
+
+  const validateEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
 
   const handleSaveChanges = async () => {
-    console.log("Updating user with ID:", user.userId);
+    let errorMessages = {};
+    if (!validatePhoneNumber(cellNo)) {
+      errorMessages.cellNo = 'Invalid phone number format. Required: XXX-XXX-XXXX';
+    }
+    if (!validatePhoneNumber(officeNo)) {
+      errorMessages.officeNo = 'Invalid phone number format. Required: XXX-XXX-XXXX';
+    }
+    if (!validateEmail(email)) {
+      errorMessages.email = 'Invalid email format.';
+    }
 
-    const updateData = {
-      cellNo,
-      officeNo,
-      email,
-      office
-    };
-
+    if (Object.keys(errorMessages).length > 0) {
+      setErrors(errorMessages);
+      return;
+    }
 
     try {
+      const updateData = {
+        phoneNumber: cellNo,
+        officePhoneNumber: officeNo,
+        email,
+        officeLocation: office
+      };
       const response = await axios.put(`/user/${user.userId}`, updateData);
       notify();
-      setEditMode(false); 
-      console.log(response.data);
+      setEditMode(false);
     } catch (error) {
       console.error('Failed to update profile:', error);
       notifyErr();
+    }
+  };
+
+  const handleInputChange = (setterFunction, value, validatorFunction) => {
+    setterFunction(value);
+    // Clear the corresponding error if the new value is valid
+    if (validatorFunction(value)) {
+      setErrors((prev) => ({ ...prev, [setterFunction.name]: undefined }));
     }
   };
 
@@ -324,7 +361,6 @@ function ContactInfo({ user }) {
     setShowPasswordResetConfirmation(true);
   };
 
-
   return (
     <div className="flex flex-col mt-1.5 text-3xl text-black max-md:mt-10">
       <h2 className="text-4xl text-left text-red-800">Contact Information</h2>
@@ -333,21 +369,24 @@ function ContactInfo({ user }) {
           <input
             type="text"
             value={cellNo}
-            onChange={(e) => setCellNo(e.target.value)}
+            onChange={(e) => handleInputChange(setCellNo, e.target.value, validatePhoneNumber)}
             className="mt-6 text-left border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
           />
+          {errors.cellNo && <div className="text-red-500 text-lg">{errors.cellNo}</div>}
           <input
             type="text"
             value={officeNo}
-            onChange={(e) => setOfficeNo(e.target.value)}
+            onChange={(e) => handleInputChange(setOfficeNo, e.target.value, validatePhoneNumber)}
             className="mt-3 text-left border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
           />
+          {errors.officeNo && <div className="text-red-500 text-lg">{errors.officeNo}</div>}
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => handleInputChange(setEmail, e.target.value, validateEmail)}
             className="mt-2.5 text-left border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
           />
+          {errors.email && <div className="text-red-500 text-lg" >{errors.email}</div>}
           <input
             type="text"
             value={office}
@@ -373,8 +412,8 @@ function ContactInfo({ user }) {
       )}
       <div className="flex gap-5 justify-between items-start mt-24 text-sm font-medium text-neutral-600 max-md:pr-5 max-md:mt-10">
         <button
-        onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
-        className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
+          onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
+          className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
         >
           {editMode ? "Save Changes" : "Edit Contact Info"}
         </button>
@@ -498,136 +537,316 @@ function ProfileDetails({ user }) {
 
 function ProfileSection({ user }) {
   return (
-    <div className="flex flex-col ml-5 w-[76%] max-md:ml-0 max-md:w-full">
+    <div className="flex flex-col ml-5 w-full max-md:ml-0 max-md:w-full">
       <div className="flex flex-col grow max-md:mt-6 max-md:max-w-full">
         <div
           className="px-8 py-7 max-md:px-5 max-md:max-w-full"
           style={{ backgroundColor: "#F5F5DC" }}
         >
-          <div className="flex gap-5 max-md:flex-col max-md:gap-0">
-            <ProfileDetails user={user}/>
-            <ContactInfo user={user}/>
+          <div className="flex flex-row gap-5 max-md:flex-col max-md:gap-0 w-full">
+            <div className="flex-1 min-w-0">
+              <ProfileDetails user={user}/>
+            </div>
+            <div className="flex-2 min-w-0 pr-10">
+              <ContactInfo user={user}/>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
+const ScheduleCalendar = ({ user, onScheduleChange, preview }) => {
+  
+  const today = new Date();
+  const threeYearsLater = new Date(today.getFullYear() + 3, today.getMonth(), today.getDate());
 
-function ScheduleCalendar({ onScheduleChange }) {
-  return (
-    <div>
-      <div className="flex items-center justify-center">
-        <div className="text-3xl font-bold text-center">February 2024</div>
-        <img
-          loading="lazy"
-          src="/dateicon.png"
-          className="shrink-0 self-stretch w-8 aspect-[0.91]"
-          alt="Relevant alt text describing the image"
-        />
-        <button
-          onClick={onScheduleChange}
-          className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
-        >
-          Change Schedule
-        </button>
-      </div>
-      <img
-        src="/Calandar.png"
-        className="grow w-full aspect-[1.64] max-md:mt-10 max-md:max-w-full"
-        alt="Schedule"
-      />
-    </div>
-  );
-}
+  const customStyles = {
+    calendarContainer: {
+      width: '100%',
+      maxWidth: '1000px', // Adjust the width as needed
+      margin: '0 auto',
+    },
+    calendar: {
 
-function ScheduleImage() {
-  return (
-    <div className="flex flex-col ml-5 w-6/12 max-md:ml-0 max-md:w-full">
-      <div className="flex items-center justify-center">
-        {" "}
-        <div className="text-3xl font-bold">March 2024</div>
-      </div>
-      <img
-        src="/Calandar.png"
-        className="grow w-full aspect-[1.64] max-md:mt-10 max-md:max-w-full"
-        alt="Schedule"
-      />
-    </div>
-  );
-}
+      borderRadius: '8px',
+      boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+      color: '#333',
+    },
+    navigationButton: {
+      backgroundColor: '#912424',
+      color: 'white',
+      borderRadius: '10px',
+      padding: '5px',
+      marginTop: "1vh"
+    },
+    monthYearHeader: {
+      backgroundColor: '#8e0000',
+      color: 'white',
+      padding: '5px',
+      width:"90%",
+      margin: '0 auto',
+      borderRadius: '10px',
+      fontSize: "2.5em",
+      marginTop: "1vh"
+    },
+    tile: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: 'column'
+    },
+    dateText: {
+      color: '#8e0000',
+      fontWeight: 'bold',
+      fontSize: "2em",
+    }
+  };
 
-function ChangeAvailability({ onRevertToProfile }) {
-  function DateSelector({ label }) {
-    return (
-      <div className="flex flex-col justify-center">
-        <div className="justify-center px-2.5 py-1 bg-white border border-black border-solid">
-          {label}
-        </div>
-      </div>
-    );
+  // Updated to ensure date and time handling is accurate
+  const parseTime = (timeStr) => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return { hours, minutes };
+  };
+
+  const getTimeOffsForDay = (date) => {
+    const dateStr = date.toISOString().substring(0, 10);
+    return user.unavailableTimes.filter(u => {
+      const startDayStr = new Date(u.start).toISOString().substring(0, 10);
+      const endDayStr = new Date(u.end).toISOString().substring(0, 10);
+      return dateStr >= startDayStr && dateStr <= endDayStr;
+    });
+  };
+
+  const getWorkingHoursForDay = (date, usualHours) => {
+    
+    if (!usualHours || usualHours.start === '0:00' && usualHours.end === '0:00') return ['Off'];  // Check for 'Off' hours
+  
+    const timeOffs = getTimeOffsForDay(date);
+    let segments = [];
+    let currentStart = parseTime(usualHours.start);
+  
+    timeOffs.sort((a, b) => new Date(a.start) - new Date(b.start)).forEach(timeOff => {
+      const timeOffStart = parseTime(new Date(timeOff.start).toLocaleTimeString('it-IT'));
+      const timeOffEnd = parseTime(new Date(timeOff.end).toLocaleTimeString('it-IT'));
+      if (currentStart.hours < timeOffStart.hours || 
+          (currentStart.hours === timeOffStart.hours && currentStart.minutes < timeOffStart.minutes)) {
+        segments.push(`${currentStart.hours}:${currentStart.minutes.toString().padStart(2, '0')}-${timeOffStart.hours}:${timeOffStart.minutes.toString().padStart(2, '0')}`);
+      }
+      currentStart = timeOffEnd;
+    });
+  
+    if (currentStart.hours < parseTime(usualHours.end).hours) {
+      segments.push(`${currentStart.hours}:${currentStart.minutes.toString().padStart(2, '0')}-${parseTime(usualHours.end).hours}:${parseTime(usualHours.end).minutes.toString().padStart(2, '0')}`);
+    }
+  
+    return segments.length ? segments : ['Off'];  // Display 'Off' if no segments are created
+  };
+
+  const getUsualHoursForDay = (day) => {
+    // Calendar UI starts the week on Monday (0 = Monday, 6 = Sunday)
+    const adjustedDay = (day + 6) % 7;  // Adjust so 0 = Sunday, 6 = Saturday if needed
+    const weekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][adjustedDay];
+    const hours = user.usualHours.find(uh => uh.day === weekday);
+    return hours || { start: '0:00', end: '0:00' };  // Provide default 'Off' hours if no match is found
+  };
+
+  if (!user) {
+    return <p>Loading user data...</p>;
   }
 
-  function TimeRange() {
-    return (
-      <div className="flex gap-2 mt-2 whitespace-nowrap">
-        <div className="shrink-0 bg-white border border-black border-solid h-[17px] w-[79px]" />
-        <div className="my-auto">~</div>
-        <div className="shrink-0 bg-white border border-black border-solid h-[17px] w-[79px]" />
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col px-8 pt-20 pb-8 bg-white max-md:px-5">
-      <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50 max-md:px-5 max-md:max-w-full">
-        <header className="flex justify-between items-center max-w-full text-red-800">
-          <h1 className="text-4xl">Change Availability</h1>
-          <h2 className="text-4xl">Notes</h2>
-        </header>
-        <div className="flex gap-5 justify-between items-start mt-1.5 text-sm font-medium text-black">
-          <div className="flex flex-col mt-4 text-xs text-center">
-            <h3 className="text-xl">Select Date</h3>
-            <div className="flex gap-2 mt-3 whitespace-nowrap">
-              <DateSelector label="mmddyyyy" />
-              <div className="my-auto">~</div>
-              <DateSelector label="mmddyyyy" />
-            </div>
-            <h3 className="mt-7 text-xl">Select Status</h3>
-            <div className="flex gap-0 mt-3">
-              <div className="flex flex-col justify-center">
-                <div className="justify-center px-1.5 py-1 bg-white border border-black border-solid">
-                  Work Hours
-                </div>
-              </div>
-              <div className="flex flex-col justify-center whitespace-nowrap">
-                <div className="justify-center px-0.5 py-1 bg-white border border-black border-solid">
-                  ▼
-                </div>
-              </div>
-            </div>
-            <TimeRange />
-          </div>
-          <div className="flex flex-col mt-7">
-            <p>To select one day, leave second field empty</p>
-            <p className="mt-1.5">Work hours are in 24hr format</p>
-          </div>
-          <div className="flex-1"></div>
+    <div style={customStyles.calendarContainer}>
+      
+      {
+        !preview && (
           <button
-            className="justify-center self-end px-5 py-1 mt-48 text-white whitespace-nowrap bg-red-800 rounded-lg border border-solid border-neutral-600"
-            onClick={onRevertToProfile}
+            onClick={onScheduleChange}
+            className="mt-2 mb-5 justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
           >
+            Edit Schedule
+          </button>
+        )
+      }
+      <Calendar
+        minDate={today}
+        maxDate={threeYearsLater}
+        tileContent={({ date, view }) => {
+          if (view === 'month') {
+            const usualHours = getUsualHoursForDay(date.getDay());
+            const workingHours = getWorkingHoursForDay(date, usualHours);
+            return (
+              <div style={customStyles.tile}>
+                <span style={customStyles.dateText}>{date.getDate()}</span>
+                <div className="text-md mt-4">
+                  {workingHours.join(', ')}
+                </div>
+              </div>
+            );
+          }
+        }}
+        navigationLabel={({ label }) => (
+          <div style={customStyles.monthYearHeader}>{label}</div>
+        )}
+        prevLabel={<div style={customStyles.navigationButton}>‹</div>}
+        nextLabel={<div style={customStyles.navigationButton}>›</div>}
+        style={customStyles.calendar}
+      />
+    </div>
+  );
+};
+
+function ChangeAvailability({ user, onRevertToProfile , setUser}) {
+  const [dateRange, setDateRange] = useState([new Date(), new Date()]);
+  const [status, setStatus] = useState('Work Hours');
+  const [errors, setErrors] = useState({});
+  const [weeklySchedule, setWeeklySchedule] = useState([...user.usualHours]);
+  const [previewSchedule, setPreviewSchedule] = useState([...user.usualHours]);
+
+  useEffect(() => {
+    setPreviewSchedule([...weeklySchedule]);
+  }, [weeklySchedule]);
+
+  const handleDateChange = (range) => {
+    setDateRange(range);
+  };
+
+  const handleStatusChange = (event) => {
+    setStatus(event.target.value);
+  };
+
+  const handleWeekdayHoursChange = (day, hours) => {
+    const updatedSchedule = weeklySchedule.map(schedule =>
+      schedule.day === day ? { ...schedule, ...hours } : schedule
+    );
+    setWeeklySchedule(updatedSchedule);
+  };
+
+  // When the user wants to go back without saving
+  const handleBackWithoutSaving = () => {
+    setWeeklySchedule([...user.usualHours]);  // Reset any changes made
+    onRevertToProfile();  // Switch back to the profile view
+  };
+
+  const handleSubmitTimeOff = async () => {
+    if (!dateRange[0] || !dateRange[1] || !status) {
+      setErrors({ msg: 'Please fill in all fields.' });
+      return;
+    }
+
+    const updateData = {
+      unavailableTimes: [...user.unavailableTimes, {
+        start: dateRange[0],
+        end: dateRange[1],
+        reason: status
+      }]
+    };
+
+    try {
+      const response = await axios.put(`/user/${user.userId}`, updateData);
+      if (response.status === 200) {
+        toast.success('Availability updated successfully!');
+        onRevertToProfile(); // Assuming this function re-fetches user data or redirects
+      } else {
+        toast.error('Failed to update availability.');
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+      toast.error('Error updating user: ' + error.message);
+    }
+  };
+
+  const handleSubmitWeeklySchedule = async () => {
+    const updateData = {
+      usualHours: weeklySchedule
+    };
+  
+    try {
+      const response = await axios.put(`/user/${user.userId}`, updateData);
+      if (response.status === 200) {
+        toast.success('Weekly schedule updated successfully!');
+        setUser({ ...user, usualHours: weeklySchedule }); // Update user state
+        onRevertToProfile();
+      } else {
+        toast.error('Failed to update weekly schedule.');
+      }
+    } catch (error) {
+      console.error('Error updating weekly schedule:', error);
+      toast.error('Error updating weekly schedule: ' + error.message);
+    }
+  };
+
+  
+
+  return (
+    <div className="flex flex-col px-8 pt-20 pb-8 bg-white">
+      <button onClick={handleBackWithoutSaving} className="mb-4 bg-primary p-2 rounded text-white text-xl w-1/6">
+        Back to Profile
+      </button>
+      <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
+        <header className="flex justify-between items-center max-w-full text-red-800">
+          <h1 className="text-4xl">Time-Off Request</h1>
+        </header>
+        <div className="flex flex-col mt-4">
+          <DateRangePicker
+            showOneCalendar
+            appearance="default"
+            placeholder="Select Date Range"
+            format="yyyy-MM-dd HH:mm"
+            value={dateRange}
+            onChange={handleDateChange}
+          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={status}
+              label="Status"
+              onChange={handleStatusChange}
+            >
+              <MenuItem value="On-Call">On-Call</MenuItem>
+              <MenuItem value="Time-Off">Time-Off</MenuItem>
+              <MenuItem value="Vacation">Vacation</MenuItem>
+            </Select>
+          </FormControl>
+          {errors.msg && <div style={{ color: 'red' }}>{errors.msg}</div>}
+          <button color="#8e0000" onClick={handleSubmitTimeOff}>
             Submit
           </button>
         </div>
       </section>
-      <section className="flex flex-col pt-5 pb-10 mt-10 border border-black border-solid">
-        <div className="flex flex-col px-8 font-medium">
-          <h2 className="text-4xl text-red-800">Preview</h2>
-          <div className="flex gap-5 self-center mt-9 text-3xl text-black">
-            <div className="flex-auto">February 2024</div>
-            <div className="flex-auto">March 2024</div>
-          </div>
+      <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
+        <header className="flex justify-between items-center max-w-full text-red-800">
+          <h1 className="text-4xl">Weekly Schedule Update</h1>
+        </header>
+        <div className="flex flex-col mt-4">
+          {weeklySchedule.map((schedule, index) => (
+            <div key={index} className="flex justify-between items-center">
+              <p>{schedule.day}</p>
+              <TextField
+                label="Start Time"
+                type="time"
+                value={schedule.start}
+                onChange={(e) => handleWeekdayHoursChange(schedule.day, { start: e.target.value })}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+              <TextField
+                label="End Time"
+                type="time"
+                value={schedule.end}
+                onChange={(e) => handleWeekdayHoursChange(schedule.day, { end: e.target.value })}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            </div>
+          ))}
+          <button color="#8e0000" onClick={handleSubmitWeeklySchedule}>
+            Update Schedule
+          </button>
+
+          <ScheduleCalendar user={{...user, usualHours: previewSchedule}} onScheduleChange={() => {}} preview={true} />
         </div>
       </section>
     </div>
@@ -649,6 +868,7 @@ function MyComponent() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        console.log(id);
         const response = await axios.get(`/user/${id}`);
         setUser(response.data);  // Set the user data in state
       } catch (error) {
@@ -713,7 +933,7 @@ function MyComponent() {
 
   // Renders the change availability view
   if (view === "changeAvailability") {
-    return <ChangeAvailability onRevertToProfile={handleRevertToProfile} />;
+    return <ChangeAvailability onRevertToProfile={handleRevertToProfile} user={user} setUser={setUser}/>;
   }
 
   // Default view rendering (profile view)
@@ -733,10 +953,9 @@ function MyComponent() {
           <ProfileSection user={user}/>
         </div>
       </div>
-      <div className="mt-4 w-full max-w-[1286px] max-md:max-w-full">
-        <div className="flex gap-5 max-md:flex-col max-md:gap-0">
-          <ScheduleCalendar onScheduleChange={handleScheduleChange} />
-          <ScheduleImage />
+      <div className="flex flex-col md:flex-row gap-5">
+      <div className="w-full my-5">
+          <ScheduleCalendar user={user} onScheduleChange={handleScheduleChange} preview={false}/>
         </div>
         {incorrectName && <p className="text-red-500">Incorrect name</p>}
         {showTerminationModal && (
