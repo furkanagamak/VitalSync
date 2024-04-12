@@ -43,7 +43,7 @@ function MyComponent() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("/users"); 
+        const response = await axios.get("/user"); 
         const formattedUsers = response.data.map((user) => [
           `${user.firstName} ${user.lastName}`,
           user.department,
