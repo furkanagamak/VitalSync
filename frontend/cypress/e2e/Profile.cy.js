@@ -1,23 +1,22 @@
 describe('MyComponent Button Functionality', () => {
-    beforeEach(() => {
-      cy.visit('/');
-      cy.get('#emailInput').type('john.doe@example.com');
-      cy.get('#passwordInput').type('password123');
-      cy.get('button').contains('Sign in').click();
-      cy.wait(1000);
-      cy.visit('/Profile/:id'); 
-    });
+  beforeEach(() => {
+    cy.visit('/');
+    cy.get('#emailInput').type('john.doe@example.com');
+    cy.get('#passwordInput').type('password123');
+    cy.get('button').contains('Sign in').click();
+    cy.wait(1000);
+    cy.get('#userNav').should('be.visible').click();
+  });
   
 
-    it('changes view to ChangeAvailability on clicking Change Schedule', () => {
-      cy.contains('Change Schedule').click();
-      cy.contains('Change Availability').should('be.visible');
+    it('changes view to ChangeAvailability on clicking Edit Schedule', () => {
+      cy.contains('Edit Schedule').should('exist').click();
+      cy.contains('Time-Off Request').should('be.visible');
     });
   
     it('returns to profile view from ChangeAvailability', () => {
-      cy.contains('Change Schedule').click();
-      cy.contains('Change Availability').should('be.visible');
-  
+      cy.contains('Edit Schedule').should('be.visible').click();
+      cy.contains('Weekly Schedule Update').should('be.visible');
       cy.contains('Submit').click();
       cy.contains('Change Availability').should('not.exist');
     });
