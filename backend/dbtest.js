@@ -12,6 +12,7 @@ const ProcessTemplate = require("./models/processTemplate.js");
 const ProcessInstance = require("./models/processInstance.js");
 const SectionTemplate = require("./models/sectionTemplate.js");
 const SectionInstance = require("./models/sectionInstance.js");
+const bcrypt = require("bcrypt");
 
 async function addInstances() {
   try {
@@ -28,7 +29,7 @@ async function addInstances() {
       lastName: "Doe",
       password: "password123",
       email: "john.doe@example.com",
-      accountType: "staff",
+      accountType: "system admin",
       position: "Doctor",
       department: "Cardiology",
       degree: "MD",
@@ -36,6 +37,9 @@ async function addInstances() {
       officePhoneNumber: "0987654321",
       officeLocation: "Room 101",
     };
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(accountData.password, salt);
+    accountData.password = hashedPassword;
     const newAccount = new Account(accountData);
     const savedAccount = await newAccount.save();
     console.log("Account saved:", savedAccount);
@@ -169,7 +173,7 @@ async function addInstances() {
     const savedSectionInstance = await newSectionInstance.save();
     console.log("SectionInstance saved:", savedSectionInstance);
 
-    await Promise.all([
+    /*await Promise.all([
       Account.deleteMany({}),
       Patient.deleteMany({}),
       ResourceInstance.deleteMany({}),
@@ -182,7 +186,7 @@ async function addInstances() {
       SectionTemplate.deleteMany({}),
       SectionInstance.deleteMany({}),
     ]);
-    console.log("Database cleared.");
+    console.log("Database cleared.");*/
   } catch (error) {
     console.error("Error:", error);
   } finally {

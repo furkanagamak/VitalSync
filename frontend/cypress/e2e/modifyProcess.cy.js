@@ -1,5 +1,10 @@
 describe('Modify Process Landing Page Tests', () => {
     beforeEach(() => {
+        cy.visit('/');
+        cy.get('#emailInput').type('john.doe@example.com');
+        cy.get('#passwordInput').type('password123');
+        cy.get('button').contains('Sign in').click();
+        cy.wait(1000);
         cy.visit('/processManagement/modifyProcess/landing');
     });
 
@@ -36,6 +41,11 @@ describe('Modify Process Landing Page Tests', () => {
 
 describe('Modify Resource Assignments Tests', () => {
     beforeEach(() => {
+        cy.visit('/');
+        cy.get('#emailInput').type('john.doe@example.com');
+        cy.get('#passwordInput').type('password123');
+        cy.get('button').contains('Sign in').click();
+        cy.wait(1000);
         cy.visit('/processManagement/modifyProcess/resourceAssignments');
     });
 
@@ -58,6 +68,11 @@ describe('Modify Resource Assignments Tests', () => {
 
 describe('Modify Staff Assignments Tests', () => {
     beforeEach(() => {
+        cy.visit('/');
+        cy.get('#emailInput').type('john.doe@example.com');
+        cy.get('#passwordInput').type('password123');
+        cy.get('button').contains('Sign in').click();
+        cy.wait(1000);
         cy.visit('/processManagement/modifyProcess/staffAssignments');
     });
 
@@ -81,6 +96,11 @@ describe('Modify Staff Assignments Tests', () => {
 
 describe('Pending Staff Assignments Tests', () => {
     beforeEach(() => {
+        cy.visit('/');
+        cy.get('#emailInput').type('john.doe@example.com');
+        cy.get('#passwordInput').type('password123');
+        cy.get('button').contains('Sign in').click();
+        cy.wait(1000);
         cy.visit('/processManagement/modifyProcess/pendingStaffAssignments');
     });
 
@@ -105,6 +125,11 @@ describe('Pending Staff Assignments Tests', () => {
 
 describe('Pending Resource Assignments Tests', () => {
     beforeEach(() => {
+        cy.visit('/');
+        cy.get('#emailInput').type('john.doe@example.com');
+        cy.get('#passwordInput').type('password123');
+        cy.get('button').contains('Sign in').click();
+        cy.wait(1000);
         cy.visit('/processManagement/modifyProcess/pendingResourceAssignments');
     });
 
@@ -128,6 +153,11 @@ describe('Pending Resource Assignments Tests', () => {
 
 describe('Review Staff Assignments Tests', () => {
     beforeEach(() => {
+        cy.visit('/');
+        cy.get('#emailInput').type('john.doe@example.com');
+        cy.get('#passwordInput').type('password123');
+        cy.get('button').contains('Sign in').click();
+        cy.wait(1000);
         cy.visit('/processManagement/modifyProcess/reviewStaffAssignments');
     });
 
@@ -152,6 +182,11 @@ describe('Review Staff Assignments Tests', () => {
 
 describe('Review Resource Assignments Tests', () => {
     beforeEach(() => {
+        cy.visit('/');
+        cy.get('#emailInput').type('john.doe@example.com');
+        cy.get('#passwordInput').type('password123');
+        cy.get('button').contains('Sign in').click();
+        cy.wait(1000);
         cy.visit('/processManagement/modifyProcess/reviewResourceAssignments');
     });
 

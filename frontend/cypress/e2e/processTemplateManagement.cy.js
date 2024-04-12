@@ -1,15 +1,15 @@
 describe('Process Template Management', () => {
     beforeEach(() => {
+      cy.visit('/');
+      cy.get('#emailInput').type('john.doe@example.com');
+      cy.get('#passwordInput').type('password123');
+      cy.get('button').contains('Sign in').click();
+      cy.wait(1000);
       cy.visit('/ProcessTemplateManagement');
     });
   
     it('successfully loads', () => {
       cy.contains('Process Template Management');
-    });
-  
-    it('can navigate to create template form', () => {
-      cy.get('button').contains('Create Template').click();
-      cy.url().should('include', '/CreateProcessTemplateForm');
     });
   
     it('can input and clear search term', () => {

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -13,6 +14,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [fetchImg, setFetchImg] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const triggerNavImgRefetch = () => {
     setFetchImg((fetchImg) => !fetchImg);
@@ -61,9 +63,16 @@ export const AuthProvider = ({ children }) => {
           const data = await res.json();
           if (data.isLoggedIn) {
             setUser(data.account);
-            navigate("/home");
+            console.log(location.pathname);
+            if (
+              location.pathname === "/" ||
+              location.pathname === "/RecoveryPage"
+            )
+              navigate("/home");
           } else {
-            navigate("/");
+            if (location.pathname !== "/RecoveryPage") {
+              navigate("/");
+            }
           }
         } else {
           navigate("/");

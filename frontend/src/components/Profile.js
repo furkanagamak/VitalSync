@@ -155,25 +155,47 @@ function PasswordResetConfirmation({ onClose }) {
 }
 
 function ConfirmResetPasswordModal({ onClose, onConfirm }) {
+  const [currentPassword, setCurrentPassword] = useState('');
+
+  const handlePasswordChange = (event) => {
+    setCurrentPassword(event.target.value);
+  };
+
+  const handleSubmit = () => {
+    // Include logic to verify the current password before resetting
+    // ...
+    onConfirm(); 
+  };
+
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
       <div className="flex flex-col justify-center max-w-[364px] bg-lime-50 rounded-lg border border-red-800 border-solid shadow">
         <div className="text-base leading-6 text-center text-black px-16 py-6">
-          Are You Sure You Want to Reset The Password?
+          To reset the Password enter your current Password
         </div>
-        <div className="flex gap-5 mt-7 text-sm font-medium justify-center px-5 pb-5">
-          <button
-            onClick={onClose}
-            className="flex-1 justify-center px-5 py-3.5 bg-white rounded-lg border border-solid border-neutral-600 text-neutral-600"
-          >
-            No
-          </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 justify-center px-5 py-3.5 bg-red-800 rounded-lg text-white"
-          >
-            Yes
-          </button>
+        <div className="flex flex-col gap-3 px-5 pb-5 mt-3">
+          <input
+            type="password"
+            placeholder="Enter Current Password"
+            value={currentPassword}
+            onChange={handlePasswordChange}
+            className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            style={{ fontSize: '12px' }} // Adjust the font size as needed
+          />
+          <div className="flex gap-5 mt-2 text-sm font-medium justify-center">
+            <button
+              onClick={onClose}
+              className="flex-1 justify-center px-5 py-3.5 bg-white rounded-lg border border-solid border-neutral-600 text-neutral-600"
+            >
+              No
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="flex-1 justify-center px-5 py-3.5 bg-red-800 rounded-lg text-white"
+            >
+              Yes
+            </button>
+          </div>
         </div>
       </div>
     </div>
