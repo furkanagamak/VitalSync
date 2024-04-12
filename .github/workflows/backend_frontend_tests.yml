@@ -63,7 +63,7 @@ jobs:
       - name: Run Jest Tests
         run: |
           cd backend
-          npm test
+          npx jest
 
       - name: Run Cypress Tests
         run: |
