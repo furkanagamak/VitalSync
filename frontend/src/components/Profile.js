@@ -472,7 +472,6 @@ function ProfileDetails({ user }) {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       notify();
       setEditMode(false); // Optionally reset edit mode
-      console.log(response.data);
     } catch (error) {
       console.error('Failed to update profile:', error);
       notifyErr();
@@ -608,7 +607,6 @@ function ScheduleCalendar({ user, onScheduleChange, preview }) {
     const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const weekday = weekdayNames[day];  // No need to adjust if array is aligned properly
     const hours = user.usualHours.find(uh => uh.day === weekday);
-    console.log(`Day index: ${day}, Day name: ${weekday}, Usual hours:`, hours);
 
     return hours || { start: '0:00', end: '0:00' };  // Provide default 'Off' hours if no match is found
     
@@ -637,10 +635,6 @@ function ScheduleCalendar({ user, onScheduleChange, preview }) {
           if (view === 'month') {
             const usualHours = getUsualHoursForDay(date.getDay());
             const workingHours = getWorkingHoursForDay(date, usualHours);
-
-            if(date.getDay() === 0){
-              console.log("Sunday: ", usualHours, workingHours);
-            }
             return (
               <div style={customStyles.tile}>
                 <div className="text-md mt-4">
