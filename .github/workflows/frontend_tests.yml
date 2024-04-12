@@ -28,8 +28,23 @@ jobs:
         run: |
           cd frontend
           npm install
+      
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.10.0
+        with:
+          mongodb-version: "latest"
 
-      - name: Start Server
+      - name: Load Database
+        run: |
+          cd backend
+          node dbtest.js
+
+      - name: Start Backend Server
+        run: |
+          cd backend
+          node server.js &
+          
+      - name: Start Frontend Server
         run: |
           cd frontend
           npm start &
