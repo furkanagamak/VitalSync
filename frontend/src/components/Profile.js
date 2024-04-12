@@ -17,6 +17,7 @@ import { FormControlLabel, Checkbox } from '@mui/material';
 const notify = () => toast.success("Profile successfully updated.");
 const notifyErr = () => toast.error("There was an error updating the profile.");
 
+
 function ImageUploader({ onClose, setImgUrl }) {
   const fileTypes = ["PNG", "JPEG", "GIF", "JPG"];
   const [fileName, setFileName] = useState("");
@@ -139,42 +140,123 @@ function AccountTerminationConfirmation() {
   );
 }
 
-function PasswordResetConfirmation({ onClose }) {
+function PasswordResetConfirmation({ onClose, userId }) {
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handlePasswordChange = (e) => {
+    setNewPassword(e.target.value);
+  };
+
+  const handleConfirmPasswordChange = (e) => {
+    setConfirmPassword(e.target.value);
+  };
+
+  const handleSubmit = async () => {
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    try {
+      const response = await axios.post('/reset-password', {
+        userId: userId,
+        newPassword: newPassword
+      });
+
+      if (response.status === 200) {
+        onClose();
+        alert("Password has been successfully reset.");
+      } else {
+        setError("Failed to reset password.");
+      }
+    } catch (error) {
+      setError("Error resetting password.");
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
       <div className="flex flex-col justify-center max-w-[364px] bg-lime-50 rounded-lg border border-red-800 border-solid shadow">
-        <p className="text-base leading-6 text-center text-black px-16 py-6">
-          The Password has been reset
-          <br />
-          The temporary password is:
-          <br />
-          <span className="font-bold">B6wcCW53</span>
-          <br />A confirmation Email has been sent
-        </p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="justify-center items-center self-center px-5 py-1.5 mt-1 mb-4 text-xs bg-white rounded-lg border border-solid border-neutral-600 text-neutral-600"
-        >
-          Close
-        </button>
+        <div className="px-12 py-4 text-center text-black">
+          <p className="text-sm leading-5">Enter your new password:</p>
+          <input
+            type="password"
+            value={newPassword}
+            onChange={handlePasswordChange}
+            className="mt-2 p-2 border rounded w-full"
+            placeholder="New password"
+            style={{ maxWidth: '200px', fontSize: '0.875rem' }}  // 14px
+          />
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={handleConfirmPasswordChange}
+            className="mt-2 p-2 border rounded w-full"
+            placeholder="Confirm new password"
+            style={{ maxWidth: '200px', fontSize: '0.875rem' }}  // 14px
+          />
+          {error && <p className="text-xs text-red-500">{error}</p>}
+        </div>
+        <div className="flex justify-evenly mt-3">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="px-4 py-1 bg-red-800 text-white rounded-lg border border-solid border-neutral-600 text-xs"
+          >
+            Reset Password
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-1 bg-zinc-300 text-black rounded-lg border border-solid border-neutral-600 text-xs"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-function ConfirmResetPasswordModal({ onClose, onConfirm }) {
+function ConfirmResetPasswordModal({ user,onClose, onConfirm }) {
   const [currentPassword, setCurrentPassword] = useState('');
 
   const handlePasswordChange = (event) => {
     setCurrentPassword(event.target.value);
   };
 
-  const handleSubmit = () => {
-    // Include logic to verify the current password before resetting
-    // ...
-    onConfirm(); 
+  const handleSubmit = async () => {
+    if (!currentPassword) {
+      toast.error("Please enter your current password.");
+      return;
+    }
+  
+    if (!user || !user.userId) {
+      toast.error("User information is not available.");
+      return;
+    }
+  
+    try {
+      const response = await axios.post('/verify-password', {
+        userId: user.userId,
+        password: currentPassword
+      });
+  
+      if (response.data.isPasswordCorrect) {
+        onConfirm();
+        toast.success("Password verified successfully!");
+      } else {
+        toast.error("Incorrect password. Please try again.");
+      }
+    } catch (error) {
+      console.error('Error verifying password:', error);
+      toast.error("Failed to verify password. Please try again.");
+    }
   };
+  
+  
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
@@ -189,7 +271,7 @@ function ConfirmResetPasswordModal({ onClose, onConfirm }) {
             value={currentPassword}
             onChange={handlePasswordChange}
             className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            style={{ fontSize: '12px' }} // Adjust the font size as needed
+            style={{ fontSize: '12px' }} 
           />
           <div className="flex gap-5 mt-2 text-sm font-medium justify-center">
             <button
@@ -211,15 +293,32 @@ function ConfirmResetPasswordModal({ onClose, onConfirm }) {
   );
 }
 
-function AccountTerminationModal({ onClose, onTerminate }) {
-  const [name, setName] = useState("");
+function AccountTerminationModal({ user, onClose, onTerminate, userId, fullName }) {
+  console.log("UserId before request:", userId);
+  console.log("UserId before request:", fullName);
+  const [inputName, setInputName] = useState("");
 
-  const handleNameChange = (e) => setName(e.target.value);
+  const handleNameChange = (e) => setInputName(e.target.value);
 
-  const handleSubmit = () => {
-    if (name.toLowerCase() === "john smith") {
-      onTerminate(true);
+  const handleSubmit = async () => {
+    if (inputName.trim().toLowerCase() === fullName.toLowerCase()) {
+      try {
+        
+        const response = await axios.put(`/user/${userId}`, { isTerminated: true });
+        if (response.status === 200) {
+          toast.success('User account terminated successfully.');
+          onTerminate(true);
+        } else {
+          toast.error('Failed to terminate account.');
+          onTerminate(false);
+        }
+      } catch (error) {
+        console.error('Error terminating account:', error);
+        toast.error('Error terminating account: ' + error.message);
+        onTerminate(false);
+      }
     } else {
+      toast.error('Name does not match.');
       onTerminate(false);
     }
   };
@@ -229,12 +328,11 @@ function AccountTerminationModal({ onClose, onTerminate }) {
       <div className="flex flex-col justify-center max-w-[436px]">
         <div className="flex flex-col items-center px-7 pt-3.5 pb-7 w-full bg-lime-50 rounded-lg border border-red-800 border-solid shadow">
           <div className="self-stretch text-base leading-6 text-center text-black">
-            Are you sure you want to terminate this account? If yes, write the
-            person's name of the account to be terminated.
+            Are you sure you want to terminate this account? If yes, write the full name of the person of the account to be terminated.
           </div>
           <input
             type="text"
-            value={name}
+            value={inputName}
             onChange={handleNameChange}
             className="shrink-0 mt-8 bg-white border border-black border-solid h-[25px] w-[241px]"
           />
@@ -257,6 +355,7 @@ function AccountTerminationModal({ onClose, onTerminate }) {
     </div>
   );
 }
+
 
 function ProfileImage({ imgUrl, setImgUrl }) {
   const [showUploader, setShowUploader] = useState(false);
@@ -294,6 +393,8 @@ function ContactInfo({ user }) {
   const [errors, setErrors] = useState({});
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
   const [showPasswordResetConfirmation, setShowPasswordResetConfirmation] = useState(false);
+  const { currentUser } = useAuth();
+
 
   useEffect(() => {
     if (user) {
@@ -360,6 +461,9 @@ function ContactInfo({ user }) {
     setShowPasswordResetConfirmation(true);
   };
 
+ 
+  console.log("profile is",user?.userId)
+
   return (
     <div className="flex flex-col mt-1.5 text-3xl text-black max-md:mt-10">
       <h2 className="text-4xl text-left text-red-800">Contact Information</h2>
@@ -416,15 +520,20 @@ function ContactInfo({ user }) {
         >
           {editMode ? "Save Changes" : "Edit Contact Info"}
         </button>
+        {currentUser?.userId !== user?.userId && (
+          
+
         <button
           onClick={handleResetPasswordClick}
           className="justify-center px-2 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
         >
           Reset Password
         </button>
+      )}
       </div>
       {showResetPasswordModal && (
         <ConfirmResetPasswordModal
+          user={user}
           onClose={() => setShowResetPasswordModal(false)}
           onConfirm={handleResetPasswordConfirm}
         />
@@ -859,6 +968,7 @@ function MyComponent() {
   const [imgUrl, setImgUrl] = useState("/profileicon.png");
   const { id } = useParams();
   const [user, setUser] = useState(null); // State to hold the user data
+  
 
 
   useEffect(() => {
@@ -953,13 +1063,17 @@ function MyComponent() {
       <div className="w-full my-5">
           <ScheduleCalendar user={user} onScheduleChange={handleScheduleChange} preview={false}/>
         </div>
-        {incorrectName && <p className="text-red-500">Incorrect name</p>}
-        {showTerminationModal && (
-          <AccountTerminationModal
-            onClose={handleCloseTerminationModal}
-            onTerminate={handleTerminationConfirmation}
-          />
-        )}
+        
+        {
+          showTerminationModal && user && (
+            <AccountTerminationModal
+              onClose={handleCloseTerminationModal}
+              onTerminate={handleTerminationConfirmation}
+              userId={id}
+              fullName={`${user.firstName} ${user.lastName}`} // Safe access since we check if user exists
+            />
+          )
+        }
       </div>
     </div>
   );
