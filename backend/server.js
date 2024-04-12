@@ -774,10 +774,12 @@ app.post('/reset-password', async (req, res) => {
 
   try {
     const user = await Account.findById(userId);
+
     if (!user) {
       return res.status(404).send({ message: "User not found." });
     }
 
+    console.log(user)
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 

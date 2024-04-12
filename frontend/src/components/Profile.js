@@ -140,7 +140,7 @@ function AccountTerminationConfirmation() {
   );
 }
 
-function PasswordResetConfirmation({ onClose, userId }) {
+function PasswordResetConfirmation({ onClose, userId, user }) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -159,11 +159,15 @@ function PasswordResetConfirmation({ onClose, userId }) {
       return;
     }
 
+    console.log(user.userId)
+
     try {
       const response = await axios.post('/reset-password', {
-        userId: userId,
+        userId: user.userId,
         newPassword: newPassword
       });
+
+      
 
       if (response.status === 200) {
         onClose();
@@ -540,6 +544,7 @@ function ContactInfo({ user }) {
       )}
       {showPasswordResetConfirmation && (
         <PasswordResetConfirmation
+          user={user}
           onClose={() => setShowPasswordResetConfirmation(false)}
         />
       )}
