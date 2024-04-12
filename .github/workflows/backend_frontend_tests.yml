@@ -63,7 +63,7 @@ jobs:
       - name: Run Jest Tests
         run: |
           cd backend
-          npx jest
+          npx jest --runInBand
 
       - name: Run Cypress Tests
         run: |
