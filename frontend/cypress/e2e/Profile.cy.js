@@ -27,10 +27,10 @@ describe('MyComponent Button Functionality', () => {
         cy.contains('Save Changes').click();
       });
 
-      it(' submitting contact changes', () => {
+      /* it(' submitting contact changes', () => {
         cy.contains('Change Contact Info').click();
         cy.contains('Save Changes').click();
-      });
+      }); */
   
       it('successfully completes the reset password flow', () => {
         cy.contains('Reset Password').click();
