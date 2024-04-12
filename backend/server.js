@@ -743,6 +743,54 @@ app.put('/user/:userId', async (req, res) => {
   }
 });
 
+app.post('/verify-password', async (req, res) => {
+  const { userId, password } = req.body;
+  try {
+    const user = await Account.findById(userId);
+
+    if (!user) {
+      return res.status(404).send({ message: "User not found." });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (isPasswordCorrect) {
+      res.send({ isPasswordCorrect: true });
+    } else {
+      res.send({ isPasswordCorrect: false });
+    }
+  } catch (error) {
+    console.error('Error verifying password:', error);
+    res.status(500).send({ message: "Internal server error." });
+  }
+});
+
+app.post('/reset-password', async (req, res) => {
+  const { userId, newPassword } = req.body;
+
+  if (!newPassword) {
+    return res.status(400).send({ message: "Password cannot be empty." });
+  }
+
+  try {
+    const user = await Account.findById(userId);
+    if (!user) {
+      return res.status(404).send({ message: "User not found." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword; 
+    await user.save();
+
+    res.send({ message: "Password successfully updated." });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).send({ message: "Internal server error." });
+  }
+});
+
 
 module.exports = {
   app,
