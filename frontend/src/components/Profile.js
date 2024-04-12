@@ -5,7 +5,7 @@ import { useAuth } from "../providers/authProvider.js";
 import axios from "axios";
 import { useReducer } from "react";
 import { DateRangePicker } from 'rsuite';
-import 'rsuite/dist/rsuite.min.css'; 
+import "rsuite/dist/rsuite-no-reset.min.css"; 
 import { TextField, FormControl, Select, MenuItem, InputLabel, Button } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -13,11 +13,6 @@ import './Calendar.css';
 import styled from 'styled-components';
 import { FiberPin } from "@mui/icons-material";
 import { FormControlLabel, Checkbox } from '@mui/material';
-
-
-
-
-
 
 const notify = () => toast.success("Profile successfully updated.");
 const notifyErr = () => toast.error("There was an error updating the profile.");
@@ -774,7 +769,7 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
       </button>
       <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
         <header className="flex justify-between items-center max-w-full text-red-800">
-          <h1 className="text-4xl">Time-Off Request</h1>
+          <h1 className="text-4xl">Time-Off and On-Call Request</h1>
         </header>
         <div className="flex flex-col mt-4">
           <DateRangePicker
@@ -798,8 +793,9 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
             </Select>
           </FormControl>
           {errors.msg && <div style={{ color: 'red' }}>{errors.msg}</div>}
-          <button color="#8e0000" onClick={handleSubmitTimeOff}>
-            Submit
+          <button               className="bg-primary text-white px-5 py-2.5 text-lg rounded-full cursor-pointer w-2/5 mx-auto max-w-xs"
+ onClick={handleSubmitTimeOff}>
+            Submit Changes
           </button>
         </div>
       </section>
@@ -807,39 +803,40 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
         <header className="flex justify-between items-center max-w-full text-red-800">
           <h1 className="text-4xl">Weekly Schedule Update</h1>
         </header>
-        <div className="flex flex-col mt-4">
+        <div className="flex flex-col mt-4 space-y-6"> 
           {weeklySchedule.map((schedule, index) => (
-            <div key={index} className="flex justify-between items-center">
-              <p>{schedule.day}</p>
+            <div key={index} className="grid grid-cols-4 gap-4 items-center">
+              <p className="text-2xl">{schedule.day}</p>
               <TextField
                 label="Start Time"
                 type="time"
                 value={schedule.start}
                 onChange={(e) => handleWeekdayHoursChange(schedule.day, 'start', e.target.value)}
-                InputLabelProps={{
-                  shrink: true,
-                }}
+                InputLabelProps={{ shrink: true }}
               />
               <TextField
                 label="End Time"
                 type="time"
                 value={schedule.end}
                 onChange={(e) => handleWeekdayHoursChange(schedule.day, 'end', e.target.value)}
-                InputLabelProps={{
-                  shrink: true,
-                }}
+                InputLabelProps={{ shrink: true }}
               />
               <FormControlLabel
-                control={<Checkbox checked={schedule.start === '0:00' && schedule.end === '0:00'} onChange={() => handleToggleDayOff(schedule.day)} />}
+                control={<Checkbox   className="ml-5" checked={schedule.start === '0:00' && schedule.end === '0:00'} onChange={() => handleToggleDayOff(schedule.day)} />}
                 label="Day Off"
               />
             </div>
           ))}
-          <button color="#8e0000" onClick={handleSubmitWeeklySchedule}>
-            Update Schedule
-          </button>
-          <div className="m-auto mt-10">
-            <ScheduleCalendar user={{ ...user, usualHours: previewSchedule }} onScheduleChange={() => { }} preview={true} />
+          <button 
+              onClick={handleSubmitWeeklySchedule}
+              className="bg-primary text-white px-5 py-2.5 text-lg rounded-full cursor-pointer w-2/5 mx-auto max-w-xs"
+            >
+              Update Schedule
+            </button>
+            <div className="text-center mt-10">
+            <h2 className="text-3xl text-primary mb-5">Preview Weekly Schedule</h2>
+            <div className="mx-auto">
+            <ScheduleCalendar className="mt-10" user={{ ...user, usualHours: previewSchedule }} onScheduleChange={() => { }} preview={true} /></div>
           </div>
         </div>
       </section>
