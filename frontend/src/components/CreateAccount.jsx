@@ -304,7 +304,7 @@ const Form1 = ({
             <label className="block text-primary text-lg font-bold mb-2">
               Type
             </label>
-            <div className="flex  justify-center items-center text-primary">
+            <div className="flex justify-center items-center text-primary">
               <p className="">
                 {accType.charAt(0).toUpperCase() + accType.slice(1)}
               </p>
