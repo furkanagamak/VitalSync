@@ -3,15 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../providers/authProvider.js";
 import axios from "axios";
-import { useReducer } from "react";
 import { DateRangePicker } from 'rsuite';
 import "rsuite/dist/rsuite-no-reset.min.css"; 
-import { TextField, FormControl, Select, MenuItem, InputLabel, Button } from '@mui/material';
+import { TextField, FormControl, Select, MenuItem, InputLabel } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './Calendar.css';
-import styled from 'styled-components';
-import { FiberPin } from "@mui/icons-material";
 import { FormControlLabel, Checkbox } from '@mui/material';
 
 const notify = () => toast.success("Profile successfully updated.");
@@ -737,10 +734,6 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
   };
 
   const handleSubmitWeeklySchedule = async () => {
-    if (Object.keys(errors).length > 0) {
-      toast.error('Please correct the errors before submitting.');
-      return;
-    }
 
     const updateData = {
       usualHours: weeklySchedule
@@ -767,8 +760,9 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
         Back to Profile
       </button>
       <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
-        <header className="flex justify-between items-center max-w-full text-red-800">
+        <header className="flex justify-between items-center max-w-full text-red-800 mb-5">
           <h1 className="text-4xl">Time-Off Request</h1>
+          <p className="text-lg">Please select a status before submitting.</p>
         </header>
         <div className="flex flex-col mt-4">
           <DateRangePicker
@@ -785,6 +779,7 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
               value={status}
               label="Status"
               onChange={handleStatusChange}
+              defaultValue="Time-Off"
             >
               <MenuItem value="Time-Off">Time-Off</MenuItem>
               <MenuItem value="Vacation">Vacation</MenuItem>
@@ -798,8 +793,10 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
         </div>
       </section>
       <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
-        <header className="flex justify-between items-center max-w-full text-red-800">
+        <header className="flex justify-between items-center max-w-full text-red-800 mb-5">
           <h1 className="text-4xl">Weekly Schedule Update</h1>
+          <p className="text-lg">Please ensure that the start time is before the end time.</p>
+
         </header>
         <div className="flex flex-col mt-4 space-y-6"> 
           {weeklySchedule.map((schedule, index) => (
