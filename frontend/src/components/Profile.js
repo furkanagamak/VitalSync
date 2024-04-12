@@ -5,15 +5,14 @@ import { useAuth } from "../providers/authProvider.js";
 import axios from "axios";
 import { useReducer } from "react";
 import { DateRangePicker } from 'rsuite';
-import 'rsuite/dist/rsuite.min.css'; 
+import "rsuite/dist/rsuite-no-reset.min.css"; 
 import { TextField, FormControl, Select, MenuItem, InputLabel, Button } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import './Calendar.css';
 import styled from 'styled-components';
-
-
-
-
+import { FiberPin } from "@mui/icons-material";
+import { FormControlLabel, Checkbox } from '@mui/material';
 
 const notify = () => toast.success("Profile successfully updated.");
 const notifyErr = () => toast.error("There was an error updating the profile.");
@@ -271,7 +270,7 @@ function ProfileImage({ imgUrl, setImgUrl }) {
         className="w-full aspect-[0.93]"
       />
       <div
-        className="justify-center self-center p-1 mt-3.5 rounded-lg border border-solid bg-zinc-300 border-neutral-600 cursor-pointer"
+        className="justify-center self-center p-1 mt-3.5 rounded-lg border border-solid bg-primary text-white border-neutral-600 cursor-pointer"
         onClick={() => setShowUploader(true)}
       >
         Change Profile Image
@@ -413,13 +412,13 @@ function ContactInfo({ user }) {
       <div className="flex gap-5 justify-between items-start mt-24 text-sm font-medium text-neutral-600 max-md:pr-5 max-md:mt-10">
         <button
           onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
-          className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
+          className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
         >
           {editMode ? "Save Changes" : "Edit Contact Info"}
         </button>
         <button
           onClick={handleResetPasswordClick}
-          className="justify-center px-2 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
+          className="justify-center px-2 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
         >
           Reset Password
         </button>
@@ -527,7 +526,7 @@ function ProfileDetails({ user }) {
       </div>
       <button
         onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
-        className="px-5 py-1 text-sm font-medium text-neutral-600 bg-zinc-300 border border-solid border-neutral-600 rounded-lg self-start mt-auto"
+        className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
       >
         {editMode ? "Save Changes" : "Edit Profile"}
       </button>
@@ -556,54 +555,16 @@ function ProfileSection({ user }) {
     </div>
   );
 }
-const ScheduleCalendar = ({ user, onScheduleChange, preview }) => {
+
+function ScheduleCalendar({ user, onScheduleChange, preview }) {
   
   const today = new Date();
   const threeYearsLater = new Date(today.getFullYear() + 3, today.getMonth(), today.getDate());
 
   const customStyles = {
-    calendarContainer: {
-      width: '100%',
-      maxWidth: '1000px', // Adjust the width as needed
-      margin: '0 auto',
-    },
-    calendar: {
 
-      borderRadius: '8px',
-      boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-      color: '#333',
-    },
-    navigationButton: {
-      backgroundColor: '#912424',
-      color: 'white',
-      borderRadius: '10px',
-      padding: '5px',
-      marginTop: "1vh"
-    },
-    monthYearHeader: {
-      backgroundColor: '#8e0000',
-      color: 'white',
-      padding: '5px',
-      width:"90%",
-      margin: '0 auto',
-      borderRadius: '10px',
-      fontSize: "2.5em",
-      marginTop: "1vh"
-    },
-    tile: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      flexDirection: 'column'
-    },
-    dateText: {
-      color: '#8e0000',
-      fontWeight: 'bold',
-      fontSize: "2em",
-    }
   };
 
-  // Updated to ensure date and time handling is accurate
   const parseTime = (timeStr) => {
     const [hours, minutes] = timeStr.split(':').map(Number);
     return { hours, minutes };
@@ -620,7 +581,7 @@ const ScheduleCalendar = ({ user, onScheduleChange, preview }) => {
 
   const getWorkingHoursForDay = (date, usualHours) => {
     
-    if (!usualHours || usualHours.start === '0:00' && usualHours.end === '0:00') return ['Off'];  // Check for 'Off' hours
+    if (!usualHours || usualHours.start === '0:00' && usualHours.end === '0:00') return ['Off'];  
   
     const timeOffs = getTimeOffsForDay(date);
     let segments = [];
@@ -640,15 +601,17 @@ const ScheduleCalendar = ({ user, onScheduleChange, preview }) => {
       segments.push(`${currentStart.hours}:${currentStart.minutes.toString().padStart(2, '0')}-${parseTime(usualHours.end).hours}:${parseTime(usualHours.end).minutes.toString().padStart(2, '0')}`);
     }
   
-    return segments.length ? segments : ['Off'];  // Display 'Off' if no segments are created
+    return segments.length ? segments : ['Off'];  
   };
 
   const getUsualHoursForDay = (day) => {
-    // Calendar UI starts the week on Monday (0 = Monday, 6 = Sunday)
-    const adjustedDay = (day + 6) % 7;  // Adjust so 0 = Sunday, 6 = Saturday if needed
-    const weekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][adjustedDay];
+    const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const weekday = weekdayNames[day];  // No need to adjust if array is aligned properly
     const hours = user.usualHours.find(uh => uh.day === weekday);
+    console.log(`Day index: ${day}, Day name: ${weekday}, Usual hours:`, hours);
+
     return hours || { start: '0:00', end: '0:00' };  // Provide default 'Off' hours if no match is found
+    
   };
 
   if (!user) {
@@ -656,13 +619,12 @@ const ScheduleCalendar = ({ user, onScheduleChange, preview }) => {
   }
 
   return (
-    <div style={customStyles.calendarContainer}>
-      
+    <div>
       {
         !preview && (
           <button
             onClick={onScheduleChange}
-            className="mt-2 mb-5 justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
+            className="mt-2 mb-5 justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
           >
             Edit Schedule
           </button>
@@ -675,9 +637,12 @@ const ScheduleCalendar = ({ user, onScheduleChange, preview }) => {
           if (view === 'month') {
             const usualHours = getUsualHoursForDay(date.getDay());
             const workingHours = getWorkingHoursForDay(date, usualHours);
+
+            if(date.getDay() === 0){
+              console.log("Sunday: ", usualHours, workingHours);
+            }
             return (
               <div style={customStyles.tile}>
-                <span style={customStyles.dateText}>{date.getDate()}</span>
                 <div className="text-md mt-4">
                   {workingHours.join(', ')}
                 </div>
@@ -690,13 +655,12 @@ const ScheduleCalendar = ({ user, onScheduleChange, preview }) => {
         )}
         prevLabel={<div style={customStyles.navigationButton}>‹</div>}
         nextLabel={<div style={customStyles.navigationButton}>›</div>}
-        style={customStyles.calendar}
       />
     </div>
   );
 };
 
-function ChangeAvailability({ user, onRevertToProfile , setUser}) {
+function ChangeAvailability({ user, onRevertToProfile, setUser }) {
   const [dateRange, setDateRange] = useState([new Date(), new Date()]);
   const [status, setStatus] = useState('Work Hours');
   const [errors, setErrors] = useState({});
@@ -715,17 +679,34 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
     setStatus(event.target.value);
   };
 
-  const handleWeekdayHoursChange = (day, hours) => {
+  const handleWeekdayHoursChange = (day, field, value) => {
+    const updatedSchedule = weeklySchedule.map(schedule => {
+      if (schedule.day === day) {
+        const newSchedule = { ...schedule, [field]: value };
+        // Ensure start time is not later than end time
+        if (new Date(`1970-01-01T${newSchedule.start}`) >= new Date(`1970-01-01T${newSchedule.end}`)) {
+          setErrors(prev => ({ ...prev, [day]: "Start time must be earlier than end time" }));
+        } else {
+          delete errors[day]; // Clear errors if the times are valid
+          setErrors({ ...errors });
+          return newSchedule;
+        }
+      }
+      return schedule;
+    });
+    setWeeklySchedule(updatedSchedule);
+  };
+
+  const handleToggleDayOff = (day) => {
     const updatedSchedule = weeklySchedule.map(schedule =>
-      schedule.day === day ? { ...schedule, ...hours } : schedule
+      schedule.day === day ? { ...schedule, start: '0:00', end: '0:00' } : schedule
     );
     setWeeklySchedule(updatedSchedule);
   };
 
-  // When the user wants to go back without saving
   const handleBackWithoutSaving = () => {
-    setWeeklySchedule([...user.usualHours]);  // Reset any changes made
-    onRevertToProfile();  // Switch back to the profile view
+    setWeeklySchedule([...user.usualHours]);  
+    onRevertToProfile(); 
   };
 
   const handleSubmitTimeOff = async () => {
@@ -746,7 +727,12 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
         toast.success('Availability updated successfully!');
-        onRevertToProfile(); // Assuming this function re-fetches user data or redirects
+        setUser({ ...user, usualHours: weeklySchedule, unavailableTimes:  [...user.unavailableTimes, {
+          start: dateRange[0],
+          end: dateRange[1],
+          reason: status
+        }]});
+        onRevertToProfile();
       } else {
         toast.error('Failed to update availability.');
       }
@@ -757,15 +743,20 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
   };
 
   const handleSubmitWeeklySchedule = async () => {
+    if (Object.keys(errors).length > 0) {
+      toast.error('Please correct the errors before submitting.');
+      return;
+    }
+
     const updateData = {
       usualHours: weeklySchedule
     };
-  
+
     try {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
         toast.success('Weekly schedule updated successfully!');
-        setUser({ ...user, usualHours: weeklySchedule }); // Update user state
+        setUser({ ...user, usualHours: weeklySchedule });
         onRevertToProfile();
       } else {
         toast.error('Failed to update weekly schedule.');
@@ -776,10 +767,8 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
     }
   };
 
-  
-
   return (
-    <div className="flex flex-col px-8 pt-20 pb-8 bg-white">
+    <div className="flex flex-col px-8 pt-10 pb-8 bg-white">
       <button onClick={handleBackWithoutSaving} className="mb-4 bg-primary p-2 rounded text-white text-xl w-1/6">
         Back to Profile
       </button>
@@ -803,14 +792,14 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
               label="Status"
               onChange={handleStatusChange}
             >
-              <MenuItem value="On-Call">On-Call</MenuItem>
               <MenuItem value="Time-Off">Time-Off</MenuItem>
               <MenuItem value="Vacation">Vacation</MenuItem>
             </Select>
           </FormControl>
           {errors.msg && <div style={{ color: 'red' }}>{errors.msg}</div>}
-          <button color="#8e0000" onClick={handleSubmitTimeOff}>
-            Submit
+          <button               className="bg-primary text-white px-5 py-2.5 text-lg rounded-full cursor-pointer w-2/5 mx-auto max-w-xs"
+        onClick={handleSubmitTimeOff}>
+            Submit Changes
           </button>
         </div>
       </section>
@@ -818,40 +807,47 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
         <header className="flex justify-between items-center max-w-full text-red-800">
           <h1 className="text-4xl">Weekly Schedule Update</h1>
         </header>
-        <div className="flex flex-col mt-4">
+        <div className="flex flex-col mt-4 space-y-6"> 
           {weeklySchedule.map((schedule, index) => (
-            <div key={index} className="flex justify-between items-center">
-              <p>{schedule.day}</p>
+            <div key={index} className="grid grid-cols-4 gap-4 items-center">
+              <p className="text-2xl">{schedule.day}</p>
               <TextField
                 label="Start Time"
                 type="time"
                 value={schedule.start}
-                onChange={(e) => handleWeekdayHoursChange(schedule.day, { start: e.target.value })}
-                InputLabelProps={{
-                  shrink: true,
-                }}
+                onChange={(e) => handleWeekdayHoursChange(schedule.day, 'start', e.target.value)}
+                InputLabelProps={{ shrink: true }}
               />
               <TextField
                 label="End Time"
                 type="time"
                 value={schedule.end}
-                onChange={(e) => handleWeekdayHoursChange(schedule.day, { end: e.target.value })}
-                InputLabelProps={{
-                  shrink: true,
-                }}
+                onChange={(e) => handleWeekdayHoursChange(schedule.day, 'end', e.target.value)}
+                InputLabelProps={{ shrink: true }}
+              />
+              <FormControlLabel
+                control={<Checkbox   className="ml-5" checked={schedule.start === '0:00' && schedule.end === '0:00'} onChange={() => handleToggleDayOff(schedule.day)} />}
+                label="Day Off"
               />
             </div>
           ))}
-          <button color="#8e0000" onClick={handleSubmitWeeklySchedule}>
-            Update Schedule
-          </button>
-
-          <ScheduleCalendar user={{...user, usualHours: previewSchedule}} onScheduleChange={() => {}} preview={true} />
+          <button 
+              onClick={handleSubmitWeeklySchedule}
+              className="bg-primary text-white px-5 py-2.5 text-lg rounded-full cursor-pointer w-2/5 mx-auto max-w-xs"
+            >
+              Update Schedule
+            </button>
+            <div className="text-center mt-10">
+            <h2 className="text-3xl text-primary mb-5">Preview Weekly Schedule</h2>
+            <div className="mx-auto flex justify-center">
+            <ScheduleCalendar className="mt-10" user={{ ...user, usualHours: previewSchedule }} onScheduleChange={() => { }} preview={true} /></div>
+          </div>
         </div>
       </section>
     </div>
   );
 }
+
 
 function MyComponent() {
   const navigate = useNavigate();
@@ -941,7 +937,7 @@ function MyComponent() {
     <div className="flex flex-col items-center pt-10 pr-5 pb-8 pl-14 bg-white max-md:pl-5">
       <button
         onClick={handleTerminateAccount}
-        className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-red-800 rounded-lg border border-solid border-neutral-600"
+        className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-highlightRed rounded-lg border border-solid border-neutral-600"
       >
         Terminate Account
       </button>
