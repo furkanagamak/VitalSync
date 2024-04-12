@@ -646,6 +646,17 @@ async function removePredefinedAccounts() {
   }
 }
 
+app.get('/users', async (req, res) => {
+  try {
+    const users = await Account.find({}, { firstName: 1, lastName: 1, department: 1, position: 1 }); // Select necessary fields
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Error fetching users', error: error.message });
+  }
+});
+
+
 module.exports = {
   app,
   initializePredefinedAccounts,
