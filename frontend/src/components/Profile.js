@@ -763,7 +763,7 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
   };
 
   return (
-    <div className="flex flex-col px-8 pt-20 pb-8 bg-white">
+    <div className="flex flex-col px-8 pt-10 pb-8 bg-white">
       <button onClick={handleBackWithoutSaving} className="mb-4 bg-primary p-2 rounded text-white text-xl w-1/6">
         Back to Profile
       </button>
@@ -835,7 +835,7 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
             </button>
             <div className="text-center mt-10">
             <h2 className="text-3xl text-primary mb-5">Preview Weekly Schedule</h2>
-            <div className="mx-auto">
+            <div className="mx-auto flex justify-center">
             <ScheduleCalendar className="mt-10" user={{ ...user, usualHours: previewSchedule }} onScheduleChange={() => { }} preview={true} /></div>
           </div>
         </div>

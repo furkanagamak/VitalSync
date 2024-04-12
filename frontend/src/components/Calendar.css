@@ -43,7 +43,7 @@
   font-size: 1rem !important;
  }
  .react-calendar__tile--now {
-  background: #8e0000;
+  background: #f8f8fa;
   font-weight: bold !important;
   color: #8e0000;
   font-size: 1rem !important;
@@ -51,7 +51,7 @@
  }
  .react-calendar__tile--now:enabled:hover,
  .react-calendar__tile--now:enabled:focus {
-  background: #8e0000;
+  background: #f8f8fa;
   border-radius: 6px;
   font-weight: bold;
   color: #8e0000;
@@ -65,7 +65,7 @@
 
  }
  .react-calendar__tile--active {
-  background: #8e0000;
+  background: #f8f8fa;
   border-radius: 6px;
   font-weight: bold;
   color: white;
