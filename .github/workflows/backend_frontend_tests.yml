@@ -1,9 +1,17 @@
-name: Run Frontend Tests and Deploy
+name: Run Backend and Frontend Tests and Deploy
 on:
   push:
     branches: [main]
+env:
+  MONGO_URI: mongodb://127.0.0.1:27017/test
+  FRONTEND_URL: http://localhost:3000
+  BUCKET_NAME: vital-sync
+  BUCKET_REGION: us-east-2
+  AWS_ACCESS_KEY_ID: AKIAYOXMMERDENNQKHWH
+  AWS_SECRET_ACCESS_KEY: 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
+  REACT_APP_API_BASE_URL: http://localhost:5000
 jobs:
-  cypress-run:
+  jest-cypress-run:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,15 +39,13 @@ jobs:
       
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.10.0
-        with:
-          mongodb-version: "latest"
       
       - name: Install Backend Dependencies
         run: |
           cd backend
           npm install
 
-      - name: Load Database
+      - name: Load Database with Test Data
         run: |
           cd backend
           node dbtest.js
@@ -54,17 +60,28 @@ jobs:
           cd frontend
           npm start &
 
+      - name: Run Jest Tests
+        run: |
+          cd backend
+          npx jest
+
       - name: Run Cypress Tests
         run: |
           cd frontend
           npx cypress run
 
   deploy:
-    needs: cypress-run
+    needs: jest-cypress-run
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Render
+      - name: Deploy Frontend to Render
         env:
           deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
+
+      - name: Deploy Backend to Render
+        env:
+          deploy_url: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK_URL }}
         run: |
           curl "$deploy_url"
