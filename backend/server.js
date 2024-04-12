@@ -335,6 +335,8 @@ const transformAccount = async (account) => {
 };
 
 app.post("/login", async (req, res) => {
+  console.log("Login route hit with body:", req.body);
+
   try {
     const { email, password } = req.body;
 
@@ -367,7 +369,7 @@ app.post("/login", async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    console.error("Login error:", error);
     res.status(400).send({ message: "Error logging in", error });
   }
 });
@@ -526,6 +528,57 @@ app.post("/resetPassword", async (req, res) => {
     res.status(500).send({ message: "Error resetting password", error });
   }
 });
+
+app.get('/user/:userId', async (req, res) => {
+  try {
+    const user = await Account.findOne({ _id: req.params.userId });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const response = {
+      userId: user._id, 
+      firstName: user.firstName,
+      lastName: user.lastName,
+      profileUrl: user.profileUrl,
+      userType: user.userType,
+      position: user.position,
+      department: user.department,
+      degree: user.degree,
+      specialization: user.specialization,
+      phoneNumber: user.phoneNumber,
+      officePhoneNumber: user.officePhoneNumber,
+      email: user.email,
+      officeLocation: user.officeLocation,
+      userImg: user.userImg,
+      usualHours: user.usualHours,
+      profileImage: user.profileImage,
+      unavailableTimes: user.unavailableTimes
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error fetching user by _id:', error);
+    res.status(500).json({ message: 'Error fetching user', error: error.message });
+  }
+});
+
+app.put('/user/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const updateData = req.body;
+
+  try {
+    const updatedUser = await Account.findByIdAndUpdate(userId, updateData, { new: true });
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ message: 'Profile updated successfully', user: updatedUser });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ message: 'Error updating user', error: error.message });
+  }
+})
 
 const PORT = 5000;
 app.listen(PORT, () => {
