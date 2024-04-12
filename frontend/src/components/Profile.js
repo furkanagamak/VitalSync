@@ -727,6 +727,11 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
         toast.success('Availability updated successfully!');
+        setUser({ ...user, usualHours: weeklySchedule, unavailableTimes:  [...user.unavailableTimes, {
+          start: dateRange[0],
+          end: dateRange[1],
+          reason: status
+        }]});
         onRevertToProfile();
       } else {
         toast.error('Failed to update availability.');
@@ -769,7 +774,7 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
       </button>
       <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
         <header className="flex justify-between items-center max-w-full text-red-800">
-          <h1 className="text-4xl">Time-Off and On-Call Request</h1>
+          <h1 className="text-4xl">Time-OffRequest</h1>
         </header>
         <div className="flex flex-col mt-4">
           <DateRangePicker
@@ -787,14 +792,13 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
               label="Status"
               onChange={handleStatusChange}
             >
-              <MenuItem value="On-Call">On-Call</MenuItem>
               <MenuItem value="Time-Off">Time-Off</MenuItem>
               <MenuItem value="Vacation">Vacation</MenuItem>
             </Select>
           </FormControl>
           {errors.msg && <div style={{ color: 'red' }}>{errors.msg}</div>}
           <button               className="bg-primary text-white px-5 py-2.5 text-lg rounded-full cursor-pointer w-2/5 mx-auto max-w-xs"
- onClick={handleSubmitTimeOff}>
+        onClick={handleSubmitTimeOff}>
             Submit Changes
           </button>
         </div>

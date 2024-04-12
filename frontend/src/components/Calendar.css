@@ -64,6 +64,11 @@
   font-size: 1rem !important;
 
  }
+
+ .react-calendar__tile--hasActive {
+  background: transparent;
+}
+
  .react-calendar__tile--active {
   background: #f8f8fa;
   border-radius: 6px;
@@ -72,20 +77,20 @@
   font-size: 1rem !important;
  }
  .react-calendar__tile > :first-child {
-  color: #8e0000; /* Primary blue */
+  color: #8e0000; 
   font-weight: bold;
 }
 
  .react-calendar__tile {
   
-  display: flex; /* Using Flexbox within each tile */
+  display: flex;
   flex-direction: column;
-  align-items: center; /* Centers content vertically */
-  justify-content: center; /* Centers content horizontally */
-  min-height: 1rem !important; /* Minimum height for each tile */
+  align-items: center; 
+  justify-content: center;
+  min-height: 1rem !important; 
   padding: 10px;
   border: 1px solid #ccc;
-  overflow: hidden; /* Prevents content from spilling out */
+  overflow: hidden; 
   text-overflow: ellipsis;
   font-size: 1rem;
   font-size: 1rem !important;
@@ -96,14 +101,10 @@
   .react-calendar__month-view__days__day--weekend {
  color: black !important;
 } 
- .react-calendar__tile--active:enabled:hover,
- .react-calendar__tile--active:enabled:focus {
-  background: #8e0000;
-  color: white;
-  font-size: 1rem !important;
 
- }
  .react-calendar--selectRange .react-calendar__tile--hover {
   background-color: #f8f8fa;
   font-size: 1rem !important;
  }
+
+ 
