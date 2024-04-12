@@ -12,9 +12,6 @@ import 'react-calendar/dist/Calendar.css';
 import styled from 'styled-components';
 
 
-
-
-
 const notify = () => toast.success("Profile successfully updated.");
 const notifyErr = () => toast.error("There was an error updating the profile.");
 
@@ -172,8 +169,6 @@ function ConfirmResetPasswordModal({ onClose, onConfirm }) {
   };
 
   const handleSubmit = () => {
-    // Include logic to verify the current password before resetting
-    // ...
     onConfirm(); 
   };
 
@@ -190,7 +185,7 @@ function ConfirmResetPasswordModal({ onClose, onConfirm }) {
             value={currentPassword}
             onChange={handlePasswordChange}
             className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            style={{ fontSize: '12px' }} // Adjust the font size as needed
+            style={{ fontSize: '12px' }} 
           />
           <div className="flex gap-5 mt-2 text-sm font-medium justify-center">
             <button
@@ -212,15 +207,32 @@ function ConfirmResetPasswordModal({ onClose, onConfirm }) {
   );
 }
 
-function AccountTerminationModal({ onClose, onTerminate }) {
-  const [name, setName] = useState("");
+function AccountTerminationModal({ user, onClose, onTerminate, userId, fullName }) {
+  console.log("UserId before request:", userId);
+  console.log("UserId before request:", fullName);
+  const [inputName, setInputName] = useState("");
 
-  const handleNameChange = (e) => setName(e.target.value);
+  const handleNameChange = (e) => setInputName(e.target.value);
 
-  const handleSubmit = () => {
-    if (name.toLowerCase() === "john smith") {
-      onTerminate(true);
+  const handleSubmit = async () => {
+    if (inputName.trim().toLowerCase() === fullName.toLowerCase()) {
+      try {
+        
+        const response = await axios.put(`/user/${userId}`, { isTerminated: true });
+        if (response.status === 200) {
+          toast.success('User account terminated successfully.');
+          onTerminate(true);
+        } else {
+          toast.error('Failed to terminate account.');
+          onTerminate(false);
+        }
+      } catch (error) {
+        console.error('Error terminating account:', error);
+        toast.error('Error terminating account: ' + error.message);
+        onTerminate(false);
+      }
     } else {
+      toast.error('Name does not match.');
       onTerminate(false);
     }
   };
@@ -230,12 +242,11 @@ function AccountTerminationModal({ onClose, onTerminate }) {
       <div className="flex flex-col justify-center max-w-[436px]">
         <div className="flex flex-col items-center px-7 pt-3.5 pb-7 w-full bg-lime-50 rounded-lg border border-red-800 border-solid shadow">
           <div className="self-stretch text-base leading-6 text-center text-black">
-            Are you sure you want to terminate this account? If yes, write the
-            person's name of the account to be terminated.
+            Are you sure you want to terminate this account? If yes, write the full name of the person of the account to be terminated.
           </div>
           <input
             type="text"
-            value={name}
+            value={inputName}
             onChange={handleNameChange}
             className="shrink-0 mt-8 bg-white border border-black border-solid h-[25px] w-[241px]"
           />
@@ -258,6 +269,7 @@ function AccountTerminationModal({ onClose, onTerminate }) {
     </div>
   );
 }
+
 
 function ProfileImage({ imgUrl, setImgUrl }) {
   const [showUploader, setShowUploader] = useState(false);
@@ -564,7 +576,7 @@ const ScheduleCalendar = ({ user, onScheduleChange, preview }) => {
   const customStyles = {
     calendarContainer: {
       width: '100%',
-      maxWidth: '1000px', // Adjust the width as needed
+      maxWidth: '1000px', 
       margin: '0 auto',
     },
     calendar: {
@@ -863,6 +875,7 @@ function MyComponent() {
   const [imgUrl, setImgUrl] = useState("/profileicon.png");
   const { id } = useParams();
   const [user, setUser] = useState(null); // State to hold the user data
+  
 
 
   useEffect(() => {
@@ -957,13 +970,17 @@ function MyComponent() {
       <div className="w-full my-5">
           <ScheduleCalendar user={user} onScheduleChange={handleScheduleChange} preview={false}/>
         </div>
-        {incorrectName && <p className="text-red-500">Incorrect name</p>}
-        {showTerminationModal && (
-          <AccountTerminationModal
-            onClose={handleCloseTerminationModal}
-            onTerminate={handleTerminationConfirmation}
-          />
-        )}
+        
+        {
+          showTerminationModal && user && (
+            <AccountTerminationModal
+              onClose={handleCloseTerminationModal}
+              onTerminate={handleTerminationConfirmation}
+              userId={id}
+              fullName={`${user.firstName} ${user.lastName}`} // Safe access since we check if user exists
+            />
+          )
+        }
       </div>
     </div>
   );

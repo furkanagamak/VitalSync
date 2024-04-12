@@ -716,11 +716,30 @@ app.put('/user/:userId', async (req, res) => {
 
 app.get('/users', async (req, res) => {
   try {
-    const user = await Account.find({}, { firstName: 1, lastName: 1, department: 1, position: 1 }); // Select necessary fields
-    res.json(user);
+    const users = await Account.find({}, { firstName: 1, lastName: 1, department: 1, position: 1, isTerminated: 1 }); // Select necessary fields
+    res.json(users);
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ message: 'Error fetching users', error: error.message });
+  }
+});
+
+app.put('/user/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const { isTerminated } = req.body;
+
+  console.log('UserID:', userId); // Check the user ID received
+  console.log('isTerminated:', isTerminated); // Check the isTerminated flag received
+
+  try {
+    const user = await Account.findByIdAndUpdate(userId, { isTerminated }, { new: true });
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    res.send(user);
+  } catch (error) {
+    console.error('Failed to update user:', error);
+    res.status(500).send('Internal Server Error');
   }
 });
 
