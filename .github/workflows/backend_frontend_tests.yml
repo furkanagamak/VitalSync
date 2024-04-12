@@ -53,7 +53,7 @@ jobs:
       - name: Start Backend Server
         run: |
           cd backend
-          node server.js &
+          node app.js &
           
       - name: Start Frontend Server
         run: |
