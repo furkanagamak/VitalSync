@@ -337,6 +337,8 @@ const transformAccount = async (account) => {
 };
 
 app.post("/login", async (req, res) => {
+  console.log("Login route hit with body:", req.body);
+
   try {
     const { email, password } = req.body;
 
@@ -369,7 +371,7 @@ app.post("/login", async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    console.error("Login error:", error);
     res.status(400).send({ message: "Error logging in", error });
   }
 });

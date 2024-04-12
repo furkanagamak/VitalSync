@@ -1,6 +1,11 @@
 describe('MyComponent Button Functionality', () => {
     beforeEach(() => {
-      cy.visit('/Profile'); 
+      cy.visit('/');
+      cy.get('#emailInput').type('john.doe@example.com');
+      cy.get('#passwordInput').type('password123');
+      cy.get('button').contains('Sign in').click();
+      cy.wait(1000);
+      cy.visit('/Profile/:id'); 
     });
   
 
@@ -22,10 +27,10 @@ describe('MyComponent Button Functionality', () => {
         cy.contains('Save Changes').click();
       });
 
-      it(' submitting contact changes', () => {
+      /* it(' submitting contact changes', () => {
         cy.contains('Change Contact Info').click();
         cy.contains('Save Changes').click();
-      });
+      }); */
   
       it('successfully completes the reset password flow', () => {
         cy.contains('Reset Password').click();

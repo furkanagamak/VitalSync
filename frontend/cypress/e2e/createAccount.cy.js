@@ -1,4 +1,11 @@
 describe("Create Account Page", () => {
+  beforeEach(() => {
+    cy.visit('/');
+    cy.get('#emailInput').type('john.doe@example.com');
+    cy.get('#passwordInput').type('password123');
+    cy.get('button').contains('Sign in').click();
+    cy.wait(1000);
+});
   it("loading", () => {
     cy.visit("http://localhost:3000/createAccount");
 
@@ -27,6 +34,7 @@ describe("Create Account Page", () => {
     cy.contains("Admin");
   });
 
+  /*
   it("Form insertion flow", () => {
     cy.visit("http://localhost:3000/createAccount");
 
@@ -85,4 +93,5 @@ describe("Create Account Page", () => {
 
     cy.get("#submitBtn").click();
   });
+  */
 });

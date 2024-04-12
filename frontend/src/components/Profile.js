@@ -2,6 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../providers/authProvider.js";
+import axios from "axios";
+import { useReducer } from "react";
+
+const notify = () => toast.success("Profile successfully updated.");
+const notifyErr = () => toast.error("There was an error updating the profile.");
 
 function ImageUploader({ onClose, setImgUrl }) {
   const fileTypes = ["PNG", "JPEG", "GIF", "JPG"];
@@ -249,17 +254,46 @@ function ProfileImage({ imgUrl, setImgUrl }) {
   );
 }
 
-function ContactInfo() {
+function ContactInfo({ user }) {
   const [editMode, setEditMode] = useState(false);
-  const [cellNo, setCellNo] = useState("(123)-456-7890");
-  const [officeNo, setOfficeNo] = useState("(123)-456-7890");
-  const [email, setEmail] = useState("Smith.john@sbu.com");
-  const [office, setOffice] = useState("West Wing/307B");
+  const [cellNo, setCellNo] = useState('');
+  const [officeNo, setOfficeNo] = useState('');
+  const [email, setEmail] = useState('');
+  const [office, setOffice] = useState('');
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
-  const [showPasswordResetConfirmation, setShowPasswordResetConfirmation] =
-    useState(false);
+  const [showPasswordResetConfirmation, setShowPasswordResetConfirmation] = useState(false);
 
-  const handleSaveChanges = () => setEditMode(false);
+  useEffect(() => {
+    if (user) {
+      setCellNo(user.phoneNumber || '');
+      setOfficeNo(user.officePhoneNumber || '');
+      setEmail(user.email || '');
+      setOffice(user.officeLocation || '');
+    }
+  }, [user]);  
+
+
+  const handleSaveChanges = async () => {
+    console.log("Updating user with ID:", user.userId);
+
+    const updateData = {
+      cellNo,
+      officeNo,
+      email,
+      office
+    };
+
+
+    try {
+      const response = await axios.put(`/user/${user.userId}`, updateData);
+      notify();
+      setEditMode(false); 
+      console.log(response.data);
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      notifyErr();
+    }
+  };
 
   const handleResetPasswordClick = () => setShowResetPasswordModal(true);
 
@@ -267,6 +301,7 @@ function ContactInfo() {
     setShowResetPasswordModal(false);
     setShowPasswordResetConfirmation(true);
   };
+
 
   return (
     <div className="flex flex-col mt-1.5 text-3xl text-black max-md:mt-10">
@@ -316,10 +351,10 @@ function ContactInfo() {
       )}
       <div className="flex gap-5 justify-between items-start mt-24 text-sm font-medium text-neutral-600 max-md:pr-5 max-md:mt-10">
         <button
-          onClick={() => setEditMode(!editMode)}
-          className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
+        onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
+        className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
         >
-          {editMode ? "Save Changes" : "Change Contact Info"}
+          {editMode ? "Save Changes" : "Edit Contact Info"}
         </button>
         <button
           onClick={handleResetPasswordClick}
@@ -343,15 +378,46 @@ function ContactInfo() {
   );
 }
 
-function ProfileDetails() {
+
+function ProfileDetails({ user }) {
   const [editMode, setEditMode] = useState(false);
-  const [name, setName] = useState("John Smith");
-  const [designation, setDesignation] = useState("MD");
-  const [specialty, setSpecialty] = useState("Neurologist");
-  const [department, setDepartment] = useState("Neurology Department");
-  const [departmentHead, setDepartmentHead] = useState(
-    "Head of the Neurology Department"
-  );
+  const [name, setName] = useState(user ? `${user.firstName} ${user.lastName}` : '');
+  const [designation, setDesignation] = useState(user ? user.degree : '');
+  const [specialty, setSpecialty] = useState(user ? user.position : '');
+  const [department, setDepartment] = useState(user ? user.department : '');
+
+  useEffect(() => {
+    if (user) {
+      setName(`${user.firstName} ${user.lastName}`);
+      setDesignation(user.degree);
+      setSpecialty(user.position);
+      setDepartment(user.department);
+    }
+  }, [user]);
+
+  const handleSaveChanges = async () => {
+    console.log("Updating user with ID:", user.userId);
+
+    const [firstName, lastName] = name.split(' ');
+    const updateData = {
+      firstName,
+      lastName,
+      degree: designation,
+      position: specialty,
+      department
+    };
+
+
+    try {
+      const response = await axios.put(`/user/${user.userId}`, updateData);
+      notify();
+      setEditMode(false); // Optionally reset edit mode
+      console.log(response.data);
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      notifyErr();
+    }
+  };
 
   return (
     <div className="flex flex-col grow gap-4 border-r border-black max-md:flex-wrap max-md:mt-10">
@@ -382,12 +448,6 @@ function ProfileDetails() {
               onChange={(e) => setDepartment(e.target.value)}
               className="mb-2 text-3xl text-left text-black max-md:max-w-full border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
             />
-            <input
-              type="text"
-              value={departmentHead}
-              onChange={(e) => setDepartmentHead(e.target.value)}
-              className="mb-2 text-3xl text-left text-black max-md:max-w-full border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            />
           </>
         ) : (
           <>
@@ -401,14 +461,11 @@ function ProfileDetails() {
             <p className="mb-2 text-3xl text-left text-black max-md:max-w-full">
               {department}
             </p>
-            <p className="mb-2 text-3xl text-left text-black max-md:max-w-full">
-              {departmentHead}
-            </p>
           </>
         )}
       </div>
       <button
-        onClick={() => setEditMode(!editMode)}
+        onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
         className="px-5 py-1 text-sm font-medium text-neutral-600 bg-zinc-300 border border-solid border-neutral-600 rounded-lg self-start mt-auto"
       >
         {editMode ? "Save Changes" : "Edit Profile"}
@@ -417,7 +474,7 @@ function ProfileDetails() {
   );
 }
 
-function ProfileSection() {
+function ProfileSection({ user }) {
   return (
     <div className="flex flex-col ml-5 w-[76%] max-md:ml-0 max-md:w-full">
       <div className="flex flex-col grow max-md:mt-6 max-md:max-w-full">
@@ -426,8 +483,8 @@ function ProfileSection() {
           style={{ backgroundColor: "#F5F5DC" }}
         >
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
-            <ProfileDetails />
-            <ContactInfo />
+            <ProfileDetails user={user}/>
+            <ContactInfo user={user}/>
           </div>
         </div>
       </div>
@@ -564,6 +621,21 @@ function MyComponent() {
   const [view, setView] = useState("profile"); // 'profile' or 'changeAvailability'
   const [imgUrl, setImgUrl] = useState("/profileicon.png");
   const { id } = useParams();
+  const [user, setUser] = useState(null); // State to hold the user data
+
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get(`/user/${id}`);
+        setUser(response.data);  // Set the user data in state
+      } catch (error) {
+        console.error('Failed to fetch user:', error);
+      }
+    };
+
+    fetchUser();
+  }, [id]);
 
   useEffect(() => {
     const fetchUserImg = async () => {
@@ -636,7 +708,7 @@ function MyComponent() {
           <div className="flex flex-col w-[24%] max-md:ml-0 max-md:w-full">
             <ProfileImage imgUrl={imgUrl} setImgUrl={setImgUrl} />
           </div>
-          <ProfileSection />
+          <ProfileSection user={user}/>
         </div>
       </div>
       <div className="mt-4 w-full max-w-[1286px] max-md:max-w-full">
