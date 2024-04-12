@@ -646,7 +646,6 @@ async function removePredefinedAccounts() {
   }
 }
 
-<<<<<<< HEAD
 app.get('/users', async (req, res) => {
   try {
     const users = await Account.find({}, { firstName: 1, lastName: 1, department: 1, position: 1 }); // Select necessary fields
@@ -657,16 +656,9 @@ app.get('/users', async (req, res) => {
   }
 });
 
-const PORT = 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
 
-module.exports = app;
-=======
 module.exports = {
   app,
   initializePredefinedAccounts,
   removePredefinedAccounts,
 };
->>>>>>> 9c08fbef719639f274e43d64d70185d620389e63
