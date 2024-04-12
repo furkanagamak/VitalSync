@@ -31,12 +31,32 @@ const CreateAccount = ({ navToAdminActions }) => {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    let formattedValue = value;
+  
+    // Check if the input is one of the phone number fields
+    if (name === "phoneNumber" || name === "officePhoneNumber") {
+      formattedValue = value.replace(/\D/g, '');
+  
+      formattedValue = formattedValue.substring(0, 10);
+      formattedValue = formattedValue.replace(/(\d{3})(\d{1,3})?(\d{1,4})?/, (match, p1, p2, p3) => {
+        if (p3) return `${p1}-${p2}-${p3}`;
+        if (p2) return `${p1}-${p2}`;
+        return p1;
+      });
+    }
+
+    setFormData({ ...formData, [name]: formattedValue });
   };
 
   const isValidEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
+  };
+
+  const isValidPhoneNumber = (phoneNumber) => {
+    const regex = /^\d{3}-\d{3}-\d{4}$/;
+    return regex.test(phoneNumber);
   };
 
   const handleSubmit = async (e) => {
@@ -61,6 +81,16 @@ const CreateAccount = ({ navToAdminActions }) => {
     if (missingFields.length === 0) {
       if (!isValidEmail(formData.email))
         return toast.error("Email is invalid!");
+
+      if (!isValidPhoneNumber(formData.phoneNumber)) {
+        toast.error("Phone number is invalid! Format should be XXX-XXX-XXXX.");
+        return;
+      }
+      if (formData.officePhoneNumber && !isValidPhoneNumber(formData.officePhoneNumber)) {
+        toast.error("Office phone number is invalid! Format should be XXX-XXX-XXXX.");
+        return;
+      }
+
       try {
         const response = await fetch(
           `${process.env.REACT_APP_API_BASE_URL}/createAccount`,
