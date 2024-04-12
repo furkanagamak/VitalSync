@@ -142,6 +142,7 @@ app.get("/user/profilePicture/url/:id", async (req, res) => {
     if (!req.params.id) return res.status(404).send("No profile pic");
     const user = await Account.findOne({ _id: req.params.id });
     if (!user) return res.status(404).send("User not found");
+    if (user.profileUrl === "") return res.status(200).send("");
 
     const command = new GetObjectCommand({
       Bucket: bucketName,
@@ -569,6 +570,8 @@ async function initializePredefinedAccounts() {
       },
     ];
 
+    const createdAccountIds = []; // Array to store the IDs of the created accounts
+
     // Loop through predefined accounts and create them if they don't exist
     for (const accountData of predefinedAccounts) {
       // Check if an account with the given email already exists
@@ -586,16 +589,22 @@ async function initializePredefinedAccounts() {
           password: hashedPassword,
         });
 
-        await newAccount.save();
+        // Save the account and store its ID
+        const savedAccount = await newAccount.save();
         console.log(`Account '${accountData.email}' created successfully.`);
+        createdAccountIds.push(savedAccount._id); // Push the ID of the created account
       } else {
         console.log(
           `Account with email '${accountData.email}' already exists.`
         );
       }
     }
+
+    // Return the array of created account IDs
+    return createdAccountIds;
   } catch (error) {
     console.error("Error initializing predefined accounts:", error);
+    throw error; // Propagate the error to the caller
   }
 }
 
