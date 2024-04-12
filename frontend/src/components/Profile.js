@@ -138,25 +138,81 @@ function AccountTerminationConfirmation() {
   );
 }
 
-function PasswordResetConfirmation({ onClose }) {
+function PasswordResetConfirmation({ onClose, userId }) {
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handlePasswordChange = (e) => {
+    setNewPassword(e.target.value);
+  };
+
+  const handleConfirmPasswordChange = (e) => {
+    setConfirmPassword(e.target.value);
+  };
+
+  const handleSubmit = async () => {
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    try {
+      const response = await axios.post('/reset-password', {
+        userId: userId,
+        newPassword: newPassword
+      });
+
+      if (response.status === 200) {
+        onClose();
+        alert("Password has been successfully reset.");
+      } else {
+        setError("Failed to reset password.");
+      }
+    } catch (error) {
+      setError("Error resetting password.");
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
       <div className="flex flex-col justify-center max-w-[364px] bg-lime-50 rounded-lg border border-red-800 border-solid shadow">
-        <p className="text-base leading-6 text-center text-black px-16 py-6">
-          The Password has been reset
-          <br />
-          The temporary password is:
-          <br />
-          <span className="font-bold">B6wcCW53</span>
-          <br />A confirmation Email has been sent
-        </p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="justify-center items-center self-center px-5 py-1.5 mt-1 mb-4 text-xs bg-white rounded-lg border border-solid border-neutral-600 text-neutral-600"
-        >
-          Close
-        </button>
+        <div className="px-12 py-4 text-center text-black">
+          <p className="text-sm leading-5">Enter your new password:</p>
+          <input
+            type="password"
+            value={newPassword}
+            onChange={handlePasswordChange}
+            className="mt-2 p-2 border rounded w-full"
+            placeholder="New password"
+            style={{ maxWidth: '200px', fontSize: '0.875rem' }}  // 14px
+          />
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={handleConfirmPasswordChange}
+            className="mt-2 p-2 border rounded w-full"
+            placeholder="Confirm new password"
+            style={{ maxWidth: '200px', fontSize: '0.875rem' }}  // 14px
+          />
+          {error && <p className="text-xs text-red-500">{error}</p>}
+        </div>
+        <div className="flex justify-evenly mt-3">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="px-4 py-1 bg-red-800 text-white rounded-lg border border-solid border-neutral-600 text-xs"
+          >
+            Reset Password
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-1 bg-zinc-300 text-black rounded-lg border border-solid border-neutral-600 text-xs"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -181,7 +237,6 @@ function ConfirmResetPasswordModal({ user,onClose, onConfirm }) {
     }
   
     try {
-      console.log('User ID is:', user.userId);
       const response = await axios.post('/verify-password', {
         userId: user.userId,
         password: currentPassword
