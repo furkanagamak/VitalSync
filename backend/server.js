@@ -139,8 +139,16 @@ app.put("/user/profilePicture", upload.single("image"), async (req, res) => {
 
 app.get("/user/profilePicture/url/:id", async (req, res) => {
   try {
-    if (!req.params.id) return res.status(404).send("No profile pic");
-    const user = await Account.findOne({ _id: req.params.id });
+    if (!req.params.id)
+      return res.status(404).send("id field needs to be provided!");
+
+    let user;
+    try {
+      user = await Account.findById(req.params.id);
+    } catch (err) {
+      return res.status(404).send("User not found");
+    }
+
     if (!user) return res.status(404).send("User not found");
     if (user.profileUrl === "") return res.status(200).send("");
 
@@ -177,92 +185,92 @@ const isValidEmail = (email) => {
 };
 
 app.post("/createAccount", async (req, res) => {
-  try {
-    const {
-      firstName,
-      lastName,
-      email,
-      accountType,
-      position,
-      department,
-      degree,
-      phoneNumber,
-      officePhoneNumber,
-      officeLocation,
-      eligibleRoles,
-    } = req.body;
+  // try {
+  const {
+    firstName,
+    lastName,
+    email,
+    accountType,
+    position,
+    department,
+    degree,
+    phoneNumber,
+    officePhoneNumber,
+    officeLocation,
+    eligibleRoles,
+  } = req.body;
 
-    // permission checks
-    // const currUID = req.cookies.accountId;
-    // if (!currUID) {
-    //   return res.status(401).send("You are not authorized to use this feature");
-    // }
-    // const currUser = await Account.find({ _id: currUID });
-    // if (!currUser)
-    //   return res
-    //     .status(400)
-    //     .send("Malformed session, please logout and sign in again!");
-    // if (currUser.accountType === "staff")
-    //   return res
-    //     .status(401)
-    //     .send("You are not authorized to use this feature!");
-    // if (
-    //   accountType === "hospital admin" &&
-    //   currUser.accountType !== "system admin"
-    // )
-    //   return res
-    //     .status(401)
-    //     .send(
-    //       "You need to ask an system admin to create this type of account!"
-    //     );
+  // permission checks
+  // const currUID = req.cookies.accountId;
+  // if (!currUID) {
+  //   return res.status(401).send("You are not authorized to use this feature");
+  // }
+  // const currUser = await Account.find({ _id: currUID });
+  // if (!currUser)
+  //   return res
+  //     .status(400)
+  //     .send("Malformed session, please logout and sign in again!");
+  // if (currUser.accountType === "staff")
+  //   return res
+  //     .status(401)
+  //     .send("You are not authorized to use this feature!");
+  // if (
+  //   accountType === "hospital admin" &&
+  //   currUser.accountType !== "system admin"
+  // )
+  //   return res
+  //     .status(401)
+  //     .send(
+  //       "You need to ask an system admin to create this type of account!"
+  //     );
 
-    // Check if any required field is missing or empty
-    if (
-      !firstName ||
-      !lastName ||
-      !email ||
-      !accountType ||
-      !position ||
-      !department ||
-      !degree ||
-      !phoneNumber ||
-      !eligibleRoles
-    ) {
-      return res
-        .status(400)
-        .send(
-          "All fields except officePhoneNumber and officeLocation are required."
-        );
+  // Check if any required field is missing or empty
+  if (
+    !firstName ||
+    !lastName ||
+    !email ||
+    !accountType ||
+    !position ||
+    !department ||
+    !degree ||
+    !phoneNumber ||
+    !eligibleRoles
+  ) {
+    return res
+      .status(400)
+      .send(
+        "All fields except officePhoneNumber and officeLocation are required."
+      );
+  }
+
+  if (!isValidEmail) {
+    return res.status(400).send("invalid email provided");
+  }
+
+  // Check if an account with the given email already exists
+  const accountExists = await Account.findOne({ email: email });
+  if (accountExists) {
+    return res.status(400).send("An account with this email already exists.");
+  }
+
+  const inpRole = await Role.findOne({ name: eligibleRoles });
+  if (!inpRole) return res.status(400).send("queried role doesn't exists");
+
+  // Generate a random password
+  const password = crypto.randomBytes(8).toString("hex");
+
+  // Hash the password
+  bcrypt.hash(password, saltRounds, async (err, hash) => {
+    if (err) {
+      return res.status(500).send("Error hashing password");
     }
 
-    if (!isValidEmail) {
-      return res.status(400).send("invalid email provided");
-    }
-
-    // Check if an account with the given email already exists
-    const accountExists = await Account.findOne({ email: email });
-    if (accountExists) {
-      return res.status(400).send("An account with this email already exists.");
-    }
-
-    const inpRole = await Role.findOne({ name: eligibleRoles });
-    if (!inpRole) return res.status(400).send("queried role doesn't exists");
-
-    // Generate a random password
-    const password = crypto.randomBytes(8).toString("hex");
-
-    // Hash the password
-    bcrypt.hash(password, saltRounds, async (err, hash) => {
-      if (err) {
-        return res.status(500).send("Error hashing password");
-      }
-
-      // Send email with the plain password
-      const mailOptions = {
-        from: "vitalsync2024@gmail.com",
-        to: email,
-        subject: "Welcome to VitalSync - Your Account Details",
-        html: `
+    // Send email with the plain password
+    const mailOptions = {
+      from: "vitalsync2024@gmail.com",
+      to: email,
+      subject: "Welcome to VitalSync - Your Account Details",
+      html: `
           <div style="font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 16px; color: #333;">
             <h2>Welcome to VitalSync!</h2>
             <p>Hello <strong>${firstName} ${lastName}</strong>,</p>
@@ -283,39 +291,39 @@ app.post("/createAccount", async (req, res) => {
             <p>The VitalSync Team</p>
           </div>
         `,
-      };
+    };
 
-      transporter.sendMail(mailOptions, async (error, info) => {
-        if (error) {
-          return res.status(500).send("Error sending email");
-        } else {
-          // Create and save the new account
-          const newAccount = new Account({
-            firstName,
-            lastName,
-            password: hash, // Store the hashed password
-            email,
-            accountType,
-            position,
-            department,
-            degree,
-            phoneNumber,
-            officePhoneNumber,
-            officeLocation,
-            eligibleRoles: inpRole,
-          });
+    transporter.sendMail(mailOptions, async (error, info) => {
+      if (error) {
+        return res.status(500).send("Error sending email");
+      } else {
+        // Create and save the new account
+        const newAccount = new Account({
+          firstName,
+          lastName,
+          password: hash, // Store the hashed password
+          email,
+          accountType,
+          position,
+          department,
+          degree,
+          phoneNumber,
+          officePhoneNumber,
+          officeLocation,
+          eligibleRoles: inpRole,
+        });
 
-          await newAccount.save();
-          res.status(201).send({
-            message: "Account created successfully",
-            accountId: newAccount._id,
-          });
-        }
-      });
+        await newAccount.save();
+        res.status(201).send({
+          message: "Account created successfully",
+          accountId: newAccount._id,
+        });
+      }
     });
-  } catch (error) {
-    res.status(400).send("Error creating account");
-  }
+  });
+  // } catch (error) {
+  //   res.status(500).send("Error creating account");
+  // }
 });
 
 const transformAccount = async (account) => {
@@ -592,7 +600,7 @@ async function initializePredefinedAccounts() {
         // Save the account and store its ID
         const savedAccount = await newAccount.save();
         console.log(`Account '${accountData.email}' created successfully.`);
-        createdAccountIds.push(savedAccount._id); // Push the ID of the created account
+        createdAccountIds.push(savedAccount._id.toString()); // Push the ID of the created account
       } else {
         console.log(
           `Account with email '${accountData.email}' already exists.`
@@ -655,7 +663,58 @@ async function removePredefinedAccounts() {
   }
 }
 
-app.get('/user', async (req, res) => {
+app.get('/user/:userId', async (req, res) => {
+  try {
+    const user = await Account.findOne({ _id: req.params.userId });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const response = {
+      userId: user._id, 
+      firstName: user.firstName,
+      lastName: user.lastName,
+      profileUrl: user.profileUrl,
+      userType: user.userType,
+      position: user.position,
+      department: user.department,
+      degree: user.degree,
+      specialization: user.specialization,
+      phoneNumber: user.phoneNumber,
+      officePhoneNumber: user.officePhoneNumber,
+      email: user.email,
+      officeLocation: user.officeLocation,
+      userImg: user.userImg,
+      usualHours: user.usualHours,
+      profileImage: user.profileImage,
+      unavailableTimes: user.unavailableTimes
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error fetching user by _id:', error);
+    res.status(500).json({ message: 'Error fetching user', error: error.message });
+  }
+});
+
+app.put('/user/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const updateData = req.body;
+
+  try {
+    const updatedUser = await Account.findByIdAndUpdate(userId, updateData, { new: true });
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ message: 'Profile updated successfully', user: updatedUser });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ message: 'Error updating user', error: error.message });
+  }
+})
+
+app.get('/users', async (req, res) => {
   try {
     const user = await Account.find({}, { firstName: 1, lastName: 1, department: 1, position: 1 }); // Select necessary fields
     res.json(user);
