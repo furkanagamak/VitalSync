@@ -569,8 +569,6 @@ async function initializePredefinedAccounts() {
       },
     ];
 
-    const Account = require("./models/Account"); // Assuming you have an Account model defined
-
     // Loop through predefined accounts and create them if they don't exist
     for (const accountData of predefinedAccounts) {
       // Check if an account with the given email already exists
