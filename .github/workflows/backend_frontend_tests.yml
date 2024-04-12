@@ -50,16 +50,6 @@ jobs:
           cd backend
           node dbtest.js
 
-      - name: Run Jest Tests
-        run: |
-          cd backend
-          npx jest
-
-      - name: Run Cypress Tests
-        run: |
-          cd frontend
-          npx cypress run
-
       - name: Start Backend Server
         run: |
           cd backend
@@ -69,6 +59,16 @@ jobs:
         run: |
           cd frontend
           npm start &
+
+      - name: Run Jest Tests
+        run: |
+          cd backend
+          npx jest
+
+      - name: Run Cypress Tests
+        run: |
+          cd frontend
+          npx cypress run
 
   deploy:
     needs: jest-cypress-run
