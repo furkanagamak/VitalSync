@@ -16,12 +16,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      
+
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
           node-version: "18.x"
-        
+
       - name: Cache Modules
         uses: actions/cache@v2
         with:
@@ -36,10 +36,10 @@ jobs:
         run: |
           cd frontend
           npm install
-      
+
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.10.0
-      
+
       - name: Install Backend Dependencies
         run: |
           cd backend
@@ -50,16 +50,6 @@ jobs:
           cd backend
           node dbtest.js
 
-      - name: Start Backend Server
-        run: |
-          cd backend
-          node app.js &
-          
-      - name: Start Frontend Server
-        run: |
-          cd frontend
-          npm start &
-
       - name: Run Jest Tests
         run: |
           cd backend
@@ -69,6 +59,16 @@ jobs:
         run: |
           cd frontend
           npx cypress run
+
+      - name: Start Backend Server
+        run: |
+          cd backend
+          node app.js &
+
+      - name: Start Frontend Server
+        run: |
+          cd frontend
+          npm start &
 
   deploy:
     needs: jest-cypress-run
