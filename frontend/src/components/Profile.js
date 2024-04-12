@@ -338,11 +338,11 @@ function ContactInfo({ user }) {
         officeLocation: office
       };
       const response = await axios.put(`/user/${user.userId}`, updateData);
-      alert('Profile updated successfully!');
+      notify();
       setEditMode(false);
     } catch (error) {
       console.error('Failed to update profile:', error);
-      alert('Failed to update profile.');
+      notifyErr();
     }
   };
 
@@ -556,7 +556,7 @@ function ProfileSection({ user }) {
     </div>
   );
 }
-const ScheduleCalendar = ({ user, onScheduleChange }) => {
+const ScheduleCalendar = ({ user, onScheduleChange, preview }) => {
   
   const today = new Date();
   const threeYearsLater = new Date(today.getFullYear() + 3, today.getMonth(), today.getDate());
@@ -657,12 +657,17 @@ const ScheduleCalendar = ({ user, onScheduleChange }) => {
 
   return (
     <div style={customStyles.calendarContainer}>
-      <button
-        onClick={onScheduleChange}
-        className="mt-2 mb-5  justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
-      >
-        Edit Schedule
-      </button>
+      
+      {
+        !preview && (
+          <button
+            onClick={onScheduleChange}
+            className="mt-2 mb-5 justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
+          >
+            Edit Schedule
+          </button>
+        )
+      }
       <Calendar
         minDate={today}
         maxDate={threeYearsLater}
@@ -695,7 +700,12 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
   const [dateRange, setDateRange] = useState([new Date(), new Date()]);
   const [status, setStatus] = useState('Work Hours');
   const [errors, setErrors] = useState({});
-  const [weeklySchedule, setWeeklySchedule] = useState(user.usualHours);
+  const [weeklySchedule, setWeeklySchedule] = useState([...user.usualHours]);
+  const [previewSchedule, setPreviewSchedule] = useState([...user.usualHours]);
+
+  useEffect(() => {
+    setPreviewSchedule([...weeklySchedule]);
+  }, [weeklySchedule]);
 
   const handleDateChange = (range) => {
     setDateRange(range);
@@ -710,6 +720,12 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
       schedule.day === day ? { ...schedule, ...hours } : schedule
     );
     setWeeklySchedule(updatedSchedule);
+  };
+
+  // When the user wants to go back without saving
+  const handleBackWithoutSaving = () => {
+    setWeeklySchedule([...user.usualHours]);  // Reset any changes made
+    onRevertToProfile();  // Switch back to the profile view
   };
 
   const handleSubmitTimeOff = async () => {
@@ -760,8 +776,13 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
     }
   };
 
+  
+
   return (
     <div className="flex flex-col px-8 pt-20 pb-8 bg-white">
+      <button onClick={handleBackWithoutSaving} className="mb-4 bg-primary p-2 rounded text-white text-xl w-1/6">
+        Back to Profile
+      </button>
       <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
         <header className="flex justify-between items-center max-w-full text-red-800">
           <h1 className="text-4xl">Time-Off Request</h1>
@@ -824,6 +845,8 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
           <button color="#8e0000" onClick={handleSubmitWeeklySchedule}>
             Update Schedule
           </button>
+
+          <ScheduleCalendar user={{...user, usualHours: previewSchedule}} onScheduleChange={() => {}} preview={true} />
         </div>
       </section>
     </div>
@@ -845,6 +868,7 @@ function MyComponent() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        console.log(id);
         const response = await axios.get(`/user/${id}`);
         setUser(response.data);  // Set the user data in state
       } catch (error) {
@@ -931,7 +955,7 @@ function MyComponent() {
       </div>
       <div className="flex flex-col md:flex-row gap-5">
       <div className="w-full my-5">
-          <ScheduleCalendar user={user} onScheduleChange={handleScheduleChange}/>
+          <ScheduleCalendar user={user} onScheduleChange={handleScheduleChange} preview={false}/>
         </div>
         {incorrectName && <p className="text-red-500">Incorrect name</p>}
         {showTerminationModal && (

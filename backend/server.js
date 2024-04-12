@@ -655,6 +655,57 @@ async function removePredefinedAccounts() {
   }
 }
 
+app.get('/user/:userId', async (req, res) => {
+  try {
+    const user = await Account.findOne({ _id: req.params.userId });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const response = {
+      userId: user._id, 
+      firstName: user.firstName,
+      lastName: user.lastName,
+      profileUrl: user.profileUrl,
+      userType: user.userType,
+      position: user.position,
+      department: user.department,
+      degree: user.degree,
+      specialization: user.specialization,
+      phoneNumber: user.phoneNumber,
+      officePhoneNumber: user.officePhoneNumber,
+      email: user.email,
+      officeLocation: user.officeLocation,
+      userImg: user.userImg,
+      usualHours: user.usualHours,
+      profileImage: user.profileImage,
+      unavailableTimes: user.unavailableTimes
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error fetching user by _id:', error);
+    res.status(500).json({ message: 'Error fetching user', error: error.message });
+  }
+});
+
+app.put('/user/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const updateData = req.body;
+
+  try {
+    const updatedUser = await Account.findByIdAndUpdate(userId, updateData, { new: true });
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ message: 'Profile updated successfully', user: updatedUser });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ message: 'Error updating user', error: error.message });
+  }
+})
+
 app.get('/users', async (req, res) => {
   try {
     const users = await Account.find({}, { firstName: 1, lastName: 1, department: 1, position: 1 }); // Select necessary fields
