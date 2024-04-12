@@ -20,25 +20,7 @@ describe("GET /user/profilePicture/url/:id get signed profile picture url", () =
     uids = await initializePredefinedAccounts();
   });
 
-  it("Getting image of invalid user id", async () => {
-    const profileUrlRes = await request(app).get(
-      `/user/profilePicture/url/abcde`
-    );
-    expect(profileUrlRes.status).toBe(404);
-    expect(profileUrlRes.text).toBeDefined();
-    expect(profileUrlRes.text).toBe("User not found");
-  });
-
-  it("Getting image of user 1 before they have updated their image", async () => {
-    const profileUrlRes = await request(app).get(
-      `/user/profilePicture/url/${uids[0]}`
-    );
-    expect(profileUrlRes.status).toBe(200);
-    expect(profileUrlRes.text).toBeDefined();
-    expect(profileUrlRes.text).toBe("");
-  });
-
-  it("Getting image of user 1 after they have updated their image", async () => {
+  it("Login and then request checkLogin", async () => {
     // Log in with dummy account to get a valid session
     const loginRes = await request(app).post("/login").send({
       email: dummyEmail,
@@ -51,22 +33,43 @@ describe("GET /user/profilePicture/url/:id get signed profile picture url", () =
       .split("=")[1];
 
     // Upload profile picture with a dummy image
-    const uploadRes = await request(app)
-      .put("/user/profilePicture")
+    const checkLoginRes = await request(app)
+      .get("/checkLogin")
       .withCredentials()
       .set("Cookie", [`accountId=${accountId}`]) // Set the session cookie
-      .attach(
-        "image",
-        fs.readFileSync(__dirname + "/profilepic.png"),
-        "profilepic.png"
-      )
-      .on("error", (err) => console.log(err));
+      .expect("Content-Type", /json/);
 
-    const profileUrlRes = await request(app).get(
-      `/user/profilePicture/url/${uids[0]}`
-    );
-    expect(profileUrlRes.text).toBeDefined();
-    expect(profileUrlRes.text).not.toBe("");
+    expect(checkLoginRes.status).toBe(200);
+
+    const body = checkLoginRes.body;
+
+    expect(body).toHaveProperty("isLoggedIn");
+    expect(body.isLoggedIn).toBe(true);
+
+    expect(body).toHaveProperty("account");
+    const retUser = body.account;
+    expect(retUser).toHaveProperty("id");
+    expect(retUser.id).toBe(uids[0]);
+    expect(retUser).toHaveProperty("firstName");
+    expect(retUser.firstName).toBe("Staff");
+    expect(retUser).toHaveProperty("lastName");
+    expect(retUser.lastName).toBe("User");
+    expect(retUser).toHaveProperty("accountType");
+    expect(retUser.accountType).toBe("staff");
+    expect(retUser).toHaveProperty("profileUrl");
+    expect(retUser.profileUrl).toBe("");
+  });
+
+  it("checkLogin without login", async () => {
+    const loginRes = await request(app).get(`/checkLogin`);
+
+    expect(loginRes.status).toBe(200);
+
+    const body = loginRes.body;
+    expect(body).toHaveProperty("isLoggedIn");
+    expect(body.isLoggedIn).toBe(false);
+
+    expect(body).not.toHaveProperty("account");
   });
 
   // remove dummy accounts
