@@ -4,6 +4,16 @@ import toast from "react-hot-toast";
 import { useAuth } from "../providers/authProvider.js";
 import axios from "axios";
 import { useReducer } from "react";
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
+import { Box } from '@mui/material';
+import dayjs from 'dayjs';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+
+
+
 
 const notify = () => toast.success("Profile successfully updated.");
 const notifyErr = () => toast.error("There was an error updating the profile.");
@@ -282,6 +292,7 @@ function ContactInfo({ user }) {
   const [officeNo, setOfficeNo] = useState('');
   const [email, setEmail] = useState('');
   const [office, setOffice] = useState('');
+  const [errors, setErrors] = useState({});
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
   const [showPasswordResetConfirmation, setShowPasswordResetConfirmation] = useState(false);
 
@@ -292,28 +303,54 @@ function ContactInfo({ user }) {
       setEmail(user.email || '');
       setOffice(user.officeLocation || '');
     }
-  }, [user]);  
+  }, [user]);
 
+  const validatePhoneNumber = (number) => {
+    return /^\d{3}-\d{3}-\d{4}$/.test(number);
+  };
+
+  const validateEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
 
   const handleSaveChanges = async () => {
-    console.log("Updating user with ID:", user.userId);
+    let errorMessages = {};
+    if (!validatePhoneNumber(cellNo)) {
+      errorMessages.cellNo = 'Invalid phone number format. Required: XXX-XXX-XXXX';
+    }
+    if (!validatePhoneNumber(officeNo)) {
+      errorMessages.officeNo = 'Invalid phone number format. Required: XXX-XXX-XXXX';
+    }
+    if (!validateEmail(email)) {
+      errorMessages.email = 'Invalid email format.';
+    }
 
-    const updateData = {
-      cellNo,
-      officeNo,
-      email,
-      office
-    };
-
+    if (Object.keys(errorMessages).length > 0) {
+      setErrors(errorMessages);
+      return;
+    }
 
     try {
+      const updateData = {
+        phoneNumber: cellNo,
+        officePhoneNumber: officeNo,
+        email,
+        officeLocation: office
+      };
       const response = await axios.put(`/user/${user.userId}`, updateData);
-      notify();
-      setEditMode(false); 
-      console.log(response.data);
+      alert('Profile updated successfully!');
+      setEditMode(false);
     } catch (error) {
       console.error('Failed to update profile:', error);
-      notifyErr();
+      alert('Failed to update profile.');
+    }
+  };
+
+  const handleInputChange = (setterFunction, value, validatorFunction) => {
+    setterFunction(value);
+    // Clear the corresponding error if the new value is valid
+    if (validatorFunction(value)) {
+      setErrors((prev) => ({ ...prev, [setterFunction.name]: undefined }));
     }
   };
 
@@ -324,7 +361,6 @@ function ContactInfo({ user }) {
     setShowPasswordResetConfirmation(true);
   };
 
-
   return (
     <div className="flex flex-col mt-1.5 text-3xl text-black max-md:mt-10">
       <h2 className="text-4xl text-left text-red-800">Contact Information</h2>
@@ -333,21 +369,24 @@ function ContactInfo({ user }) {
           <input
             type="text"
             value={cellNo}
-            onChange={(e) => setCellNo(e.target.value)}
+            onChange={(e) => handleInputChange(setCellNo, e.target.value, validatePhoneNumber)}
             className="mt-6 text-left border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
           />
+          {errors.cellNo && <div className="text-red-500 text-lg">{errors.cellNo}</div>}
           <input
             type="text"
             value={officeNo}
-            onChange={(e) => setOfficeNo(e.target.value)}
+            onChange={(e) => handleInputChange(setOfficeNo, e.target.value, validatePhoneNumber)}
             className="mt-3 text-left border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
           />
+          {errors.officeNo && <div className="text-red-500 text-lg">{errors.officeNo}</div>}
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => handleInputChange(setEmail, e.target.value, validateEmail)}
             className="mt-2.5 text-left border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
           />
+          {errors.email && <div className="text-red-500 text-lg" >{errors.email}</div>}
           <input
             type="text"
             value={office}
@@ -373,8 +412,8 @@ function ContactInfo({ user }) {
       )}
       <div className="flex gap-5 justify-between items-start mt-24 text-sm font-medium text-neutral-600 max-md:pr-5 max-md:mt-10">
         <button
-        onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
-        className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
+          onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
+          className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
         >
           {editMode ? "Save Changes" : "Edit Contact Info"}
         </button>
@@ -498,15 +537,19 @@ function ProfileDetails({ user }) {
 
 function ProfileSection({ user }) {
   return (
-    <div className="flex flex-col ml-5 w-[76%] max-md:ml-0 max-md:w-full">
+    <div className="flex flex-col ml-5 w-full max-md:ml-0 max-md:w-full">
       <div className="flex flex-col grow max-md:mt-6 max-md:max-w-full">
         <div
           className="px-8 py-7 max-md:px-5 max-md:max-w-full"
           style={{ backgroundColor: "#F5F5DC" }}
         >
-          <div className="flex gap-5 max-md:flex-col max-md:gap-0">
-            <ProfileDetails user={user}/>
-            <ContactInfo user={user}/>
+          <div className="flex flex-row gap-5 max-md:flex-col max-md:gap-0 w-full">
+            <div className="flex-1 min-w-0">
+              <ProfileDetails user={user}/>
+            </div>
+            <div className="flex-2 min-w-0 pr-10">
+              <ContactInfo user={user}/>
+            </div>
           </div>
         </div>
       </div>
@@ -514,7 +557,7 @@ function ProfileSection({ user }) {
   );
 }
 
-function ScheduleCalendar({ onScheduleChange }) {
+/*function ScheduleCalendar({ onScheduleChange }) {
   return (
     <div>
       <div className="flex items-center justify-center">
@@ -539,23 +582,102 @@ function ScheduleCalendar({ onScheduleChange }) {
       />
     </div>
   );
-}
+}*/
 
-function ScheduleImage() {
+
+function ScheduleCalendar({ user }, onScheduleChange) {
+  const today = new Date();
+  const threeMonthsLater = new Date(today.getFullYear(), today.getMonth() + 3, today.getDate());
+
+  if (!user) {
+    return <p>Loading...</p>;  // Or any other loading indicator
+  }
+
+  const customStyles = {
+    calendar: {
+      borderRadius: '8px',
+      boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+      color: '#333',
+    },
+    navigationButton: {
+      backgroundColor: '#912424',
+      color: 'white',
+      borderRadius: '4px',
+      margin: '3px',
+    },
+    monthYearHeader: {
+      backgroundColor: '#8e0000',
+      color: 'white',
+      padding: '10px',
+    },
+    tile: {
+      border: '1px solid black',  // Add border to each cell
+      width: '60px',             // Increase the width of each cell
+      height: '60px',            // Adjust height for alignment
+      display: 'flex',           // Flex to center content
+      justifyContent: 'center',  // Center horizontally
+      alignItems: 'center',      // Center vertically
+      flexDirection: 'column'    // Stack children vertically
+    },
+    dateText: {
+      color: '#912424',          // Color of the date text
+      fontWeight: 'bold'
+    }
+  };
+
+  const getUsualHoursForDay = (day) => {
+    const weekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][day];
+    return user.usualHours.find(uh => uh.day === weekday);
+  };
+
+  const getUnavailableReasonForDate = (date) => {
+    const unavailable = user.unavailableTimes.find(u => {
+      const startDate = new Date(u.start);
+      const endDate = new Date(u.end);
+      return date >= startDate && date <= endDate;
+    });
+    return unavailable ? unavailable.reason : null;
+  };
+
   return (
-    <div className="flex flex-col ml-5 w-6/12 max-md:ml-0 max-md:w-full">
-      <div className="flex items-center justify-center">
-        {" "}
-        <div className="text-3xl font-bold">March 2024</div>
-      </div>
-      <img
-        src="/Calandar.png"
-        className="grow w-full aspect-[1.64] max-md:mt-10 max-md:max-w-full"
-        alt="Schedule"
+    <div style={{ width: 'auto', margin: '0 auto' }}>
+      <Calendar
+        minDate={today}
+        maxDate={threeMonthsLater}
+        tileContent={({ date, view }) => {
+          if (view === 'month') {
+            const hours = getUsualHoursForDay(date.getDay());
+            const reason = getUnavailableReasonForDate(date);
+            return (
+              <div style={customStyles.tile}>
+                <span style={customStyles.dateText}>{date.getDate()}</span>
+                <div style={{ fontSize: '0.75em', marginTop: '4px' }}>
+                  {hours ? `${hours.start} - ${hours.end}` : reason || ''}
+                </div>
+              </div>
+            );
+          }
+        }}
+        navigationLabel={({ label }) => (
+          <div style={customStyles.monthYearHeader}>
+            {label}
+          </div>
+        )}
+        prevLabel={<div style={customStyles.navigationButton}>‹</div>}
+        nextLabel={<div style={customStyles.navigationButton}>›</div>}
+        style={customStyles.calendar}
       />
+      <button
+          onClick={onScheduleChange}
+          className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
+        >
+          Change Schedule
+        </button>
     </div>
   );
 }
+
+
 
 function ChangeAvailability({ onRevertToProfile }) {
   function DateSelector({ label }) {
@@ -733,10 +855,9 @@ function MyComponent() {
           <ProfileSection user={user}/>
         </div>
       </div>
-      <div className="mt-4 w-full max-w-[1286px] max-md:max-w-full">
-        <div className="flex gap-5 max-md:flex-col max-md:gap-0">
-          <ScheduleCalendar onScheduleChange={handleScheduleChange} />
-          <ScheduleImage />
+      <div className="flex flex-col md:flex-row gap-5">
+      <div className="w-full my-5">
+          <ScheduleCalendar user={user} onScheduleChange={handleScheduleChange} />
         </div>
         {incorrectName && <p className="text-red-500">Incorrect name</p>}
         {showTerminationModal && (
