@@ -2,9 +2,8 @@ import React, {useState, useEffect } from 'react';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
 import { BiSolidDownArrow } from "react-icons/bi";
 import { FaArrowLeft } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
-
-// Mock data for Resources - replace with actual data retrieval mechanism
 const resources = [
     { 
       name: "Operating Room",
@@ -70,6 +69,7 @@ const resources = [
   ];
 
 export function ResourceDropdownContent({ resource }) {
+  
   return (
     <div className="flex mx-10 mb-5">
       <div className="w-1/3 text-3xl mt-20 mr-32">
@@ -106,8 +106,17 @@ export function ResourceDropdownContent({ resource }) {
 }
 
 
-export function ModifyResourceAssignments({ processName, onBack, onProceed }) {
+export function ModifyResourceAssignments() {
   const [openResources, setOpenResources] = useState(new Set());
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    navigate("/processManagement/modifyProcess/landing");
+  };
+
+  const handleProceed = () => {
+    navigate("/processManagement/modifyProcess/reviewResourceAssignments");
+  };
 
   useEffect(() => {
     const allResources = new Set(resources.map(resource => resource.name));
@@ -130,7 +139,7 @@ export function ModifyResourceAssignments({ processName, onBack, onProceed }) {
         <button
           className="ml-5 hover:bg-red-900 border-black border-2 flex items-center justify-center bg-primary text-white rounded-full px-5 py-2 text-xl shadow"
           style={{ maxWidth: '30%' }}
-          onClick={onBack}
+          onClick={handleGoBack}
         >
           <FaArrowLeft className="mr-3" />
           Go Back
@@ -139,7 +148,7 @@ export function ModifyResourceAssignments({ processName, onBack, onProceed }) {
         <button
           className="mr-10 mt-5 hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-10 py-5 text-4xl"
           style={{ maxWidth: '30%' }}
-          onClick={onProceed}
+          onClick={handleProceed}
         >
           Proceed
         </button>
@@ -147,7 +156,7 @@ export function ModifyResourceAssignments({ processName, onBack, onProceed }) {
 
       <div className="container mx-auto p-8">
         <div className="pb-4 mb-4 border-b-2 border-black">
-          <h2 className="text-4xl font-bold">{processName}<span className="text-primary" > - Modify Resource Assignments</span></h2>
+          <h2 className="text-4xl font-bold">{"Radial Prostatectomy"}<span className="text-primary" > - Modify Resource Assignments</span></h2>
         </div>
 
         <div>

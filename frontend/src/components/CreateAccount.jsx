@@ -2,6 +2,16 @@ import React from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import {
+  TextField,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const CreateAccount = ({ navToAdminActions }) => {
   const [accCreatePage, setAccCreatePage] = useState("type");
@@ -18,14 +28,75 @@ const CreateAccount = ({ navToAdminActions }) => {
     officePhoneNumber: "",
     officeLocation: "",
   });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const isValidEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form data:", { ...formData });
+    const requiredFields = [
+      { name: "First Name", value: formData.firstName },
+      { name: "Last Name", value: formData.lastName },
+      { name: "Degree", value: formData.degree },
+      { name: "Department", value: formData.department },
+      { name: "Position", value: formData.position },
+      { name: "Eligible Roles", value: formData.eligibleRoles },
+      { name: "Phone Number", value: formData.phoneNumber },
+      { name: "Email", value: formData.email },
+      { name: "Account Type", value: accType },
+    ];
+
+    // Check if all required fields have values
+    const missingFields = requiredFields.filter(
+      (field) => field.value.trim() === ""
+    );
+
+    if (missingFields.length === 0) {
+      if (!isValidEmail(formData.email))
+        return toast.error("Email is invalid!");
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_API_BASE_URL}/createAccount`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              ...formData,
+              accountType: accType,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          toast.success(
+            "Account created successfully! Credentials has been sent to the provided email!"
+          );
+          navigate("/adminActions");
+        } else {
+          toast.error(await response.text());
+        }
+      } catch (error) {
+        console.error("Error creating account:", error.message);
+        toast.error("Failed to create account. Please try again later.");
+      }
+    } else {
+      // Display error message for empty required fields
+      const missingFieldNames = missingFields
+        .map((field) => field.name)
+        .join(", ");
+      toast.error(
+        `Please fill in the following required fields: ${missingFieldNames}.`
+      );
+    }
   };
 
   const makeAccTypeSelection = (type) => {
@@ -45,8 +116,69 @@ const CreateAccount = ({ navToAdminActions }) => {
     setAccCreatePage("form2");
   };
 
+  const theme = createTheme({
+    typography: {
+      fontSize: 12,
+      button: {
+        textTransform: "none",
+      },
+    },
+    palette: {
+      primary: {
+        main: "#8E0000",
+      },
+    },
+    components: {
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#8E0000",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#8E0000",
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#8E0000",
+            },
+            backgroundColor: "white",
+          },
+          input: {
+            "&.MuiOutlinedInput-inputMultiline": {
+              backgroundColor: "white",
+            },
+          },
+        },
+      },
+      MuiSelect: {
+        styleOverrides: {
+          iconOutlined: {
+            color: "#8E0000",
+          },
+          select: {
+            color: "#8E0000",
+          },
+        },
+      },
+      MuiSvgIcon: {
+        styleOverrides: {
+          root: {
+            color: "#8E0000",
+          },
+        },
+      },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: {
+            color: "#8E0000",
+          },
+        },
+      },
+    },
+  });
+
   return (
-    <>
+    <ThemeProvider theme={theme}>
       {accCreatePage === "type" && (
         <SelectAccType
           makeAccTypeSelection={makeAccTypeSelection}
@@ -71,13 +203,16 @@ const CreateAccount = ({ navToAdminActions }) => {
           navToForm1={navToForm1}
         />
       )}
-    </>
+      {accCreatePage === "credentials" && (
+        <DisplayCredentials email={formData.email} password={`abcdef`} />
+      )}
+    </ThemeProvider>
   );
 };
 
 const SelectAccType = ({ navToAdminActions, makeAccTypeSelection }) => {
   const selectAdmin = () => {
-    makeAccTypeSelection("admin");
+    makeAccTypeSelection("hospital admin");
   };
 
   const selectStaff = () => {
@@ -143,116 +278,110 @@ const Form1 = ({
           <FaArrowLeft className="h-6 w-6" />
         </button>
         <div className="flex flex-col justify-center items-center text-primary">
-          <h1 className="text-3xl font-semibold">Create New Resource</h1>
+          <h1 className="text-3xl font-semibold">Create New Account</h1>
           <p>All fields with * are required</p>
         </div>
       </section>
       <form
-        className="mx-auto max-w-lg bg-[#f5f5dc] py-4 px-8"
+        className="mx-auto max-w-lg bg-[#f5f5dc] py-4 px-8 space-y-8"
         onSubmit={handleSubmit}
       >
-        <div className="mb-4 flex">
-          <div className="w-3/4">
-            <label className="block text-primary text-lg font-bold mb-2">
-              *First Name
-            </label>
-            <input
-              type="text"
+        <div className="flex">
+          <div className="w-3/4 mt-auto">
+            <TextField
+              multiline
+              label="*First Name"
               name="firstName"
               value={formData.firstName}
               onChange={handleChange}
-              className="shadow rounded w-full py-2 px-3"
               id="firstNameInp"
+              InputLabelProps={{ style: { color: "#8E0000" } }}
+              inputProps={{ style: { color: "#8E0000" } }}
+              className="shadow rounded w-full"
             />
           </div>
-          <div className="pl-4 w-1/4">
+          <div className="text-center w-1/4">
             <label className="block text-primary text-lg font-bold mb-2">
               Type
             </label>
-            <div className="flex items-center text-primary">
+            <div className="flex  justify-center items-center text-primary">
               <p className="">
                 {accType.charAt(0).toUpperCase() + accType.slice(1)}
               </p>
             </div>
           </div>
         </div>
-        <div className="mb-4">
-          <label className="block text-primary text-lg font-bold mb-2">
-            *Last Name
-          </label>
-          <input
-            type="text"
-            name="lastName"
-            value={formData.lastName}
-            onChange={handleChange}
-            className="shadow rounded w-full py-2 px-3"
-            id="lastNameInp"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-primary text-lg font-bold mb-2">
+        <TextField
+          multiline
+          label="*Last Name"
+          name="lastName"
+          value={formData.lastName}
+          onChange={handleChange}
+          id="lastNameInp"
+          InputLabelProps={{ style: { color: "#8E0000" } }}
+          inputProps={{ style: { color: "#8E0000" } }}
+          className="shadow rounded w-full"
+        />
+        <FormControl fullWidth>
+          <InputLabel id="degreeInputLabel" style={{ color: "#8E0000" }}>
             *Degree
-          </label>
-          <select
-            name="degree"
+          </InputLabel>
+          <Select
+            label="degree"
             value={formData.degree}
+            name="degree"
             onChange={handleChange}
-            className="shadow rounded w-full py-2 px-3"
+            style={{ color: "#8E0000" }}
             id="degreeInp"
           >
-            <option value="">Select Degree</option>
-            <option value="bachelors">Bachelors</option>
-            <option value="masters">Masters</option>
-            <option value="phd">PhD</option>
-            <option value="others">Other</option>
-          </select>
-        </div>
-        <div className="mb-4">
-          <label className="block text-primary text-lg font-bold mb-2">
-            *Department
-          </label>
-          <input
-            type="text"
-            name="department"
-            value={formData.department}
-            onChange={handleChange}
-            className="shadow rounded w-full py-2 px-3"
-            id="departmentInp"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-primary text-lg font-bold mb-2">
-            *Position
-          </label>
-          <input
-            type="text"
-            name="position"
-            value={formData.position}
-            onChange={handleChange}
-            className="shadow rounded w-full py-2 px-3"
-            id="positionInp"
-          />
-        </div>
+            <MenuItem value="">Select Degree</MenuItem>
+            <MenuItem value="bachelors">Bachelors</MenuItem>
+            <MenuItem value="masters">Masters</MenuItem>
+            <MenuItem value="phd">PhD</MenuItem>
+            <MenuItem value="other">Other</MenuItem>
+          </Select>
+        </FormControl>
+        <TextField
+          label="*Department"
+          name="department"
+          value={formData.department}
+          onChange={handleChange}
+          id="departmentInp"
+          InputLabelProps={{ style: { color: "#8E0000" } }}
+          inputProps={{ style: { color: "#8E0000" } }}
+          className="shadow rounded w-full"
+        />
+        <TextField
+          label="*Position"
+          name="position"
+          value={formData.position}
+          onChange={handleChange}
+          id="positionInp"
+          InputLabelProps={{ style: { color: "#8E0000" } }}
+          inputProps={{ style: { color: "#8E0000" } }}
+          className="shadow rounded w-full"
+        />
         <div className="flex">
-          <div className="mb-4 w-3/4">
-            <label className="block text-primary text-lg font-bold mb-2">
+          <FormControl className="w-3/4">
+            <InputLabel id="roleInpLabel" style={{ color: "#8E0000" }}>
               *Eligible Roles
-            </label>
-            <select
-              name="eligibleRoles"
+            </InputLabel>
+            <Select
+              label="*eligible roles"
               value={formData.eligibleRoles}
+              name="eligibleRoles"
               onChange={handleChange}
-              className="shadow rounded w-full py-2 px-3"
+              style={{ color: "#8E0000" }}
               id="eligibleRolesInp"
             >
-              <option value="">Select Role</option>
-              <option value="physician">Physician</option>
-              <option value="nurse">Nurse</option>
-              <option value="surgeon">Surgeon</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div className="mt-6 flex justify-center items-center w-1/4">
+              <MenuItem value="">Select Role</MenuItem>
+              <MenuItem value="physician">Physician</MenuItem>
+              <MenuItem value="nurse">Nurse</MenuItem>
+              <MenuItem value="surgeon">Surgeon</MenuItem>
+              <MenuItem value="other">Other</MenuItem>
+            </Select>
+          </FormControl>
+          <div className="flex justify-center items-center w-1/4">
             <button
               type="submit"
               className="bg-primary text-white rounded-md ml-auto h-fit py-2 px-4"
@@ -280,65 +409,53 @@ const Form2 = ({ formData, handleChange, handleSubmit, navToForm1 }) => {
           <FaArrowLeft className="h-6 w-6" />
         </button>
         <h1 className="text-primary text-3xl font-semibold">
-          Create New Resource
+          Create New Account
         </h1>
       </section>
       <form
-        className="mx-auto max-w-lg bg-[#f5f5dc] py-4 px-8"
+        className="mx-auto max-w-lg bg-[#f5f5dc] pt-8 pb-4 px-8 space-y-8"
         onSubmit={handleSubmit}
       >
-        <div className="mb-4">
-          <label className="block text-primary text-lg font-bold mb-2">
-            *Phone Number
-          </label>
-          <input
-            type="text"
-            name="phoneNumber"
-            value={formData.phoneNumber}
-            onChange={handleChange}
-            className="shadow rounded w-full py-2 px-3"
-            id="phoneNumberInp"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-primary text-lg font-bold mb-2">
-            *Email
-          </label>
-          <input
-            type="text"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="shadow rounded w-full py-2 px-3"
-            id="emailInp"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-primary text-lg font-bold mb-2">
-            Office Phone Number
-          </label>
-          <input
-            type="text"
-            name="officePhoneNumber"
-            value={formData.officePhoneNumber}
-            onChange={handleChange}
-            className="shadow rounded w-full py-2 px-3"
-            id="officePhoneNumberInp"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-primary text-lg font-bold mb-2">
-            Office Location
-          </label>
-          <input
-            type="text"
-            name="officeLocation"
-            value={formData.officeLocation}
-            onChange={handleChange}
-            className="shadow rounded w-full py-2 px-3"
-            id="officeLocationInp"
-          />
-        </div>
+        <TextField
+          label="*Phone Number"
+          name="phoneNumber"
+          value={formData.phoneNumber}
+          onChange={handleChange}
+          InputLabelProps={{ style: { color: "#8E0000" } }}
+          inputProps={{ style: { color: "#8E0000" } }}
+          className="shadow rounded w-full py-2 px-3"
+          id="phoneNumberInp"
+        />
+        <TextField
+          label="*Email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          InputLabelProps={{ style: { color: "#8E0000" } }}
+          inputProps={{ style: { color: "#8E0000" } }}
+          className="shadow rounded w-full py-2 px-3"
+          id="emailInp"
+        />
+        <TextField
+          label="Office Phone Number"
+          name="officePhoneNumber"
+          value={formData.officePhoneNumber}
+          onChange={handleChange}
+          InputLabelProps={{ style: { color: "#8E0000" } }}
+          inputProps={{ style: { color: "#8E0000" } }}
+          className="shadow rounded w-full py-2 px-3"
+          id="officePhoneNumberInp"
+        />
+        <TextField
+          label="  Office Location"
+          name="officeLocation"
+          value={formData.officeLocation}
+          onChange={handleChange}
+          InputLabelProps={{ style: { color: "#8E0000" } }}
+          inputProps={{ style: { color: "#8E0000" } }}
+          className="shadow rounded w-full py-2 px-3"
+          id="officeLocationInp"
+        />
         <div className="mt-6 flex">
           <button
             type="submit"
@@ -349,6 +466,29 @@ const Form2 = ({ formData, handleChange, handleSubmit, navToForm1 }) => {
           </button>
         </div>
       </form>
+    </div>
+  );
+};
+
+const DisplayCredentials = ({ email, password }) => {
+  return (
+    <div className="mx-auto max-w-lg bg-[#f5f5dc] p-8 space-y-8">
+      <section className="text-primary text-2xl space-y-4">
+        <h1 className="text-center">
+          You have successfully created your account!
+        </h1>
+        <h1>Here are your credentials:</h1>
+      </section>
+      <section className="text-lg">
+        <div className="flex space-x-10">
+          <h1 className="text-primary underline">Email: </h1>
+          <p>example@123.com</p>
+        </div>
+        <div className="flex space-x-2">
+          <h1 className="text-primary underline">Password: </h1>
+          <p>{password}</p>
+        </div>
+      </section>
     </div>
   );
 };

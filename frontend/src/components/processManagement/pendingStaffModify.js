@@ -3,6 +3,8 @@ import { FaArrowLeft } from 'react-icons/fa';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
 import { FaCheck } from "react-icons/fa";
 import { MdOutlineOpenInNew } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
+
 
 
 const sections = [
@@ -70,13 +72,14 @@ const sections = [
   ];
 
   function NavButtons({ onBack, onProceed }) {
+
     return (
         <div className="flex justify-between items-center mb-5">
             <button className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center" onClick={onBack}>
                 <FaArrowLeft className="mr-2" />
                 Go Back
             </button>
-            <h1 className="text-primary text-3xl font-bold">Pending Staff Modification</h1>
+            <h1 className="text-primary text-4xl font-bold">Pending Staff Assignments</h1>
             <button className="hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-7 py-5 text-4xl" onClick={onProceed}>
                 Proceed
             </button>
@@ -84,7 +87,7 @@ const sections = [
     );
 }
 
-export function PendingStaffModify({ onBack, onProceed }) {
+export function PendingStaffModify() {
   const [openSections, setOpenSections] = useState(new Set(sections.map(section => section.name)));
 
   const toggleSection = (sectionName) => {
@@ -97,12 +100,21 @@ export function PendingStaffModify({ onBack, onProceed }) {
     setOpenSections(updatedSections);
   };
 
+  const navigate = useNavigate();
+  const handleGoBack = () => {
+    navigate("/processManagement/modifyProcess/landing");
+  };
+
+  const handleProceed = () => {
+    navigate("/processManagement/modifyProcess/pendingResourceAssignments");
+  };
+
   return (
     <div className="container mx-auto p-8">
-      <NavButtons onBack={onBack} onProceed={onProceed} />
+      <NavButtons onBack={handleGoBack} onProceed={handleProceed} />
       <div className="bg-secondary border-red-600 border-2 rounded-md p-4">
         <p className="text-left text-lg italic mb-7">
-          Confirm the following staff assignments for procedures in all sections:
+          Confirm the status of staff assignments for procedures in all sections:
         </p>
         {sections.map((section, index) => (
           <div key={index} className="mt-4">
@@ -116,9 +128,9 @@ export function PendingStaffModify({ onBack, onProceed }) {
             {openSections.has(section.name) && (
               <div className="bg-white mt-2 p-4 rounded-md">
                 {section.procedures.map((procedure, idx) => (
-                  <div key={idx} className={`flex justify-between items-center py-2 ${idx < section.procedures.length - 1 ? 'border-b' : ''} border-primary`}>
+                  <div key={idx} className={`flex justify-between items-center py-2 ${idx < section.procedures.length - 1 ? 'border-b' : ''} border-black`}>
                     <span className='text-2xl'>{procedure.title}</span>
-                    <div className={`flex items-center text-2xl font-bold ${procedure.assignedStaff.length > 0 ? 'text-green-500' : 'text-highlightRed'}`}>
+                    <div className={`flex items-center text-2xl font-bold ${procedure.assignedStaff.length > 0 ? 'text-green-500' : 'text-highlightRed underline'}`}>
                       {procedure.assignedStaff.length > 0 ? <><FaCheck className="mr-2" />Assigned</> : <><MdOutlineOpenInNew className="mr-2" />Assignments Required</>}
                     </div>
                   </div>

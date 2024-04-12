@@ -2,6 +2,10 @@ import React, { useState, useMemo } from "react";
 import { useTable, useSortBy, usePagination } from "react-table";
 import { TbLayoutGridAdd } from "react-icons/tb";
 import "./TemplateStyles.css";
+import toast, { Toaster } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+
+const notify = () => toast.success("Process Template Deleted!");
 
 const SearchBar = () => {
   const [inputValue, setInputValue] = useState("");
@@ -9,8 +13,8 @@ const SearchBar = () => {
   const handleClearInput = () => setInputValue("");
 
   return (
-    <div className="inline-flex items-center rounded-full text-xl border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative">
-      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#8E0000]">
+    <div className="w-1/5 inline-flex items-center rounded-full text-xl border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative">
+      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#8E0000] mr-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-6 w-6 text-white"
@@ -28,7 +32,7 @@ const SearchBar = () => {
       </div>
       <input
         type="search"
-        placeholder="Search for process templates"
+        placeholder="Search for process records"
         className="bg-transparent border-none outline-none placeholder-[#8E0000] text-[#8E0000] pl-2"
         style={{ minWidth: "275px" }}
         value={inputValue}
@@ -59,34 +63,47 @@ const SearchBar = () => {
 };
 
 const CreateTemplateButton = () => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate("/CreateProcessTemplateForm");
+  };
+
   return (
-    <button className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]">
+    <button
+      className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
+      onClick={handleClick}
+    >
       <TbLayoutGridAdd className="mr-2 size-10" />
       Create Template
     </button>
   );
 };
 
-const CompletedProcessRecords = (props) => {
+const ProcessTable = () => {
   const data = React.useMemo(
     () => [
       {
+        patient: "Abigail Hobbs",
+        id: "13941",
         name: "Appendectomy",
         description:
           "The standard process for performing an appendectomy, which is the surgical removal of the appendix.",
-        sections: "Preoperative, Intraoperative, Postoperative",
         procedures:
           "Fasting, IV Access, General Anesthesia, Appendix Removal, Pain Management, Postoperative Monitoring",
       },
       {
+        patient: "Bradley Johnson",
+        id: "12482",
         name: "Cholecystectomy",
         description:
           "The standard process for performing a cholecystectomy, which is the surgical removal of the gallbladder.",
-        sections: "Preoperative, Intraoperative, Postoperative",
         procedures:
           "Fasting, IV Access, General Anesthesia, Gallbladder Removal, Pain Management, Postoperative Monitoring",
       },
       {
+        patient: "John Doe",
+        id: "19321",
         name: "Hysterectomy",
         description:
           "The standard process for performing a hysterectomy, which is the surgical removal of the uterus.",
@@ -95,26 +112,29 @@ const CompletedProcessRecords = (props) => {
           "Fasting, IV Access, General Anesthesia, Uterus Removal, Pain Management, Postoperative Monitoring",
       },
       {
+        patient: "Ashton Smith",
+        id: "15234",
         name: "Laminectomy",
         description:
           "The standard process for performing a laminectomy, which is the surgical removal of the lamina.",
-        sections: "Preoperative, Intraoperative, Postoperative",
         procedures:
           "Fasting, IV Access, General Anesthesia, Lamina Removal, Pain Management, Postoperative Monitoring",
       },
       {
+        patient: "John Proctor",
+        id: "14837",
         name: "Mastectomy",
         description:
           "The standard process for performing a mastectomy, which is the surgical removal of the breast.",
-        sections: "Preoperative, Intraoperative, Postoperative",
         procedures:
           "Fasting, IV Access, General Anesthesia, Breast Removal, Pain Management, Postoperative Monitoring",
       },
       {
+        patient: "Ana Wiseman",
+        id: "10093",
         name: "Nephrectomy",
         description:
           "The standard process for performing a nephrectomy, which is the surgical removal of the kidney.",
-        sections: "Preoperative, Intraoperative, Postoperative",
         procedures:
           "Fasting, IV Access, General Anesthesia, Kidney Removal, Pain Management, Postoperative Monitoring",
       },
@@ -125,57 +145,72 @@ const CompletedProcessRecords = (props) => {
   const columns = React.useMemo(
     () => [
       {
-        Header: "Name",
+        Header: "Patient Name",
+        accessor: "patient",
+        style: { backgroundColor: "#F5F5DC" },
+      },
+      {
+        Header: "Process ID",
+        accessor: "id",
+      },
+      {
+        Header: "Process Name",
         accessor: "name",
         style: { backgroundColor: "#F5F5DC" },
       },
       {
         Header: "Description",
         accessor: "description",
-      },
-      {
-        Header: "Sections",
-        accessor: "sections",
-        style: { backgroundColor: "#F5F5DC" },
+
       },
       {
         Header: "Procedures",
         accessor: "procedures",
+        style: { backgroundColor: "#F5F5DC" },
+
       },
       {
         Header: "Actions",
-        Cell: () => (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <button
-             onClick={() => props.nextCreatePage('patient')}
-            style={{
-                    background: "none",
-                    border: "none",
-                    padding: "0",
-                    cursor: "pointer",
-                    marginRight: "10px",
+        Cell: ({ row }) => {
+          const navigate = useNavigate();
+
+          const handleEditClick = () => {
+            navigate("/recordProcess");
+          };
+
+          return (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <button
+                onClick={handleEditClick}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: "0",
+                  cursor: "pointer",
+                  marginRight: "10px",
                 }}
-                >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="40"
-                height="40"
-                fill="#8E0000"
-                className="bi bi-pencil"
-                viewBox="0 0 16 16"
               >
-                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
-              </svg>
-            </button>
-            
-          </div>
-        ),
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="40"
+                  height="40"
+                  fill="#8E0000"
+                  className="bi bi-pencil"
+                  viewBox="0 0 576 512"
+                >
+                  <path d="M572.52 241.4C518.29 135.59 410.93 64 288 64S57.68 135.64 3.48 241.41a32.35 32.35 0 0 0 0 29.19C57.71 376.41 165.07 448 288 448s230.32-71.64 284.52-177.41a32.35 32.35 0 0 0 0-29.19zM288 400a144 144 0 1 1 144-144 143.93 143.93 0 0 1-144 144zm0-240a95.31 95.31 0 0 0-25.31 3.79 47.85 47.85 0 0 1-66.9 66.9A95.78 95.78 0 1 0 288 160z" />
+                </svg>
+              </button>
+              
+            </div>
+          );
+        },
         disableSortBy: true,
         style: { backgroundColor: "#F5F5DC" },
       },
@@ -338,4 +373,19 @@ const CompletedProcessRecords = (props) => {
   );
 };
 
-export default CompletedProcessRecords;
+const ProcessTemplateManagement = () => {
+  return (
+    <div className="flex flex-col items-center space-y-4 relative">
+      <h1 className="text-4xl text-[#8E0000] text-center underline font-bold mt-5">
+      Completed Process Records
+      </h1>
+
+      <SearchBar />
+      <div>
+        <ProcessTable />
+      </div>
+    </div>
+  );
+};
+
+export default ProcessTemplateManagement;

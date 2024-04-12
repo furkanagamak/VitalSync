@@ -1,0 +1,31 @@
+const mongoose = require("mongoose");
+
+const procedureInstanceSchema = new mongoose.Schema({
+  procedureName: { type: String, required: true },
+  description: { type: String, default: "" },
+  requiredResources: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ResourceTemplate",
+    },
+  ],
+  assignedResources: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ResourceInstance",
+    },
+  ],
+  rolesAssignedPeople: [
+    {
+      role: { type: mongoose.Schema.Types.ObjectId, ref: "Role" },
+      accounts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Account" }],
+    },
+  ],
+  numOfPeopleCompleted: { type: Number, required: true },
+  timeStart: { type: Date, required: true },
+  timeEnd: { type: Date, required: true },
+  processID: { type: mongoose.Schema.Types.ObjectId, ref: "ProcessInstance" },
+  sectionID: { type: mongoose.Schema.Types.ObjectId, ref: "SectionInstance" },
+});
+
+module.exports = mongoose.model("ProcedureInstance", procedureInstanceSchema);
