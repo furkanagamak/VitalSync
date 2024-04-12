@@ -4,13 +4,13 @@ import toast from "react-hot-toast";
 import { useAuth } from "../providers/authProvider.js";
 import axios from "axios";
 import { useReducer } from "react";
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
-import { Box } from '@mui/material';
-import dayjs from 'dayjs';
+import { DateRangePicker } from 'rsuite';
+import 'rsuite/dist/rsuite.min.css'; 
+import { TextField, FormControl, Select, MenuItem, InputLabel, Button } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import styled from 'styled-components';
+
 
 
 
@@ -556,45 +556,19 @@ function ProfileSection({ user }) {
     </div>
   );
 }
-
-/*function ScheduleCalendar({ onScheduleChange }) {
-  return (
-    <div>
-      <div className="flex items-center justify-center">
-        <div className="text-3xl font-bold text-center">February 2024</div>
-        <img
-          loading="lazy"
-          src="/dateicon.png"
-          className="shrink-0 self-stretch w-8 aspect-[0.91]"
-          alt="Relevant alt text describing the image"
-        />
-        <button
-          onClick={onScheduleChange}
-          className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
-        >
-          Change Schedule
-        </button>
-      </div>
-      <img
-        src="/Calandar.png"
-        className="grow w-full aspect-[1.64] max-md:mt-10 max-md:max-w-full"
-        alt="Schedule"
-      />
-    </div>
-  );
-}*/
-
-
-function ScheduleCalendar({ user }, onScheduleChange) {
+const ScheduleCalendar = ({ user, onScheduleChange }) => {
+  
   const today = new Date();
-  const threeMonthsLater = new Date(today.getFullYear(), today.getMonth() + 3, today.getDate());
-
-  if (!user) {
-    return <p>Loading...</p>;  // Or any other loading indicator
-  }
+  const threeYearsLater = new Date(today.getFullYear() + 3, today.getMonth(), today.getDate());
 
   const customStyles = {
+    calendarContainer: {
+      width: '100%',
+      maxWidth: '1000px', // Adjust the width as needed
+      margin: '0 auto',
+    },
     calendar: {
+
       borderRadius: '8px',
       boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
       color: '#333',
@@ -602,154 +576,254 @@ function ScheduleCalendar({ user }, onScheduleChange) {
     navigationButton: {
       backgroundColor: '#912424',
       color: 'white',
-      borderRadius: '4px',
-      margin: '3px',
+      borderRadius: '10px',
+      padding: '5px',
+      marginTop: "1vh"
     },
     monthYearHeader: {
       backgroundColor: '#8e0000',
       color: 'white',
-      padding: '10px',
+      padding: '5px',
+      width:"90%",
+      margin: '0 auto',
+      borderRadius: '10px',
+      fontSize: "2.5em",
+      marginTop: "1vh"
     },
     tile: {
-      border: '1px solid black',  // Add border to each cell
-      width: '60px',             // Increase the width of each cell
-      height: '60px',            // Adjust height for alignment
-      display: 'flex',           // Flex to center content
-      justifyContent: 'center',  // Center horizontally
-      alignItems: 'center',      // Center vertically
-      flexDirection: 'column'    // Stack children vertically
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: 'column'
     },
     dateText: {
-      color: '#912424',          // Color of the date text
-      fontWeight: 'bold'
+      color: '#8e0000',
+      fontWeight: 'bold',
+      fontSize: "2em",
     }
   };
 
-  const getUsualHoursForDay = (day) => {
-    const weekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][day];
-    return user.usualHours.find(uh => uh.day === weekday);
+  // Updated to ensure date and time handling is accurate
+  const parseTime = (timeStr) => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return { hours, minutes };
   };
 
-  const getUnavailableReasonForDate = (date) => {
-    const unavailable = user.unavailableTimes.find(u => {
-      const startDate = new Date(u.start);
-      const endDate = new Date(u.end);
-      return date >= startDate && date <= endDate;
+  const getTimeOffsForDay = (date) => {
+    const dateStr = date.toISOString().substring(0, 10);
+    return user.unavailableTimes.filter(u => {
+      const startDayStr = new Date(u.start).toISOString().substring(0, 10);
+      const endDayStr = new Date(u.end).toISOString().substring(0, 10);
+      return dateStr >= startDayStr && dateStr <= endDayStr;
     });
-    return unavailable ? unavailable.reason : null;
   };
+
+  const getWorkingHoursForDay = (date, usualHours) => {
+    
+    if (!usualHours || usualHours.start === '0:00' && usualHours.end === '0:00') return ['Off'];  // Check for 'Off' hours
+  
+    const timeOffs = getTimeOffsForDay(date);
+    let segments = [];
+    let currentStart = parseTime(usualHours.start);
+  
+    timeOffs.sort((a, b) => new Date(a.start) - new Date(b.start)).forEach(timeOff => {
+      const timeOffStart = parseTime(new Date(timeOff.start).toLocaleTimeString('it-IT'));
+      const timeOffEnd = parseTime(new Date(timeOff.end).toLocaleTimeString('it-IT'));
+      if (currentStart.hours < timeOffStart.hours || 
+          (currentStart.hours === timeOffStart.hours && currentStart.minutes < timeOffStart.minutes)) {
+        segments.push(`${currentStart.hours}:${currentStart.minutes.toString().padStart(2, '0')}-${timeOffStart.hours}:${timeOffStart.minutes.toString().padStart(2, '0')}`);
+      }
+      currentStart = timeOffEnd;
+    });
+  
+    if (currentStart.hours < parseTime(usualHours.end).hours) {
+      segments.push(`${currentStart.hours}:${currentStart.minutes.toString().padStart(2, '0')}-${parseTime(usualHours.end).hours}:${parseTime(usualHours.end).minutes.toString().padStart(2, '0')}`);
+    }
+  
+    return segments.length ? segments : ['Off'];  // Display 'Off' if no segments are created
+  };
+
+  const getUsualHoursForDay = (day) => {
+    // Calendar UI starts the week on Monday (0 = Monday, 6 = Sunday)
+    const adjustedDay = (day + 6) % 7;  // Adjust so 0 = Sunday, 6 = Saturday if needed
+    const weekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][adjustedDay];
+    const hours = user.usualHours.find(uh => uh.day === weekday);
+    return hours || { start: '0:00', end: '0:00' };  // Provide default 'Off' hours if no match is found
+  };
+
+  if (!user) {
+    return <p>Loading user data...</p>;
+  }
 
   return (
-    <div style={{ width: 'auto', margin: '0 auto' }}>
+    <div style={customStyles.calendarContainer}>
+      <button
+        onClick={onScheduleChange}
+        className="mt-2 mb-5  justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
+      >
+        Edit Schedule
+      </button>
       <Calendar
         minDate={today}
-        maxDate={threeMonthsLater}
+        maxDate={threeYearsLater}
         tileContent={({ date, view }) => {
           if (view === 'month') {
-            const hours = getUsualHoursForDay(date.getDay());
-            const reason = getUnavailableReasonForDate(date);
+            const usualHours = getUsualHoursForDay(date.getDay());
+            const workingHours = getWorkingHoursForDay(date, usualHours);
             return (
               <div style={customStyles.tile}>
                 <span style={customStyles.dateText}>{date.getDate()}</span>
-                <div style={{ fontSize: '0.75em', marginTop: '4px' }}>
-                  {hours ? `${hours.start} - ${hours.end}` : reason || ''}
+                <div className="text-md mt-4">
+                  {workingHours.join(', ')}
                 </div>
               </div>
             );
           }
         }}
         navigationLabel={({ label }) => (
-          <div style={customStyles.monthYearHeader}>
-            {label}
-          </div>
+          <div style={customStyles.monthYearHeader}>{label}</div>
         )}
         prevLabel={<div style={customStyles.navigationButton}>‹</div>}
         nextLabel={<div style={customStyles.navigationButton}>›</div>}
         style={customStyles.calendar}
       />
-      <button
-          onClick={onScheduleChange}
-          className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
-        >
-          Change Schedule
-        </button>
     </div>
   );
-}
+};
 
+function ChangeAvailability({ user, onRevertToProfile , setUser}) {
+  const [dateRange, setDateRange] = useState([new Date(), new Date()]);
+  const [status, setStatus] = useState('Work Hours');
+  const [errors, setErrors] = useState({});
+  const [weeklySchedule, setWeeklySchedule] = useState(user.usualHours);
 
+  const handleDateChange = (range) => {
+    setDateRange(range);
+  };
 
-function ChangeAvailability({ onRevertToProfile }) {
-  function DateSelector({ label }) {
-    return (
-      <div className="flex flex-col justify-center">
-        <div className="justify-center px-2.5 py-1 bg-white border border-black border-solid">
-          {label}
-        </div>
-      </div>
+  const handleStatusChange = (event) => {
+    setStatus(event.target.value);
+  };
+
+  const handleWeekdayHoursChange = (day, hours) => {
+    const updatedSchedule = weeklySchedule.map(schedule =>
+      schedule.day === day ? { ...schedule, ...hours } : schedule
     );
-  }
+    setWeeklySchedule(updatedSchedule);
+  };
 
-  function TimeRange() {
-    return (
-      <div className="flex gap-2 mt-2 whitespace-nowrap">
-        <div className="shrink-0 bg-white border border-black border-solid h-[17px] w-[79px]" />
-        <div className="my-auto">~</div>
-        <div className="shrink-0 bg-white border border-black border-solid h-[17px] w-[79px]" />
-      </div>
-    );
-  }
+  const handleSubmitTimeOff = async () => {
+    if (!dateRange[0] || !dateRange[1] || !status) {
+      setErrors({ msg: 'Please fill in all fields.' });
+      return;
+    }
+
+    const updateData = {
+      unavailableTimes: [...user.unavailableTimes, {
+        start: dateRange[0],
+        end: dateRange[1],
+        reason: status
+      }]
+    };
+
+    try {
+      const response = await axios.put(`/user/${user.userId}`, updateData);
+      if (response.status === 200) {
+        toast.success('Availability updated successfully!');
+        onRevertToProfile(); // Assuming this function re-fetches user data or redirects
+      } else {
+        toast.error('Failed to update availability.');
+      }
+    } catch (error) {
+      console.error('Error updating user:', error);
+      toast.error('Error updating user: ' + error.message);
+    }
+  };
+
+  const handleSubmitWeeklySchedule = async () => {
+    const updateData = {
+      usualHours: weeklySchedule
+    };
+  
+    try {
+      const response = await axios.put(`/user/${user.userId}`, updateData);
+      if (response.status === 200) {
+        toast.success('Weekly schedule updated successfully!');
+        setUser({ ...user, usualHours: weeklySchedule }); // Update user state
+        onRevertToProfile();
+      } else {
+        toast.error('Failed to update weekly schedule.');
+      }
+    } catch (error) {
+      console.error('Error updating weekly schedule:', error);
+      toast.error('Error updating weekly schedule: ' + error.message);
+    }
+  };
 
   return (
-    <div className="flex flex-col px-8 pt-20 pb-8 bg-white max-md:px-5">
-      <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50 max-md:px-5 max-md:max-w-full">
+    <div className="flex flex-col px-8 pt-20 pb-8 bg-white">
+      <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
         <header className="flex justify-between items-center max-w-full text-red-800">
-          <h1 className="text-4xl">Change Availability</h1>
-          <h2 className="text-4xl">Notes</h2>
+          <h1 className="text-4xl">Time-Off Request</h1>
         </header>
-        <div className="flex gap-5 justify-between items-start mt-1.5 text-sm font-medium text-black">
-          <div className="flex flex-col mt-4 text-xs text-center">
-            <h3 className="text-xl">Select Date</h3>
-            <div className="flex gap-2 mt-3 whitespace-nowrap">
-              <DateSelector label="mmddyyyy" />
-              <div className="my-auto">~</div>
-              <DateSelector label="mmddyyyy" />
-            </div>
-            <h3 className="mt-7 text-xl">Select Status</h3>
-            <div className="flex gap-0 mt-3">
-              <div className="flex flex-col justify-center">
-                <div className="justify-center px-1.5 py-1 bg-white border border-black border-solid">
-                  Work Hours
-                </div>
-              </div>
-              <div className="flex flex-col justify-center whitespace-nowrap">
-                <div className="justify-center px-0.5 py-1 bg-white border border-black border-solid">
-                  ▼
-                </div>
-              </div>
-            </div>
-            <TimeRange />
-          </div>
-          <div className="flex flex-col mt-7">
-            <p>To select one day, leave second field empty</p>
-            <p className="mt-1.5">Work hours are in 24hr format</p>
-          </div>
-          <div className="flex-1"></div>
-          <button
-            className="justify-center self-end px-5 py-1 mt-48 text-white whitespace-nowrap bg-red-800 rounded-lg border border-solid border-neutral-600"
-            onClick={onRevertToProfile}
-          >
+        <div className="flex flex-col mt-4">
+          <DateRangePicker
+            showOneCalendar
+            appearance="default"
+            placeholder="Select Date Range"
+            format="yyyy-MM-dd HH:mm"
+            value={dateRange}
+            onChange={handleDateChange}
+          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={status}
+              label="Status"
+              onChange={handleStatusChange}
+            >
+              <MenuItem value="On-Call">On-Call</MenuItem>
+              <MenuItem value="Time-Off">Time-Off</MenuItem>
+              <MenuItem value="Vacation">Vacation</MenuItem>
+            </Select>
+          </FormControl>
+          {errors.msg && <div style={{ color: 'red' }}>{errors.msg}</div>}
+          <button color="#8e0000" onClick={handleSubmitTimeOff}>
             Submit
           </button>
         </div>
       </section>
-      <section className="flex flex-col pt-5 pb-10 mt-10 border border-black border-solid">
-        <div className="flex flex-col px-8 font-medium">
-          <h2 className="text-4xl text-red-800">Preview</h2>
-          <div className="flex gap-5 self-center mt-9 text-3xl text-black">
-            <div className="flex-auto">February 2024</div>
-            <div className="flex-auto">March 2024</div>
-          </div>
+      <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
+        <header className="flex justify-between items-center max-w-full text-red-800">
+          <h1 className="text-4xl">Weekly Schedule Update</h1>
+        </header>
+        <div className="flex flex-col mt-4">
+          {weeklySchedule.map((schedule, index) => (
+            <div key={index} className="flex justify-between items-center">
+              <p>{schedule.day}</p>
+              <TextField
+                label="Start Time"
+                type="time"
+                value={schedule.start}
+                onChange={(e) => handleWeekdayHoursChange(schedule.day, { start: e.target.value })}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+              <TextField
+                label="End Time"
+                type="time"
+                value={schedule.end}
+                onChange={(e) => handleWeekdayHoursChange(schedule.day, { end: e.target.value })}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            </div>
+          ))}
+          <button color="#8e0000" onClick={handleSubmitWeeklySchedule}>
+            Update Schedule
+          </button>
         </div>
       </section>
     </div>
@@ -835,7 +909,7 @@ function MyComponent() {
 
   // Renders the change availability view
   if (view === "changeAvailability") {
-    return <ChangeAvailability onRevertToProfile={handleRevertToProfile} />;
+    return <ChangeAvailability onRevertToProfile={handleRevertToProfile} user={user} setUser={setUser}/>;
   }
 
   // Default view rendering (profile view)
@@ -857,7 +931,7 @@ function MyComponent() {
       </div>
       <div className="flex flex-col md:flex-row gap-5">
       <div className="w-full my-5">
-          <ScheduleCalendar user={user} onScheduleChange={handleScheduleChange} />
+          <ScheduleCalendar user={user} onScheduleChange={handleScheduleChange}/>
         </div>
         {incorrectName && <p className="text-red-500">Incorrect name</p>}
         {showTerminationModal && (
