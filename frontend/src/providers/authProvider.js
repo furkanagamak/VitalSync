@@ -61,7 +61,12 @@ export const AuthProvider = ({ children }) => {
           const data = await res.json();
           if (data.isLoggedIn) {
             setUser(data.account);
-            navigate("/home");
+            console.log(window.location.pathname);
+            if (
+              window.location.pathname === "/" ||
+              window.location.pathname === "/recoveryPage"
+            )
+              navigate("/home");
           } else {
             navigate("/");
           }

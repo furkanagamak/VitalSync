@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "start": "nodemon server.js",
+    "test": "jest"
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.552.0",
     "@aws-sdk/s3-request-presigner": "^3.552.0",
@@ -12,5 +16,9 @@
     "nodemailer": "^6.9.13",
     "nodemon": "^3.1.0",
     "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.4"
   }
 }
