@@ -7,7 +7,7 @@ const request = require("supertest");
 const fs = require("fs");
 const mongoose = require("mongoose");
 
-describe("PUT /user/profilePicture update profile picture endpoint testing", () => {
+describe("GET /user/profilePicture/url/:id get signed profile picture url", () => {
   // Dummy account credentials
   const dummyEmail = "staff@example.com";
   const dummyPassword = "staffPassword123";
@@ -20,33 +20,7 @@ describe("PUT /user/profilePicture update profile picture endpoint testing", () 
     uids = await initializePredefinedAccounts();
   });
 
-  it("Unauthorized requests should be rejected with error message", async () => {
-    const res = await request(app).put("/user/profilePicture").expect(400);
-    expect(res.text).toEqual("User not logged in");
-  });
-
-  it("Uploading malformed input", async () => {
-    // Log in with dummy account to get a valid session
-    const loginRes = await request(app).post("/login").send({
-      email: dummyEmail,
-      password: dummyPassword,
-    });
-
-    // Extract accountId from the response cookies
-    const accountId = loginRes.headers["set-cookie"][0]
-      .split(";")[0]
-      .split("=")[1];
-
-    const uploadRes = await request(app)
-      .put("/user/profilePicture")
-      .withCredentials()
-      .set("Cookie", [`accountId=${accountId}`])
-      .field("image", "123334");
-
-    expect(uploadRes.status).toEqual(500);
-  });
-
-  it("Uploading profile picture as logged in user should return a signed URL", async () => {
+  it("Getting image of user 1 after they have updated their image", async () => {
     // Log in with dummy account to get a valid session
     const loginRes = await request(app).post("/login").send({
       email: dummyEmail,
@@ -68,17 +42,15 @@ describe("PUT /user/profilePicture update profile picture endpoint testing", () 
         fs.readFileSync(__dirname + "/profilepic.png"),
         "profilepic.png"
       )
-      .expect("Content-Type", /json/)
       .on("error", (err) => console.log(err));
 
-    // Assert that the response contains a signed URL
-    expect(uploadRes.status).toEqual(200);
-    expect(uploadRes.body).toHaveProperty("message");
-    expect(uploadRes.body).toHaveProperty("url");
-    expect(uploadRes.body.message).toEqual(
-      "Your profile image has been updated!"
+    const profileUrlRes = await request(app).get(
+      `/user/profilePicture/url/${uids[0]}`
     );
-    expect(uploadRes.body.url).toBeDefined();
+    console.log(`/user/profilePicture/url/${uids[0]}`);
+    console.log(profileUrlRes.text);
+    expect(profileUrlRes.text).toBeDefined();
+    expect(profileUrlRes.text).not.toBe("");
   });
 
   // remove dummy accounts
