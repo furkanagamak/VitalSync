@@ -5,14 +5,18 @@ const {
 } = require("../server.js");
 const request = require("supertest");
 const fs = require("fs");
+const mongoose = require("mongoose");
+
 describe("PUT /user/profilePicture update profile picture endpoint testing", () => {
   // Dummy account credentials
   const dummyEmail = "staff@example.com";
   const dummyPassword = "staffPassword123";
+  let server;
 
   // create dummy accounts
   beforeAll(async () => {
     await initializePredefinedAccounts();
+    server = app.listen(5000);
   });
 
   it("Unauthorized requests should be rejected with error message", async () => {
@@ -58,5 +62,7 @@ describe("PUT /user/profilePicture update profile picture endpoint testing", () 
   // remove dummy accounts
   afterAll(async () => {
     await removePredefinedAccounts();
+    server.close();
+    mongoose.disconnect();
   });
 });
