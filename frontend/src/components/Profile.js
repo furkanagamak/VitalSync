@@ -9,7 +9,11 @@ import 'rsuite/dist/rsuite.min.css';
 import { TextField, FormControl, Select, MenuItem, InputLabel, Button } from '@mui/material';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import './Calendar.css';
 import styled from 'styled-components';
+import { FiberPin } from "@mui/icons-material";
+import { FormControlLabel, Checkbox } from '@mui/material';
+
 
 
 
@@ -556,54 +560,16 @@ function ProfileSection({ user }) {
     </div>
   );
 }
-const ScheduleCalendar = ({ user, onScheduleChange, preview }) => {
+
+function ScheduleCalendar({ user, onScheduleChange, preview }) {
   
   const today = new Date();
   const threeYearsLater = new Date(today.getFullYear() + 3, today.getMonth(), today.getDate());
 
   const customStyles = {
-    calendarContainer: {
-      width: '100%',
-      maxWidth: '1000px', // Adjust the width as needed
-      margin: '0 auto',
-    },
-    calendar: {
 
-      borderRadius: '8px',
-      boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-      color: '#333',
-    },
-    navigationButton: {
-      backgroundColor: '#912424',
-      color: 'white',
-      borderRadius: '10px',
-      padding: '5px',
-      marginTop: "1vh"
-    },
-    monthYearHeader: {
-      backgroundColor: '#8e0000',
-      color: 'white',
-      padding: '5px',
-      width:"90%",
-      margin: '0 auto',
-      borderRadius: '10px',
-      fontSize: "2.5em",
-      marginTop: "1vh"
-    },
-    tile: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      flexDirection: 'column'
-    },
-    dateText: {
-      color: '#8e0000',
-      fontWeight: 'bold',
-      fontSize: "2em",
-    }
   };
 
-  // Updated to ensure date and time handling is accurate
   const parseTime = (timeStr) => {
     const [hours, minutes] = timeStr.split(':').map(Number);
     return { hours, minutes };
@@ -620,7 +586,7 @@ const ScheduleCalendar = ({ user, onScheduleChange, preview }) => {
 
   const getWorkingHoursForDay = (date, usualHours) => {
     
-    if (!usualHours || usualHours.start === '0:00' && usualHours.end === '0:00') return ['Off'];  // Check for 'Off' hours
+    if (!usualHours || usualHours.start === '0:00' && usualHours.end === '0:00') return ['Off'];  
   
     const timeOffs = getTimeOffsForDay(date);
     let segments = [];
@@ -640,15 +606,17 @@ const ScheduleCalendar = ({ user, onScheduleChange, preview }) => {
       segments.push(`${currentStart.hours}:${currentStart.minutes.toString().padStart(2, '0')}-${parseTime(usualHours.end).hours}:${parseTime(usualHours.end).minutes.toString().padStart(2, '0')}`);
     }
   
-    return segments.length ? segments : ['Off'];  // Display 'Off' if no segments are created
+    return segments.length ? segments : ['Off'];  
   };
 
   const getUsualHoursForDay = (day) => {
-    // Calendar UI starts the week on Monday (0 = Monday, 6 = Sunday)
-    const adjustedDay = (day + 6) % 7;  // Adjust so 0 = Sunday, 6 = Saturday if needed
-    const weekday = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][adjustedDay];
+    const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const weekday = weekdayNames[day];  // No need to adjust if array is aligned properly
     const hours = user.usualHours.find(uh => uh.day === weekday);
+    console.log(`Day index: ${day}, Day name: ${weekday}, Usual hours:`, hours);
+
     return hours || { start: '0:00', end: '0:00' };  // Provide default 'Off' hours if no match is found
+    
   };
 
   if (!user) {
@@ -656,8 +624,7 @@ const ScheduleCalendar = ({ user, onScheduleChange, preview }) => {
   }
 
   return (
-    <div style={customStyles.calendarContainer}>
-      
+    <div>
       {
         !preview && (
           <button
@@ -675,9 +642,12 @@ const ScheduleCalendar = ({ user, onScheduleChange, preview }) => {
           if (view === 'month') {
             const usualHours = getUsualHoursForDay(date.getDay());
             const workingHours = getWorkingHoursForDay(date, usualHours);
+
+            if(date.getDay() === 0){
+              console.log("Sunday: ", usualHours, workingHours);
+            }
             return (
               <div style={customStyles.tile}>
-                <span style={customStyles.dateText}>{date.getDate()}</span>
                 <div className="text-md mt-4">
                   {workingHours.join(', ')}
                 </div>
@@ -690,13 +660,12 @@ const ScheduleCalendar = ({ user, onScheduleChange, preview }) => {
         )}
         prevLabel={<div style={customStyles.navigationButton}>‹</div>}
         nextLabel={<div style={customStyles.navigationButton}>›</div>}
-        style={customStyles.calendar}
       />
     </div>
   );
 };
 
-function ChangeAvailability({ user, onRevertToProfile , setUser}) {
+function ChangeAvailability({ user, onRevertToProfile, setUser }) {
   const [dateRange, setDateRange] = useState([new Date(), new Date()]);
   const [status, setStatus] = useState('Work Hours');
   const [errors, setErrors] = useState({});
@@ -715,17 +684,34 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
     setStatus(event.target.value);
   };
 
-  const handleWeekdayHoursChange = (day, hours) => {
+  const handleWeekdayHoursChange = (day, field, value) => {
+    const updatedSchedule = weeklySchedule.map(schedule => {
+      if (schedule.day === day) {
+        const newSchedule = { ...schedule, [field]: value };
+        // Ensure start time is not later than end time
+        if (new Date(`1970-01-01T${newSchedule.start}`) >= new Date(`1970-01-01T${newSchedule.end}`)) {
+          setErrors(prev => ({ ...prev, [day]: "Start time must be earlier than end time" }));
+        } else {
+          delete errors[day]; // Clear errors if the times are valid
+          setErrors({ ...errors });
+          return newSchedule;
+        }
+      }
+      return schedule;
+    });
+    setWeeklySchedule(updatedSchedule);
+  };
+
+  const handleToggleDayOff = (day) => {
     const updatedSchedule = weeklySchedule.map(schedule =>
-      schedule.day === day ? { ...schedule, ...hours } : schedule
+      schedule.day === day ? { ...schedule, start: '0:00', end: '0:00' } : schedule
     );
     setWeeklySchedule(updatedSchedule);
   };
 
-  // When the user wants to go back without saving
   const handleBackWithoutSaving = () => {
-    setWeeklySchedule([...user.usualHours]);  // Reset any changes made
-    onRevertToProfile();  // Switch back to the profile view
+    setWeeklySchedule([...user.usualHours]);  
+    onRevertToProfile(); 
   };
 
   const handleSubmitTimeOff = async () => {
@@ -746,7 +732,7 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
         toast.success('Availability updated successfully!');
-        onRevertToProfile(); // Assuming this function re-fetches user data or redirects
+        onRevertToProfile();
       } else {
         toast.error('Failed to update availability.');
       }
@@ -757,15 +743,20 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
   };
 
   const handleSubmitWeeklySchedule = async () => {
+    if (Object.keys(errors).length > 0) {
+      toast.error('Please correct the errors before submitting.');
+      return;
+    }
+
     const updateData = {
       usualHours: weeklySchedule
     };
-  
+
     try {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
         toast.success('Weekly schedule updated successfully!');
-        setUser({ ...user, usualHours: weeklySchedule }); // Update user state
+        setUser({ ...user, usualHours: weeklySchedule });
         onRevertToProfile();
       } else {
         toast.error('Failed to update weekly schedule.');
@@ -775,8 +766,6 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
       toast.error('Error updating weekly schedule: ' + error.message);
     }
   };
-
-  
 
   return (
     <div className="flex flex-col px-8 pt-20 pb-8 bg-white">
@@ -826,7 +815,7 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
                 label="Start Time"
                 type="time"
                 value={schedule.start}
-                onChange={(e) => handleWeekdayHoursChange(schedule.day, { start: e.target.value })}
+                onChange={(e) => handleWeekdayHoursChange(schedule.day, 'start', e.target.value)}
                 InputLabelProps={{
                   shrink: true,
                 }}
@@ -835,23 +824,29 @@ function ChangeAvailability({ user, onRevertToProfile , setUser}) {
                 label="End Time"
                 type="time"
                 value={schedule.end}
-                onChange={(e) => handleWeekdayHoursChange(schedule.day, { end: e.target.value })}
+                onChange={(e) => handleWeekdayHoursChange(schedule.day, 'end', e.target.value)}
                 InputLabelProps={{
                   shrink: true,
                 }}
+              />
+              <FormControlLabel
+                control={<Checkbox checked={schedule.start === '0:00' && schedule.end === '0:00'} onChange={() => handleToggleDayOff(schedule.day)} />}
+                label="Day Off"
               />
             </div>
           ))}
           <button color="#8e0000" onClick={handleSubmitWeeklySchedule}>
             Update Schedule
           </button>
-
-          <ScheduleCalendar user={{...user, usualHours: previewSchedule}} onScheduleChange={() => {}} preview={true} />
+          <div className="m-auto mt-10">
+            <ScheduleCalendar user={{ ...user, usualHours: previewSchedule }} onScheduleChange={() => { }} preview={true} />
+          </div>
         </div>
       </section>
     </div>
   );
 }
+
 
 function MyComponent() {
   const navigate = useNavigate();
