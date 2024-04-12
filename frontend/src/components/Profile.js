@@ -270,7 +270,7 @@ function ProfileImage({ imgUrl, setImgUrl }) {
         className="w-full aspect-[0.93]"
       />
       <div
-        className="justify-center self-center p-1 mt-3.5 rounded-lg border border-solid bg-zinc-300 border-neutral-600 cursor-pointer"
+        className="justify-center self-center p-1 mt-3.5 rounded-lg border border-solid bg-primary text-white border-neutral-600 cursor-pointer"
         onClick={() => setShowUploader(true)}
       >
         Change Profile Image
@@ -412,13 +412,13 @@ function ContactInfo({ user }) {
       <div className="flex gap-5 justify-between items-start mt-24 text-sm font-medium text-neutral-600 max-md:pr-5 max-md:mt-10">
         <button
           onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
-          className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
+          className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
         >
           {editMode ? "Save Changes" : "Edit Contact Info"}
         </button>
         <button
           onClick={handleResetPasswordClick}
-          className="justify-center px-2 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
+          className="justify-center px-2 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
         >
           Reset Password
         </button>
@@ -526,7 +526,7 @@ function ProfileDetails({ user }) {
       </div>
       <button
         onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
-        className="px-5 py-1 text-sm font-medium text-neutral-600 bg-zinc-300 border border-solid border-neutral-600 rounded-lg self-start mt-auto"
+        className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
       >
         {editMode ? "Save Changes" : "Edit Profile"}
       </button>
@@ -624,7 +624,7 @@ function ScheduleCalendar({ user, onScheduleChange, preview }) {
         !preview && (
           <button
             onClick={onScheduleChange}
-            className="mt-2 mb-5 justify-center px-1.5 py-1 rounded-lg border border-solid bg-zinc-300 border-neutral-600"
+            className="mt-2 mb-5 justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
           >
             Edit Schedule
           </button>
@@ -774,7 +774,7 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
       </button>
       <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
         <header className="flex justify-between items-center max-w-full text-red-800">
-          <h1 className="text-4xl">Time-OffRequest</h1>
+          <h1 className="text-4xl">Time-Off Request</h1>
         </header>
         <div className="flex flex-col mt-4">
           <DateRangePicker
@@ -937,7 +937,7 @@ function MyComponent() {
     <div className="flex flex-col items-center pt-10 pr-5 pb-8 pl-14 bg-white max-md:pl-5">
       <button
         onClick={handleTerminateAccount}
-        className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-red-800 rounded-lg border border-solid border-neutral-600"
+        className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-highlightRed rounded-lg border border-solid border-neutral-600"
       >
         Terminate Account
       </button>
