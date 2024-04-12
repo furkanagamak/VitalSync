@@ -5,10 +5,10 @@ on:
 env:
   MONGO_URI: mongodb://127.0.0.1:27017/test
   FRONTEND_URL: http://localhost:3000
-  BUCKET_NAME: vital-sync
-  BUCKET_REGION: us-east-2
-  AWS_ACCESS_KEY_ID: AKIAYOXMMERDENNQKHWH
-  AWS_SECRET_ACCESS_KEY: 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
+  BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+  BUCKET_REGION: ${{ secrets.BUCKET_REGION }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   REACT_APP_API_BASE_URL: http://localhost:5000
 jobs:
   jest-cypress-run:
