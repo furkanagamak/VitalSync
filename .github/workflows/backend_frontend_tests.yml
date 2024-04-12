@@ -1,4 +1,4 @@
-name: Run Frontend Tests and Deploy
+name: Run Backend and Frontend Tests and Deploy
 on:
   push:
     branches: [main]
@@ -11,7 +11,7 @@ env:
   AWS_SECRET_ACCESS_KEY: SPxZegWFCKIcqfvcEJrBiuW6cFicSaqM8ZM6lN9R
   REACT_APP_API_BASE_URL: http://localhost:5000
 jobs:
-  cypress-run:
+  jest-cypress-run:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -45,7 +45,7 @@ jobs:
           cd backend
           npm install
 
-      - name: Load Database
+      - name: Load Database with Test Data
         run: |
           cd backend
           node dbtest.js
@@ -60,17 +60,28 @@ jobs:
           cd frontend
           npm start &
 
+      - name: Run Jest Tests
+        run: |
+          cd backend
+          npm test
+
       - name: Run Cypress Tests
         run: |
           cd frontend
           npx cypress run
 
   deploy:
-    needs: cypress-run
+    needs: jest-cypress-run
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Render
+      - name: Deploy Frontend to Render
         env:
           deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          curl "$deploy_url"
+
+      - name: Deploy Backend to Render
+        env:
+          deploy_url: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK_URL }}
         run: |
           curl "$deploy_url"
