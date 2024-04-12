@@ -11,6 +11,7 @@ const {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
 } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { fromEnv } = require("@aws-sdk/credential-provider-env");
@@ -94,45 +95,47 @@ app.get("/", (req, res) => {
 });
 
 app.put("/user/profilePicture", upload.single("image"), async (req, res) => {
-  try {
-    const accountId = req.cookies.accountId;
-    if (!accountId) {
-      return res.status(400).send("User not logged in");
-    }
-
-    const currUser = await Account.findOne({ _id: accountId });
-    if (!currUser) return res.status(404).send("User does not exist! Malfo");
-
-    // puts image into s3
-    const profileUrlName =
-      currUser.email + "." + req.file.mimetype.split("/")[1];
-    const putCommand = new PutObjectCommand({
-      Bucket: bucketName,
-      Key: profileUrlName,
-      Body: req.file.buffer,
-      ContentType: req.file.mimetype,
-    });
-    await s3.send(putCommand);
-    currUser.profileUrl = profileUrlName;
-    await currUser.save();
-
-    // prepares new url
-    const getCommand = new GetObjectCommand({
-      Bucket: bucketName,
-      Key: profileUrlName,
-    });
-    const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
-
-    res.status(200).send(
-      JSON.stringify({
-        message: "Your profile image has been updated!",
-        url: url,
-      })
-    );
-  } catch (error) {
-    console.log(error);
-    res.status(500).send(error);
+  // try {
+  const accountId = req.cookies.accountId;
+  if (!accountId) {
+    return res.status(400).send("User not logged in");
   }
+
+  const currUser = await Account.findOne({ _id: accountId });
+  if (!currUser)
+    return res
+      .status(404)
+      .send("User does not exist! Malformed session, please login again!");
+
+  // puts image into s3
+  const profileUrlName = currUser.email + "." + req.file.mimetype.split("/")[1];
+  const putCommand = new PutObjectCommand({
+    Bucket: bucketName,
+    Key: profileUrlName,
+    Body: req.file.buffer,
+    ContentType: req.file.mimetype,
+  });
+  await s3.send(putCommand);
+  currUser.profileUrl = profileUrlName;
+  await currUser.save();
+
+  // prepares new url
+  const getCommand = new GetObjectCommand({
+    Bucket: bucketName,
+    Key: profileUrlName,
+  });
+  const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
+
+  res.status(200).send(
+    JSON.stringify({
+      message: "Your profile image has been updated!",
+      url: url,
+    })
+  );
+  // } catch (error) {
+  //   console.log(error);
+  //   res.status(500).send(error);
+  // }
 });
 
 app.get("/user/profilePicture/url/:id", async (req, res) => {
@@ -527,9 +530,130 @@ app.post("/resetPassword", async (req, res) => {
   }
 });
 
+async function initializePredefinedAccounts() {
+  try {
+    const predefinedAccounts = [
+      {
+        firstName: "Staff",
+        lastName: "User",
+        email: "staff@example.com",
+        accountType: "staff",
+        position: "Staff Position",
+        department: "Staff Department",
+        degree: "Staff Degree",
+        phoneNumber: "1234567890",
+        password: "staffPassword123", // Password for staff
+      },
+      {
+        firstName: "Hospital",
+        lastName: "Admin",
+        email: "hospitaladmin@example.com",
+        accountType: "hospital admin",
+        position: "Hospital Admin Position",
+        department: "Hospital Admin Department",
+        degree: "Hospital Admin Degree",
+        phoneNumber: "9876543210",
+        password: "hospitalAdminPassword123", // Password for hospital admin
+      },
+      {
+        firstName: "System",
+        lastName: "Admin",
+        email: "systemadmin@example.com",
+        accountType: "system admin",
+        position: "System Admin Position",
+        department: "System Admin Department",
+        degree: "System Admin Degree",
+        phoneNumber: "5555555555",
+        password: "systemAdminPassword123", // Password for system admin
+      },
+    ];
+
+    const Account = require("./models/Account"); // Assuming you have an Account model defined
+
+    // Loop through predefined accounts and create them if they don't exist
+    for (const accountData of predefinedAccounts) {
+      // Check if an account with the given email already exists
+      const accountExists = await Account.findOne({ email: accountData.email });
+      if (!accountExists) {
+        // Hash the password (assuming bcrypt is used)
+        const hashedPassword = await bcrypt.hash(
+          accountData.password,
+          saltRounds
+        );
+
+        // Create and save the new account
+        const newAccount = new Account({
+          ...accountData,
+          password: hashedPassword,
+        });
+
+        await newAccount.save();
+        console.log(`Account '${accountData.email}' created successfully.`);
+      } else {
+        console.log(
+          `Account with email '${accountData.email}' already exists.`
+        );
+      }
+    }
+  } catch (error) {
+    console.error("Error initializing predefined accounts:", error);
+  }
+}
+
+// Function to remove predefined accounts
+async function removePredefinedAccounts() {
+  try {
+    const predefinedAccounts = await Account.find({
+      email: {
+        $in: [
+          "staff@example.com",
+          "hospitaladmin@example.com",
+          "systemadmin@example.com",
+        ],
+      },
+    });
+
+    const deletedAccounts = await Account.deleteMany({
+      email: {
+        $in: [
+          "staff@example.com",
+          "hospitaladmin@example.com",
+          "systemadmin@example.com",
+        ],
+      },
+    });
+
+    console.log(
+      `${deletedAccounts.deletedCount} predefined accounts removed successfully.`
+    );
+
+    for (const account of predefinedAccounts) {
+      const profileUrlName = account.profileUrl;
+
+      if (!profileUrlName || !profileUrlName.includes("@")) {
+        continue;
+      }
+
+      const deleteCommand = new DeleteObjectCommand({
+        Bucket: bucketName,
+        Key: profileUrlName,
+      });
+
+      await s3.send(deleteCommand);
+      console.log(`Profile image '${profileUrlName}' deleted successfully.`);
+    }
+  } catch (error) {
+    console.error("Error removing predefined accounts:", error);
+  }
+}
+
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-module.exports = app;
+module.exports = {
+  app,
+  initializePredefinedAccounts,
+  removePredefinedAccounts,
+};
