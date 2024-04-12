@@ -116,7 +116,7 @@ function MyComponent() {
           onKeyDown={(e) => {
             if (e.key === "Enter") handleSignIn();
           }}
-          className="shrink-0 mt-1 bg-white rounded-lg border border-solid border-stone-500 h-[30px]"
+          className="shrink-0 mt-1 mb-2.5 bg-white rounded-lg border border-solid border-stone-500 h-[30px]"
         />
         <label htmlFor="passwordInput" className="self-start max-md:mt-10">
           Password:
@@ -129,7 +129,7 @@ function MyComponent() {
           onKeyDown={(e) => {
             if (e.key === "Enter") handleSignIn();
           }}
-          className="shrink-0 mt-1 bg-white rounded-lg border border-solid border-stone-500 h-[30px]"
+          className="shrink-0 mt-1 mb-1 bg-white rounded-lg border border-solid border-stone-500 h-[30px]"
         />
         <SignInButton label="Sign in" onClick={handleSignIn} />
         <ForgotPasswordLink label="Forgot Password" to="/recoveryPage" />
