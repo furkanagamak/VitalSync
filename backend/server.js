@@ -11,6 +11,7 @@ const {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
 } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { fromEnv } = require("@aws-sdk/credential-provider-env");
@@ -101,7 +102,10 @@ app.put("/user/profilePicture", upload.single("image"), async (req, res) => {
     }
 
     const currUser = await Account.findOne({ _id: accountId });
-    if (!currUser) return res.status(404).send("User does not exist! Malfo");
+    if (!currUser)
+      return res
+        .status(404)
+        .send("User does not exist! Malformed session, please login again!");
 
     // puts image into s3
     const profileUrlName =
@@ -123,12 +127,10 @@ app.put("/user/profilePicture", upload.single("image"), async (req, res) => {
     });
     const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
 
-    res.status(200).send(
-      JSON.stringify({
-        message: "Your profile image has been updated!",
-        url: url,
-      })
-    );
+    res.status(200).json({
+      message: "Your profile image has been updated!",
+      url: url,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
@@ -529,57 +531,122 @@ app.post("/resetPassword", async (req, res) => {
   }
 });
 
-app.get('/user/:userId', async (req, res) => {
+async function initializePredefinedAccounts() {
   try {
-    const user = await Account.findOne({ _id: req.params.userId });
+    const predefinedAccounts = [
+      {
+        firstName: "Staff",
+        lastName: "User",
+        email: "staff@example.com",
+        accountType: "staff",
+        position: "Staff Position",
+        department: "Staff Department",
+        degree: "Staff Degree",
+        phoneNumber: "1234567890",
+        password: "staffPassword123", // Password for staff
+      },
+      {
+        firstName: "Hospital",
+        lastName: "Admin",
+        email: "hospitaladmin@example.com",
+        accountType: "hospital admin",
+        position: "Hospital Admin Position",
+        department: "Hospital Admin Department",
+        degree: "Hospital Admin Degree",
+        phoneNumber: "9876543210",
+        password: "hospitalAdminPassword123", // Password for hospital admin
+      },
+      {
+        firstName: "System",
+        lastName: "Admin",
+        email: "systemadmin@example.com",
+        accountType: "system admin",
+        position: "System Admin Position",
+        department: "System Admin Department",
+        degree: "System Admin Degree",
+        phoneNumber: "5555555555",
+        password: "systemAdminPassword123", // Password for system admin
+      },
+    ];
 
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    // Loop through predefined accounts and create them if they don't exist
+    for (const accountData of predefinedAccounts) {
+      // Check if an account with the given email already exists
+      const accountExists = await Account.findOne({ email: accountData.email });
+      if (!accountExists) {
+        // Hash the password (assuming bcrypt is used)
+        const hashedPassword = await bcrypt.hash(
+          accountData.password,
+          saltRounds
+        );
+
+        // Create and save the new account
+        const newAccount = new Account({
+          ...accountData,
+          password: hashedPassword,
+        });
+
+        await newAccount.save();
+        console.log(`Account '${accountData.email}' created successfully.`);
+      } else {
+        console.log(
+          `Account with email '${accountData.email}' already exists.`
+        );
+      }
     }
-
-    const response = {
-      userId: user._id, 
-      firstName: user.firstName,
-      lastName: user.lastName,
-      profileUrl: user.profileUrl,
-      userType: user.userType,
-      position: user.position,
-      department: user.department,
-      degree: user.degree,
-      specialization: user.specialization,
-      phoneNumber: user.phoneNumber,
-      officePhoneNumber: user.officePhoneNumber,
-      email: user.email,
-      officeLocation: user.officeLocation,
-      userImg: user.userImg,
-      usualHours: user.usualHours,
-      profileImage: user.profileImage,
-      unavailableTimes: user.unavailableTimes
-    };
-
-    res.json(response);
   } catch (error) {
-    console.error('Error fetching user by _id:', error);
-    res.status(500).json({ message: 'Error fetching user', error: error.message });
+    console.error("Error initializing predefined accounts:", error);
   }
-});
+}
 
-app.put('/user/:userId', async (req, res) => {
-  const { userId } = req.params;
-  const updateData = req.body;
-
+// Function to remove predefined accounts
+async function removePredefinedAccounts() {
   try {
-    const updatedUser = await Account.findByIdAndUpdate(userId, updateData, { new: true });
-    if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    res.json({ message: 'Profile updated successfully', user: updatedUser });
-  } catch (error) {
-    console.error('Error updating user:', error);
-    res.status(500).json({ message: 'Error updating user', error: error.message });
-  }
-})
+    const predefinedAccounts = await Account.find({
+      email: {
+        $in: [
+          "staff@example.com",
+          "hospitaladmin@example.com",
+          "systemadmin@example.com",
+        ],
+      },
+    });
 
+    const deletedAccounts = await Account.deleteMany({
+      email: {
+        $in: [
+          "staff@example.com",
+          "hospitaladmin@example.com",
+          "systemadmin@example.com",
+        ],
+      },
+    });
+
+    console.log(
+      `${deletedAccounts.deletedCount} predefined accounts removed successfully.`
+    );
+
+    for (const account of predefinedAccounts) {
+      const profileUrlName = account.profileUrl;
+
+      if (!profileUrlName || !profileUrlName.includes("@")) {
+        continue;
+      }
+
+      const deleteCommand = new DeleteObjectCommand({
+        Bucket: bucketName,
+        Key: profileUrlName,
+      });
+
+      await s3.send(deleteCommand);
+      console.log(`Profile image '${profileUrlName}' deleted successfully.`);
+    }
+  } catch (error) {
+    console.error("Error removing predefined accounts:", error);
+  }
+}
+
+<<<<<<< HEAD
 app.get('/users', async (req, res) => {
   try {
     const users = await Account.find({}, { firstName: 1, lastName: 1, department: 1, position: 1 }); // Select necessary fields
@@ -596,3 +663,10 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+=======
+module.exports = {
+  app,
+  initializePredefinedAccounts,
+  removePredefinedAccounts,
+};
+>>>>>>> 9c08fbef719639f274e43d64d70185d620389e63
