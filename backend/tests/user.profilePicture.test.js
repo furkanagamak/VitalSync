@@ -16,7 +16,7 @@ describe("PUT /user/profilePicture update profile picture endpoint testing", () 
   // create dummy accounts
   beforeAll(async () => {
     await initializePredefinedAccounts();
-    server = app.listen(5000);
+    server = app.listen(5001);
   });
 
   it("Unauthorized requests should be rejected with error message", async () => {
@@ -45,8 +45,8 @@ describe("PUT /user/profilePicture update profile picture endpoint testing", () 
         "image",
         fs.readFileSync(__dirname + "/profilepic.png"),
         "profilepic.png"
-      ) // Attach a dummy image
-      // .expect("Content-Type", /json/)
+      )
+      .expect("Content-Type", /json/)
       .on("error", (err) => console.log(err));
 
     // Assert that the response contains a signed URL
