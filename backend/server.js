@@ -201,28 +201,26 @@ app.post("/createAccount", async (req, res) => {
   } = req.body;
 
   // permission checks
-  // const currUID = req.cookies.accountId;
-  // if (!currUID) {
-  //   return res.status(401).send("You are not authorized to use this feature");
-  // }
-  // const currUser = await Account.find({ _id: currUID });
-  // if (!currUser)
-  //   return res
-  //     .status(400)
-  //     .send("Malformed session, please logout and sign in again!");
-  // if (currUser.accountType === "staff")
-  //   return res
-  //     .status(401)
-  //     .send("You are not authorized to use this feature!");
-  // if (
-  //   accountType === "hospital admin" &&
-  //   currUser.accountType !== "system admin"
-  // )
-  //   return res
-  //     .status(401)
-  //     .send(
-  //       "You need to ask an system admin to create this type of account!"
-  //     );
+  const currUID = req.cookies.accountId;
+  if (!currUID) {
+    return res.status(401).send("You are not authorized to use this feature");
+  }
+  const currUser = await Account.findOne({ _id: currUID });
+  if (!currUser)
+    return res
+      .status(400)
+      .send("Malformed session, please logout and sign in again!");
+  if (currUser.accountType === "staff")
+    return res.status(401).send("You are not authorized to use this feature!");
+  console.log(accountType);
+  console.log(currUser.accountType);
+  if (
+    accountType === "hospital admin" &&
+    currUser.accountType !== "system admin"
+  )
+    return res
+      .status(401)
+      .send("You need to ask an system admin to create this type of account!");
 
   // Check if any required field is missing or empty
   if (

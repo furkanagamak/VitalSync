@@ -66,6 +66,7 @@ const CreateAccount = ({ navToAdminActions }) => {
           `${process.env.REACT_APP_API_BASE_URL}/createAccount`,
           {
             method: "POST",
+            credentials: "include",
             headers: {
               "Content-Type": "application/json",
             },
