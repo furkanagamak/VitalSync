@@ -3,13 +3,13 @@ on:
   push:
     branches: [main]
 env:
-  MONGO_URI=mongodb://127.0.0.1:27017/test
-  FRONTEND_URL=http://localhost:3000
-  BUCKET_NAME=vital-sync
-  BUCKET_REGION=us-east-2
-  AWS_ACCESS_KEY_ID=AKIAYOXMMERDENNQKHWH
-  AWS_SECRET_ACCESS_KEY=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
-  REACT_APP_API_BASE_URL=http://localhost:5000
+  MONGO_URI: mongodb://127.0.0.1:27017/test
+  FRONTEND_URL: http://localhost:3000
+  BUCKET_NAME: vital-sync
+  BUCKET_REGION: us-east-2
+  AWS_ACCESS_KEY_ID: AKIAYOXMMERDENNQKHWH
+  AWS_SECRET_ACCESS_KEY: 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
+  REACT_APP_API_BASE_URL: http://localhost:5000
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
