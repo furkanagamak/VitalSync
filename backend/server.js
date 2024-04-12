@@ -95,47 +95,46 @@ app.get("/", (req, res) => {
 });
 
 app.put("/user/profilePicture", upload.single("image"), async (req, res) => {
-  // try {
-  const accountId = req.cookies.accountId;
-  if (!accountId) {
-    return res.status(400).send("User not logged in");
-  }
+  try {
+    const accountId = req.cookies.accountId;
+    if (!accountId) {
+      return res.status(400).send("User not logged in");
+    }
 
-  const currUser = await Account.findOne({ _id: accountId });
-  if (!currUser)
-    return res
-      .status(404)
-      .send("User does not exist! Malformed session, please login again!");
+    const currUser = await Account.findOne({ _id: accountId });
+    if (!currUser)
+      return res
+        .status(404)
+        .send("User does not exist! Malformed session, please login again!");
 
-  // puts image into s3
-  const profileUrlName = currUser.email + "." + req.file.mimetype.split("/")[1];
-  const putCommand = new PutObjectCommand({
-    Bucket: bucketName,
-    Key: profileUrlName,
-    Body: req.file.buffer,
-    ContentType: req.file.mimetype,
-  });
-  await s3.send(putCommand);
-  currUser.profileUrl = profileUrlName;
-  await currUser.save();
+    // puts image into s3
+    const profileUrlName =
+      currUser.email + "." + req.file.mimetype.split("/")[1];
+    const putCommand = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: profileUrlName,
+      Body: req.file.buffer,
+      ContentType: req.file.mimetype,
+    });
+    await s3.send(putCommand);
+    currUser.profileUrl = profileUrlName;
+    await currUser.save();
 
-  // prepares new url
-  const getCommand = new GetObjectCommand({
-    Bucket: bucketName,
-    Key: profileUrlName,
-  });
-  const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
+    // prepares new url
+    const getCommand = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: profileUrlName,
+    });
+    const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
 
-  res.status(200).send(
-    JSON.stringify({
+    res.status(200).json({
       message: "Your profile image has been updated!",
       url: url,
-    })
-  );
-  // } catch (error) {
-  //   console.log(error);
-  //   res.status(500).send(error);
-  // }
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
 });
 
 app.get("/user/profilePicture/url/:id", async (req, res) => {
