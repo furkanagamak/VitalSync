@@ -102,6 +102,7 @@ const UserNav = ({ id, firstName, lastName, profileUrl, fetchImg }) => {
 
   return (
     <div
+      title="Click on this button to view your profile."
       className="ml-auto space-x-4 flex items-center mx-2 cursor-pointer"
       onClick={handleNavigate}
       id="userNav"
@@ -123,6 +124,7 @@ const Notifications = () => {
   return (
     <>
       <button
+        title="Click on this button to view notifications."
         id="notificationsBtn"
         className="flex items-center ml-2 mr-4"
         onClick={flickDropDown}
@@ -153,6 +155,7 @@ const LogoutButton = () => {
 
   return (
     <button
+      title="Click on this button to logout."
       id="logoutbtn"
       onClick={handleLogout}
       className="flex items-center ml-0 mr-4"

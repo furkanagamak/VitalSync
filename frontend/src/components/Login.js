@@ -3,29 +3,14 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../providers/authProvider";
 
-function Checkbox({ label }) {
-  return (
-    <div className="flex items-center gap-2 mt-5 text-base">
-      <input
-        type="checkbox"
-        id={`${label.toLowerCase()}Checkbox`}
-        className="shrink-0 bg-white border border-solid border-stone-500 h-[15px] w-[15px]"
-      />
-      <label
-        htmlFor={`${label.toLowerCase()}Checkbox`}
-        className="flex justify-start"
-      >
-        {label}
-      </label>
-    </div>
-  );
-}
-
-function SignInButton({ label, onClick }) {
+function SignInButton({ label, onClick, disabled }) {
   return (
     <button
-      className="justify-center items-center px-16 py-4 mt-4 text-xl text-white bg-red-800 rounded-3xl border border-red-800 border-solid max-md:px-5"
+      className={`justify-center items-center px-16 py-4 mt-4 text-xl text-white bg-red-800 rounded-3xl border border-red-800 border-solid max-md:px-5 ${
+        disabled ? "opacity-50 cursor-not-allowed" : ""
+      }`}
       onClick={onClick}
+      disabled={disabled}
     >
       {label}
     </button>
@@ -54,6 +39,8 @@ function MyComponent() {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   };
+
+  const disableSignIn = !email || !password || !isValidEmail(email);
 
   const handleSignIn = async () => {
     let isValid = true;
@@ -128,7 +115,11 @@ function MyComponent() {
           }}
           className="shrink-0 mt-1 mb-1 bg-white rounded-lg border border-solid border-stone-500 h-[30px] p-2"
         />
-        <SignInButton label="Sign in" onClick={handleSignIn} />
+        <SignInButton
+          label="Sign in"
+          onClick={handleSignIn}
+          disabled={disableSignIn}
+        />
         <ForgotPasswordLink label="Forgot Password" to="/recoveryPage" />
       </div>
     </div>

@@ -352,7 +352,7 @@ app.post("/login", async (req, res) => {
     // Check if an account with the given email exists
     const account = await Account.findOne({ email: email });
     if (!account) {
-      return res.status(400).send({ message: "Account not found" });
+      return res.status(400).send({ message: "Incorrect email or password." });
     }
 
     // Compare the password
@@ -374,7 +374,7 @@ app.post("/login", async (req, res) => {
         const resAcc = await transformAccount(account);
         res.status(200).send({ message: "Login successful", account: resAcc });
       } else {
-        res.status(400).send({ message: "Incorrect password" });
+        res.status(400).send({ message: "Incorrect email or password." });
       }
     });
   } catch (error) {

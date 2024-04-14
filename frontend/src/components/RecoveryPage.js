@@ -133,8 +133,14 @@ function MyComponent() {
               className="shrink-0 mt-1 bg-white rounded-lg border border-solid border-stone-500 h-[30px] w-full p-2"
             />
             <button
-              className="justify-center items-center px-16 py-2.5 mt-4 text-center text-white whitespace-nowrap bg-red-800 rounded-lg border border-red-800 border-solid max-md:px-5"
+              className={`justify-center items-center px-16 py-2.5 mt-4 text-center text-white whitespace-nowrap bg-red-800 rounded-lg border border-red-800 max-md:px-5
+              ${
+                isValidEmail(email)
+                  ? "opacity-100"
+                  : "opacity-50 cursor-not-allowed"
+              }`}
               onClick={handleEmailSubmit}
+              disabled={!isValidEmail(email)}
             >
               Submit
             </button>
@@ -158,11 +164,13 @@ function MyComponent() {
               type="text"
               value={otpCode}
               onChange={(e) => setOtpCode(e.target.value)}
-              className="shrink-0 mt-1 bg-white rounded-lg border border-solid border-stone-500 h-[30px] w-full"
+              className="shrink-0 mt-1 bg-white rounded-lg border border-solid border-stone-500 h-[30px] w-full p-2"
             />
             <button
-              className="justify-center items-center px-16 py-2.5 mt-4 text-center text-white whitespace-nowrap bg-red-800 rounded-lg border border-red-800 border-solid max-md:px-5"
+              className={`justify-center items-center px-16 py-2.5 mt-4 text-center text-white whitespace-nowrap bg-red-800 rounded-lg border border-red-800 max-md:px-5
+              ${otpCode ? "opacity-100" : "opacity-50 cursor-not-allowed"}`}
               onClick={handleCodeSubmit}
+              disabled={!otpCode}
             >
               Submit
             </button>
@@ -206,7 +214,7 @@ function MyComponent() {
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="shrink-0 mt-1 w-full bg-white rounded-lg border border-solid border-stone-500 h-[30px]"
+              className="shrink-0 mt-1 w-full bg-white rounded-lg border border-solid border-stone-500 h-[30px] p-2"
             />
             <label
               htmlFor="confirmPassword"
@@ -218,12 +226,18 @@ function MyComponent() {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="shrink-0 mt-1 w-full bg-white rounded-lg border border-solid border-stone-500 h-[30px]"
+              className="shrink-0 mt-1 w-full bg-white rounded-lg border border-solid border-stone-500 h-[30px] p-2"
             />
             <button
               type="submit"
-              className="justify-center items-center px-16 py-2.5 mt-3 text-center text-white whitespace-nowrap bg-red-800 rounded-lg border border-red-800 border-solid max-md:px-5"
+              className={`justify-center items-center px-16 py-2.5 mt-4 text-center text-white whitespace-nowrap bg-red-800 rounded-lg border border-red-800 max-md:px-5
+              ${
+                newPassword && confirmPassword
+                  ? "opacity-100"
+                  : "opacity-50 cursor-not-allowed"
+              }`}
               onClick={handlePasswordSubmit}
+              disabled={!newPassword || !confirmPassword}
             >
               Submit
             </button>
