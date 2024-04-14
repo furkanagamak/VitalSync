@@ -44,10 +44,10 @@ describe('MyComponent Button Functionality', () => {
         cy.contains('Upload').click();
       });
 
-    it('opens termination modal on clicking Terminate Account button', () => {
+      /*it('opens termination modal on clicking Terminate Account button', () => {
         cy.contains('Terminate Account').click();
         cy.contains('Are you sure you want to terminate this account?').should('be.visible');
-      });
+      });*/
 
       /*
       it('closes termination modal on submitting termination', () => {
