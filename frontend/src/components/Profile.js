@@ -1069,6 +1069,7 @@ function MyComponent() {
   const [imgUrl, setImgUrl] = useState("/profileicon.png");
   const { id } = useParams();
   const [user, setUser] = useState(null); // State to hold the user data
+  const { user: authUser } = useAuth();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -1150,12 +1151,14 @@ function MyComponent() {
   // Default view rendering (profile view)
   return (
     <div className="flex flex-col items-center pt-10 pr-5 pb-8 pl-14 bg-white max-md:pl-5">
-      <button
-        onClick={handleTerminateAccount}
-        className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-highlightRed rounded-lg border border-solid border-neutral-600"
-      >
-        Terminate Account
-      </button>
+      {id && authUser && (authUser.id !== id) && (
+        <button
+          onClick={handleTerminateAccount}
+          className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-highlightRed rounded-lg border border-solid border-neutral-600"
+        >
+          Terminate Account
+        </button>
+      )}
       <div className="self-stretch mt-2 max-md:max-w-full">
         <div className="flex gap-5 max-md:flex-col max-md:gap-0">
           <div className="flex flex-col w-[24%] max-md:ml-0 max-md:w-full">
