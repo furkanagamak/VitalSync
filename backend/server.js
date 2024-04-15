@@ -810,16 +810,16 @@ app.post("/reset-password", async (req, res) => {
 
 app.get("/procedureTemplates", async (req, res) => {
   try {
-    const procedureTemplates = await ProcedureTemplate.find();
+    const procedureTemplates = await ProcedureTemplate.find()
+      .populate("requiredResources")
+      .populate("roles");
     res.json(procedureTemplates);
   } catch (error) {
     console.error("Error fetching procedure templates:", error);
-    res
-      .status(500)
-      .json({
-        message: "Error fetching procedure templates",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error fetching procedure templates",
+      error: error.message,
+    });
   }
 });
 
@@ -829,12 +829,10 @@ app.get("/resourceTemplates", async (req, res) => {
     res.json(resourceTemplates);
   } catch (error) {
     console.error("Error fetching resource templates:", error);
-    res
-      .status(500)
-      .json({
-        message: "Error fetching resource templates",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error fetching resource templates",
+      error: error.message,
+    });
   }
 });
 
@@ -866,12 +864,10 @@ app.post("/procedureTemplates", async (req, res) => {
     res.status(201).json(savedProcedureTemplate);
   } catch (error) {
     console.error("Failed to create procedure template:", error);
-    res
-      .status(400)
-      .json({
-        message: "Failed to create procedure template",
-        error: error.message,
-      });
+    res.status(400).json({
+      message: "Failed to create procedure template",
+      error: error.message,
+    });
   }
 });
 

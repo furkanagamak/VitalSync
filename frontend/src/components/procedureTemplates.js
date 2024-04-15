@@ -95,7 +95,7 @@ const CreateTemplateButton = () => {
   );
 };
 
-const ProcedureTable = ({filter}) => {
+const ProcedureTable = ({ filter }) => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -106,8 +106,10 @@ const ProcedureTable = ({filter}) => {
           response.data.map((template) => ({
             name: template.procedureName,
             description: template.description || "",
-            resources: template.requiredResources.join(", "),
-            roles: template.roles.join(", "),
+            resources: template.requiredResources
+              .map((resource) => resource.name)
+              .join(", "),
+            roles: template.roles.map((role) => role.name).join(", "),
             time: template.estimatedTime,
             notes: template.specialNotes || "",
           }))
@@ -121,13 +123,14 @@ const ProcedureTable = ({filter}) => {
 
   const filteredData = useMemo(() => {
     if (!filter) return data;
-    return data.filter(template => 
-      template.name.toLowerCase().includes(filter.toLowerCase()) ||
-      template.description.toLowerCase().includes(filter.toLowerCase()) ||
-      template.resources.toLowerCase().includes(filter.toLowerCase()) ||
-      template.roles.toLowerCase().includes(filter.toLowerCase()) ||
-      template.notes.toLowerCase().includes(filter.toLowerCase()) || 
-      template.time.toString().includes(filter)
+    return data.filter(
+      (template) =>
+        template.name.toLowerCase().includes(filter.toLowerCase()) ||
+        template.description.toLowerCase().includes(filter.toLowerCase()) ||
+        template.resources.toLowerCase().includes(filter.toLowerCase()) ||
+        template.roles.toLowerCase().includes(filter.toLowerCase()) ||
+        template.notes.toLowerCase().includes(filter.toLowerCase()) ||
+        template.time.toString().includes(filter)
     );
   }, [data, filter]);
 
