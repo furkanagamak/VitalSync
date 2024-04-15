@@ -25,6 +25,8 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const Account = require("./models/account.js");
 const Role = require("./models/role.js");
+const ProcedureTemplate = require("./models/procedureTemplate.js");
+const ResourceTemplate = require("./models/resourceTemplate.js");
 
 dotenv.config();
 
@@ -661,16 +663,16 @@ async function removePredefinedAccounts() {
   }
 }
 
-app.get('/user/:userId', async (req, res) => {
+app.get("/user/:userId", async (req, res) => {
   try {
     const user = await Account.findOne({ _id: req.params.userId });
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     const response = {
-      userId: user._id, 
+      userId: user._id,
       firstName: user.firstName,
       lastName: user.lastName,
       profileUrl: user.profileUrl,
@@ -686,62 +688,77 @@ app.get('/user/:userId', async (req, res) => {
       userImg: user.userImg,
       usualHours: user.usualHours,
       profileImage: user.profileImage,
-      unavailableTimes: user.unavailableTimes
+      unavailableTimes: user.unavailableTimes,
     };
 
     res.json(response);
   } catch (error) {
-    console.error('Error fetching user by _id:', error);
-    res.status(500).json({ message: 'Error fetching user', error: error.message });
+    console.error("Error fetching user by _id:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching user", error: error.message });
   }
 });
 
-app.put('/user/:userId', async (req, res) => {
+app.put("/user/:userId", async (req, res) => {
   const { userId } = req.params;
   const updateData = req.body;
 
   try {
-    const updatedUser = await Account.findByIdAndUpdate(userId, updateData, { new: true });
+    const updatedUser = await Account.findByIdAndUpdate(userId, updateData, {
+      new: true,
+    });
     if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
-    res.json({ message: 'Profile updated successfully', user: updatedUser });
+    res.json({ message: "Profile updated successfully", user: updatedUser });
   } catch (error) {
-    console.error('Error updating user:', error);
-    res.status(500).json({ message: 'Error updating user', error: error.message });
-  }
-})
-
-app.get('/users', async (req, res) => {
-  try {
-    const users = await Account.find({}, { firstName: 1, lastName: 1, department: 1, position: 1, isTerminated: 1 }); // Select necessary fields
-    res.json(users);
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ message: 'Error fetching users', error: error.message });
+    console.error("Error updating user:", error);
+    res
+      .status(500)
+      .json({ message: "Error updating user", error: error.message });
   }
 });
 
-app.put('/user/:userId', async (req, res) => {
+app.get("/users", async (req, res) => {
+  try {
+    const users = await Account.find(
+      {},
+      { firstName: 1, lastName: 1, department: 1, position: 1, isTerminated: 1 }
+    ); // Select necessary fields
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching users", error: error.message });
+  }
+});
+
+app.put("/user/:userId", async (req, res) => {
   const { userId } = req.params;
   const { isTerminated } = req.body;
 
-  console.log('UserID:', userId); // Check the user ID received
-  console.log('isTerminated:', isTerminated); // Check the isTerminated flag received
+  console.log("UserID:", userId); // Check the user ID received
+  console.log("isTerminated:", isTerminated); // Check the isTerminated flag received
 
   try {
-    const user = await Account.findByIdAndUpdate(userId, { isTerminated }, { new: true });
+    const user = await Account.findByIdAndUpdate(
+      userId,
+      { isTerminated },
+      { new: true }
+    );
     if (!user) {
-      return res.status(404).send('User not found');
+      return res.status(404).send("User not found");
     }
     res.send(user);
   } catch (error) {
-    console.error('Failed to update user:', error);
-    res.status(500).send('Internal Server Error');
+    console.error("Failed to update user:", error);
+    res.status(500).send("Internal Server Error");
   }
 });
 
-app.post('/verify-password', async (req, res) => {
+app.post("/verify-password", async (req, res) => {
   const { userId, password } = req.body;
   try {
     const user = await Account.findById(userId);
@@ -758,12 +775,12 @@ app.post('/verify-password', async (req, res) => {
       res.send({ isPasswordCorrect: false });
     }
   } catch (error) {
-    console.error('Error verifying password:', error);
+    console.error("Error verifying password:", error);
     res.status(500).send({ message: "Internal server error." });
   }
 });
 
-app.post('/reset-password', async (req, res) => {
+app.post("/reset-password", async (req, res) => {
   const { userId, newPassword } = req.body;
 
   if (!newPassword) {
@@ -777,20 +794,86 @@ app.post('/reset-password', async (req, res) => {
       return res.status(404).send({ message: "User not found." });
     }
 
-    console.log(user)
+    console.log(user);
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    user.password = hashedPassword; 
+    user.password = hashedPassword;
     await user.save();
 
     res.send({ message: "Password successfully updated." });
   } catch (error) {
-    console.error('Error resetting password:', error);
+    console.error("Error resetting password:", error);
     res.status(500).send({ message: "Internal server error." });
   }
 });
 
+app.get("/procedureTemplates", async (req, res) => {
+  try {
+    const procedureTemplates = await ProcedureTemplate.find();
+    res.json(procedureTemplates);
+  } catch (error) {
+    console.error("Error fetching procedure templates:", error);
+    res
+      .status(500)
+      .json({
+        message: "Error fetching procedure templates",
+        error: error.message,
+      });
+  }
+});
+
+app.get("/resourceTemplates", async (req, res) => {
+  try {
+    const resourceTemplates = await ResourceTemplate.find();
+    res.json(resourceTemplates);
+  } catch (error) {
+    console.error("Error fetching resource templates:", error);
+    res
+      .status(500)
+      .json({
+        message: "Error fetching resource templates",
+        error: error.message,
+      });
+  }
+});
+
+app.get("/roles", async (req, res) => {
+  try {
+    const roles = await Role.find();
+    res.json(roles);
+  } catch (error) {
+    console.error("Error fetching roles:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching roles", error: error.message });
+  }
+});
+
+app.post("/procedureTemplates", async (req, res) => {
+  try {
+    const newProcedureTemplate = new ProcedureTemplate({
+      procedureName: req.body.procedureName,
+      description: req.body.description,
+      requiredResources: req.body.requiredResources,
+      roles: req.body.roles,
+      estimatedTime: req.body.estimatedTime,
+      specialNotes: req.body.specialNotes,
+    });
+
+    const savedProcedureTemplate = await newProcedureTemplate.save();
+
+    res.status(201).json(savedProcedureTemplate);
+  } catch (error) {
+    console.error("Failed to create procedure template:", error);
+    res
+      .status(400)
+      .json({
+        message: "Failed to create procedure template",
+        error: error.message,
+      });
+  }
+});
 
 module.exports = {
   app,
