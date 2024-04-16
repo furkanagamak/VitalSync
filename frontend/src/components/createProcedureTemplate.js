@@ -344,7 +344,7 @@ const ProcedureForm = ({
             min: 1,
             type: "number",
             onKeyDown: (e) => {
-              if (e.key === "-" || e.key === "+" || e.key === ".") {
+              if (e.key === "-" || e.key === "+" || e.key === "." || e.key === "e") {
                 e.preventDefault();
               }
             },
