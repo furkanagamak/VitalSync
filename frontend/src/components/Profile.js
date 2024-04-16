@@ -735,7 +735,7 @@ function ScheduleCalendar({ user, onScheduleChange, preview }) {
           segments.push(
             `${currentStart.hours}:${currentStart.minutes
               .toString()
-              .padStart(2, "0")}-${timeOffStart.hours}:${timeOffStart.minutes
+              .padStart(2, "0")} - ${timeOffStart.hours}:${timeOffStart.minutes
               .toString()
               .padStart(2, "0")}`
           );
@@ -747,7 +747,7 @@ function ScheduleCalendar({ user, onScheduleChange, preview }) {
       segments.push(
         `${currentStart.hours}:${currentStart.minutes
           .toString()
-          .padStart(2, "0")}-${parseTime(usualHours.end).hours}:${parseTime(
+          .padStart(2, "0")} - ${parseTime(usualHours.end).hours}:${parseTime(
           usualHours.end
         )
           .minutes.toString()
