@@ -950,6 +950,8 @@ app.post("/resources", async (req, res) => {
   return res.status(201).send("The resource has been successfully created!");
 });
 
+app.put("/resources", async (req, res) => {});
+
 app.get("/roles", async (req, res) => {
   try {
     const roles = await Role.find();

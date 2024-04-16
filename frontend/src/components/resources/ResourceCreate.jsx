@@ -59,6 +59,7 @@ const ResourceCreate = ({ navToViewResource }) => {
 
   const makeTypeSelection = (type) => {
     setResourceType(type);
+    if (type === "roles") setFormData({ ...formData, location: "" });
     setResourceCreatePage("form");
   };
 
@@ -212,6 +213,7 @@ const ResourceForm = ({
   handleSubmit,
   navToTypeSelection,
 }) => {
+  const typeIsRole = resourceType === "roles";
   return (
     <div className="py-8 px-4">
       <section className="flex justify-center items-center relative py-4">
@@ -263,7 +265,7 @@ const ResourceForm = ({
         </div>
         <div className="mb-4">
           <TextField
-            label="*Location"
+            label={`${typeIsRole ? "" : "*"}Location`}
             name="location"
             value={formData.location}
             onChange={handleChange}
@@ -271,13 +273,14 @@ const ResourceForm = ({
             InputLabelProps={{ style: { color: "#8E0000" } }}
             inputProps={{ style: { color: "#8E0000" } }}
             className="shadow rounded w-full py-2 px-3"
+            disabled={typeIsRole}
           />
         </div>
         <div className="mb-4">
           <TextField
             multiline
             rows={4}
-            label="*Description"
+            label={`${typeIsRole ? "" : "*"}Description`}
             name="description"
             value={formData.description}
             onChange={handleChange}

@@ -283,3 +283,60 @@ describe("POST /resources for creating resources", () => {
     await mongoose.disconnect();
   });
 });
+
+describe("PUT /resources for editing resources", () => {
+  // Dummy account credentials
+  const dummyStaffEmail = "staff@example.com";
+  const dummyStaffPassword = "staffPassword123";
+  const dummyAdminEmail = "hospitaladmin@example.com";
+  const dummyAdminPassword = "hospitalAdminPassword123";
+  let server;
+  let uids;
+
+  // create dummy accounts
+  beforeAll(async () => {
+    server = app.listen(5001);
+    uids = await initializePredefinedAccounts();
+  });
+
+  it("unauthorized requests should be rejected", async () => {
+    // not signing in and attempt to create resource
+    const unauthorizedRes = await request(app).put(`/resources`).send({
+      name: "testName",
+      type: "testType",
+      location: "testLocation",
+      description: "testDescription",
+      uniqueIdentifier: "AB-023",
+    });
+    expect(unauthorizedRes.status).toEqual(400);
+    expect(unauthorizedRes.text).toEqual("User not logged in");
+
+    // sign in with staff account should not be accepted
+    const loginRes = await request(app).post(`/login`).withCredentials().send({
+      email: dummyStaffEmail,
+      password: dummyStaffPassword,
+    });
+    const accountId = loginRes.headers["set-cookie"][0]
+      .split(";")[0]
+      .split("=")[1];
+
+    const forbiddenRes = await request(app)
+      .post(`/resources`)
+      .withCredentials()
+      .set("Cookie", [`accountId=${accountId}`])
+      .send({
+        name: "testName",
+        type: "testType",
+        location: "testLocation",
+        description: "testDescription",
+      });
+    expect(forbiddenRes.status).toEqual(403);
+    expect(forbiddenRes.text).toEqual("Only admins may create resources!");
+  });
+  // remove dummy accounts
+  afterAll(async () => {
+    await removePredefinedAccounts();
+    await server.close();
+    await mongoose.disconnect();
+  });
+});
