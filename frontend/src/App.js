@@ -302,7 +302,7 @@ function App() {
                 <>
                   <Toaster />
                   <Navbar />
-                  <ProcessTemplateManagementq />
+                  <ProcessTemplateManagement />
                 </>
               }
             />
