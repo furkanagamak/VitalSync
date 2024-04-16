@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import {
   TextField,
@@ -19,15 +19,15 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 
-const notify = () => toast.success("Procedure Template Modified!");
+axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
+axios.defaults.withCredentials = true;
 
-const ModifyTemplateButton = () => {
-  const navigate = useNavigate();
-
-  const handleModifyClick = () => {
-    navigate("/ProcedureTemplateManagement");
-    notify();
+const ModifyTemplateButton = ({ onModify }) => {
+  const handleModifyClick = async () => {
+    await onModify();
   };
 
   return (
@@ -80,26 +80,16 @@ const GoBackButton = () => {
   );
 };
 
-const ProcedureForm = () => {
-  const [procedure, setProcedure] = useState({
-    name: "General Anesthesia",
-    description:
-      "A state of controlled unconsciousness during which a patient is asleep and unaware of their surroundings.",
-    estimatedTime: "45",
-    specialInstructions:
-      "NPO (nothing by mouth) for 8 hours before the procedure.",
-  });
-  const [resources, setResources] = useState([
-    { type: "Equipment", name: "Anesthesia Machine", quantity: 1 },
-    { type: "Equipment", name: "Monitoring System", quantity: 1 },
-    { type: "Equipment", name: "Propofol", quantity: 1 },
-    { type: "Equipment", name: "Suction Device", quantity: 1 },
-  ]);
-  const [roles, setRoles] = useState([
-    { name: "Anesthesiologist", quantity: 1 },
-    { name: "Anesthesia Technician", quantity: 1 },
-    { name: "Nurse Anesthetist", quantity: 2 },
-  ]);
+const ProcedureForm = ({
+  procedure,
+  setProcedure,
+  resources,
+  setResources,
+  roles,
+  setRoles,
+  createTemplate,
+}) => {
+  const { templateId } = useParams();
   const [newResource, setNewResource] = useState({
     type: "",
     name: "",
@@ -107,10 +97,67 @@ const ProcedureForm = () => {
   });
   const [newRole, setNewRole] = useState({ name: "", quantity: 1 });
 
-  // Hardcoded data for the dropdowns
-  const resourceTypes = ["Equipment", "Space"];
-  const resourceNames = ["MRI Machine", "X-Ray Machine", "Operating Room"];
-  const roleNames = ["Surgeon", "Nurse", "Anesthesiologist"];
+  const [resourceTypes, setResourceTypes] = useState([]);
+  const [roleNames, setRoleNames] = useState([]);
+  const [resourceNames, setResourceNames] = useState({});
+
+  useEffect(() => {
+    const fetchProcedureTemplate = async () => {
+      try {
+        const response = await axios.get(`/procedureTemplates/${templateId}`);
+        const template = response.data;
+        setProcedure({
+          name: template.procedureName,
+          description: template.description,
+          estimatedTime: template.estimatedTime.toString(),
+          specialInstructions: template.specialNotes,
+        });
+        setResources(
+          template.requiredResources.map((res) => ({
+            type: res.resource.type,
+            name: res.resource.name,
+            quantity: res.quantity,
+          }))
+        );
+
+        setRoles(
+          template.roles.map((role) => ({
+            name: role.role.name,
+            quantity: role.quantity,
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching procedure template:", error);
+      }
+    };
+
+    const fetchResourceTemplates = async () => {
+      try {
+        const response = await axios.get("/resourceTemplates");
+        const typesToNames = {};
+        response.data.forEach((template) => {
+          if (!typesToNames[template.type]) {
+            typesToNames[template.type] = [];
+          }
+          typesToNames[template.type].push(template.name);
+        });
+        setResourceNames(typesToNames);
+        setResourceTypes(Object.keys(typesToNames));
+      } catch (error) {
+        console.error("Error fetching resource templates:", error);
+      }
+    };
+
+    const fetchRoles = async () => {
+      const response = await axios.get("/roles");
+      const names = response.data.map((role) => role.name);
+      setRoleNames(names);
+    };
+
+    fetchProcedureTemplate();
+    fetchResourceTemplates();
+    fetchRoles();
+  }, [templateId]);
 
   const theme = createTheme({
     typography: {
@@ -190,30 +237,46 @@ const ProcedureForm = () => {
 
   const addResource = () => {
     if (!newResource.type) {
-      alert("Resource type is required.");
+      toast.error("Resource type is required.");
       return;
     }
     if (!newResource.name) {
-      alert("Resource name is required.");
+      toast.error("Resource name is required.");
       return;
     }
     if (newResource.quantity < 1) {
-      alert("Quantity cannot be less than 1.");
+      toast.error("Quantity cannot be less than 1.");
       return;
     }
+
+    for (let i = 0; i < resources.length; i++) {
+      if (resources[i].name === newResource.name) {
+        toast.error("Resource already exists in selected resources.");
+        return;
+      }
+    }
+
     setResources([...resources, newResource]);
     setNewResource({ type: "", name: "", quantity: 1 });
   };
 
   const addRole = () => {
     if (!newRole.name) {
-      alert("Role name is required.");
+      toast.error("Role name is required.");
       return;
     }
     if (newRole.quantity < 1) {
-      alert("Quantity cannot be less than 1.");
+      toast.error("Quantity cannot be less than 1.");
       return;
     }
+
+    for (let i = 0; i < roles.length; i++) {
+      if (roles[i].name === newRole.name) {
+        toast.error("Role already exists in selected roles.");
+        return;
+      }
+    }
+
     setRoles([...roles, newRole]);
     setNewRole({ name: "", quantity: 1 });
   };
@@ -249,10 +312,6 @@ const ProcedureForm = () => {
     const newRoles = [...roles];
     newRoles.splice(index, 1);
     setRoles(newRoles);
-  };
-
-  const modifyTemplate = () => {
-    console.log({ procedure, resources, roles });
   };
 
   return (
@@ -310,7 +369,12 @@ const ProcedureForm = () => {
             min: 1,
             type: "number",
             onKeyDown: (e) => {
-              if (e.key === "-" || e.key === "+" || e.key === ".") {
+              if (
+                e.key === "-" ||
+                e.key === "+" ||
+                e.key === "." ||
+                e.key === "e"
+              ) {
                 e.preventDefault();
               }
             },
@@ -368,11 +432,12 @@ const ProcedureForm = () => {
                 onChange={handleResourceChange}
                 style={{ color: "#8E0000" }}
               >
-                {resourceNames.map((name, index) => (
-                  <MenuItem key={index} value={name}>
-                    {name}
-                  </MenuItem>
-                ))}
+                {newResource.type &&
+                  resourceNames[newResource.type]?.map((name, index) => (
+                    <MenuItem key={index} value={name}>
+                      {name}
+                    </MenuItem>
+                  ))}
               </Select>
             </FormControl>
           </div>
@@ -581,6 +646,73 @@ const ProcedureForm = () => {
 };
 
 const ModifyProcedureTemplateForm = () => {
+  const [procedure, setProcedure] = useState({
+    name: "",
+    description: "",
+    estimatedTime: "",
+    specialInstructions: "",
+  });
+  const [resources, setResources] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const navigate = useNavigate();
+  const { templateId } = useParams();
+
+  const modifyTemplate = async () => {
+    const resourceData = resources.map((resource) => ({
+      resourceName: resource.name,
+      quantity: resource.quantity,
+    }));
+
+    const roleData = roles.map((role) => ({
+      roleName: role.name,
+      quantity: role.quantity,
+    }));
+
+    if (!procedure.name) {
+      toast.error("Procedure name is required.");
+      return;
+    }
+
+    if (!procedure.estimatedTime) {
+      toast.error("Estimated time is required.");
+      return;
+    }
+
+    if (resourceData.length === 0) {
+      toast.error("At least one resource is required.");
+      return;
+    }
+
+    if (roleData.length === 0) {
+      toast.error("At least one role is required.");
+      return;
+    }
+
+    const templateData = {
+      procedureName: procedure.name,
+      description: procedure.description,
+      estimatedTime: procedure.estimatedTime,
+      specialNotes: procedure.specialInstructions,
+      requiredResources: resourceData,
+      roles: roleData,
+    };
+
+    try {
+      const response = await axios.put(
+        `/procedureTemplates/${templateId}`,
+        templateData
+      );
+      console.log("Template Modified:", response.data);
+      navigate("/ProcedureTemplateManagement");
+      toast.success("Procedure Template Modified Successfully!");
+    } catch (error) {
+      console.error("Error modifying procedure template:", error);
+      toast.error(
+        "Failed to modify procedure template: " + error.response.data.error
+      );
+    }
+  };
+
   return (
     <div>
       <div
@@ -597,7 +729,7 @@ const ModifyProcedureTemplateForm = () => {
           <GoBackButton />
         </div>
         <div style={{ position: "absolute", right: "2rem" }}>
-          <ModifyTemplateButton />
+          <ModifyTemplateButton onModify={modifyTemplate} />
         </div>
         <h1
           style={{
@@ -611,7 +743,15 @@ const ModifyProcedureTemplateForm = () => {
           Modify Procedure Template
         </h1>
       </div>
-      <ProcedureForm />
+      <ProcedureForm
+        procedure={procedure}
+        setProcedure={setProcedure}
+        resources={resources}
+        setResources={setResources}
+        roles={roles}
+        setRoles={setRoles}
+        modifyTemplate={modifyTemplate}
+      />
     </div>
   );
 };
