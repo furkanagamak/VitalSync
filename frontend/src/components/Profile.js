@@ -165,9 +165,9 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
 
       if (response.status === 200) {
         onClose();
-        alert("Password has been successfully reset.");
+        toast("Password has been successfully reset.");
       } else {
-        setError("Failed to reset password.");
+        toast("Failed to reset password.");
       }
     } catch (error) {
       setError("Error resetting password.");
@@ -201,14 +201,14 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
           <button
             type="button"
             onClick={handleSubmit}
-            className="px-4 py-1 bg-red-800 text-white rounded-lg border border-solid border-neutral-600 text-xs"
+            className="px-4 py-1 bg-red-800 text-white rounded-lg border border-solid border-neutral-600 text-xs mb-5"
           >
             Reset Password
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1 bg-zinc-300 text-black rounded-lg border border-solid border-neutral-600 text-xs"
+            className="px-4 py-1 bg-zinc-300 text-black rounded-lg border border-solid border-neutral-600 text-xs mb-5"
           >
             Close
           </button>
