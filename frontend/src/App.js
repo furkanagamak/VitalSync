@@ -337,7 +337,7 @@ function App() {
               }
             />
             <Route
-              path="/ModifyProcedureTemplateForm"
+              path="/ModifyProcedureTemplateForm/:templateId"
               element={
                 <>
                   <Toaster />

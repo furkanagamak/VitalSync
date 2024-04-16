@@ -28,6 +28,7 @@ const Role = require("./models/role.js");
 const ProcedureTemplate = require("./models/procedureTemplate.js");
 const ResourceTemplate = require("./models/resourceTemplate.js");
 const ResourceInstance = require("./models/resourceInstance.js");
+const SectionTemplate = require("./models/sectionTemplate.js");
 
 dotenv.config();
 
@@ -1007,6 +1008,107 @@ app.post("/procedureTemplates", async (req, res) => {
       message: "Failed to create procedure template",
       error: error.message,
     });
+  }
+});
+
+app.put("/procedureTemplates/:id", async (req, res) => {
+  try {
+    // Resolve ResourceTemplate names to IDs
+    const resourceIdsWithQuantity = await Promise.all(
+      req.body.requiredResources.map(async (item) => {
+        const resource = await ResourceTemplate.findOne({
+          name: item.resourceName
+        });
+        if (!resource) {
+          throw new Error(`Resource not found: ${item.resourceName}`);
+        }
+        return { resource: resource._id, quantity: item.quantity };
+      })
+    );
+
+    // Resolve Role names to IDs
+    const roleIdsWithQuantity = await Promise.all(
+      req.body.roles.map(async (item) => {
+        const role = await Role.findOne({ name: item.roleName });
+        if (!role) {
+          throw new Error(`Role not found: ${item.roleName}`);
+        }
+        return { role: role._id, quantity: item.quantity };
+      })
+    );
+
+    // Update the ProcedureTemplate with the resolved IDs
+    const updatedProcedureTemplate = await ProcedureTemplate.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          procedureName: req.body.procedureName,
+          description: req.body.description,
+          requiredResources: resourceIdsWithQuantity,
+          roles: roleIdsWithQuantity,
+          estimatedTime: req.body.estimatedTime,
+          specialNotes: req.body.specialNotes
+        }
+      },
+      { new: true }
+    );
+
+    if (!updatedProcedureTemplate) {
+      throw new Error('Procedure template not found');
+    }
+
+    res.status(200).json(updatedProcedureTemplate);
+  } catch (error) {
+    console.error("Failed to update procedure template:", error);
+    res.status(400).json({
+      message: "Failed to update procedure template",
+      error: error.message,
+    });
+  }
+});
+
+app.get("/procedureTemplates/:id", async (req, res) => {
+  try {
+    const procedureTemplate = await ProcedureTemplate.findById(req.params.id)
+      .populate("requiredResources.resource")
+      .populate("roles.role");
+    if (!procedureTemplate) {
+      return res.status(404).json({ message: "Procedure template not found" });
+    }
+    res.json(procedureTemplate);
+  } catch (error) {
+    console.error("Error fetching procedure template by ID:", error);
+    res.status(500).json({
+      message: "Error fetching procedure template",
+      error: error.message,
+    });
+  }
+});
+
+app.delete('/procedureTemplates/:id', async (req, res) => {
+  const procedureTemplateId = req.params.id;
+  try {
+      // Check if any SectionTemplate is using the ProcedureTemplate
+      const isUsed = await SectionTemplate.findOne({ procedureTemplates: new mongoose.Types.ObjectId(procedureTemplateId)});
+      
+      if (isUsed) {
+          // If the ProcedureTemplate is in use, do not delete and send a message
+          return res.status(403).json({
+              message: 'Cannot delete procedure template because it is in use by a process template.'
+          });
+      }
+
+      // If the ProcedureTemplate is not in use, proceed to delete
+      await ProcedureTemplate.findByIdAndDelete(procedureTemplateId);
+
+      res.status(200).json({
+          message: 'Procedure template deleted successfully.'
+      });
+  } catch (error) {
+      res.status(500).json({
+          message: 'Error deleting procedure template',
+          error: error.message
+      });
   }
 });
 
