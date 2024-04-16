@@ -4,6 +4,16 @@ import { MdOutlineMedicalServices } from "react-icons/md";
 import { IoPersonOutline } from "react-icons/io5";
 import { LuBedDouble } from "react-icons/lu";
 import { Link } from "react-router-dom";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import {
+  TextField,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const ResourceCreate = ({ navToViewResource }) => {
   const [resourceCreatePage, setResourceCreatePage] = useState("type");
@@ -12,17 +22,39 @@ const ResourceCreate = ({ navToViewResource }) => {
     name: "",
     location: "",
     description: "",
-    uniqueIdentifier: "",
   });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form data:", formData);
-    // Add logic to submit form data to endpoint
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/resources`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ...formData, type: resourceType }),
+        }
+      );
+
+      const text = await response.text();
+
+      if (!response.ok) {
+        return toast.error(text);
+      }
+      toast.success(text);
+      navigate("/resources");
+    } catch (error) {
+      toast.error("An error occured while trying to submit your form");
+      console.error("Error submitting form:", error.message);
+    }
   };
 
   const makeTypeSelection = (type) => {
@@ -33,9 +65,69 @@ const ResourceCreate = ({ navToViewResource }) => {
   const navToTypeSelection = () => {
     setResourceCreatePage("type");
   };
+  const theme = createTheme({
+    typography: {
+      fontSize: 12,
+      button: {
+        textTransform: "none",
+      },
+    },
+    palette: {
+      primary: {
+        main: "#8E0000",
+      },
+    },
+    components: {
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#8E0000",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#8E0000",
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#8E0000",
+            },
+            backgroundColor: "white",
+          },
+          input: {
+            "&.MuiOutlinedInput-inputMultiline": {
+              backgroundColor: "white",
+            },
+          },
+        },
+      },
+      MuiSelect: {
+        styleOverrides: {
+          iconOutlined: {
+            color: "#8E0000",
+          },
+          select: {
+            color: "#8E0000",
+          },
+        },
+      },
+      MuiSvgIcon: {
+        styleOverrides: {
+          root: {
+            color: "#8E0000",
+          },
+        },
+      },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: {
+            color: "#8E0000",
+          },
+        },
+      },
+    },
+  });
 
   return (
-    <>
+    <ThemeProvider theme={theme}>
       {resourceCreatePage === "type" && (
         <SelectType
           navToViewResource={navToViewResource}
@@ -51,7 +143,7 @@ const ResourceCreate = ({ navToViewResource }) => {
           navToTypeSelection={navToTypeSelection}
         />
       )}
-    </>
+    </ThemeProvider>
   );
 };
 
@@ -60,8 +152,8 @@ const SelectType = ({ navToViewResource, makeTypeSelection }) => {
     makeTypeSelection("equipments");
   };
 
-  const selectPersonnel = () => {
-    makeTypeSelection("personnel");
+  const selectRole = () => {
+    makeTypeSelection("roles");
   };
 
   const selectSpace = () => {
@@ -94,11 +186,11 @@ const SelectType = ({ navToViewResource, makeTypeSelection }) => {
         </button>
         <button
           className="flex flex-col items-center"
-          onClick={selectPersonnel}
-          id="selectPersonnelBtn"
+          onClick={selectRole}
+          id="selectRoleBtn"
         >
           <IoPersonOutline className="w-8 h-8" />
-          <p>Personnel</p>
+          <p>Role</p>
         </button>
         <button
           className="flex flex-col items-center"
@@ -140,23 +232,22 @@ const ResourceForm = ({
       >
         <div className="mb-4 flex">
           <div className="w-1/2">
-            <label className="block text-primary text-lg font-bold mb-2">
-              Name
-            </label>
-            <input
-              type="text"
+            <TextField
+              label="*Name"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="shadow rounded w-full py-2 px-3"
               id="nameInp"
+              InputLabelProps={{ style: { color: "#8E0000" } }}
+              inputProps={{ style: { color: "#8E0000" } }}
+              className="shadow rounded w-full py-2 px-3"
             />
           </div>
           <div className="ml-8 w-1/2">
-            <label className="block text-primary text-lg font-bold mb-2">
+            <label className="block text-primary text-lg font-bold mb-2 text-center">
               Type
             </label>
-            <div className="flex items-center text-primary">
+            <div className="flex items-center justify-center text-primary">
               {resourceType === "equipments" && (
                 <MdOutlineMedicalServices className="w-6 h-6" />
               )}
@@ -171,41 +262,29 @@ const ResourceForm = ({
           </div>
         </div>
         <div className="mb-4">
-          <label className="block text-primary text-lg font-bold mb-2">
-            Location
-          </label>
-          <input
-            type="text"
+          <TextField
+            label="*Location"
             name="location"
             value={formData.location}
             onChange={handleChange}
-            className="shadow rounded w-full py-2 px-3"
             id="locationInp"
+            InputLabelProps={{ style: { color: "#8E0000" } }}
+            inputProps={{ style: { color: "#8E0000" } }}
+            className="shadow rounded w-full py-2 px-3"
           />
         </div>
         <div className="mb-4">
-          <label className="block text-primary text-lg font-bold mb-2">
-            Description
-          </label>
-          <textarea
+          <TextField
+            multiline
+            rows={4}
+            label="*Description"
             name="description"
             value={formData.description}
             onChange={handleChange}
-            className="shadow border rounded w-full py-2 px-3"
             id="descriptionInp"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-primary text-lg font-bold mb-2">
-            Unique Identifier (Optional)
-          </label>
-          <input
-            type="text"
-            name="uniqueIdentifier"
-            value={formData.uniqueIdentifier}
-            onChange={handleChange}
+            InputLabelProps={{ style: { color: "#8E0000" } }}
+            inputProps={{ style: { color: "#8E0000" } }}
             className="shadow rounded w-full py-2 px-3"
-            id="uniqueIdentifierInp"
           />
         </div>
         <div className="mt-6 flex">

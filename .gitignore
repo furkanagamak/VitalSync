@@ -1,3 +1,8 @@
 .env
 backend/.env
 frontend/.env
+cypress/support/e2e.js
+cypress/e2e/spec.cy.js
+cypress/fixtures/example.json
+cypress/support/commands.js
+/frontend/cypress/screenshots

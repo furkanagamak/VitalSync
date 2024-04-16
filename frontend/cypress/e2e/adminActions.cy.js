@@ -1,4 +1,11 @@
 describe("Admin Actions", () => {
+  beforeEach(() => {
+    cy.visit('/');
+    cy.get('#emailInput').type('john.doe@example.com');
+    cy.get('#passwordInput').type('password123');
+    cy.get('button').contains('Sign in').click();
+    cy.wait(1000);
+});
   it("Process Template Management", () => {
     cy.visit("http://localhost:3000/adminActions");
 

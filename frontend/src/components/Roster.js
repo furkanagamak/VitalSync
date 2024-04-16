@@ -1,27 +1,13 @@
-import React, { useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const tableData = [
-  ["John Smith", "Neurology", "Head of Department"],
-  ["Johnson", "Neurology", "Head of Department"],
-  ["Williams", "Pediatrics", "Attending Physician"],
-  ["James Brown", "Orthopedics", "Senior Consultant"],
-  ["Linda Garcia", "Dermatology", "Attending Physician"],
-  ["Barbara Jones", "Emergency Medicine", "Resident"],
-  ["Elizabeth Miller", "Obstetrics and Gynecology", "Head of Department"],
-  ["Jennifer Davis", "Oncology", "Senior Consultant"],
-  ["Maria Rodriguez", "Psychiatry", "Attending Physician"],
-  ["Susan Wilson", "Endocrinology", "Resident"],
-  ["Margaret Moore", "Gastroenterology", "Head of Department"],
-  ["Dorothy Taylor", "Ophthalmology", "Senior Consultant"],
-  ["Lisa Anderson", "Pulmonology", "Attending Physician"],
-];
-
-function Table({ rows,  onRowClick  }) {
+// Table component 
+function Table({ rows, onRowClick }) {
   return (
     <table className="w-full">
       <thead>
-        <tr style={{ backgroundColor: '#8E0000', color: 'white' }}>
+        <tr style={{ backgroundColor: "#8E0000", color: "white" }}>
           <th className="px-4 py-2">Name</th>
           <th className="px-4 py-2">Department</th>
           <th className="px-4 py-2">Position</th>
@@ -29,10 +15,14 @@ function Table({ rows,  onRowClick  }) {
       </thead>
       <tbody>
         {rows.map((row, index) => (
-          <tr key={index} onClick={() => onRowClick(row)} style={{ backgroundColor: index % 2 === 0 ? '#F5F5DC' : 'transparent' }}>
-            <td className="px-4 py-2 h-12">{row[0]}</td>
-            <td className="px-4 py-2 h-12">{row[1]}</td>
-            <td className="px-4 py-2 h-12">{row[2]}</td>
+          <tr
+            key={index} // Ideally, use a unique ID from the database if available
+            onClick={() => onRowClick(row)}
+            style={{ backgroundColor: index % 2 === 0 ? "#F5F5DC" : "transparent" }}
+          >
+            <td className="px-4 py-2 h-12" style={{ textAlign: 'center', verticalAlign: 'middle' }}>{row[0]}</td> 
+            <td className="px-4 py-2 h-12" style={{ textAlign: 'center', verticalAlign: 'middle' }}>{row[1]}</td> 
+            <td className="px-4 py-2 h-12" style={{ textAlign: 'center', verticalAlign: 'middle' }}>{row[2]}</td>
           </tr>
         ))}
       </tbody>
@@ -44,30 +34,59 @@ const ROWS_PER_PAGE = 10;
 
 function MyComponent() {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterValue, setFilterValue] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterValue, setFilterValue] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
+  const [users, setUsers] = useState([]);
 
-  let filteredRows = tableData.filter(row =>
-    (!filterValue || row[1].toLowerCase().includes(filterValue.toLowerCase()) || row[2].toLowerCase().includes(filterValue.toLowerCase())) &&
-    (searchTerm === '' || row.some(cell => cell.toLowerCase().includes(searchTerm.toLowerCase())))
+  
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get("/users"); 
+        const formattedUsers = response.data
+          .filter(user => !user.isTerminated)  
+          .map((user) => [
+            `${user.firstName} ${user.lastName}`,
+            user.department,
+            user.position,
+            user._id,
+          ]);
+
+        setUsers(formattedUsers);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  // Filter and Search Logic
+  let filteredRows = users.filter(
+    (user) =>
+      (!filterValue ||
+        user[1].toLowerCase().includes(filterValue.toLowerCase()) ||
+        user[2].toLowerCase().includes(filterValue.toLowerCase())) &&
+      (searchTerm === "" ||
+        user[0].toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user[1].toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user[2].toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  // Paginate Users
   const totalPages = Math.ceil(filteredRows.length / ROWS_PER_PAGE);
-
   filteredRows = filteredRows.slice(currentPage * ROWS_PER_PAGE, (currentPage + 1) * ROWS_PER_PAGE);
 
+  // Handle click on a user row
   const handleRowClick = (row) => {
-    // Example logic: navigate to Profile if the row matches certain criteria
-    // Adjust the condition as needed
-    if (row[0] === "John Smith" && row[1] === "Neurology" && row[2] === "Head of Department") {
-      navigate('/Profile'); 
-    }
+    const userId = row[3]; // Access the user ID
+    navigate(`/Profile/${userId}`); // Navigate to the profile route
   };
 
   return (
     <div className="flex flex-col justify-center items-center h-screen">
-      <div style={{ width: '90%'}} className="w-full flex justify-end items-center">
+      <div style={{ width: "90%" }} className="w-full flex justify-end items-center">
         <select
           className="px-3 py-2 border rounded mr-2"
           value={filterValue}
@@ -93,17 +112,19 @@ function MyComponent() {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      <div style={{ width: '90%', height: '80%' }} className="flex flex-col justify-start items-center">
+
+      <div style={{ width: "90%", height: "80%" }} className="flex flex-col justify-start items-center">
         <div className="w-full overflow-auto">
-          <Table rows={filteredRows} onRowClick={handleRowClick}/>
-        </div>
+          <Table rows={filteredRows} onRowClick={handleRowClick} />
+        </div>    
+
         {totalPages > 1 && (
           <div className="flex mt-4">
             {Array.from({ length: totalPages }, (_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentPage(index)}
-                className={`px-4 py-2 mx-1 ${index === currentPage ? 'bg-gray-300' : 'bg-white'} border rounded`}
+                className={`px-4 py-2 mx-1 ${index === currentPage ? "bg-gray-300" : "bg-white"} border rounded`}
               >
                 {index + 1}
               </button>

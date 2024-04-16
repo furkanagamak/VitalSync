@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import {
   TextField,
@@ -19,15 +19,14 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const notify = () => toast.success("Procedure Template Created!");
+axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
+axios.defaults.withCredentials = true;
 
-const CreateTemplateButton = () => {
-  const navigate = useNavigate();
-
-  const handleCreateClick = () => {
-    navigate("/ProcedureTemplateManagement");
-    notify();
+const CreateTemplateButton = ({ onCreate }) => {
+  const handleCreateClick = async () => {
+    await onCreate();
   };
 
   return (
@@ -50,7 +49,7 @@ const CreateTemplateButton = () => {
         <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z" />
         <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z" />
       </svg>
-      Create Template
+      Save Template
     </button>
   );
 };
@@ -85,26 +84,52 @@ const GoBackButton = () => {
   );
 };
 
-const ProcedureForm = () => {
-  const [procedure, setProcedure] = useState({
-    name: "",
-    description: "",
-    estimatedTime: "",
-    specialInstructions: "",
-  });
-  const [resources, setResources] = useState([]);
-  const [roles, setRoles] = useState([]);
+const ProcedureForm = ({
+  procedure,
+  setProcedure,
+  resources,
+  setResources,
+  roles,
+  setRoles,
+  createTemplate,
+}) => {
   const [newResource, setNewResource] = useState({
     type: "",
     name: "",
     quantity: 1,
   });
   const [newRole, setNewRole] = useState({ name: "", quantity: 1 });
+  const [resourceTypes, setResourceTypes] = useState([]);
+  const [roleNames, setRoleNames] = useState([]);
+  const [resourceNames, setResourceNames] = useState({});
 
-  // Hardcoded data for the dropdowns
-  const resourceTypes = ["Equipment", "Space"];
-  const resourceNames = ["MRI Machine", "X-Ray Machine", "Operating Room"];
-  const roleNames = ["Surgeon", "Nurse", "Anesthesiologist"];
+  useEffect(() => {
+    const fetchResourceTemplates = async () => {
+      try {
+        const response = await axios.get("/resourceTemplates");
+        const typesToNames = {};
+        response.data.forEach((template) => {
+          if (!typesToNames[template.type]) {
+            typesToNames[template.type] = [];
+          }
+          typesToNames[template.type].push(template.name);
+        });
+        setResourceNames(typesToNames);
+        setResourceTypes(Object.keys(typesToNames));
+      } catch (error) {
+        console.error("Error fetching resource templates:", error);
+      }
+    };
+
+    const fetchRoles = async () => {
+      const response = await axios.get("/roles");
+      const names = response.data.map((role) => role.name);
+      setRoleNames(names);
+    };
+
+    fetchResourceTemplates();
+    fetchRoles();
+  }, []);
 
   const theme = createTheme({
     typography: {
@@ -184,30 +209,46 @@ const ProcedureForm = () => {
 
   const addResource = () => {
     if (!newResource.type) {
-      alert("Resource type is required.");
+      toast.error("Resource type is required.");
       return;
     }
     if (!newResource.name) {
-      alert("Resource name is required.");
+      toast.error("Resource name is required.");
       return;
     }
     if (newResource.quantity < 1) {
-      alert("Quantity cannot be less than 1.");
+      toast.error("Quantity cannot be less than 1.");
       return;
     }
+
+    for (let i = 0; i < resources.length; i++) {
+      if (resources[i].name === newResource.name) {
+        toast.error("Resource already exists in selected resources.");
+        return;
+      }
+    }
+
     setResources([...resources, newResource]);
     setNewResource({ type: "", name: "", quantity: 1 });
   };
 
   const addRole = () => {
     if (!newRole.name) {
-      alert("Role name is required.");
+      toast.error("Role name is required.");
       return;
     }
     if (newRole.quantity < 1) {
-      alert("Quantity cannot be less than 1.");
+      toast.error("Quantity cannot be less than 1.");
       return;
     }
+
+    for (let i = 0; i < roles.length; i++) {
+      if (roles[i].name === newRole.name) {
+        toast.error("Role already exists in selected roles.");
+        return;
+      }
+    }
+
     setRoles([...roles, newRole]);
     setNewRole({ name: "", quantity: 1 });
   };
@@ -243,10 +284,6 @@ const ProcedureForm = () => {
     const newRoles = [...roles];
     newRoles.splice(index, 1);
     setRoles(newRoles);
-  };
-
-  const createTemplate = () => {
-    console.log({ procedure, resources, roles });
   };
 
   return (
@@ -307,7 +344,7 @@ const ProcedureForm = () => {
             min: 1,
             type: "number",
             onKeyDown: (e) => {
-              if (e.key === "-" || e.key === "+" || e.key === ".") {
+              if (e.key === "-" || e.key === "+" || e.key === "." || e.key === "e") {
                 e.preventDefault();
               }
             },
@@ -366,11 +403,12 @@ const ProcedureForm = () => {
                 onChange={handleResourceChange}
                 style={{ color: "#8E0000" }}
               >
-                {resourceNames.map((name, index) => (
-                  <MenuItem key={index} value={name}>
-                    {name}
-                  </MenuItem>
-                ))}
+                {newResource.type &&
+                  resourceNames[newResource.type]?.map((name, index) => (
+                    <MenuItem key={index} value={name}>
+                      {name}
+                    </MenuItem>
+                  ))}
               </Select>
             </FormControl>
           </div>
@@ -579,6 +617,69 @@ const ProcedureForm = () => {
 };
 
 const CreateProcedureTemplateForm = () => {
+  const [procedure, setProcedure] = useState({
+    name: "",
+    description: "",
+    estimatedTime: "",
+    specialInstructions: "",
+  });
+  const [resources, setResources] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const navigate = useNavigate();
+
+  const createTemplate = async () => {
+    const resourceData = resources.map((resource) => ({
+      resourceName: resource.name,
+      quantity: resource.quantity,
+    }));
+
+    const roleData = roles.map((role) => ({
+      roleName: role.name,
+      quantity: role.quantity,
+    }));
+
+    if (!procedure.name) {
+      toast.error("Procedure name is required.");
+      return;
+    }
+
+    if (!procedure.estimatedTime) {
+      toast.error("Estimated time is required.");
+      return;
+    }
+
+    if (resourceData.length === 0) {
+      toast.error("At least one resource is required.");
+      return;
+    }
+
+    if (roleData.length === 0) {
+      toast.error("At least one role is required.");
+      return;
+    }
+
+    const templateData = {
+      procedureName: procedure.name,
+      description: procedure.description,
+      estimatedTime: procedure.estimatedTime,
+      specialNotes: procedure.specialInstructions,
+      requiredResources: resourceData,
+      roles: roleData,
+    };
+
+    try {
+      const response = await axios.post("/procedureTemplates", templateData);
+      console.log("Template Created:", response.data);
+      navigate("/ProcedureTemplateManagement");
+      toast.success("Procedure Template Created Successfully!");
+    } catch (error) {
+      console.error("Error creating procedure template:", error);
+      toast.error(
+        "Failed to create procedure template: " + error.response.data.error
+      );
+    }
+  };
+
   return (
     <div>
       <div
@@ -595,7 +696,7 @@ const CreateProcedureTemplateForm = () => {
           <GoBackButton />
         </div>
         <div style={{ position: "absolute", right: "2rem" }}>
-          <CreateTemplateButton />
+          <CreateTemplateButton onCreate={createTemplate} />
         </div>
         <h1
           style={{
@@ -609,7 +710,15 @@ const CreateProcedureTemplateForm = () => {
           Create New Procedure Template
         </h1>
       </div>
-      <ProcedureForm />
+      <ProcedureForm
+        procedure={procedure}
+        setProcedure={setProcedure}
+        resources={resources}
+        setResources={setResources}
+        roles={roles}
+        setRoles={setRoles}
+        createTemplate={createTemplate}
+      />
     </div>
   );
 };

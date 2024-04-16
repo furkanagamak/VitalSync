@@ -13,6 +13,9 @@ function MyComponent() {
   const [otpCode, setOtpCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [canResend, setCanResend] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const [timerActive, setTimerActive] = useState(false);
 
   const isValidEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -21,6 +24,22 @@ function MyComponent() {
 
   const isValidPassword = (password) => {
     return password.length >= 6 && !password.includes(email);
+  };
+
+  const startTimer = (duration) => {
+    setCountdown(duration);
+    setTimerActive(true);
+    const timer = setInterval(() => {
+      setCountdown((prevCountdown) => {
+        if (prevCountdown <= 1) {
+          clearInterval(timer);
+          setCanResend(true);
+          setTimerActive(false);
+          return 0;
+        }
+        return prevCountdown - 1;
+      });
+    }, 1000);
   };
 
   const handleEmailSubmit = () => {
@@ -34,6 +53,8 @@ function MyComponent() {
         .then((response) => {
           setCurrentStep("verifyCode");
           setErrorMessage("");
+          setCanResend(false);
+          startTimer(120);
         })
         .catch((error) => {
           setErrorMessage(
@@ -83,6 +104,19 @@ function MyComponent() {
     }
   };
 
+  const handleResendCode = () => {
+    axios
+      .post("/forgotPassword", { email })
+      .then((response) => {
+        setOtpCode(""); // Clear previous code if any
+        setCanResend(false); // Disable the button again
+        setTimeout(() => setCanResend(true), 180000); // Reset the timer
+      })
+      .catch((error) => {
+        setErrorMessage(error.response.data.message || "Error resending code.");
+      });
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case "enterEmail":
@@ -96,11 +130,17 @@ function MyComponent() {
               id="emailInput"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="shrink-0 mt-1 bg-white rounded-lg border border-solid border-stone-500 h-[30px] w-full"
+              className="shrink-0 mt-1 bg-white rounded-lg border border-solid border-stone-500 h-[30px] w-full p-2"
             />
             <button
-              className="justify-center items-center px-16 py-2.5 mt-4 text-center text-white whitespace-nowrap bg-red-800 rounded-lg border border-red-800 border-solid max-md:px-5"
+              className={`justify-center items-center px-16 py-2.5 mt-4 text-center text-white whitespace-nowrap bg-red-800 rounded-lg border border-red-800 max-md:px-5
+              ${
+                isValidEmail(email)
+                  ? "opacity-100"
+                  : "opacity-50 cursor-not-allowed"
+              }`}
               onClick={handleEmailSubmit}
+              disabled={!isValidEmail(email)}
             >
               Submit
             </button>
@@ -124,14 +164,34 @@ function MyComponent() {
               type="text"
               value={otpCode}
               onChange={(e) => setOtpCode(e.target.value)}
-              className="shrink-0 mt-1 bg-white rounded-lg border border-solid border-stone-500 h-[30px] w-full"
+              className="shrink-0 mt-1 bg-white rounded-lg border border-solid border-stone-500 h-[30px] w-full p-2"
             />
             <button
-              className="justify-center items-center px-16 py-2.5 mt-4 text-center text-white whitespace-nowrap bg-red-800 rounded-lg border border-red-800 border-solid max-md:px-5"
+              className={`justify-center items-center px-16 py-2.5 mt-4 text-center text-white whitespace-nowrap bg-red-800 rounded-lg border border-red-800 max-md:px-5
+              ${otpCode ? "opacity-100" : "opacity-50 cursor-not-allowed"}`}
               onClick={handleCodeSubmit}
+              disabled={!otpCode}
             >
               Submit
             </button>
+            {timerActive && (
+              <div className="mt-2 text-xs text-center">
+                You can resend the code in {Math.floor(countdown / 60)}:
+                {("0" + (countdown % 60)).slice(-2)}
+              </div>
+            )}
+            {!timerActive && canResend && (
+              <button
+                className="justify-center items-center px-16 py-2.5 mt-4 text-center text-white whitespace-nowrap bg-red-800 rounded-lg border border-red-800 border-solid max-md:px-5"
+                onClick={() => {
+                  handleResendCode();
+                  startTimer(120);
+                }}
+                disabled={!canResend}
+              >
+                Resend Code
+              </button>
+            )}
             <div className="mt-5 mb-1.5 text-xs text-center">
               Contact System Admin:
               <br />
@@ -154,7 +214,7 @@ function MyComponent() {
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="shrink-0 mt-1 w-full bg-white rounded-lg border border-solid border-stone-500 h-[30px]"
+              className="shrink-0 mt-1 w-full bg-white rounded-lg border border-solid border-stone-500 h-[30px] p-2"
             />
             <label
               htmlFor="confirmPassword"
@@ -166,12 +226,18 @@ function MyComponent() {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="shrink-0 mt-1 w-full bg-white rounded-lg border border-solid border-stone-500 h-[30px]"
+              className="shrink-0 mt-1 w-full bg-white rounded-lg border border-solid border-stone-500 h-[30px] p-2"
             />
             <button
               type="submit"
-              className="justify-center items-center px-16 py-2.5 mt-3 text-center text-white whitespace-nowrap bg-red-800 rounded-lg border border-red-800 border-solid max-md:px-5"
+              className={`justify-center items-center px-16 py-2.5 mt-4 text-center text-white whitespace-nowrap bg-red-800 rounded-lg border border-red-800 max-md:px-5
+              ${
+                newPassword && confirmPassword
+                  ? "opacity-100"
+                  : "opacity-50 cursor-not-allowed"
+              }`}
               onClick={handlePasswordSubmit}
+              disabled={!newPassword || !confirmPassword}
             >
               Submit
             </button>

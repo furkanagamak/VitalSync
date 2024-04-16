@@ -11,6 +11,7 @@ const {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
 } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { fromEnv } = require("@aws-sdk/credential-provider-env");
@@ -24,6 +25,9 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const Account = require("./models/account.js");
 const Role = require("./models/role.js");
+const ProcedureTemplate = require("./models/procedureTemplate.js");
+const ResourceTemplate = require("./models/resourceTemplate.js");
+const ResourceInstance = require("./models/resourceInstance.js");
 
 dotenv.config();
 
@@ -101,7 +105,10 @@ app.put("/user/profilePicture", upload.single("image"), async (req, res) => {
     }
 
     const currUser = await Account.findOne({ _id: accountId });
-    if (!currUser) return res.status(404).send("User does not exist! Malfo");
+    if (!currUser)
+      return res
+        .status(404)
+        .send("User does not exist! Malformed session, please login again!");
 
     // puts image into s3
     const profileUrlName =
@@ -123,12 +130,10 @@ app.put("/user/profilePicture", upload.single("image"), async (req, res) => {
     });
     const url = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
 
-    res.status(200).send(
-      JSON.stringify({
-        message: "Your profile image has been updated!",
-        url: url,
-      })
-    );
+    res.status(200).json({
+      message: "Your profile image has been updated!",
+      url: url,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
@@ -137,9 +142,18 @@ app.put("/user/profilePicture", upload.single("image"), async (req, res) => {
 
 app.get("/user/profilePicture/url/:id", async (req, res) => {
   try {
-    if (!req.params.id) return res.status(404).send("No profile pic");
-    const user = await Account.findOne({ _id: req.params.id });
+    if (!req.params.id)
+      return res.status(404).send("id field needs to be provided!");
+
+    let user;
+    try {
+      user = await Account.findById(req.params.id);
+    } catch (err) {
+      return res.status(404).send("User not found");
+    }
+
     if (!user) return res.status(404).send("User not found");
+    if (user.profileUrl === "") return res.status(200).send("");
 
     const command = new GetObjectCommand({
       Bucket: bucketName,
@@ -174,92 +188,90 @@ const isValidEmail = (email) => {
 };
 
 app.post("/createAccount", async (req, res) => {
-  try {
-    const {
-      firstName,
-      lastName,
-      email,
-      accountType,
-      position,
-      department,
-      degree,
-      phoneNumber,
-      officePhoneNumber,
-      officeLocation,
-      eligibleRoles,
-    } = req.body;
+  // try {
+  const {
+    firstName,
+    lastName,
+    email,
+    accountType,
+    position,
+    department,
+    degree,
+    phoneNumber,
+    officePhoneNumber,
+    officeLocation,
+    eligibleRoles,
+  } = req.body;
 
-    // permission checks
-    // const currUID = req.cookies.accountId;
-    // if (!currUID) {
-    //   return res.status(401).send("You are not authorized to use this feature");
-    // }
-    // const currUser = await Account.find({ _id: currUID });
-    // if (!currUser)
-    //   return res
-    //     .status(400)
-    //     .send("Malformed session, please logout and sign in again!");
-    // if (currUser.accountType === "staff")
-    //   return res
-    //     .status(401)
-    //     .send("You are not authorized to use this feature!");
-    // if (
-    //   accountType === "hospital admin" &&
-    //   currUser.accountType !== "system admin"
-    // )
-    //   return res
-    //     .status(401)
-    //     .send(
-    //       "You need to ask an system admin to create this type of account!"
-    //     );
+  // permission checks
+  const currUID = req.cookies.accountId;
+  if (!currUID) {
+    return res.status(401).send("You are not authorized to use this feature");
+  }
+  const currUser = await Account.findOne({ _id: currUID });
+  if (!currUser)
+    return res
+      .status(400)
+      .send("Malformed session, please logout and sign in again!");
+  if (currUser.accountType === "staff")
+    return res.status(401).send("You are not authorized to use this feature!");
+  console.log(accountType);
+  console.log(currUser.accountType);
+  if (
+    accountType === "hospital admin" &&
+    currUser.accountType !== "system admin"
+  )
+    return res
+      .status(401)
+      .send("You need to ask an system admin to create this type of account!");
 
-    // Check if any required field is missing or empty
-    if (
-      !firstName ||
-      !lastName ||
-      !email ||
-      !accountType ||
-      !position ||
-      !department ||
-      !degree ||
-      !phoneNumber ||
-      !eligibleRoles
-    ) {
-      return res
-        .status(400)
-        .send(
-          "All fields except officePhoneNumber and officeLocation are required."
-        );
+  // Check if any required field is missing or empty
+  if (
+    !firstName ||
+    !lastName ||
+    !email ||
+    !accountType ||
+    !position ||
+    !department ||
+    !degree ||
+    !phoneNumber ||
+    !eligibleRoles
+  ) {
+    return res
+      .status(400)
+      .send(
+        "All fields except officePhoneNumber and officeLocation are required."
+      );
+  }
+
+  if (!isValidEmail) {
+    return res.status(400).send("invalid email provided");
+  }
+
+  // Check if an account with the given email already exists
+  const accountExists = await Account.findOne({ email: email });
+  if (accountExists) {
+    return res.status(400).send("An account with this email already exists.");
+  }
+
+  const inpRole = await Role.findOne({ name: eligibleRoles });
+  if (!inpRole) return res.status(400).send("queried role doesn't exists");
+
+  // Generate a random password
+  const password = crypto.randomBytes(8).toString("hex");
+
+  // Hash the password
+  bcrypt.hash(password, saltRounds, async (err, hash) => {
+    if (err) {
+      return res.status(500).send("Error hashing password");
     }
 
-    if (!isValidEmail) {
-      return res.status(400).send("invalid email provided");
-    }
-
-    // Check if an account with the given email already exists
-    const accountExists = await Account.findOne({ email: email });
-    if (accountExists) {
-      return res.status(400).send("An account with this email already exists.");
-    }
-
-    const inpRole = await Role.findOne({ name: eligibleRoles });
-    if (!inpRole) return res.status(400).send("queried role doesn't exists");
-
-    // Generate a random password
-    const password = crypto.randomBytes(8).toString("hex");
-
-    // Hash the password
-    bcrypt.hash(password, saltRounds, async (err, hash) => {
-      if (err) {
-        return res.status(500).send("Error hashing password");
-      }
-
-      // Send email with the plain password
-      const mailOptions = {
-        from: "vitalsync2024@gmail.com",
-        to: email,
-        subject: "Welcome to VitalSync - Your Account Details",
-        html: `
+    // Send email with the plain password
+    const mailOptions = {
+      from: "vitalsync2024@gmail.com",
+      to: email,
+      subject: "Welcome to VitalSync - Your Account Details",
+      html: `
           <div style="font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 16px; color: #333;">
             <h2>Welcome to VitalSync!</h2>
             <p>Hello <strong>${firstName} ${lastName}</strong>,</p>
@@ -280,39 +292,39 @@ app.post("/createAccount", async (req, res) => {
             <p>The VitalSync Team</p>
           </div>
         `,
-      };
+    };
 
-      transporter.sendMail(mailOptions, async (error, info) => {
-        if (error) {
-          return res.status(500).send("Error sending email");
-        } else {
-          // Create and save the new account
-          const newAccount = new Account({
-            firstName,
-            lastName,
-            password: hash, // Store the hashed password
-            email,
-            accountType,
-            position,
-            department,
-            degree,
-            phoneNumber,
-            officePhoneNumber,
-            officeLocation,
-            eligibleRoles: inpRole,
-          });
+    transporter.sendMail(mailOptions, async (error, info) => {
+      if (error) {
+        return res.status(500).send("Error sending email");
+      } else {
+        // Create and save the new account
+        const newAccount = new Account({
+          firstName,
+          lastName,
+          password: hash, // Store the hashed password
+          email,
+          accountType,
+          position,
+          department,
+          degree,
+          phoneNumber,
+          officePhoneNumber,
+          officeLocation,
+          eligibleRoles: inpRole,
+        });
 
-          await newAccount.save();
-          res.status(201).send({
-            message: "Account created successfully",
-            accountId: newAccount._id,
-          });
-        }
-      });
+        await newAccount.save();
+        res.status(201).send({
+          message: "Account created successfully",
+          accountId: newAccount._id,
+        });
+      }
     });
-  } catch (error) {
-    res.status(400).send("Error creating account");
-  }
+  });
+  // } catch (error) {
+  //   res.status(500).send("Error creating account");
+  // }
 });
 
 const transformAccount = async (account) => {
@@ -343,7 +355,7 @@ app.post("/login", async (req, res) => {
     // Check if an account with the given email exists
     const account = await Account.findOne({ email: email });
     if (!account) {
-      return res.status(400).send({ message: "Account not found" });
+      return res.status(400).send({ message: "Incorrect email or password." });
     }
 
     // Compare the password
@@ -365,7 +377,7 @@ app.post("/login", async (req, res) => {
         const resAcc = await transformAccount(account);
         res.status(200).send({ message: "Login successful", account: resAcc });
       } else {
-        res.status(400).send({ message: "Incorrect password" });
+        res.status(400).send({ message: "Incorrect email or password." });
       }
     });
   } catch (error) {
@@ -529,16 +541,139 @@ app.post("/resetPassword", async (req, res) => {
   }
 });
 
-app.get('/user/:userId', async (req, res) => {
+async function initializePredefinedAccounts() {
+  try {
+    const predefinedAccounts = [
+      {
+        firstName: "Staff",
+        lastName: "User",
+        email: "staff@example.com",
+        accountType: "staff",
+        position: "Staff Position",
+        department: "Staff Department",
+        degree: "Staff Degree",
+        phoneNumber: "1234567890",
+        password: "staffPassword123", // Password for staff
+      },
+      {
+        firstName: "Hospital",
+        lastName: "Admin",
+        email: "hospitaladmin@example.com",
+        accountType: "hospital admin",
+        position: "Hospital Admin Position",
+        department: "Hospital Admin Department",
+        degree: "Hospital Admin Degree",
+        phoneNumber: "9876543210",
+        password: "hospitalAdminPassword123", // Password for hospital admin
+      },
+      {
+        firstName: "System",
+        lastName: "Admin",
+        email: "systemadmin@example.com",
+        accountType: "system admin",
+        position: "System Admin Position",
+        department: "System Admin Department",
+        degree: "System Admin Degree",
+        phoneNumber: "5555555555",
+        password: "systemAdminPassword123", // Password for system admin
+      },
+    ];
+
+    const createdAccountIds = []; // Array to store the IDs of the created accounts
+
+    // Loop through predefined accounts and create them if they don't exist
+    for (const accountData of predefinedAccounts) {
+      // Check if an account with the given email already exists
+      const accountExists = await Account.findOne({ email: accountData.email });
+      if (!accountExists) {
+        // Hash the password (assuming bcrypt is used)
+        const hashedPassword = await bcrypt.hash(
+          accountData.password,
+          saltRounds
+        );
+
+        // Create and save the new account
+        const newAccount = new Account({
+          ...accountData,
+          password: hashedPassword,
+        });
+
+        // Save the account and store its ID
+        const savedAccount = await newAccount.save();
+        console.log(`Account '${accountData.email}' created successfully.`);
+        createdAccountIds.push(savedAccount._id.toString()); // Push the ID of the created account
+      } else {
+        console.log(
+          `Account with email '${accountData.email}' already exists.`
+        );
+      }
+    }
+
+    // Return the array of created account IDs
+    return createdAccountIds;
+  } catch (error) {
+    console.error("Error initializing predefined accounts:", error);
+    throw error; // Propagate the error to the caller
+  }
+}
+
+// Function to remove predefined accounts
+async function removePredefinedAccounts() {
+  try {
+    const predefinedAccounts = await Account.find({
+      email: {
+        $in: [
+          "staff@example.com",
+          "hospitaladmin@example.com",
+          "systemadmin@example.com",
+        ],
+      },
+    });
+
+    const deletedAccounts = await Account.deleteMany({
+      email: {
+        $in: [
+          "staff@example.com",
+          "hospitaladmin@example.com",
+          "systemadmin@example.com",
+        ],
+      },
+    });
+
+    console.log(
+      `${deletedAccounts.deletedCount} predefined accounts removed successfully.`
+    );
+
+    for (const account of predefinedAccounts) {
+      const profileUrlName = account.profileUrl;
+
+      if (!profileUrlName || !profileUrlName.includes("@")) {
+        continue;
+      }
+
+      const deleteCommand = new DeleteObjectCommand({
+        Bucket: bucketName,
+        Key: profileUrlName,
+      });
+
+      await s3.send(deleteCommand);
+      console.log(`Profile image '${profileUrlName}' deleted successfully.`);
+    }
+  } catch (error) {
+    console.error("Error removing predefined accounts:", error);
+  }
+}
+
+app.get("/user/:userId", async (req, res) => {
   try {
     const user = await Account.findOne({ _id: req.params.userId });
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     const response = {
-      userId: user._id, 
+      userId: user._id,
       firstName: user.firstName,
       lastName: user.lastName,
       profileUrl: user.profileUrl,
@@ -554,35 +689,329 @@ app.get('/user/:userId', async (req, res) => {
       userImg: user.userImg,
       usualHours: user.usualHours,
       profileImage: user.profileImage,
-      unavailableTimes: user.unavailableTimes
+      unavailableTimes: user.unavailableTimes,
     };
 
     res.json(response);
   } catch (error) {
-    console.error('Error fetching user by _id:', error);
-    res.status(500).json({ message: 'Error fetching user', error: error.message });
+    console.error("Error fetching user by _id:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching user", error: error.message });
   }
 });
 
-app.put('/user/:userId', async (req, res) => {
+app.put("/user/:userId", async (req, res) => {
   const { userId } = req.params;
   const updateData = req.body;
 
   try {
-    const updatedUser = await Account.findByIdAndUpdate(userId, updateData, { new: true });
+    const updatedUser = await Account.findByIdAndUpdate(userId, updateData, {
+      new: true,
+    });
     if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
-    res.json({ message: 'Profile updated successfully', user: updatedUser });
+    res.json({ message: "Profile updated successfully", user: updatedUser });
   } catch (error) {
-    console.error('Error updating user:', error);
-    res.status(500).json({ message: 'Error updating user', error: error.message });
+    console.error("Error updating user:", error);
+    res
+      .status(500)
+      .json({ message: "Error updating user", error: error.message });
   }
-})
-
-const PORT = 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
 });
 
-module.exports = app;
+app.get("/users", async (req, res) => {
+  try {
+    const users = await Account.find(
+      {},
+      { firstName: 1, lastName: 1, department: 1, position: 1, isTerminated: 1 }
+    ); // Select necessary fields
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching users", error: error.message });
+  }
+});
+
+app.put("/user/:userId", async (req, res) => {
+  const { userId } = req.params;
+  const { isTerminated } = req.body;
+
+  console.log("UserID:", userId); // Check the user ID received
+  console.log("isTerminated:", isTerminated); // Check the isTerminated flag received
+
+  try {
+    const user = await Account.findByIdAndUpdate(
+      userId,
+      { isTerminated },
+      { new: true }
+    );
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    res.send(user);
+  } catch (error) {
+    console.error("Failed to update user:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.post("/verify-password", async (req, res) => {
+  const { userId, password } = req.body;
+  try {
+    const user = await Account.findById(userId);
+
+    if (!user) {
+      return res.status(404).send({ message: "User not found." });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (isPasswordCorrect) {
+      res.send({ isPasswordCorrect: true });
+    } else {
+      res.send({ isPasswordCorrect: false });
+    }
+  } catch (error) {
+    console.error("Error verifying password:", error);
+    res.status(500).send({ message: "Internal server error." });
+  }
+});
+
+app.post("/reset-password", async (req, res) => {
+  const { userId, newPassword } = req.body;
+
+  if (!newPassword) {
+    return res.status(400).send({ message: "Password cannot be empty." });
+  }
+
+  try {
+    const user = await Account.findById(userId);
+
+    if (!user) {
+      return res.status(404).send({ message: "User not found." });
+    }
+
+    console.log(user);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    res.send({ message: "Password successfully updated." });
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    res.status(500).send({ message: "Internal server error." });
+  }
+});
+
+app.get("/procedureTemplates", async (req, res) => {
+  try {
+    const procedureTemplates = await ProcedureTemplate.find()
+      .populate("requiredResources.resource")
+      .populate("roles.role");
+    res.json(procedureTemplates);
+  } catch (error) {
+    console.error("Error fetching procedure templates:", error);
+    res.status(500).json({
+      message: "Error fetching procedure templates",
+      error: error.message,
+    });
+  }
+});
+
+app.get("/resourceTemplates", async (req, res) => {
+  try {
+    const resourceTemplates = await ResourceTemplate.find();
+    res.json(resourceTemplates);
+  } catch (error) {
+    console.error("Error fetching resource templates:", error);
+    res.status(500).json({
+      message: "Error fetching resource templates",
+      error: error.message,
+    });
+  }
+});
+
+function generateRandomString(length) {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let randomString = "";
+  for (let i = 0; i < length; i++) {
+    randomString += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return randomString;
+}
+
+function generateString(inputString) {
+  const firstLetters = inputString
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase())
+    .join("");
+  const randomString = generateRandomString(6);
+  return `${firstLetters}-${randomString}`.toUpperCase();
+}
+
+app.post("/resources", async (req, res) => {
+  // check admin permission
+  const accountId = req.cookies.accountId;
+  if (!accountId) {
+    return res.status(400).send("User not logged in");
+  }
+
+  const currUser = await Account.findOne({ _id: accountId });
+  if (!currUser)
+    return res
+      .status(404)
+      .send("User does not exist! Malformed session, please login again!");
+
+  if (currUser.accountType === "staff")
+    return res.status(403).send("Only admins may create resources!");
+
+  const name = req.body.name.trim().toLowerCase();
+  const type = req.body.type.trim();
+  const location = req.body.location.trim();
+  const description = req.body.description.trim();
+  console.log("Got type: ", type);
+  // param checks
+  if (!name || !type)
+    return res
+      .status(400)
+      .send("Please insert a name and type for the resource!");
+  if (type !== "equipments" && type !== "spaces" && type !== "roles")
+    return res
+      .status(400)
+      .send("type can only be equipments, spaces, or roles!");
+  if (type !== "roles" && (!location || !description))
+    return res
+      .status(400)
+      .send(
+        "for non roles resources, a location and description must be defined!"
+      );
+
+  // handles role addition
+  if (type === "roles") {
+    // ensure that role does not already exists
+    const findRole = await Role.findOne({ name: name });
+    if (findRole)
+      return res
+        .status(400)
+        .send("An role with the requested name already exists!");
+
+    try {
+      const newRole = new Role({
+        name,
+        description,
+        uniqueIdentifier: name.replace(" ", "_").toLowerCase(),
+      });
+      await newRole.save();
+    } catch {
+      return res.status(500).send("Server side occur when creating role");
+    }
+    return res.status(201).send("The newly requested role is created!");
+  }
+
+  // add resource template if not already exists
+  const findResTemplates = await ResourceTemplate.findOne({ name: name });
+  if (!findResTemplates) {
+    const newResTemplate = new ResourceTemplate({
+      type,
+      name,
+      description: description ? description : "",
+    });
+    await newResTemplate.save();
+  }
+
+  // generates unique id
+  let uniqueIdentifier;
+  let findRes;
+  do {
+    uniqueIdentifier = generateString(name);
+    findRes = await ResourceInstance.findOne({
+      uniqueIdentifier: uniqueIdentifier,
+    });
+  } while (findRes);
+
+  // add resource instance
+  const newResInstance = new ResourceInstance({
+    type,
+    name,
+    location,
+    description,
+    uniqueIdentifier,
+    status: "Available",
+  });
+
+  await newResInstance.save();
+  return res.status(201).send("The resource has been successfully created!");
+});
+
+app.get("/roles", async (req, res) => {
+  try {
+    const roles = await Role.find();
+    res.json(roles);
+  } catch (error) {
+    console.error("Error fetching roles:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching roles", error: error.message });
+  }
+});
+
+app.post("/procedureTemplates", async (req, res) => {
+  try {
+    // Resolve ResourceTemplate names to IDs
+    const resourceIdsWithQuantity = await Promise.all(
+      req.body.requiredResources.map(async (item) => {
+        const resource = await ResourceTemplate.findOne({
+          name: item.resourceName,
+        });
+        if (!resource) {
+          throw new Error(`Resource not found: ${item.resourceName}`);
+        }
+        return { resource: resource._id, quantity: item.quantity };
+      })
+    );
+
+    // Resolve Role names to IDs
+    const roleIdsWithQuantity = await Promise.all(
+      req.body.roles.map(async (item) => {
+        const role = await Role.findOne({ name: item.roleName });
+        if (!role) {
+          throw new Error(`Role not found: ${item.roleName}`);
+        }
+        return { role: role._id, quantity: item.quantity };
+      })
+    );
+
+    // Create new ProcedureTemplate with resolved IDs
+    const newProcedureTemplate = new ProcedureTemplate({
+      procedureName: req.body.procedureName,
+      description: req.body.description,
+      requiredResources: resourceIdsWithQuantity,
+      roles: roleIdsWithQuantity,
+      estimatedTime: req.body.estimatedTime,
+      specialNotes: req.body.specialNotes,
+    });
+
+    const savedProcedureTemplate = await newProcedureTemplate.save();
+
+    res.status(201).json(savedProcedureTemplate);
+  } catch (error) {
+    console.error("Failed to create procedure template:", error);
+    res.status(400).json({
+      message: "Failed to create procedure template",
+      error: error.message,
+    });
+  }
+});
+
+module.exports = {
+  app,
+  initializePredefinedAccounts,
+  removePredefinedAccounts,
+};

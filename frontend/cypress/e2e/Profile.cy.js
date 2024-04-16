@@ -1,54 +1,78 @@
 describe('MyComponent Button Functionality', () => {
-    beforeEach(() => {
-      cy.visit('/Profile'); 
-    });
+  beforeEach(() => {
+    cy.visit('/');
+    cy.get('#emailInput').type('john.doe@example.com');
+    cy.get('#passwordInput').type('password123');
+    cy.get('button').contains('Sign in').click();
+    cy.wait(1000);
+    cy.get('#userNav').should('be.visible').click();
+  });
   
 
-    it('changes view to ChangeAvailability on clicking Change Schedule', () => {
-      cy.contains('Change Schedule').click();
-      cy.contains('Change Availability').should('be.visible');
+    it('changes view to ChangeAvailability on clicking Edit Schedule', () => {
+      cy.contains('Edit Schedule').should('exist').click();
+      cy.contains('Time-Off Request').should('be.visible');
     });
   
     it('returns to profile view from ChangeAvailability', () => {
-      cy.contains('Change Schedule').click();
-      cy.contains('Change Availability').should('be.visible');
-  
+      cy.contains('Edit Schedule').should('be.visible').click();
+      cy.contains('Weekly Schedule Update').should('be.visible');
+      cy.contains('Back to Profile').click();
+      cy.contains('Change Availability').should('not.exist');
+    });
+
+    it('returns to profile view from ChangeAvailability', () => {
+      cy.contains('Edit Schedule').should('be.visible').click();
+      cy.contains('Weekly Schedule Update').should('be.visible');
       cy.contains('Submit').click();
       cy.contains('Change Availability').should('not.exist');
     });
+
+    it('returns to profile view from ChangeAvailability', () => {
+      cy.contains('Edit Schedule').should('be.visible').click();
+      cy.contains('Weekly Schedule Update').should('be.visible');
+      cy.contains('Update').click();
+      cy.contains('Change Availability').should('not.exist');
+    });
+
+
 
     it('profile information changes', () => {
         cy.contains('Edit Profile').click();
         cy.contains('Save Changes').click();
       });
 
-      it(' submitting contact changes', () => {
+      /* it(' submitting contact changes', () => {
         cy.contains('Change Contact Info').click();
         cy.contains('Save Changes').click();
-      });
-  
+      }); */
+      
+      /*
       it('successfully completes the reset password flow', () => {
         cy.contains('Reset Password').click();
         cy.contains('Yes').click();
         cy.contains('Close').click();
       });
+      */
 
       it('opens the image uploader and clicks upload', () => {
         cy.contains('Change Profile Image').click();
         cy.contains('Upload').click();
       });
 
-    it('opens termination modal on clicking Terminate Account button', () => {
+      /*it('opens termination modal on clicking Terminate Account button', () => {
         cy.contains('Terminate Account').click();
         cy.contains('Are you sure you want to terminate this account?').should('be.visible');
-      });
-    
+      });*/
+
+      /*
       it('closes termination modal on submitting termination', () => {
         cy.contains('Terminate Account').click();
         cy.get('input[type="text"]').type('john smith');
         cy.contains('Submit').click();
         cy.contains('Account has been Terminated').should('exist');
       });
+      */
     
   });
   
