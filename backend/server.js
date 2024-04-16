@@ -27,6 +27,7 @@ const Account = require("./models/account.js");
 const Role = require("./models/role.js");
 const ProcedureTemplate = require("./models/procedureTemplate.js");
 const ResourceTemplate = require("./models/resourceTemplate.js");
+const ResourceInstance = require("./models/resourceInstance.js");
 
 dotenv.config();
 
@@ -834,6 +835,119 @@ app.get("/resourceTemplates", async (req, res) => {
       error: error.message,
     });
   }
+});
+
+function generateRandomString(length) {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let randomString = "";
+  for (let i = 0; i < length; i++) {
+    randomString += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return randomString;
+}
+
+function generateString(inputString) {
+  const firstLetters = inputString
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase())
+    .join("");
+  const randomString = generateRandomString(6);
+  return `${firstLetters}-${randomString}`.toUpperCase();
+}
+
+app.post("/resources", async (req, res) => {
+  // check admin permission
+  const accountId = req.cookies.accountId;
+  if (!accountId) {
+    return res.status(400).send("User not logged in");
+  }
+
+  const currUser = await Account.findOne({ _id: accountId });
+  if (!currUser)
+    return res
+      .status(404)
+      .send("User does not exist! Malformed session, please login again!");
+
+  if (currUser.accountType === "staff")
+    return res.status(403).send("Only admins may create resources!");
+
+  const name = req.body.name.trim().toLowerCase();
+  const type = req.body.type.trim();
+  const location = req.body.location.trim();
+  const description = req.body.description.trim();
+  console.log("Got type: ", type);
+  // param checks
+  if (!name || !type)
+    return res
+      .status(400)
+      .send("Please insert a name and type for the resource!");
+  if (type !== "equipments" && type !== "spaces" && type !== "roles")
+    return res
+      .status(400)
+      .send("type can only be equipments, spaces, or roles!");
+  if (type !== "roles" && (!location || !description))
+    return res
+      .status(400)
+      .send(
+        "for non roles resources, a location and description must be defined!"
+      );
+
+  // handles role addition
+  if (type === "roles") {
+    // ensure that role does not already exists
+    const findRole = await Role.findOne({ name: name });
+    if (findRole)
+      return res
+        .status(400)
+        .send("An role with the requested name already exists!");
+
+    try {
+      const newRole = new Role({
+        name,
+        description,
+        uniqueIdentifier: name.replace(" ", "_").toLowerCase(),
+      });
+      await newRole.save();
+    } catch {
+      return res.status(500).send("Server side occur when creating role");
+    }
+    return res.status(201).send("The newly requested role is created!");
+  }
+
+  // add resource template if not already exists
+  const findResTemplates = await ResourceTemplate.findOne({ name: name });
+  if (!findResTemplates) {
+    const newResTemplate = new ResourceTemplate({
+      type,
+      name,
+      description: description ? description : "",
+    });
+    await newResTemplate.save();
+  }
+
+  // generates unique id
+  let uniqueIdentifier;
+  let findRes;
+  do {
+    uniqueIdentifier = generateString(name);
+    findRes = await ResourceInstance.findOne({
+      uniqueIdentifier: uniqueIdentifier,
+    });
+  } while (findRes);
+
+  // add resource instance
+  const newResInstance = new ResourceInstance({
+    type,
+    name,
+    location,
+    description,
+    uniqueIdentifier,
+    status: "Available",
+  });
+
+  await newResInstance.save();
+  return res.status(201).send("The resource has been successfully created!");
 });
 
 app.get("/roles", async (req, res) => {

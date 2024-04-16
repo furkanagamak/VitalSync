@@ -1,16 +1,16 @@
 describe("Resource Create", () => {
   beforeEach(() => {
-    cy.visit('/');
-    cy.get('#emailInput').type('john.doe@example.com');
-    cy.get('#passwordInput').type('password123');
-    cy.get('button').contains('Sign in').click();
+    cy.visit("/");
+    cy.get("#emailInput").type("john.doe@example.com");
+    cy.get("#passwordInput").type("password123");
+    cy.get("button").contains("Sign in").click();
     cy.wait(1000);
-    cy.visit('/resources');
-});
+    cy.visit("/resources");
+  });
   it("loading and navigating", () => {
     cy.visit("http://localhost:3000/resources/create");
     cy.contains("Equipments");
-    cy.contains("Personnel");
+    cy.contains("Role");
     cy.contains("Spaces");
   });
   it("form flow", () => {
@@ -21,8 +21,8 @@ describe("Resource Create", () => {
     cy.contains("Equipments");
     cy.get("#backToSeleResTypeBtn").click();
 
-    cy.get("#selectPersonnelBtn").click();
-    cy.contains("Personnel");
+    cy.get("#selectRoleBtn").click();
+    cy.contains("Role");
     cy.get("#backToSeleResTypeBtn").click();
 
     cy.get("#selectSpacesBtn").click();
@@ -38,9 +38,6 @@ describe("Resource Create", () => {
     cy.get("#descriptionInp").type("This is a patient bed");
     cy.get("#descriptionInp").should("have.value", "This is a patient bed");
 
-    cy.get("#uniqueIdentifierInp").type("abcdeg");
-    cy.get("#uniqueIdentifierInp").should("have.value", "abcdeg");
-
     // field preservation
     cy.get("#backToSeleResTypeBtn").click();
     cy.get("#selectSpacesBtn").click();
@@ -48,7 +45,6 @@ describe("Resource Create", () => {
     cy.get("#nameInp").should("have.value", "Patient Bed");
     cy.get("#locationInp").should("have.value", "Room 200A");
     cy.get("#descriptionInp").should("have.value", "This is a patient bed");
-    cy.get("#uniqueIdentifierInp").should("have.value", "abcdeg");
 
     cy.get("#submitBtn").click();
   });
