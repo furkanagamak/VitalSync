@@ -28,7 +28,7 @@ describe("GET /user/profilePicture/url/:id get signed profile picture url", () =
 
     expect(loginRes.status).toBe(400);
     expect(loginRes.body).toHaveProperty("message");
-    expect(loginRes.body.message).toBe("Account not found");
+    expect(loginRes.body.message).toBe("Incorrect email or password.");
   });
 
   it("Login with invalid password", async () => {
@@ -39,7 +39,7 @@ describe("GET /user/profilePicture/url/:id get signed profile picture url", () =
 
     expect(loginRes.status).toBe(400);
     expect(loginRes.body).toHaveProperty("message");
-    expect(loginRes.body.message).toBe("Incorrect password");
+    expect(loginRes.body.message).toBe("Incorrect email or password.");
   });
 
   it("Login with valid credentials", async () => {

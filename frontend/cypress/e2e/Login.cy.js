@@ -14,7 +14,7 @@ describe('MyComponent Tests', () => {
       cy.get('#emailInput').type('wrongemail@sbu.com');
       cy.get('#passwordInput').type('wrongpassword');
       cy.get('button').contains('Sign in').click();
-      cy.contains('Account not found').should('be.visible');
+      cy.contains('Incorrect email or password.').should('be.visible');
     });
   
     it('should navigate to /home on successful login', () => {

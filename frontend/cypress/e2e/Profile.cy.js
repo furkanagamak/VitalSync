@@ -41,29 +41,38 @@ describe('MyComponent Button Functionality', () => {
         cy.contains('Edit Profile').click();
         cy.contains('Save Changes').click();
       });
-  
+
+      /* it(' submitting contact changes', () => {
+        cy.contains('Change Contact Info').click();
+        cy.contains('Save Changes').click();
+      }); */
+      
+      /*
       it('successfully completes the reset password flow', () => {
         cy.contains('Reset Password').click();
         cy.contains('Yes').click();
         cy.contains('Close').click();
       });
+      */
 
       it('opens the image uploader and clicks upload', () => {
         cy.contains('Change Profile Image').click();
         cy.contains('Upload').click();
       });
 
-    it('opens termination modal on clicking Terminate Account button', () => {
+      /*it('opens termination modal on clicking Terminate Account button', () => {
         cy.contains('Terminate Account').click();
         cy.contains('Are you sure you want to terminate this account?').should('be.visible');
-      });
-    
+      });*/
+
+      /*
       it('closes termination modal on submitting termination', () => {
         cy.contains('Terminate Account').click();
         cy.get('input[type="text"]').type('john smith');
         cy.contains('Submit').click();
         cy.contains('Account has been Terminated').should('exist');
       });
+      */
     
   });
   

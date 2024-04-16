@@ -1,14 +1,16 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useTable, useSortBy, usePagination } from "react-table";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
+axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
+axios.defaults.withCredentials = true;
 
 const notify = () => toast.success("Procedure Template Deleted!");
 
-const SearchBar = () => {
-  const [inputValue, setInputValue] = useState("");
-
+const SearchBar = ({ inputValue, setInputValue }) => {
   const handleClearInput = () => setInputValue("");
 
   return (
@@ -93,73 +95,48 @@ const CreateTemplateButton = () => {
   );
 };
 
-const ProcedureTable = () => {
-  const data = React.useMemo(
-    () => [
-      {
-        name: "General Anesthesia",
-        description:
-          "A state of controlled unconsciousness during which a patient is asleep and unaware of their surroundings.",
-        resources:
-          "Anesthesia Machine, Monitoring System, Propofol, Suction Device",
-        roles: "Anesthesiologist, Anesthesia Technician, Nurse Anesthetist",
-        time: "45 minutes",
-        notes: "NPO (nothing by mouth) for 8 hours before the procedure.",
-      },
-      {
-        name: "MRI Scan",
-        description:
-          "Imaging technique that uses magnetic fields and radio waves to produce detailed images of the body.",
-        resources: "MRI Machine, Contrast Agent, Patient Gown, Earplugs",
-        roles: "Radiologist, MRI Technologist",
-        time: "30 minutes",
-        notes: "Remove all metal objects before the scan.",
-      },
-      {
-        name: "Physical Therapy",
-        description:
-          "A treatment method aiming to alleviate pain and restore movement and function to patients affected by injury.",
-        resources: "Treatment Space, Therapeutic Equipment",
-        roles: "Physical Therapist, Physical Therapy Assistant",
-        time: "55 minutes",
-        notes:
-          "Wear comfortable clothing and footwear to facilitate movement during the session.",
-      },
-      {
-        name: "Radiation Therapy",
-        description:
-          "A cancer treatment that uses high doses of radiation to kill cancer cells and shrink/prevent tumors in the body.",
-        resources:
-          "Linear Accelerator, CT Simulator, Radiation Therapy Machine, Shielding Material",
-        roles:
-          "Radiation Therapist, Dosimetrist, Medical Physicist, Radiation Oncology Nurse",
-        time: "25 minutes",
-        notes:
-          "Patients may experience fatigue and skin changes in the treated area.",
-      },
-      {
-        name: "Ultrasound Imaging",
-        description:
-          "A diagnostic technique that uses high-frequency sound waves to produce images of the body for treatment.",
-        resources: "Ultrasound Machine, Gel for Skin Contact",
-        roles: "Sonographer, Radiologist, Ultrasound Technician",
-        time: "45 minutes",
-        notes:
-          "Wear loose-fitting clothing and comfortable shoes for the procedure.",
-      },
-      {
-        name: "Vaccination",
-        description:
-          "The administration of a vaccine to help the immune system develop protection from a disease like flu.",
-        resources: "Vaccine, Syringes, Bandages, Vaccine Refrigeration Unit",
-        roles: "Nurse, Medical Assistant",
-        time: "10 minutes",
-        notes:
-          "Patients may experience mild side effects such as soreness at the injection site.",
-      },
-    ],
-    []
-  );
+const ProcedureTable = ({ filter }) => {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("/procedureTemplates");
+        setData(
+          response.data.map((template) => ({
+            name: template.procedureName,
+            description: template.description || "",
+            resources: template.requiredResources
+              .map((resource) => resource.resource?.name)
+              .filter((name) => name)
+              .join(", "),
+            roles: template.roles
+              .map((role) => role.role?.name)
+              .filter((name) => name)
+              .join(", "),
+            time: template.estimatedTime + " minutes",
+            notes: template.specialNotes || "",
+          }))
+        );
+      } catch (error) {
+        console.error("Failed to fetch procedure templates:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const filteredData = useMemo(() => {
+    if (!filter) return data;
+    return data.filter(
+      (template) =>
+        template.name.toLowerCase().includes(filter.toLowerCase()) ||
+        template.description.toLowerCase().includes(filter.toLowerCase()) ||
+        template.resources.toLowerCase().includes(filter.toLowerCase()) ||
+        template.roles.toLowerCase().includes(filter.toLowerCase()) ||
+        template.notes.toLowerCase().includes(filter.toLowerCase()) ||
+        template.time.toString().includes(filter)
+    );
+  }, [data, filter]);
 
   const columns = React.useMemo(
     () => [
@@ -271,7 +248,7 @@ const ProcedureTable = () => {
     pageOptions,
     state: { pageIndex },
   } = useTable(
-    { columns, data, initialState: { pageSize: 3 } },
+    { columns, data: filteredData, initialState: { pageSize: 3 } },
     useSortBy,
     usePagination
   );
@@ -414,6 +391,7 @@ const ProcedureTable = () => {
 };
 
 const ProcedureTemplateManagement = () => {
+  const [searchInput, setSearchInput] = useState("");
   return (
     <div className="flex flex-col items-center space-y-4 relative">
       <h1 className="text-4xl text-[#8E0000] text-center underline font-bold mt-5">
@@ -422,9 +400,9 @@ const ProcedureTemplateManagement = () => {
       <div className="absolute right-8">
         <CreateTemplateButton />
       </div>
-      <SearchBar />
+      <SearchBar inputValue={searchInput} setInputValue={setSearchInput} />
       <div>
-        <ProcedureTable />
+        <ProcedureTable filter={searchInput} />
       </div>
     </div>
   );

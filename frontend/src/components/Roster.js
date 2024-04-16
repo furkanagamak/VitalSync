@@ -39,17 +39,19 @@ function MyComponent() {
   const [currentPage, setCurrentPage] = useState(0);
   const [users, setUsers] = useState([]);
 
-  // Fetch users on component mount
+  
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get("/users"); 
-        const formattedUsers = response.data.map((user) => [
-          `${user.firstName} ${user.lastName}`,
-          user.department,
-          user.position,
-          user._id
-        ]);
+        const formattedUsers = response.data
+          .filter(user => !user.isTerminated)  
+          .map((user) => [
+            `${user.firstName} ${user.lastName}`,
+            user.department,
+            user.position,
+            user._id,
+          ]);
 
         setUsers(formattedUsers);
       } catch (error) {
@@ -84,7 +86,6 @@ function MyComponent() {
 
   return (
     <div className="flex flex-col justify-center items-center h-screen">
-      {/* Filters */}
       <div style={{ width: "90%" }} className="w-full flex justify-end items-center">
         <select
           className="px-3 py-2 border rounded mr-2"
@@ -112,13 +113,11 @@ function MyComponent() {
         />
       </div>
 
-      {/* Roster Table */}
       <div style={{ width: "90%", height: "80%" }} className="flex flex-col justify-start items-center">
         <div className="w-full overflow-auto">
           <Table rows={filteredRows} onRowClick={handleRowClick} />
         </div>    
 
-       {/* Pagination Controls */}
         {totalPages > 1 && (
           <div className="flex mt-4">
             {Array.from({ length: totalPages }, (_, index) => (

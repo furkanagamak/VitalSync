@@ -5,15 +5,20 @@ const procedureTemplateSchema = new mongoose.Schema({
   description: { type: String, default: "" },
   requiredResources: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "ResourceTemplate",
+      resource: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ResourceTemplate",
+      },
+      quantity: { type: Number, required: true, min: 1 },
     },
   ],
   roles: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Role",
-      required: true,
+      role: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Role",
+      },
+      quantity: { type: Number, required: true, min: 1 },
     },
   ],
   estimatedTime: { type: Number, required: true },
