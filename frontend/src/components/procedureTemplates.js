@@ -263,11 +263,13 @@ const ProcedureTable = ({ filter }) => {
     try {
       const response = await axios.delete(`/procedureTemplates/${templateId}`);
       if (response.status === 200) {
-        setData(prevData => prevData.filter(template => template.id !== templateId));
-        toast.success('Procedure template deleted successfully.');
+        setData((prevData) =>
+          prevData.filter((template) => template.id !== templateId)
+        );
+        toast.success("Procedure template deleted successfully.");
       }
     } catch (error) {
-      console.error('Failed to delete procedure template:', error);
+      console.error("Failed to delete procedure template:", error);
       toast.error(error.response.data.message);
     }
   };
@@ -279,7 +281,7 @@ const ProcedureTable = ({ filter }) => {
 
   return (
     <>
-          <ConfirmationModal
+      <ConfirmationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={() => deleteProcedureTemplate(currentTemplate.id)}

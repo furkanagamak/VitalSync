@@ -25,7 +25,7 @@ import axios from "axios";
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
 
-const ModifyTemplateButton = ({onModify}) => {
+const ModifyTemplateButton = ({ onModify }) => {
   const handleModifyClick = async () => {
     await onModify();
   };
@@ -110,18 +110,22 @@ const ProcedureForm = ({
           name: template.procedureName,
           description: template.description,
           estimatedTime: template.estimatedTime.toString(),
-          specialInstructions: template.specialNotes
+          specialInstructions: template.specialNotes,
         });
-        setResources(template.requiredResources.map(res => ({
-          type: res.resource.type,
-          name: res.resource.name,
-          quantity: res.quantity
-        })));
-  
-        setRoles(template.roles.map(role => ({
-          name: role.role.name,
-          quantity: role.quantity
-        })));
+        setResources(
+          template.requiredResources.map((res) => ({
+            type: res.resource.type,
+            name: res.resource.name,
+            quantity: res.quantity,
+          }))
+        );
+
+        setRoles(
+          template.roles.map((role) => ({
+            name: role.role.name,
+            quantity: role.quantity,
+          }))
+        );
       } catch (error) {
         console.error("Error fetching procedure template:", error);
       }
@@ -365,7 +369,12 @@ const ProcedureForm = ({
             min: 1,
             type: "number",
             onKeyDown: (e) => {
-              if (e.key === "-" || e.key === "+" || e.key === "." || e.key === "e") {
+              if (
+                e.key === "-" ||
+                e.key === "+" ||
+                e.key === "." ||
+                e.key === "e"
+              ) {
                 e.preventDefault();
               }
             },
@@ -689,7 +698,10 @@ const ModifyProcedureTemplateForm = () => {
     };
 
     try {
-      const response = await axios.put(`/procedureTemplates/${templateId}`, templateData);
+      const response = await axios.put(
+        `/procedureTemplates/${templateId}`,
+        templateData
+      );
       console.log("Template Modified:", response.data);
       navigate("/ProcedureTemplateManagement");
       toast.success("Procedure Template Modified Successfully!");
