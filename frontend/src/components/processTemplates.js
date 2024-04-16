@@ -1,9 +1,11 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useTable, useSortBy, usePagination } from "react-table";
 import { TbLayoutGridAdd } from "react-icons/tb";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
 
 const notify = () => toast.success("Process Template Deleted!");
 
@@ -81,6 +83,8 @@ const CreateTemplateButton = () => {
 };
 
 const ProcessTable = () => {
+
+  
   const data = React.useMemo(
     () => [
       {

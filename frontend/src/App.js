@@ -48,7 +48,7 @@ import ResourceCreate from "./components/resources/ResourceCreate";
 import NotificationBox from "./components/notifications/NotificationBox";
 
 import ProcedureTemplateManagement from "./components/procedureTemplates.js";
-import ProcessTemplateManagementq from "./components/processTemplates.js";
+import ProcessTemplateManagement from "./components/processTemplates.js";
 import CreateProcedureTemplateForm from "./components/createProcedureTemplate.js";
 import CreateProcessTemplateForm from "./components/createProcessTemplate.js";
 import AddSectionForm from "./components/createSection.js";

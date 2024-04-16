@@ -1010,6 +1010,42 @@ app.post("/procedureTemplates", async (req, res) => {
   }
 });
 
+app.post('/processTemplates', async (req, res) => {
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction(); //avoid saving sections prematurely
+    const { processName, description, sections } = req.body;
+
+    // Create section templates and attach existing procedure templates
+    const sectionIds = await Promise.all(sections.map(async (section) => {
+      const newSection = new SectionTemplate({
+        sectionName: section.sectionName,
+        description: section.description,
+        procedureTemplates: section.procedureTemplates, //array of existing ObjectId references
+      });
+      await newSection.save({ session });
+      return newSection._id;
+    }));
+
+    // Create the process template with linked sections
+    const newProcessTemplate = new ProcessTemplate({
+      processName,
+      description,
+      sectionTemplates: sectionIds,
+    });
+
+    await newProcessTemplate.save({ session });
+
+    await session.commitTransaction();
+    res.status(201).json(newProcessTemplate);
+  } catch (error) {
+    await session.abortTransaction();
+    res.status(400).json({ message: "Failed to create process template", error: error.message });
+  } finally {
+    session.endSession(); //important
+  }
+});
+
 module.exports = {
   app,
   initializePredefinedAccounts,
