@@ -812,8 +812,8 @@ app.post("/reset-password", async (req, res) => {
 app.get("/procedureTemplates", async (req, res) => {
   try {
     const procedureTemplates = await ProcedureTemplate.find()
-      .populate("requiredResources")
-      .populate("roles");
+      .populate("requiredResources.resource")
+      .populate("roles.role");
     res.json(procedureTemplates);
   } catch (error) {
     console.error("Error fetching procedure templates:", error);
@@ -966,11 +966,36 @@ app.get("/roles", async (req, res) => {
 
 app.post("/procedureTemplates", async (req, res) => {
   try {
+    // Resolve ResourceTemplate names to IDs
+    const resourceIdsWithQuantity = await Promise.all(
+      req.body.requiredResources.map(async (item) => {
+        const resource = await ResourceTemplate.findOne({
+          name: item.resourceName,
+        });
+        if (!resource) {
+          throw new Error(`Resource not found: ${item.resourceName}`);
+        }
+        return { resource: resource._id, quantity: item.quantity };
+      })
+    );
+
+    // Resolve Role names to IDs
+    const roleIdsWithQuantity = await Promise.all(
+      req.body.roles.map(async (item) => {
+        const role = await Role.findOne({ name: item.roleName });
+        if (!role) {
+          throw new Error(`Role not found: ${item.roleName}`);
+        }
+        return { role: role._id, quantity: item.quantity };
+      })
+    );
+
+    // Create new ProcedureTemplate with resolved IDs
     const newProcedureTemplate = new ProcedureTemplate({
       procedureName: req.body.procedureName,
       description: req.body.description,
-      requiredResources: req.body.requiredResources,
-      roles: req.body.roles,
+      requiredResources: resourceIdsWithQuantity,
+      roles: roleIdsWithQuantity,
       estimatedTime: req.body.estimatedTime,
       specialNotes: req.body.specialNotes,
     });
