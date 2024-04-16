@@ -107,10 +107,14 @@ const ProcedureTable = ({ filter }) => {
             name: template.procedureName,
             description: template.description || "",
             resources: template.requiredResources
-              .map((resource) => resource.name)
+              .map((resource) => resource.resource?.name)
+              .filter((name) => name)
               .join(", "),
-            roles: template.roles.map((role) => role.name).join(", "),
-            time: template.estimatedTime,
+            roles: template.roles
+              .map((role) => role.role?.name)
+              .filter((name) => name)
+              .join(", "),
+            time: template.estimatedTime + " minutes",
             notes: template.specialNotes || "",
           }))
         );
