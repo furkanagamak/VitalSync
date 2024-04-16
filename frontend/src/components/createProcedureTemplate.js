@@ -423,7 +423,20 @@ const ProcedureForm = ({
             name="quantity"
             value={newResource.quantity}
             onChange={handleResourceChange}
-            inputProps={{ min: 1, style: { color: "#8E0000" } }}
+            inputProps={{
+              min: 1,
+              style: { color: "#8E0000" },
+              onKeyDown: (e) => {
+                if (
+                  e.key === "-" ||
+                  e.key === "+" ||
+                  e.key === "." ||
+                  e.key === "e"
+                ) {
+                  e.preventDefault();
+                }
+              },
+            }}
             InputLabelProps={{ style: { color: "#8E0000" } }}
           />
           <Button
@@ -535,7 +548,20 @@ const ProcedureForm = ({
             name="quantity"
             value={newRole.quantity}
             onChange={handleRoleChange}
-            inputProps={{ min: 1, style: { color: "#8E0000" } }}
+            inputProps={{
+              min: 1,
+              style: { color: "#8E0000" },
+              onKeyDown: (e) => {
+                if (
+                  e.key === "-" ||
+                  e.key === "+" ||
+                  e.key === "." ||
+                  e.key === "e"
+                ) {
+                  e.preventDefault();
+                }
+              },
+            }}
             InputLabelProps={{ style: { color: "#8E0000" } }}
           />
           <Button
