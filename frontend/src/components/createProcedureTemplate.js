@@ -679,6 +679,11 @@ const CreateProcedureTemplateForm = () => {
       return;
     }
 
+    if(procedure.estimatedTime < 1) {
+      toast.error("Estimated time cannot be less than 1 minute.");
+      return;
+    }
+
     if (resourceData.length === 0) {
       toast.error("At least one resource is required.");
       return;
