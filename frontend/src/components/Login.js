@@ -2,6 +2,7 @@ import * as React from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../providers/authProvider";
+import toast, { Toaster } from "react-hot-toast";
 
 function SignInButton({ label, onClick, disabled }) {
   return (
@@ -45,11 +46,11 @@ function MyComponent() {
   const handleSignIn = async () => {
     let isValid = true;
     if (!email) {
-      setError("Email is required.");
+      toast.error("Email is required.");
       isValid = false;
       return;
     } else if (!isValidEmail(email)) {
-      setError("Please enter a valid email.");
+      toast.error("Please enter a valid email.");
       isValid = false;
       return;
     } else {
@@ -57,7 +58,7 @@ function MyComponent() {
     }
 
     if (!password) {
-      setError("Password is required.");
+      toast.error("Password is required.");
       isValid = false;
       return;
     } else {
@@ -69,7 +70,7 @@ function MyComponent() {
         await login(email, password);
         navigate("/home");
       } catch (error) {
-        setError(error.response?.data?.message || "Failed to log in.");
+        toast.error(error.response?.data?.message || "Failed to log in.");
       }
     }
   };

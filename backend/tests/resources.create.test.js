@@ -112,7 +112,7 @@ describe("POST /resources for creating resources", () => {
       });
     expect(invalidRoleRes.status).toEqual(400);
     expect(invalidRoleRes.text).toEqual(
-      "type can only be equipments, spaces, or roles!"
+      "Type can only be equipment, spaces, or roles!"
     );
 
     //missing location or description for non roles resource
@@ -122,13 +122,13 @@ describe("POST /resources for creating resources", () => {
       .set("Cookie", [`accountId=${accountId}`])
       .send({
         name: "testName",
-        type: "equipments",
+        type: "equipment",
         location: "",
         description: "testDescription",
       });
     expect(missingLocationRes.status).toEqual(400);
     expect(missingLocationRes.text).toEqual(
-      "for non roles resources, a location and description must be defined!"
+      "For non-roles resources, a location and description must be defined!"
     );
 
     const missingDescriptionRes = await request(app)
@@ -137,13 +137,13 @@ describe("POST /resources for creating resources", () => {
       .set("Cookie", [`accountId=${accountId}`])
       .send({
         name: "testName",
-        type: "equipments",
+        type: "equipment",
         location: "room-203",
         description: "",
       });
     expect(missingDescriptionRes.status).toEqual(400);
     expect(missingDescriptionRes.text).toEqual(
-      "for non roles resources, a location and description must be defined!"
+      "For non-roles resources, a location and description must be defined!"
     );
 
     const duplicateRolesRes = await request(app)
@@ -158,7 +158,7 @@ describe("POST /resources for creating resources", () => {
       });
     expect(duplicateRolesRes.status).toEqual(400);
     expect(duplicateRolesRes.text).toEqual(
-      "An role with the requested name already exists!"
+      "A role with the requested name already exists!"
     );
   });
 
@@ -207,7 +207,7 @@ describe("POST /resources for creating resources", () => {
       .set("Cookie", [`accountId=${accountId}`])
       .send({
         name: "test equipment",
-        type: "equipments",
+        type: "equipment",
         location: "test location",
         description: "test description",
       });
