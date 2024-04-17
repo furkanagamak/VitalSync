@@ -29,6 +29,7 @@ const ProcedureTemplate = require("./models/procedureTemplate.js");
 const ResourceTemplate = require("./models/resourceTemplate.js");
 const ResourceInstance = require("./models/resourceInstance.js");
 const SectionTemplate = require("./models/sectionTemplate.js");
+const ProcessTemplate = require("./models/processTemplate.js");
 
 dotenv.config();
 
@@ -1017,7 +1018,7 @@ app.post("/procedureTemplates", async (req, res) => {
     const resourceIdsWithQuantity = await Promise.all(
       req.body.requiredResources.map(async (item) => {
         const resource = await ResourceTemplate.findOne({
-          name: item.resourceName
+          name: item.resourceName,
         });
         if (!resource) {
           throw new Error(`Resource not found: ${item.resourceName}`);
@@ -1047,14 +1048,14 @@ app.post("/procedureTemplates", async (req, res) => {
           requiredResources: resourceIdsWithQuantity,
           roles: roleIdsWithQuantity,
           estimatedTime: req.body.estimatedTime,
-          specialNotes: req.body.specialNotes
-        }
+          specialNotes: req.body.specialNotes,
+        },
       },
       { new: true }
     );
 
     if (!updatedProcedureTemplate) {
-      throw new Error('Procedure template not found');
+      throw new Error("Procedure template not found");
     }
 
     res.status(200).json(updatedProcedureTemplate);
@@ -1085,30 +1086,68 @@ app.get("/procedureTemplates/:id", async (req, res) => {
   }
 });
 
-app.delete('/procedureTemplates/:id', async (req, res) => {
+app.delete("/procedureTemplates/:id", async (req, res) => {
   const procedureTemplateId = req.params.id;
   try {
-      // Check if any SectionTemplate is using the ProcedureTemplate
-      const isUsed = await SectionTemplate.findOne({ procedureTemplates: new mongoose.Types.ObjectId(procedureTemplateId)});
-      
-      if (isUsed) {
-          // If the ProcedureTemplate is in use, do not delete and send a message
-          return res.status(403).json({
-              message: 'Cannot delete procedure template because it is in use by a process template.'
-          });
-      }
+    // Check if any SectionTemplate is using the ProcedureTemplate
+    const isUsed = await SectionTemplate.findOne({
+      procedureTemplates: new mongoose.Types.ObjectId(procedureTemplateId),
+    });
 
-      // If the ProcedureTemplate is not in use, proceed to delete
-      await ProcedureTemplate.findByIdAndDelete(procedureTemplateId);
-
-      res.status(200).json({
-          message: 'Procedure template deleted successfully.'
+    if (isUsed) {
+      // If the ProcedureTemplate is in use, do not delete and send a message
+      return res.status(403).json({
+        message:
+          "Cannot delete procedure template because it is in use by a process template.",
       });
+    }
+
+    // If the ProcedureTemplate is not in use, proceed to delete
+    await ProcedureTemplate.findByIdAndDelete(procedureTemplateId);
+
+    res.status(200).json({
+      message: "Procedure template deleted successfully.",
+    });
   } catch (error) {
-      res.status(500).json({
-          message: 'Error deleting procedure template',
-          error: error.message
-      });
+    res.status(500).json({
+      message: "Error deleting procedure template",
+      error: error.message,
+    });
+  }
+});
+
+app.get("/processTemplates", async (req, res) => {
+  try {
+    const templates = await ProcessTemplate.find().populate({
+      path: "sectionTemplates",
+      populate: {
+        path: "procedureTemplates",
+        populate: {
+          path: "requiredResources.resource roles.role",
+        },
+      },
+    });
+
+    res.status(200).json(templates);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error retrieving process templates");
+  }
+});
+
+app.delete("/processTemplates/:id", async (req, res) => {
+  try {
+    const processTemplateId = req.params.id;
+    await ProcessTemplate.findByIdAndDelete(processTemplateId);
+
+    res.status(200).json({
+      message: "Process template deleted successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error deleting process template",
+      error: error.message,
+    });
   }
 });
 
