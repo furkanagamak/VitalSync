@@ -13,16 +13,15 @@ import {
 } from "@mui/material";
 import toast from "react-hot-toast";
 
-const ResourceEdit = ({ navToViewResource, resource }) => {
-  const resourceType = resource.type;
+const ResourceEdit = ({ navToViewResource, resource, changeResourceById }) => {
+  const resourceType = resource.type ? resource.type.toLowerCase() : "roles";
   const [formData, setFormData] = useState({
     name: resource.name,
     location: resource.location ? resource.location : "",
     description: resource.description,
     uniqueIdentifier: resource.uniqueIdentifier,
-    type: resource.type.toLowerCase(),
   });
-  const typeIsRole = resource.type === "Roles";
+  const typeIsRole = resourceType === "roles";
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -39,7 +38,7 @@ const ResourceEdit = ({ navToViewResource, resource }) => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify({ ...formData, type: resourceType }),
         }
       );
 
@@ -49,6 +48,7 @@ const ResourceEdit = ({ navToViewResource, resource }) => {
         return toast.error(text);
       }
       toast.success(text);
+      changeResourceById(formData.uniqueIdentifier, formData);
       navToViewResource();
     } catch (error) {
       toast.error("An error occured while trying to submit your form");
@@ -164,16 +164,18 @@ const ResourceEdit = ({ navToViewResource, resource }) => {
             </div>
           </div>
           <div className="mb-4">
-            <TextField
-              label={`${typeIsRole ? "" : "*"}Location`}
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              InputLabelProps={{ style: { color: "#8E0000" } }}
-              inputProps={{ style: { color: "#8E0000" } }}
-              className="shadow rounded w-full py-2 px-3"
-              disabled={typeIsRole}
-            />
+            {!typeIsRole && (
+              <TextField
+                label={`Location`}
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                InputLabelProps={{ style: { color: "#8E0000" } }}
+                inputProps={{ style: { color: "#8E0000" } }}
+                className="shadow rounded w-full py-2 px-3"
+                disabled={typeIsRole}
+              />
+            )}
           </div>
           <div className="mb-4">
             <TextField
