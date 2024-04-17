@@ -916,6 +916,16 @@ app.post("/resources", async (req, res) => {
     return res.status(201).send("The newly requested role is created!");
   }
 
+  //retreive resources
+  app.get("/api/resources", async (req, res) => {
+    try {
+        const resources = await ResourceTemplate.find();
+        res.json(resources);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching resources", error: error.message });
+    }
+});
+
   // add resource template if not already exists
   const findResTemplates = await ResourceTemplate.findOne({ name: name });
   if (!findResTemplates) {

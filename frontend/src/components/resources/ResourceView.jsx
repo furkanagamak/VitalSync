@@ -6,6 +6,7 @@ import { AiOutlineSearch } from "react-icons/ai";
 import { FaPen, FaTrashAlt } from "react-icons/fa";
 import { MdArrowDropDown, MdArrowDropUp } from "react-icons/md";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const ResourceView = ({ navToEditResource }) => {
   // all resources
