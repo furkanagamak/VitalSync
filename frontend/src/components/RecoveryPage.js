@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -44,9 +45,9 @@ function MyComponent() {
 
   const handleEmailSubmit = () => {
     if (!email) {
-      setErrorMessage("Please enter your email address.");
+      toast.error("Please enter your email address.");
     } else if (!isValidEmail(email)) {
-      setErrorMessage("Please enter a valid email address.");
+      toast.error("Please enter a valid email address.");
     } else {
       axios
         .post("/forgotPassword", { email })
@@ -57,16 +58,14 @@ function MyComponent() {
           startTimer(120);
         })
         .catch((error) => {
-          setErrorMessage(
-            error.response.data.message || "Error sending email."
-          );
+          toast.error(error.response.data.message || "Error sending email.");
         });
     }
   };
 
   const handleCodeSubmit = () => {
     if (!otpCode) {
-      setErrorMessage("Please enter your OTP code.");
+      toast.error("Please enter your OTP code.");
     } else {
       axios
         .post("/verifyOtp", { email, otp: otpCode })
@@ -75,7 +74,7 @@ function MyComponent() {
           setErrorMessage("");
         })
         .catch((error) => {
-          setErrorMessage(
+          toast.error(
             error.response.data.message || "Invalid or expired OTP code."
           );
         });
@@ -84,11 +83,11 @@ function MyComponent() {
 
   const handlePasswordSubmit = () => {
     if (!isValidPassword(newPassword)) {
-      setErrorMessage(
+      toast.error(
         "New password must be at least 6 characters and not contain your email."
       );
     } else if (newPassword !== confirmPassword) {
-      setErrorMessage("Passwords do not match.");
+      toast.error("Passwords do not match.");
     } else {
       axios
         .post("/resetPassword", { email, newPassword })
@@ -97,7 +96,7 @@ function MyComponent() {
           setErrorMessage("");
         })
         .catch((error) => {
-          setErrorMessage(
+          toast.error(
             error.response.data.message || "Error resetting password."
           );
         });
@@ -113,7 +112,7 @@ function MyComponent() {
         setTimeout(() => setCanResend(true), 180000); // Reset the timer
       })
       .catch((error) => {
-        setErrorMessage(error.response.data.message || "Error resending code.");
+        toast.error(error.response.data.message || "Error resending code.");
       });
   };
 
