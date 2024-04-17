@@ -12,7 +12,7 @@ axios.defaults.withCredentials = true;
 
 const notify = () => toast.success("Process Template Deleted!");
 
-const SearchBar = ({inputValue, setInputValue}) => {
+const SearchBar = ({ inputValue, setInputValue }) => {
   const handleClearInput = () => setInputValue("");
 
   return (
@@ -83,27 +83,33 @@ const CreateTemplateButton = () => {
   );
 };
 
-const ProcessTable = ({filter}) => {
+const ProcessTable = ({ filter }) => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get("/processTemplates");
-        setData(response.data.map(processTemplate => ({
-          id: processTemplate._id,
-          name: processTemplate.processName,
-          description: processTemplate.description,
-          sections: processTemplate.sectionTemplates.map(section => section.sectionName).join(", "),
-          procedures: processTemplate.sectionTemplates.reduce((acc, section) => {
-            section.procedureTemplates.forEach(procedure => {
-              if (!acc.includes(procedure.procedureName)) {
-                acc.push(procedure.procedureName);
-              }
-            });
-            return acc;
-          }, []).join(", ")
-        })));
+        setData(
+          response.data.map((processTemplate) => ({
+            id: processTemplate._id,
+            name: processTemplate.processName,
+            description: processTemplate.description,
+            sections: processTemplate.sectionTemplates
+              .map((section) => section.sectionName)
+              .join(", "),
+            procedures: processTemplate.sectionTemplates
+              .reduce((acc, section) => {
+                section.procedureTemplates.forEach((procedure) => {
+                  if (!acc.includes(procedure.procedureName)) {
+                    acc.push(procedure.procedureName);
+                  }
+                });
+                return acc;
+              }, [])
+              .join(", "),
+          }))
+        );
       } catch (error) {
         console.error("Failed to fetch process templates:", error);
       }
@@ -182,7 +188,7 @@ const ProcessTable = ({filter}) => {
                 </svg>
               </button>
               <button
-                onClick={notify}
+                onClick={() => promptDelete(row.original)}
                 style={{
                   background: "none",
                   border: "none",
@@ -229,8 +235,38 @@ const ProcessTable = ({filter}) => {
     usePagination
   );
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentTemplate, setCurrentTemplate] = useState(null);
+
+  const deleteProcessTemplate = async (templateId) => {
+    setIsModalOpen(false);
+    try {
+      const response = await axios.delete(`/processTemplates/${templateId}`);
+      if (response.status === 200) {
+        setData((prevData) =>
+          prevData.filter((template) => template.id !== templateId)
+        );
+        toast.success("Process template deleted successfully.");
+      }
+    } catch (error) {
+      console.error("Failed to delete process template:", error);
+      toast.error(error.response.data.message);
+    }
+  };
+
+  const promptDelete = (template) => {
+    setCurrentTemplate(template);
+    setIsModalOpen(true);
+  };
+
   return (
     <>
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={() => deleteProcessTemplate(currentTemplate.id)}
+        templateName={currentTemplate?.name}
+      />
       <div
         style={{
           maxWidth: "95%",
