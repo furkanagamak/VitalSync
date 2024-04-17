@@ -9,6 +9,14 @@ const resources = [
     status: "In-use",
   },
   {
+    type: "Roles",
+    name: "test role",
+    location: "N/A",
+    description: "test description",
+    uniqueIdentifier: "test_role",
+    status: "In-use",
+  },
+  {
     type: "Equipments",
     name: "Patient Monitor",
     location: "Room 105C",
@@ -18,7 +26,7 @@ const resources = [
     status: "Available",
   },
   {
-    type: "Personnel",
+    type: "Roles",
     name: "John Smith",
     location: "N/A",
     description: "A doctor in the hospital",
@@ -66,7 +74,7 @@ const resources = [
     status: "Available",
   },
   {
-    type: "Personnel",
+    type: "Roles",
     name: "Judith July",
     location: "N/A",
     description: "A surgeon in the hospital",
@@ -74,7 +82,7 @@ const resources = [
     status: "N/A",
   },
   {
-    type: "Personnel",
+    type: "Roles",
     name: "Ben Harrison",
     location: "N/A",
     description: "A nurse in the hospital",
@@ -82,7 +90,7 @@ const resources = [
     status: "N/A",
   },
   {
-    type: "Personnel",
+    type: "Roles",
     name: "Gabriella Diez",
     location: "N/A",
     description: "A nurse in the hospital",
@@ -90,7 +98,7 @@ const resources = [
     status: "N/A",
   },
   {
-    type: "Personnel",
+    type: "Roles",
     name: "Aaron Adam",
     location: "N/A",
     description: "A hospital admin and doctor in the hospital",

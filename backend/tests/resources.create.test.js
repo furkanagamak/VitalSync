@@ -33,7 +33,7 @@ describe("POST /resources for creating resources", () => {
       location: "testLocation",
       description: "testDescription",
     });
-    expect(unauthorizedRes.status).toEqual(400);
+    expect(unauthorizedRes.status).toEqual(401);
     expect(unauthorizedRes.text).toEqual("User not logged in");
 
     // sign in with staff account should not be accepted
@@ -99,7 +99,7 @@ describe("POST /resources for creating resources", () => {
       "Please insert a name and type for the resource!"
     );
 
-    //invalid role provided
+    //invalid resource type provided
     const invalidRoleRes = await request(app)
       .post(`/resources`)
       .withCredentials()
