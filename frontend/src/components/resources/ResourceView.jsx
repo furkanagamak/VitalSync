@@ -1,4 +1,3 @@
-import tmpResources from "../../tmp/data/resources";
 import ResourceDeleteModal from "./ResourceDeleteModal";
 import { useState, useEffect, useMemo } from "react";
 import { useTable, useSortBy, usePagination } from "react-table";
@@ -11,66 +10,61 @@ import axios from "axios";
 const ResourceView = ({ navToEditResource }) => {
   // all resources
   const [resources, setResources] = useState(null);
-
+  const [roles, setRoles] = useState(null);
   // filters
   const [tabFilter, setTabFilter] = useState("All");
   const [textFilter, setTextFilter] = useState("");
 
   // all resources displayed inside the table
-  const [displayingResources, setDisplayingResources] = useState(resources);
+  const [displayingResources, setDisplayingResources] = useState([]);
 
   // initial fetch
   useEffect(() => {
-    const fetchResources = async () => {
-      setResources(tmpResources);
+    const fetchData = async () => {
+      try {
+        const resPromise = axios.get("/resources");
+        const rolePromise = axios.get("/roles");
+        const [resResponse, roleResponse] = await Promise.all([resPromise, rolePromise]);
+        // Enrich resources with role data
+        const enrichedResources = resResponse.data.map(resource => {
+          // Assuming each resource has a roleId that matches role.id
+          const roleDetails = roleResponse.data.find(role => role.id === resource.roleId);
+          return { ...resource, role: roleDetails };
+        });
+
+        setResources(enrichedResources);
+
+        // Print the combined resources to the console
+        console.log("Combined Resources with Roles:", enrichedResources);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
-    fetchResources();
+    fetchData();
   }, []);
 
-  // updates the display resources whenever a filter is updated
   useEffect(() => {
-    if (!resources) return;
-    const filteredDataByType =
-      tabFilter === "All"
-        ? resources
-        : resources.filter((resource) => resource.type === tabFilter);
+    if (!resources || !roles) return;
+    
+    const filteredDataByType = tabFilter === "All"
+      ? resources
+      : resources.filter(resource => resource.type === tabFilter.toLowerCase());
 
-    const filteredResources =
-      textFilter === ""
-        ? filteredDataByType
-        : filteredDataByType.filter((resource) => {
-            const searchText = textFilter.toLowerCase();
-            const {
-              type,
-              name,
-              location,
-              description,
-              uniqueIdentifier,
-              status,
-            } = resource;
-
-            const matchesType = type.toLowerCase().includes(searchText);
-            const matchesName = name.toLowerCase().includes(searchText);
-            const matchesLocation = location.toLowerCase().includes(searchText);
-            const matchesDescription = description
-              .toLowerCase()
-              .includes(searchText);
-            const matchesUniqueIdentifier = uniqueIdentifier
-              .toLowerCase()
-              .includes(searchText);
-            const matchesStatus = status.toLowerCase().includes(searchText);
-
-            return (
-              matchesType ||
-              matchesName ||
-              matchesLocation ||
-              matchesDescription ||
-              matchesUniqueIdentifier ||
-              matchesStatus
-            );
-          });
+    const filteredResources = textFilter === ""
+      ? filteredDataByType
+      : filteredDataByType.filter(resource => {
+          const searchText = textFilter.toLowerCase();
+          return (
+            resource.name.toLowerCase().includes(searchText) ||
+            resource.description.toLowerCase().includes(searchText) ||
+            (resource.location && resource.location.toLowerCase().includes(searchText)) ||
+            resource.uniqueIdentifier.toLowerCase().includes(searchText) ||
+            resource.status.toLowerCase().includes(searchText) ||
+            roles.some(role => role.name.toLowerCase().includes(searchText) && role.uniqueIdentifier === resource.roleId) // Hypothetical association
+          );
+      });
     setDisplayingResources(filteredResources);
-  }, [tabFilter, textFilter, resources]);
+  }, [tabFilter, textFilter, resources, roles]);
 
   if (displayingResources === null) return <div>Loading Resources ...</div>;
   return (
@@ -255,7 +249,7 @@ const Table = ({ resources, navToEditResource }) => {
     setShowDeleteModal(false);
     setResourceToDelete(null);
   };
-
+ 
   const handleCancel = () => {
     setShowDeleteModal(false);
     setResourceToDelete(null);
@@ -359,5 +353,6 @@ const Table = ({ resources, navToEditResource }) => {
     </>
   );
 };
+
 
 export default ResourceView;

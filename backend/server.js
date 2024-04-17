@@ -1021,16 +1021,6 @@ app.put("/resources", async (req, res) => {
     return res.status(200).send("The role has been updated!");
   }
 
-  //retreive resources
-  app.get("/api/resources", async (req, res) => {
-    try {
-        const resources = await ResourceTemplate.find();
-        res.json(resources);
-    } catch (error) {
-        res.status(500).json({ message: "Error fetching resources", error: error.message });
-    }
-});
-
   // add resource template if not already exists
   const findResTemplates = await ResourceTemplate.findOne({ name: name });
   if (!findResTemplates) {
@@ -1211,6 +1201,37 @@ app.delete("/procedureTemplates/:id", async (req, res) => {
       message: "Error deleting procedure template",
       error: error.message,
     });
+  }
+});
+
+app.get("/resources", async (req, res) => {
+  try {
+      const resources = await ResourceInstance.find();
+      res.json(resources);
+  } catch (error) {
+      res.status(500).json({ message: "Error fetching resources", error: error.message });
+  }
+});
+
+// Fetch a specific resource by ID
+app.get("/resources/:id", async (req, res) => {
+  try {
+      const resource = await ResourceInstance.findById(req.params.id);
+      if (!resource) return res.status(404).send({ message: "Resource not found" });
+      res.json(resource);
+  } catch (error) {
+      res.status(500).json({ message: "Error fetching the resource", error: error.message });
+  }
+});
+
+// Delete a resource
+app.delete("/resources/:id", async (req, res) => {
+  try {
+      const result = await ResourceInstance.findByIdAndDelete(req.params.id);
+      if (!result) return res.status(404).send({ message: "Resource not found" });
+      res.send({ message: "Resource deleted successfully" });
+  } catch (error) {
+      res.status(500).send({ message: "Error deleting the resource", error: error.message });
   }
 });
 
