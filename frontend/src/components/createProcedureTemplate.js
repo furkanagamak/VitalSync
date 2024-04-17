@@ -384,13 +384,14 @@ const ProcedureForm = ({
               <Select
                 labelId="resourcetype"
                 label="Resource Type"
+                className="capitalize"
                 value={newResource.type}
                 name="type"
                 onChange={handleResourceChange}
                 style={{ color: "#8E0000" }}
               >
                 {resourceTypes.map((type, index) => (
-                  <MenuItem key={index} value={type}>
+                  <MenuItem className="capitalize" key={index} value={type}>
                     {type}
                   </MenuItem>
                 ))}
