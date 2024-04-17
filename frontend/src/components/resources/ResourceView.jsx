@@ -55,6 +55,8 @@ const ResourceView = ({ navToEditResource }) => {
       filteredDataByType = resources;  // Show all resources when "All" is selected
     } else if (tabFilter === "Personnel") {
       filteredDataByType = roles;  // Show only roles when "Personnel" is selected
+    } else if (tabFilter === "Equipments") {
+      filteredDataByType = resources.filter(resource => resource.type === "equipment");  // Show only roles when "Personnel" is selected
     } else {
       filteredDataByType = resources.filter(resource => resource.type === tabFilter.toLowerCase());
     }
