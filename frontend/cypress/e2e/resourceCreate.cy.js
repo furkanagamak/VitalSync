@@ -9,7 +9,7 @@ describe("Resource Create", () => {
   });
   it("loading and navigating", () => {
     cy.visit("http://localhost:3000/resources/create");
-    cy.contains("Equipments");
+    cy.contains("Equipment");
     cy.contains("Role");
     cy.contains("Spaces");
   });
@@ -18,7 +18,7 @@ describe("Resource Create", () => {
 
     // select tests
     cy.get("#selectEquipmentsBtn").click();
-    cy.contains("Equipments");
+    cy.contains("Equipment");
     cy.get("#backToSeleResTypeBtn").click();
 
     cy.get("#selectRoleBtn").click();
