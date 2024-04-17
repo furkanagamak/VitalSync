@@ -29,6 +29,7 @@ const ProcedureTemplate = require("./models/procedureTemplate.js");
 const ResourceTemplate = require("./models/resourceTemplate.js");
 const ResourceInstance = require("./models/resourceInstance.js");
 const SectionTemplate = require("./models/sectionTemplate.js");
+const ProcessTemplate = require("./models/processTemplate.js");
 
 dotenv.config();
 
@@ -1109,6 +1110,26 @@ app.delete('/procedureTemplates/:id', async (req, res) => {
           message: 'Error deleting procedure template',
           error: error.message
       });
+  }
+});
+
+app.get('/processTemplates', async (req, res) => {
+  try {
+    const templates = await ProcessTemplate.find()
+      .populate({
+        path: 'sectionTemplates',
+        populate: {
+          path: 'procedureTemplates',
+          populate: {
+            path: 'requiredResources.resource roles.role',
+          }
+        }
+      });
+
+    res.status(200).json(templates);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error retrieving process templates');
   }
 });
 
