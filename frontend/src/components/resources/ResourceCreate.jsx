@@ -66,6 +66,7 @@ const ResourceCreate = ({ navToViewResource }) => {
   const navToTypeSelection = () => {
     setResourceCreatePage("type");
   };
+
   const theme = createTheme({
     typography: {
       fontSize: 12,
