@@ -68,10 +68,10 @@ async function createResource(req, res) {
       return res
         .status(400)
         .send("Please insert a name and type for the resource!");
-    if (type !== "equipments" && type !== "spaces" && type !== "roles")
+    if (type !== "equipment" && type !== "spaces" && type !== "roles")
       return res
         .status(400)
-        .send("Type can only be equipments, spaces, or roles!");
+        .send("Type can only be equipment, spaces, or roles!");
     if (type !== "roles" && (!location || !description))
       return res
         .status(400)

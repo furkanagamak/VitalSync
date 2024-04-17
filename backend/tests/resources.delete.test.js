@@ -18,19 +18,19 @@ describe("DELETE /resources for deleting resources", () => {
   const dummyAdminEmail = "hospitaladmin@example.com";
   const dummyAdminPassword = "hospitalAdminPassword123";
   const testingEquipmentTemplate = new ResourceTemplate({
-    type: "equipments",
+    type: "equipment",
     name: "testequipment",
     description: "testDescription",
   });
   const testingEquipment = new ResourceInstance({
-    type: "equipments",
+    type: "equipment",
     name: "testequipment",
     location: "testingLocation",
     description: "testDescription",
     uniqueIdentifier: "t-123",
   });
   const testingOccupiedEquipment = new ResourceInstance({
-    type: "equipments",
+    type: "equipment",
     name: "testequipment",
     location: "testingLocation",
     description: "testDescription",

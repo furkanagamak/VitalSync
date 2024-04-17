@@ -17,12 +17,12 @@ describe("PUT /resources for editing resources", () => {
   const dummyAdminEmail = "hospitaladmin@example.com";
   const dummyAdminPassword = "hospitalAdminPassword123";
   const testingEquipmentTemplate = new ResourceTemplate({
-    type: "equipments",
+    type: "equipment",
     name: "testequipment",
     description: "testDescription",
   });
   const testingEquipment = new ResourceInstance({
-    type: "equipments",
+    type: "equipment",
     name: "testequipment",
     location: "testingLocation",
     description: "testDescription",

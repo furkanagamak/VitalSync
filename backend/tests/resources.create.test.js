@@ -112,7 +112,7 @@ describe("POST /resources for creating resources", () => {
       });
     expect(invalidRoleRes.status).toEqual(400);
     expect(invalidRoleRes.text).toEqual(
-      "Type can only be equipments, spaces, or roles!"
+      "Type can only be equipment, spaces, or roles!"
     );
 
     //missing location or description for non roles resource
@@ -122,7 +122,7 @@ describe("POST /resources for creating resources", () => {
       .set("Cookie", [`accountId=${accountId}`])
       .send({
         name: "testName",
-        type: "equipments",
+        type: "equipment",
         location: "",
         description: "testDescription",
       });
@@ -137,7 +137,7 @@ describe("POST /resources for creating resources", () => {
       .set("Cookie", [`accountId=${accountId}`])
       .send({
         name: "testName",
-        type: "equipments",
+        type: "equipment",
         location: "room-203",
         description: "",
       });
@@ -207,7 +207,7 @@ describe("POST /resources for creating resources", () => {
       .set("Cookie", [`accountId=${accountId}`])
       .send({
         name: "test equipment",
-        type: "equipments",
+        type: "equipment",
         location: "test location",
         description: "test description",
       });
