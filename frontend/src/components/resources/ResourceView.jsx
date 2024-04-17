@@ -7,10 +7,9 @@ import { MdArrowDropDown, MdArrowDropUp } from "react-icons/md";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-const ResourceView = ({ navToEditResource }) => {
+const ResourceView = ({ resources, setResources, navToEditResource }) => {
   // all resources
   const [equipment, setEquipment] = useState(null);
-  const [resources, setResources] = useState(null);
   const [roles, setRoles] = useState(null);
 
   // filters
@@ -20,13 +19,25 @@ const ResourceView = ({ navToEditResource }) => {
   // all resources displayed inside the table
   const [displayingResources, setDisplayingResources] = useState([]);
 
+  const removeResourceById = (uniqueIdentifier) => {
+    if (resources)
+      setResources((resources) =>
+        resources.filter(
+          (resource) => resource.uniqueIdentifier !== uniqueIdentifier
+        )
+      );
+  };
+
   // initial fetch
   useEffect(() => {
     const fetchResources = async () => {
       try {
         const resPromise = axios.get("/resources");
         const rolePromise = axios.get("/roles");
-        const [resResponse, roleResponse] = await Promise.all([resPromise, rolePromise]);
+        const [resResponse, roleResponse] = await Promise.all([
+          resPromise,
+          rolePromise,
+        ]);
 
         // Setting state for each category
         setEquipment(resResponse.data);
@@ -37,14 +48,12 @@ const ResourceView = ({ navToEditResource }) => {
         setResources(combinedResources);
 
         console.log("Combined Resources:", combinedResources);
-
       } catch (error) {
         console.error("Error fetching resources:", error);
       }
     };
     fetchResources();
   }, []);
-  
 
   // updates the display resources whenever a filter is updated
   useEffect(() => {
@@ -52,25 +61,29 @@ const ResourceView = ({ navToEditResource }) => {
     if (!resources) return;
 
     if (tabFilter === "All") {
-      filteredDataByType = resources;  // Show all resources when "All" is selected
+      filteredDataByType = resources; // Show all resources when "All" is selected
     } else if (tabFilter === "Personnel") {
       filteredDataByType = roles;  // Show only roles when "Personnel" is selected
     } else if (tabFilter === "Equipments") {
       filteredDataByType = resources.filter(resource => resource.type === "equipment");  // Show only roles when "Personnel" is selected
     } else {
-      filteredDataByType = resources.filter(resource => resource.type === tabFilter.toLowerCase());
+      filteredDataByType = resources.filter(
+        (resource) => resource.type === tabFilter.toLowerCase()
+      );
     }
 
-    const filteredResources = textFilter === ""
-      ? filteredDataByType
-      : filteredDataByType.filter(resource => {
-          const searchText = textFilter.toLowerCase();
-          return (
-            resource.name.toLowerCase().includes(searchText) ||
-            resource.description.toLowerCase().includes(searchText) ||
-            (resource.location && resource.location.toLowerCase().includes(searchText))
-          );
-        });
+    const filteredResources =
+      textFilter === ""
+        ? filteredDataByType
+        : filteredDataByType.filter((resource) => {
+            const searchText = textFilter.toLowerCase();
+            return (
+              resource.name.toLowerCase().includes(searchText) ||
+              resource.description.toLowerCase().includes(searchText) ||
+              (resource.location &&
+                resource.location.toLowerCase().includes(searchText))
+            );
+          });
     setDisplayingResources(filteredResources);
   }, [tabFilter, textFilter, resources]);
 
@@ -89,6 +102,7 @@ const ResourceView = ({ navToEditResource }) => {
         <Table
           resources={displayingResources}
           navToEditResource={navToEditResource}
+          removeResourceById={removeResourceById}
         />
       </section>
     </div>
@@ -166,7 +180,7 @@ const Filters = ({ tabFilter, setTabFilter }) => {
   );
 };
 
-const Table = ({ resources, navToEditResource }) => {
+const Table = ({ resources, navToEditResource, removeResourceById }) => {
   // define all columns and their accessors
   const columns = useMemo(
     () => [
@@ -254,10 +268,11 @@ const Table = ({ resources, navToEditResource }) => {
   const handleDelete = () => {
     // Perform deletion logic here
     console.log("Deleting resource:", resourceToDelete);
+    removeResourceById(resourceToDelete.uniqueIdentifier);
     setShowDeleteModal(false);
     setResourceToDelete(null);
   };
- 
+
   const handleCancel = () => {
     setShowDeleteModal(false);
     setResourceToDelete(null);
@@ -361,6 +376,5 @@ const Table = ({ resources, navToEditResource }) => {
     </>
   );
 };
-
 
 export default ResourceView;
