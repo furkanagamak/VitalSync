@@ -9,8 +9,9 @@ const mongoose = require("mongoose");
 const Role = require("../models/role.js");
 const ResourceInstance = require("../models/resourceInstance.js");
 const ResourceTemplate = require("../models/resourceTemplate.js");
+const Account = require("../models/account.js");
 
-describe("PUT /resources for editing resources", () => {
+describe("DELETE /resources for deleting resources", () => {
   // Dummy account credentials
   const dummyStaffEmail = "staff@example.com";
   const dummyStaffPassword = "staffPassword123";
@@ -27,6 +28,14 @@ describe("PUT /resources for editing resources", () => {
     location: "testingLocation",
     description: "testDescription",
     uniqueIdentifier: "t-123",
+  });
+  const testingOccupiedEquipment = new ResourceInstance({
+    type: "equipments",
+    name: "testequipment",
+    location: "testingLocation",
+    description: "testDescription",
+    uniqueIdentifier: "t-111",
+    unavailableTimes: [{ start: new Date(), end: new Date() }],
   });
   const testingSpaceTemplate = new ResourceTemplate({
     type: "spaces",
@@ -45,6 +54,23 @@ describe("PUT /resources for editing resources", () => {
     name: "testrole",
     description: "testDescription",
   });
+  const testingAssignedRole = new Role({
+    uniqueIdentifier: "test_assigned_role",
+    name: "test assigned role",
+    description: "testDescription",
+  });
+  const testAccount = new Account({
+    firstName: "testFN",
+    lastName: "testLN",
+    email: "test@test.com",
+    accountType: "hospital admin",
+    position: "Test position",
+    department: "Test Department",
+    degree: "Test degree",
+    phoneNumber: "1234567890",
+    password: "staffPassword123", // Password for staff
+    eligibleRoles: [testingAssignedRole._id],
+  });
   let server;
   let uids;
 
@@ -54,18 +80,18 @@ describe("PUT /resources for editing resources", () => {
     uids = await initializePredefinedAccounts();
 
     await testingRole.save();
+    await testingAssignedRole.save();
     await testingSpaceTemplate.save();
     await testingSpace.save();
     await testingEquipmentTemplate.save();
     await testingEquipment.save();
+    await testingOccupiedEquipment.save();
+    await testAccount.save();
   });
 
   it("unauthorized requests should be rejected", async () => {
     // not signing in and attempt to update resource
-    const unauthorizedRes = await request(app).put(`/resources`).send({
-      name: "testName",
-      location: "testLocation",
-      description: "testDescription",
+    const unauthorizedRes = await request(app).delete(`/resources`).send({
       uniqueIdentifier: "AB-023",
     });
     expect(unauthorizedRes.status).toEqual(401);
@@ -81,17 +107,14 @@ describe("PUT /resources for editing resources", () => {
       .split("=")[1];
 
     const forbiddenRes = await request(app)
-      .put(`/resources`)
+      .delete(`/resources`)
       .withCredentials()
       .set("Cookie", [`accountId=${accountId}`])
       .send({
-        name: "testName",
         uniqueIdentifier: "testUniqueId",
-        location: "testLocation",
-        description: "testDescription",
       });
     expect(forbiddenRes.status).toEqual(403);
-    expect(forbiddenRes.text).toEqual("Only admins may update resources!");
+    expect(forbiddenRes.text).toEqual("Only admins may delete resources!");
   });
 
   it("invalid inputs", async () => {
@@ -103,86 +126,61 @@ describe("PUT /resources for editing resources", () => {
       .split(";")[0]
       .split("=")[1];
 
-    // missing name or type checks
-    const missingNameRes = await request(app)
-      .put(`/resources`)
+    // missing uniqueIdentifier checks
+    const missingUIDRes = await request(app)
+      .delete(`/resources`)
       .withCredentials()
       .set("Cookie", [`accountId=${accountId}`])
       .send({
-        name: "",
-        uniqueIdentifier: "testUniqueId",
-        location: "testLocation",
-        description: "testDescription",
-      });
-    expect(missingNameRes.status).toEqual(400);
-    expect(missingNameRes.text).toEqual(
-      "Please insert a name for the resource!"
-    );
-
-    const missingIDRes = await request(app)
-      .put(`/resources`)
-      .withCredentials()
-      .set("Cookie", [`accountId=${accountId}`])
-      .send({
-        name: "testName",
         uniqueIdentifier: "",
-        location: "testLocation",
-        description: "testDescription",
       });
-    expect(missingIDRes.status).toEqual(400);
-    expect(missingIDRes.text).toEqual(
-      "Please insert the uniqueIdentifier for the target resource!"
+    expect(missingUIDRes.status).toEqual(400);
+    expect(missingUIDRes.text).toEqual(
+      "Please insert the uniqueIdentifier of the resource that you are trying to delete!"
     );
 
     //provided unique identifier does not exists
     const invalidUIDRes = await request(app)
-      .put(`/resources`)
+      .delete(`/resources`)
       .withCredentials()
       .set("Cookie", [`accountId=${accountId}`])
       .send({
-        name: "testName",
         uniqueIdentifier: "qweqwweqewqwq",
-        location: "testLocation",
-        description: "testDescription",
       });
     expect(invalidUIDRes.status).toEqual(400);
     expect(invalidUIDRes.text).toEqual(
-      "There does not exist a resource with the provided uniqueIdentifier!"
+      "There does not exists an resource with the provided uniqueIdentifier!"
     );
 
-    //missing location or description for non roles resource
-    const missingLocationRes = await request(app)
-      .put(`/resources`)
+    // delete existing equipment that is occupied
+    const spacesRes = await request(app)
+      .delete(`/resources`)
       .withCredentials()
       .set("Cookie", [`accountId=${accountId}`])
       .send({
-        name: "testName",
-        uniqueIdentifier: "t-123",
-        location: "",
-        description: "testDescription",
+        uniqueIdentifier: "t-111",
       });
-    expect(missingLocationRes.status).toEqual(400);
-    expect(missingLocationRes.text).toEqual(
-      "For non-roles resources, a location and description must be defined!"
+    expect(spacesRes.status).toEqual(409);
+    expect(spacesRes.text).toEqual(
+      "The resource you are trying to delete is occupied to one or more process instance!"
     );
 
-    const missingDescriptionRes = await request(app)
-      .put(`/resources`)
+    // delete existing role that is assigned to someone
+    const roleRes = await request(app)
+      .delete(`/resources`)
       .withCredentials()
       .set("Cookie", [`accountId=${accountId}`])
       .send({
-        name: "testName",
-        uniqueIdentifier: "t-124",
-        location: "room-203",
-        description: "",
+        uniqueIdentifier: "test_assigned_role",
       });
-    expect(missingDescriptionRes.status).toEqual(400);
-    expect(missingDescriptionRes.text).toEqual(
-      "For non-roles resources, a location and description must be defined!"
+    console.log(roleRes);
+    expect(roleRes.status).toEqual(409);
+    expect(roleRes.text).toEqual(
+      "The role you are trying to delete is assigned to one or more accounts!"
     );
   });
 
-  it("update existing resources", async () => {
+  it("deleting existing resources", async () => {
     const loginRes = await request(app).post(`/login`).withCredentials().send({
       email: dummyAdminEmail,
       password: dummyAdminPassword,
@@ -191,80 +189,68 @@ describe("PUT /resources for editing resources", () => {
       .split(";")[0]
       .split("=")[1];
 
-    // update existing role
+    // delete existing role
     const roleRes = await request(app)
-      .put(`/resources`)
+      .delete(`/resources`)
       .withCredentials()
       .set("Cookie", [`accountId=${accountId}`])
       .send({
-        name: "testrole",
         uniqueIdentifier: "t-900",
-        location: "",
-        description: "",
       });
     expect(roleRes.status).toEqual(200);
-    expect(roleRes.text).toEqual("The role has been updated!");
+    expect(roleRes.text).toEqual("The role has been delete!");
 
-    const updatedRole = await Role.findOne({ uniqueIdentifier: "t-900" });
-    expect(updatedRole.description).toEqual("");
+    const findDeletedRole = await Role.findOne({ uniqueIdentifier: "t-900" });
+    expect(findDeletedRole).toBeNull();
 
-    //updating resource instance - name does not change
-    const equipmentResC = await request(app)
-      .put(`/resources`)
-      .withCredentials()
-      .set("Cookie", [`accountId=${accountId}`])
-      .send({
-        name: "testEquipment",
-        uniqueIdentifier: "t-123",
-        location: "modifiedEquipment",
-        description: "modifiedEquipment",
-      });
-    expect(equipmentResC.status).toEqual(200);
-    expect(equipmentResC.text).toEqual("The resource has been updated!");
-
-    const updatedResourceC = await ResourceInstance.findOne({
-      uniqueIdentifier: "t-123",
-    });
-    expect(updatedResourceC.name).toEqual("testequipment");
-    expect(updatedResourceC.location).toEqual("modifiedEquipment");
-    expect(updatedResourceC.description).toEqual("modifiedEquipment");
-
-    //updating resource instance - name does change
+    // delete existing equipment
     const equipmentRes = await request(app)
-      .put(`/resources`)
+      .delete(`/resources`)
       .withCredentials()
       .set("Cookie", [`accountId=${accountId}`])
       .send({
-        name: "testModifySpaces",
-        uniqueIdentifier: "t-124",
-        location: "modifiedSpaces",
-        description: "modifiedSpaces",
+        uniqueIdentifier: "t-123",
       });
     expect(equipmentRes.status).toEqual(200);
-    expect(equipmentRes.text).toEqual("The resource has been updated!");
+    expect(equipmentRes.text).toEqual("The resource has been delete!");
 
-    const updatedResourceTemplate = await ResourceTemplate.findOne({
-      name: "testmodifyspaces",
+    const findDeletedEquipment = await ResourceInstance.findOne({
+      uniqueIdentifier: "t-123",
     });
-    expect(updatedResourceTemplate).not.toBeNull();
-    await ResourceTemplate.deleteOne({ name: "testmodifyspaces" });
+    expect(findDeletedEquipment).toBeNull();
 
-    const updatedResource = await ResourceInstance.findOne({
+    // delete existing spaces
+    const spacesRes = await request(app)
+      .delete(`/resources`)
+      .withCredentials()
+      .set("Cookie", [`accountId=${accountId}`])
+      .send({
+        uniqueIdentifier: "t-124",
+      });
+    expect(spacesRes.status).toEqual(200);
+    expect(spacesRes.text).toEqual("The resource has been delete!");
+
+    const findDeletedSpace = await ResourceInstance.findOne({
       uniqueIdentifier: "t-124",
     });
-    expect(updatedResource.name).toEqual("testmodifyspaces");
-    expect(updatedResource.location).toEqual("modifiedSpaces");
-    expect(updatedResource.description).toEqual("modifiedSpaces");
+    expect(findDeletedSpace).toBeNull();
+    const findDeletedSpaceTemplate = await ResourceTemplate.findOne({
+      name: "testspaces",
+    });
+    expect(findDeletedSpace).toBeNull();
   });
 
   // remove dummy accounts
   afterAll(async () => {
     await removePredefinedAccounts();
-    await Role.deleteOne({ uniqueIdentifier: "t-900" });
-    await ResourceTemplate.deleteOne({ name: "testequipment" });
-    await ResourceTemplate.deleteOne({ name: "testspaces" });
+    await ResourceInstance.deleteOne({ uniqueIdentifier: "t-111" });
     await ResourceInstance.deleteOne({ uniqueIdentifier: "t-123" });
     await ResourceInstance.deleteOne({ uniqueIdentifier: "t-124" });
+    await ResourceTemplate.deleteOne({ name: "testequipment" });
+    await ResourceTemplate.deleteOne({ name: "testspaces" });
+    await Account.deleteOne({ email: "test@test.com" });
+    await Role.deleteOne({ uniqueIdentifier: "test_assigned_role" });
+    await Role.deleteOne({ uniqueIdentifier: "t-900" });
     await server.close();
     await mongoose.disconnect();
   });

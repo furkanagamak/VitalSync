@@ -1,6 +1,6 @@
 import React from "react";
 import { FaArrowLeft } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import {
@@ -29,21 +29,48 @@ const CreateAccount = ({ navToAdminActions }) => {
     officeLocation: "",
   });
   const navigate = useNavigate();
+  const [rolesList, setRolesList] = useState([
+    "physician",
+    "nurse",
+    "surgeon",
+    "other",
+  ]);
+
+  // fetches all roles
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/roles`);
+        if (res.ok) {
+          const data = await res.json();
+          setRolesList(data.map((role) => role.name));
+        } else {
+          console.log("server sent back error", res);
+        }
+      } catch {
+        console.log("Failed fetching roles");
+      }
+    };
+    fetchRoles();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     let formattedValue = value;
-  
+
     // Check if the input is one of the phone number fields
     if (name === "phoneNumber" || name === "officePhoneNumber") {
-      formattedValue = value.replace(/\D/g, '');
-  
+      formattedValue = value.replace(/\D/g, "");
+
       formattedValue = formattedValue.substring(0, 10);
-      formattedValue = formattedValue.replace(/(\d{3})(\d{1,3})?(\d{1,4})?/, (match, p1, p2, p3) => {
-        if (p3) return `${p1}-${p2}-${p3}`;
-        if (p2) return `${p1}-${p2}`;
-        return p1;
-      });
+      formattedValue = formattedValue.replace(
+        /(\d{3})(\d{1,3})?(\d{1,4})?/,
+        (match, p1, p2, p3) => {
+          if (p3) return `${p1}-${p2}-${p3}`;
+          if (p2) return `${p1}-${p2}`;
+          return p1;
+        }
+      );
     }
 
     setFormData({ ...formData, [name]: formattedValue });
@@ -86,8 +113,13 @@ const CreateAccount = ({ navToAdminActions }) => {
         toast.error("Phone number is invalid! Format should be XXX-XXX-XXXX.");
         return;
       }
-      if (formData.officePhoneNumber && !isValidPhoneNumber(formData.officePhoneNumber)) {
-        toast.error("Office phone number is invalid! Format should be XXX-XXX-XXXX.");
+      if (
+        formData.officePhoneNumber &&
+        !isValidPhoneNumber(formData.officePhoneNumber)
+      ) {
+        toast.error(
+          "Office phone number is invalid! Format should be XXX-XXX-XXXX."
+        );
         return;
       }
 
@@ -224,6 +256,7 @@ const CreateAccount = ({ navToAdminActions }) => {
           handleSubmit={handleSubmit}
           navToTypeSelection={navToTypeSelection}
           navToForm2={navToForm2}
+          rolesList={rolesList}
         />
       )}
       {accCreatePage === "form2" && (
@@ -297,6 +330,7 @@ const Form1 = ({
   handleSubmit,
   navToTypeSelection,
   navToForm2,
+  rolesList,
 }) => {
   return (
     <div className="py-8 px-4">
@@ -406,10 +440,11 @@ const Form1 = ({
               id="eligibleRolesInp"
             >
               <MenuItem value="">Select Role</MenuItem>
-              <MenuItem value="physician">Physician</MenuItem>
-              <MenuItem value="nurse">Nurse</MenuItem>
-              <MenuItem value="surgeon">Surgeon</MenuItem>
-              <MenuItem value="other">Other</MenuItem>
+              {rolesList.map((role) => (
+                <MenuItem className="capitalize" value={role}>
+                  {role}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
           <div className="flex justify-center items-center w-1/4">
