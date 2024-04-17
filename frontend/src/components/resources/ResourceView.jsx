@@ -9,8 +9,10 @@ import axios from "axios";
 
 const ResourceView = ({ navToEditResource }) => {
   // all resources
+  const [equipment, setEquipment] = useState(null);
   const [resources, setResources] = useState(null);
   const [roles, setRoles] = useState(null);
+
   // filters
   const [tabFilter, setTabFilter] = useState("All");
   const [textFilter, setTextFilter] = useState("");
@@ -20,35 +22,42 @@ const ResourceView = ({ navToEditResource }) => {
 
   // initial fetch
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchResources = async () => {
       try {
         const resPromise = axios.get("/resources");
         const rolePromise = axios.get("/roles");
         const [resResponse, roleResponse] = await Promise.all([resPromise, rolePromise]);
-        // Enrich resources with role data
-        const enrichedResources = resResponse.data.map(resource => {
-          // Assuming each resource has a roleId that matches role.id
-          const roleDetails = roleResponse.data.find(role => role.id === resource.roleId);
-          return { ...resource, role: roleDetails };
-        });
 
-        setResources(enrichedResources);
+        // Setting state for each category
+        setEquipment(resResponse.data);
+        setRoles(roleResponse.data);
 
-        // Print the combined resources to the console
-        console.log("Combined Resources with Roles:", enrichedResources);
+        // Combining both arrays and setting the combined array to resources
+        const combinedResources = [...resResponse.data, ...roleResponse.data];
+        setResources(combinedResources);
+
+        console.log("Combined Resources:", combinedResources);
+
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching resources:", error);
       }
     };
-    fetchData();
+    fetchResources();
   }, []);
+  
 
+  // updates the display resources whenever a filter is updated
   useEffect(() => {
-    if (!resources || !roles) return;
-    
-    const filteredDataByType = tabFilter === "All"
-      ? resources
-      : resources.filter(resource => resource.type === tabFilter.toLowerCase());
+    let filteredDataByType;
+    if (!resources) return;
+
+    if (tabFilter === "All") {
+      filteredDataByType = resources;  // Show all resources when "All" is selected
+    } else if (tabFilter === "Personnel") {
+      filteredDataByType = roles;  // Show only roles when "Personnel" is selected
+    } else {
+      filteredDataByType = resources.filter(resource => resource.type === tabFilter.toLowerCase());
+    }
 
     const filteredResources = textFilter === ""
       ? filteredDataByType
@@ -57,14 +66,11 @@ const ResourceView = ({ navToEditResource }) => {
           return (
             resource.name.toLowerCase().includes(searchText) ||
             resource.description.toLowerCase().includes(searchText) ||
-            (resource.location && resource.location.toLowerCase().includes(searchText)) ||
-            resource.uniqueIdentifier.toLowerCase().includes(searchText) ||
-            resource.status.toLowerCase().includes(searchText) ||
-            roles.some(role => role.name.toLowerCase().includes(searchText) && role.uniqueIdentifier === resource.roleId) // Hypothetical association
+            (resource.location && resource.location.toLowerCase().includes(searchText))
           );
-      });
+        });
     setDisplayingResources(filteredResources);
-  }, [tabFilter, textFilter, resources, roles]);
+  }, [tabFilter, textFilter, resources]);
 
   if (displayingResources === null) return <div>Loading Resources ...</div>;
   return (
