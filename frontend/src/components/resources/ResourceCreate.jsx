@@ -151,7 +151,7 @@ const ResourceCreate = ({ navToViewResource }) => {
 
 const SelectType = ({ navToViewResource, makeTypeSelection }) => {
   const selectEquipment = () => {
-    makeTypeSelection("equipments");
+    makeTypeSelection("equipment");
   };
 
   const selectRole = () => {
@@ -184,7 +184,7 @@ const SelectType = ({ navToViewResource, makeTypeSelection }) => {
           id="selectEquipmentsBtn"
         >
           <MdOutlineMedicalServices className="w-8 h-8" />
-          <p>Equipments</p>
+          <p>Equipment</p>
         </button>
         <button
           className="flex flex-col items-center"
@@ -251,7 +251,7 @@ const ResourceForm = ({
               Type
             </label>
             <div className="flex items-center justify-center text-primary">
-              {resourceType === "equipments" && (
+              {resourceType === "equipment" && (
                 <MdOutlineMedicalServices className="w-6 h-6" />
               )}
               {resourceType === "personnel" && (
