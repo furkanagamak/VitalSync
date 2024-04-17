@@ -29,6 +29,7 @@ const ProcedureTemplate = require("./models/procedureTemplate.js");
 const ResourceTemplate = require("./models/resourceTemplate.js");
 const ResourceInstance = require("./models/resourceInstance.js");
 const SectionTemplate = require("./models/sectionTemplate.js");
+const ProcessTemplate = require("./models/processTemplate.js");
 
 dotenv.config();
 
@@ -848,7 +849,7 @@ function generateRandomString(length) {
   return randomString;
 }
 
-function generateString(inputString) {
+function generateUniqueID(inputString) {
   const firstLetters = inputString
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase())
@@ -858,12 +859,109 @@ function generateString(inputString) {
 }
 
 app.post("/resources", async (req, res) => {
-  // check admin permission
+  try {
+    const accountId = req.cookies.accountId;
+    if (!accountId) {
+      return res.status(401).send("User not logged in");
+    }
+
+    // check admin permission
+    const currUser = await Account.findOne({ _id: accountId });
+    if (!currUser)
+      return res
+        .status(404)
+        .send("User does not exist! Malformed session, please login again!");
+
+    if (currUser.accountType === "staff")
+      return res.status(403).send("Only admins may create resources!");
+
+    const name = req.body.name.trim().toLowerCase();
+    const type = req.body.type.trim();
+    const location = req.body.location.trim();
+    const description = req.body.description.trim();
+    // param checks
+    if (!name || !type)
+      return res
+        .status(400)
+        .send("Please insert a name and type for the resource!");
+    if (type !== "equipments" && type !== "spaces" && type !== "roles")
+      return res
+        .status(400)
+        .send("type can only be equipments, spaces, or roles!");
+    if (type !== "roles" && (!location || !description))
+      return res
+        .status(400)
+        .send(
+          "for non roles resources, a location and description must be defined!"
+        );
+
+    // handles role addition
+    if (type === "roles") {
+      // ensure that role does not already exists
+      const findRole = await Role.findOne({ name: name });
+      if (findRole)
+        return res
+          .status(400)
+          .send("An role with the requested name already exists!");
+
+      try {
+        const newRole = new Role({
+          name,
+          description,
+          uniqueIdentifier: name.replace(" ", "_").toLowerCase(),
+        });
+        await newRole.save();
+      } catch {
+        return res.status(500).send("Server side occur when creating role");
+      }
+      return res.status(201).send("The newly requested role is created!");
+    }
+
+    // add resource template if not already exists
+    const findResTemplates = await ResourceTemplate.findOne({ name: name });
+    if (!findResTemplates) {
+      const newResTemplate = new ResourceTemplate({
+        type,
+        name,
+        description: description ? description : "",
+      });
+      await newResTemplate.save();
+    }
+
+    // generates unique id
+    let uniqueIdentifier;
+    let findRes;
+    do {
+      uniqueIdentifier = generateUniqueID(name);
+      findRes = await ResourceInstance.findOne({
+        uniqueIdentifier: uniqueIdentifier,
+      });
+    } while (findRes);
+
+    // add resource instance
+    const newResInstance = new ResourceInstance({
+      type,
+      name,
+      location,
+      description,
+      uniqueIdentifier,
+      status: "Available",
+    });
+
+    await newResInstance.save();
+    return res.status(201).send("The resource has been successfully created!");
+  } catch (error) {
+    return res.status(500).send("An error occured in the server ", error);
+  }
+});
+
+app.put("/resources", async (req, res) => {
   const accountId = req.cookies.accountId;
   if (!accountId) {
-    return res.status(400).send("User not logged in");
+    return res.status(401).send("User not logged in");
   }
 
+  // check admin permission
   const currUser = await Account.findOne({ _id: accountId });
   if (!currUser)
     return res
@@ -871,22 +969,40 @@ app.post("/resources", async (req, res) => {
       .send("User does not exist! Malformed session, please login again!");
 
   if (currUser.accountType === "staff")
-    return res.status(403).send("Only admins may create resources!");
+    return res.status(403).send("Only admins may update resources!");
 
   const name = req.body.name.trim().toLowerCase();
-  const type = req.body.type.trim();
+  const uniqueIdentifier = req.body.uniqueIdentifier;
   const location = req.body.location.trim();
   const description = req.body.description.trim();
-  console.log("Got type: ", type);
   // param checks
-  if (!name || !type)
+  if (!name)
+    return res.status(400).send("Please insert a name for the resource!");
+  if (!uniqueIdentifier)
     return res
       .status(400)
-      .send("Please insert a name and type for the resource!");
-  if (type !== "equipments" && type !== "spaces" && type !== "roles")
-    return res
-      .status(400)
-      .send("type can only be equipments, spaces, or roles!");
+      .send("Please insert the uniqueIdentifier for the target resource!");
+
+  // find target resource
+  let type;
+  let targetResource = await ResourceInstance.findOne({
+    uniqueIdentifier: uniqueIdentifier,
+  });
+  if (!targetResource) {
+    targetResource = await Role.findOne({
+      uniqueIdentifier: uniqueIdentifier,
+    });
+    if (!targetResource)
+      return res
+        .status(400)
+        .send(
+          "There does not exists an resource with the provided uniqueIdentifier!"
+        );
+    type = "roles";
+  } else {
+    type = targetResource.type;
+  }
+
   if (type !== "roles" && (!location || !description))
     return res
       .status(400)
@@ -896,24 +1012,13 @@ app.post("/resources", async (req, res) => {
 
   // handles role addition
   if (type === "roles") {
-    // ensure that role does not already exists
-    const findRole = await Role.findOne({ name: name });
-    if (findRole)
-      return res
-        .status(400)
-        .send("An role with the requested name already exists!");
-
     try {
-      const newRole = new Role({
-        name,
-        description,
-        uniqueIdentifier: name.replace(" ", "_").toLowerCase(),
-      });
-      await newRole.save();
     } catch {
       return res.status(500).send("Server side occur when creating role");
     }
-    return res.status(201).send("The newly requested role is created!");
+    targetResource.description = description;
+    targetResource.save();
+    return res.status(200).send("The role has been updated!");
   }
 
   //retreive resources
@@ -937,28 +1042,12 @@ app.post("/resources", async (req, res) => {
     await newResTemplate.save();
   }
 
-  // generates unique id
-  let uniqueIdentifier;
-  let findRes;
-  do {
-    uniqueIdentifier = generateString(name);
-    findRes = await ResourceInstance.findOne({
-      uniqueIdentifier: uniqueIdentifier,
-    });
-  } while (findRes);
-
   // add resource instance
-  const newResInstance = new ResourceInstance({
-    type,
-    name,
-    location,
-    description,
-    uniqueIdentifier,
-    status: "Available",
-  });
-
-  await newResInstance.save();
-  return res.status(201).send("The resource has been successfully created!");
+  targetResource.name = name;
+  targetResource.location = location;
+  targetResource.description = description;
+  await targetResource.save();
+  return res.status(200).send("The resource has been updated!");
 });
 
 app.get("/roles", async (req, res) => {
@@ -1027,7 +1116,7 @@ app.put("/procedureTemplates/:id", async (req, res) => {
     const resourceIdsWithQuantity = await Promise.all(
       req.body.requiredResources.map(async (item) => {
         const resource = await ResourceTemplate.findOne({
-          name: item.resourceName
+          name: item.resourceName,
         });
         if (!resource) {
           throw new Error(`Resource not found: ${item.resourceName}`);
@@ -1057,14 +1146,14 @@ app.put("/procedureTemplates/:id", async (req, res) => {
           requiredResources: resourceIdsWithQuantity,
           roles: roleIdsWithQuantity,
           estimatedTime: req.body.estimatedTime,
-          specialNotes: req.body.specialNotes
-        }
+          specialNotes: req.body.specialNotes,
+        },
       },
       { new: true }
     );
 
     if (!updatedProcedureTemplate) {
-      throw new Error('Procedure template not found');
+      throw new Error("Procedure template not found");
     }
 
     res.status(200).json(updatedProcedureTemplate);
@@ -1095,30 +1184,68 @@ app.get("/procedureTemplates/:id", async (req, res) => {
   }
 });
 
-app.delete('/procedureTemplates/:id', async (req, res) => {
+app.delete("/procedureTemplates/:id", async (req, res) => {
   const procedureTemplateId = req.params.id;
   try {
-      // Check if any SectionTemplate is using the ProcedureTemplate
-      const isUsed = await SectionTemplate.findOne({ procedureTemplates: new mongoose.Types.ObjectId(procedureTemplateId)});
-      
-      if (isUsed) {
-          // If the ProcedureTemplate is in use, do not delete and send a message
-          return res.status(403).json({
-              message: 'Cannot delete procedure template because it is in use by a process template.'
-          });
-      }
+    // Check if any SectionTemplate is using the ProcedureTemplate
+    const isUsed = await SectionTemplate.findOne({
+      procedureTemplates: new mongoose.Types.ObjectId(procedureTemplateId),
+    });
 
-      // If the ProcedureTemplate is not in use, proceed to delete
-      await ProcedureTemplate.findByIdAndDelete(procedureTemplateId);
-
-      res.status(200).json({
-          message: 'Procedure template deleted successfully.'
+    if (isUsed) {
+      // If the ProcedureTemplate is in use, do not delete and send a message
+      return res.status(403).json({
+        message:
+          "Cannot delete procedure template because it is in use by a process template.",
       });
+    }
+
+    // If the ProcedureTemplate is not in use, proceed to delete
+    await ProcedureTemplate.findByIdAndDelete(procedureTemplateId);
+
+    res.status(200).json({
+      message: "Procedure template deleted successfully.",
+    });
   } catch (error) {
-      res.status(500).json({
-          message: 'Error deleting procedure template',
-          error: error.message
-      });
+    res.status(500).json({
+      message: "Error deleting procedure template",
+      error: error.message,
+    });
+  }
+});
+
+app.get("/processTemplates", async (req, res) => {
+  try {
+    const templates = await ProcessTemplate.find().populate({
+      path: "sectionTemplates",
+      populate: {
+        path: "procedureTemplates",
+        populate: {
+          path: "requiredResources.resource roles.role",
+        },
+      },
+    });
+
+    res.status(200).json(templates);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error retrieving process templates");
+  }
+});
+
+app.delete("/processTemplates/:id", async (req, res) => {
+  try {
+    const processTemplateId = req.params.id;
+    await ProcessTemplate.findByIdAndDelete(processTemplateId);
+
+    res.status(200).json({
+      message: "Process template deleted successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error deleting process template",
+      error: error.message,
+    });
   }
 });
 

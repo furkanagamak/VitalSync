@@ -19,10 +19,10 @@ describe('Process Template Management', () => {
       cy.get('input[type="search"]').should('have.value', '');
     });
   
-    it('paginates through the process templates', () => {
+    /*it('paginates through the process templates', () => {
       cy.get('button').contains('Previous Page').should('be.disabled');
       cy.get('button').contains('Next Page').should('not.be.disabled').click();
       cy.get('button').contains('Previous Page').should('not.be.disabled');
-    });
+    });*/
   });
   

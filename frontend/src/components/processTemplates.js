@@ -1,15 +1,18 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useTable, useSortBy, usePagination } from "react-table";
 import { TbLayoutGridAdd } from "react-icons/tb";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import ConfirmationModal from "./templateConfirmationModal";
+
+axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
+axios.defaults.withCredentials = true;
 
 const notify = () => toast.success("Process Template Deleted!");
 
-const SearchBar = () => {
-  const [inputValue, setInputValue] = useState("");
-
+const SearchBar = ({ inputValue, setInputValue }) => {
   const handleClearInput = () => setInputValue("");
 
   return (
@@ -80,60 +83,51 @@ const CreateTemplateButton = () => {
   );
 };
 
-const ProcessTable = () => {
-  const data = React.useMemo(
-    () => [
-      {
-        name: "Appendectomy",
-        description:
-          "The standard process for performing an appendectomy, which is the surgical removal of the appendix.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Appendix Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        name: "Cholecystectomy",
-        description:
-          "The standard process for performing a cholecystectomy, which is the surgical removal of the gallbladder.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Gallbladder Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        name: "Hysterectomy",
-        description:
-          "The standard process for performing a hysterectomy, which is the surgical removal of the uterus.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Uterus Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        name: "Laminectomy",
-        description:
-          "The standard process for performing a laminectomy, which is the surgical removal of the lamina.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Lamina Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        name: "Mastectomy",
-        description:
-          "The standard process for performing a mastectomy, which is the surgical removal of the breast.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Breast Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        name: "Nephrectomy",
-        description:
-          "The standard process for performing a nephrectomy, which is the surgical removal of the kidney.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Kidney Removal, Pain Management, Postoperative Monitoring",
-      },
-    ],
-    []
-  );
+const ProcessTable = ({ filter }) => {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("/processTemplates");
+        setData(
+          response.data.map((processTemplate) => ({
+            id: processTemplate._id,
+            name: processTemplate.processName,
+            description: processTemplate.description,
+            sections: processTemplate.sectionTemplates
+              .map((section) => section.sectionName)
+              .join(", "),
+            procedures: processTemplate.sectionTemplates
+              .reduce((acc, section) => {
+                section.procedureTemplates.forEach((procedure) => {
+                  if (!acc.includes(procedure.procedureName)) {
+                    acc.push(procedure.procedureName);
+                  }
+                });
+                return acc;
+              }, [])
+              .join(", "),
+          }))
+        );
+      } catch (error) {
+        console.error("Failed to fetch process templates:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const filteredData = useMemo(() => {
+    if (!filter) return data;
+    return data.filter(
+      (template) =>
+        template.name.toLowerCase().includes(filter.toLowerCase()) ||
+        template.description.toLowerCase().includes(filter.toLowerCase()) ||
+        template.sections.toLowerCase().includes(filter.toLowerCase()) ||
+        template.procedures.toLowerCase().includes(filter.toLowerCase())
+    );
+  }, [data, filter]);
 
   const columns = React.useMemo(
     () => [
@@ -194,7 +188,7 @@ const ProcessTable = () => {
                 </svg>
               </button>
               <button
-                onClick={notify}
+                onClick={() => promptDelete(row.original)}
                 style={{
                   background: "none",
                   border: "none",
@@ -236,13 +230,43 @@ const ProcessTable = () => {
     pageOptions,
     state: { pageIndex },
   } = useTable(
-    { columns, data, initialState: { pageSize: 3 } },
+    { columns, data: filteredData, initialState: { pageSize: 3 } },
     useSortBy,
     usePagination
   );
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentTemplate, setCurrentTemplate] = useState(null);
+
+  const deleteProcessTemplate = async (templateId) => {
+    setIsModalOpen(false);
+    try {
+      const response = await axios.delete(`/processTemplates/${templateId}`);
+      if (response.status === 200) {
+        setData((prevData) =>
+          prevData.filter((template) => template.id !== templateId)
+        );
+        toast.success("Process template deleted successfully.");
+      }
+    } catch (error) {
+      console.error("Failed to delete process template:", error);
+      toast.error(error.response.data.message);
+    }
+  };
+
+  const promptDelete = (template) => {
+    setCurrentTemplate(template);
+    setIsModalOpen(true);
+  };
+
   return (
     <>
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={() => deleteProcessTemplate(currentTemplate.id)}
+        templateName={currentTemplate?.name}
+      />
       <div
         style={{
           maxWidth: "95%",
@@ -379,6 +403,7 @@ const ProcessTable = () => {
 };
 
 const ProcessTemplateManagement = () => {
+  const [searchInput, setSearchInput] = useState("");
   return (
     <div className="flex flex-col items-center space-y-4 relative">
       <h1 className="text-4xl text-[#8E0000] text-center underline font-bold mt-5">
@@ -387,9 +412,9 @@ const ProcessTemplateManagement = () => {
       <div className="absolute right-8">
         <CreateTemplateButton />
       </div>
-      <SearchBar />
+      <SearchBar inputValue={searchInput} setInputValue={setSearchInput} />
       <div>
-        <ProcessTable />
+        <ProcessTable filter={searchInput} />
       </div>
     </div>
   );
