@@ -9,6 +9,14 @@ const resources = [
     status: "In-use",
   },
   {
+    type: "equipments",
+    name: "test equipment",
+    location: "test location",
+    description: "test description",
+    uniqueIdentifier: "TE-DSF0OF",
+    status: "In-use",
+  },
+  {
     type: "Roles",
     name: "test role",
     location: "N/A",
