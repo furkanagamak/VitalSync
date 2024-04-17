@@ -40,7 +40,7 @@ const s3 = new S3Client({
   region: bucketRegion,
 });
 
-const resourceController = require("./controllers/resourceController");
+const resourceController = require("./controllers/ResourceController.js");
 
 mongoose
   .connect(process.env.MONGO_URI, {
