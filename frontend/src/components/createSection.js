@@ -53,7 +53,7 @@ const GoBackButton = () => {
   const navigate = useNavigate();
 
   const handleGoBackClick = () => {
-    navigate("/CreateProcessTemplateForm");
+    navigate(-1); //Note: needs further testing
   };
 
   return (
@@ -261,7 +261,7 @@ const SectionForm = ({ onAddProcedure, section, setSection }) => {
           </Grid>
           <Grid item>
             <Button
-              onClick={addProcedureToSection} // Update the onClick handler to add the procedure
+              onClick={addProcedureToSection}
               variant="outlined"
               startIcon={
                 <AddCircleOutlineIcon
@@ -279,8 +279,7 @@ const SectionForm = ({ onAddProcedure, section, setSection }) => {
               }}
             >
               Add Procedure
-            </Button>
-            
+            </Button>      
           </Grid>
         </Grid>
       </div>
@@ -563,8 +562,22 @@ const AddSectionForm = () => {
   };
 
   const onAddSection = () => {
-    console.log('Adding section and navigating back:', section);
+    if(!section.sectionName){
+      toast.error("Section name is required.");
+      return;
+    }
+    if(!section.description){
+      toast.error("A description is required.");
+      return;
+    }
+    if(section.procedureTemplates.length === 0){
+      toast.error("At least one procedure is required.");
+      return;
+    }    
+    
     navigate("/CreateProcessTemplateForm", { state: { newSection: section } });
+    setSection({ sectionName: "", description: "", procedureTemplates: [] }); // Clear state
+    notify();
   };
 
   const moveProcedure = (index, direction) => {

@@ -205,6 +205,11 @@ const SectionTable = ({ sections, setSections, onSaveState }) => {
     navigate("/AddSectionForm", { state: { isAddingNew: true } });
   };
 
+  const handleModifySection = (index) => {
+    const sectionToModify = sections[index];
+    navigate("/ModifySectionForm", { state: { section: sectionToModify} });
+};
+
   const updateSections = debounce((newSection) => {
     setSections(prevSections => {
       const alreadyExists = prevSections.some(section => section.sectionName === newSection.sectionName);
@@ -230,12 +235,6 @@ const SectionTable = ({ sections, setSections, onSaveState }) => {
       return newSections;
     });
   };
-  
-
-  const handleModifySection = (index) => {
-    const sectionToModify = sections[index];
-    navigate("/ModifySectionForm", { state: { section: sectionToModify, index } });
-};
 
   const deleteSection = (index) => {
     setSections(currentSections => currentSections.filter((_, i) => i !== index));
@@ -538,6 +537,8 @@ const CreateProcessTemplateForm = () => {
       sections: sections, 
     };
 
+    console.log(procData);
+
     if(!process.name){
       toast.error("Process name is required.");
       return;
@@ -556,10 +557,16 @@ const CreateProcessTemplateForm = () => {
       console.log("Template Created:", response.data);
       navigate("/ProcessTemplateManagement");
       toast.success("Process Template Created Successfully!");
+
+      setProcess({ name: "", description: "" });
+      setSections([]);
+
+      sessionStorage.removeItem('processTemplateState');
+
     } catch (error) {
       console.error("Error creating process template:", error);
       toast.error(
-        "Failed to create process template: " + error.response.data.error
+        "Failed to create process template"
       );
     }
   };

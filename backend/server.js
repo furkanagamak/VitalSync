@@ -1159,13 +1159,12 @@ app.post('/processTemplates', async (req, res) => {
       const newSection = new SectionTemplate({
         sectionName: section.sectionName,
         description: section.description,
-        procedureTemplates: section.procedureTemplates, //array of existing ObjectId references
+        procedureTemplates: section.procedureTemplates, 
       });
       await newSection.save();
       return newSection._id;
     }));
 
-    // Create the process template with linked sections
     const newProcessTemplate = new ProcessTemplate({
       processName,
       description,
@@ -1179,6 +1178,7 @@ app.post('/processTemplates', async (req, res) => {
     res.status(400).json({ message: "Failed to create process template", error: error.message });
   }
 });
+
 
 
 module.exports = {
