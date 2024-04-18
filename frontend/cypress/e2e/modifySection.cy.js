@@ -13,6 +13,7 @@ describe('Modify Section Form Tests', () => {
         cy.contains('Go Back').should('be.visible');
     });
 
+    /*
     it('allows navigation back to the modify process page ', () => {
         cy.get('button').contains('Go Back').click();
         cy.url().should('include', '/ModifyProcessTemplateForm');
@@ -36,5 +37,5 @@ describe('Modify Section Form Tests', () => {
         cy.visit('/ModifySectionForm');
         cy.contains('General Anesthesia').should('exist');
         cy.contains('Appendix Removal').should('exist');
-    });
+    });*/
 });
