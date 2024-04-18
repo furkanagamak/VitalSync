@@ -1066,6 +1066,81 @@ app.get("/processTemplates", async (req, res) => {
   }
 });
 
+app.get("/processTemplates/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const template = await ProcessTemplate.findById(id).populate({
+      path: "sectionTemplates",
+      populate: {
+        path: "procedureTemplates",
+        populate: {
+          path: "requiredResources.resource roles.role",
+        },
+      },
+    });
+
+    if (!template) {
+      return res.status(404).json({ message: "Process template not found" });
+    }
+
+    res.status(200).json(template);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error retrieving process template", error: error.message });
+  }
+});
+
+
+app.put('/processTemplates/:id', async (req, res) => {
+  try {
+    const { processName, description, sections } = req.body;
+    const { id } = req.params;
+
+    const sectionIds = await Promise.all(sections.map(async (section) => {
+      if (section._id) {
+        await SectionTemplate.findByIdAndUpdate(section._id, {
+          sectionName: section.sectionName,
+          description: section.description,
+          procedureTemplates: section.procedureTemplates,
+        });
+        return section._id;
+      } else {
+        const newSection = new SectionTemplate({
+          sectionName: section.sectionName,
+          description: section.description,
+          procedureTemplates: section.procedureTemplates,
+        });
+        await newSection.save();
+        return newSection._id;
+      }
+    }));
+
+    const updatedTemplate = await ProcessTemplate.findByIdAndUpdate(id, {
+      processName,
+      description,
+      sectionTemplates: sectionIds
+    }, { new: true }).populate({
+      path: "sectionTemplates",
+      populate: {
+        path: "procedureTemplates",
+        populate: {
+          path: "requiredResources.resource roles.role",
+        },
+      },
+    });
+
+    if (!updatedTemplate) {
+      return res.status(404).json({ message: "Process template not found" });
+    }
+
+    res.status(200).json(updatedTemplate);
+  } catch (error) {
+    console.error("Failed to update process template:", error);
+    res.status(400).json({ message: "Failed to update process template", error: error.message });
+  }
+});
+
+
 app.delete("/processTemplates/:id", async (req, res) => {
   try {
     const processTemplateId = req.params.id;

@@ -585,7 +585,7 @@ const ModifySectionForm = () => {
       return;
     }    
     
-    navigate("/CreateProcessTemplateForm", { state: { newSection: section } });
+    navigate(-1, { state: { newSection: section } });
     setSection({ sectionName: "", description: "", procedureTemplates: [] }); // Clear state
     notify();
   };

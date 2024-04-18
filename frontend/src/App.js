@@ -347,7 +347,7 @@ function App() {
               }
             />
             <Route
-              path="/ModifyProcessTemplateForm"
+              path="/ModifyProcessTemplateForm/:id"
               element={
                 <>
                   <Toaster />
