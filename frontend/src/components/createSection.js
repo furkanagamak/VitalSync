@@ -109,14 +109,20 @@ const SectionForm = ({ onAddProcedure, section, setSection }) => {
   };
 
   const addProcedureToSection = () => {
-    if (currentProcedure && !section.procedureTemplates.some(proc => proc._id === currentProcedure._id)) {
-      setSection(prevState => ({
+    if (!currentProcedure) {
+        toast.error("Please select a procedure to add.");
+        return; 
+    }
+    if (section.procedureTemplates.some(proc => proc._id === currentProcedure._id)) {
+        toast.error("This procedure has already been added.");
+        return; 
+    }
+    setSection(prevState => ({
         ...prevState,
         procedureTemplates: [...prevState.procedureTemplates, currentProcedure]
-      }));
-      setCurrentProcedure(null);
-    }
-  };
+    }));
+    setCurrentProcedure(null); 
+};
 
 
   const theme = createTheme({
