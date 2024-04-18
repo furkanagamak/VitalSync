@@ -6,7 +6,6 @@ const resourceInstanceSchema = new mongoose.Schema({
   location: { type: String, required: true },
   description: { type: String, default: "" },
   uniqueIdentifier: { type: String, required: true, unique: true },
-  status: { type: String, required: true },
   unavailableTimes: [{ start: Date, end: Date }],
 });
 
