@@ -351,6 +351,7 @@ const transformAccount = async (account) => {
 
 app.post("/login", async (req, res) => {
   console.log("Login route hit with body:", req.body);
+  const url = new URL(process.env.FRONTEND_URL);
 
   try {
     const { email, password } = req.body;
@@ -372,6 +373,7 @@ app.post("/login", async (req, res) => {
       if (result) {
         // Set a cookie with the account ID
         res.cookie("accountId", account._id, {
+          domain: url.hostname,
           maxAge: 10000000,
           sameSite: "none",
           secure: true,
@@ -390,8 +392,9 @@ app.post("/login", async (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
+  const url = new URL(process.env.FRONTEND_URL);
   // Clear the accountId cookie
-  res.clearCookie("accountId", { sameSite: "none", secure: true });
+  res.clearCookie("accountId", { domain: url.hostname, sameSite: "none", secure: true });
 
   res.status(200).send({ message: "Logout successful" });
 });
