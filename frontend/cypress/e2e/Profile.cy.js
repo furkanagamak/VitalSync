@@ -17,9 +17,25 @@ describe('MyComponent Button Functionality', () => {
     it('returns to profile view from ChangeAvailability', () => {
       cy.contains('Edit Schedule').should('be.visible').click();
       cy.contains('Weekly Schedule Update').should('be.visible');
+      cy.contains('Back to Profile').click();
+      cy.contains('Change Availability').should('not.exist');
+    });
+
+    it('returns to profile view from ChangeAvailability', () => {
+      cy.contains('Edit Schedule').should('be.visible').click();
+      cy.contains('Weekly Schedule Update').should('be.visible');
       cy.contains('Submit').click();
       cy.contains('Change Availability').should('not.exist');
     });
+
+    it('returns to profile view from ChangeAvailability', () => {
+      cy.contains('Edit Schedule').should('be.visible').click();
+      cy.contains('Weekly Schedule Update').should('be.visible');
+      cy.contains('Update').click();
+      cy.contains('Change Availability').should('not.exist');
+    });
+
+
 
     it('profile information changes', () => {
         cy.contains('Edit Profile').click();

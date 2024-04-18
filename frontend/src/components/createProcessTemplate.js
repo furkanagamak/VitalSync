@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import {
   TextField,
@@ -20,16 +20,22 @@ import { useTable, useSortBy, usePagination } from "react-table";
 import { TbLayoutGridAdd } from "react-icons/tb";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from 'axios';
+import { debounce } from 'lodash';
+
+
+
+axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
+axios.defaults.withCredentials = true;
 
 const notify = () => toast.success("Process Template Created!");
 
-const CreateTemplateButton = () => {
+const CreateTemplateButton = ({ onCreate }) => {
   const navigate = useNavigate();
 
-  const handleCreateClick = () => {
-    navigate("/ProcessTemplateManagement");
-    notify();
+  const handleCreateClick = async () => {
+    await onCreate();
   };
 
   return (
@@ -73,12 +79,7 @@ const GoBackButton = () => {
   );
 };
 
-const ProcessForm = () => {
-  const [process, setProcess] = useState({
-    name: "",
-    description: "",
-  });
-
+const ProcessForm = ({ process, setProcess, createTemplate }) => {
   const theme = createTheme({
     typography: {
       fontSize: 12,
@@ -145,10 +146,6 @@ const ProcessForm = () => {
     setProcess({ ...process, [name]: value });
   };
 
-  const createTemplate = () => {
-    console.log({ process });
-  };
-
   return (
     <ThemeProvider theme={theme}>
       <div
@@ -196,23 +193,57 @@ const ProcessForm = () => {
   );
 };
 
-const SectionTable = () => {
-  const data = React.useMemo(() => [], []);
+const SectionTable = ({ sections, setSections, onSaveState }) => {
+  const data = React.useMemo(() => sections, [sections]);
   const navigate = useNavigate();
+  const location = useLocation(); 
 
-  const handleAddSectionClick = () => {
-    navigate("/AddSectionForm");
+
+  const handleAddSection = () => {
+    console.log('Navigating to add new section');
+    onSaveState();
+    navigate("/AddSectionForm", { state: { isAddingNew: true } });
   };
 
-  const handleModifySectionClick = () => {
-    navigate("/ModifySectionForm");
+  const handleModifySection = (index) => {
+    const sectionToModify = sections[index];
+    navigate("/ModifySectionForm", { state: { section: sectionToModify} });
+};
+
+  const updateSections = debounce((newSection) => {
+    setSections(prevSections => {
+      const alreadyExists = prevSections.some(section => section.sectionName === newSection.sectionName);
+      return alreadyExists ? prevSections : [...prevSections, newSection];
+    });
+  }, 1);  //1 second millisecond delay to avoid rapid re-update of section state on location change. Need to solve underlying issue
+  
+  useEffect(() => {
+    if (location.state?.newSection) {
+      updateSections(location.state.newSection);
+    }
+  }, [location.state]);
+
+
+  const moveSection = (index, direction) => {
+    setSections(currentSections => {
+      let newSections = [...currentSections];
+      if (direction === 'up' && index > 0) {
+        [newSections[index], newSections[index - 1]] = [newSections[index - 1], newSections[index]];
+      } else if (direction === 'down' && index < newSections.length - 1) {
+        [newSections[index], newSections[index + 1]] = [newSections[index + 1], newSections[index]];
+      }
+      return newSections;
+    });
   };
 
-  const columns = React.useMemo(
-    () => [
+  const deleteSection = (index) => {
+    setSections(currentSections => currentSections.filter((_, i) => i !== index));
+  };
+
+  const columns = React.useMemo(() => [
       {
         Header: "Name",
-        accessor: "name",
+        accessor: "sectionName",
         style: { backgroundColor: "#F5F5DC" },
       },
       {
@@ -221,12 +252,21 @@ const SectionTable = () => {
       },
       {
         Header: "Procedures",
-        accessor: "procedures",
+        accessor: "procedureTemplates",
         style: { backgroundColor: "#F5F5DC" },
-      },
+        Cell: ({ value }) => value && Array.isArray(value) ? (
+            <div>
+                {value.map((procedure, index) => (
+                    <span key={index}>
+                        {procedure.procedureName}{index < value.length - 1 ? ', ' : ''}
+                    </span>
+                ))}
+            </div>
+        ) : "No procedures listed"
+    },
       {
         Header: "Actions",
-        Cell: () => (
+        Cell: ({ row }) => (
           <div
             style={{
               display: "flex",
@@ -235,6 +275,7 @@ const SectionTable = () => {
             }}
           >
             <button
+              onClick={() => moveSection(row.index, 'up')}
               style={{
                 background: "none",
                 border: "none",
@@ -258,6 +299,7 @@ const SectionTable = () => {
               </svg>
             </button>
             <button
+            onClick={() => moveSection(row.index, 'down')}
               style={{
                 background: "none",
                 border: "none",
@@ -281,8 +323,8 @@ const SectionTable = () => {
               </svg>
             </button>
             <button
-              onClick={handleModifySectionClick}
-              style={{
+                onClick={() => handleModifySection(row.index)}
+                style={{
                 background: "none",
                 border: "none",
                 padding: "0",
@@ -302,6 +344,7 @@ const SectionTable = () => {
               </svg>
             </button>
             <button
+            onClick={() => deleteSection(row.index)}
               style={{
                 background: "none",
                 border: "none",
@@ -325,7 +368,7 @@ const SectionTable = () => {
         disableSortBy: true,
       },
     ],
-    []
+    [sections]
   );
 
   const { getTableProps, getTableBodyProps, headerGroups, prepareRow, rows } =
@@ -443,7 +486,7 @@ const SectionTable = () => {
           }}
         >
           <Button
-            onClick={handleAddSectionClick}
+            onClick={handleAddSection}
             variant="outlined"
             startIcon={<AddCircleOutlineIcon style={{ color: "#8E0000" }} />}
             style={{
@@ -464,6 +507,71 @@ const SectionTable = () => {
 };
 
 const CreateProcessTemplateForm = () => {
+
+  const navigate = useNavigate();
+
+  const [process, setProcess] = useState({
+    name: "",
+    description: "",
+  });
+  const [sections, setSections] = useState([]);
+
+  const handleSaveState = () => {
+    const stateToSave = { process, sections };
+    sessionStorage.setItem('processTemplateState', JSON.stringify(stateToSave));
+  };
+
+  useEffect(() => {
+    const savedState = JSON.parse(sessionStorage.getItem('processTemplateState'));
+    if (savedState) {
+      setProcess(savedState.process);
+      setSections(savedState.sections);
+    }
+  }, []);
+
+  const createTemplate = async () => {
+
+    const procData = {
+      processName: process.name,
+      description: process.description,
+      sections: sections, 
+    };
+
+    console.log(procData);
+
+    if(!process.name){
+      toast.error("Process name is required.");
+      return;
+    }
+    if(!process.description){
+      toast.error("A description is required.");
+      return;
+    }
+    if(sections.length === 0){
+      toast.error("At least one section is required.");
+      return;
+    }
+
+    try {
+      const response = await axios.post("/processTemplates", procData);
+      console.log("Template Created:", response.data);
+      navigate("/ProcessTemplateManagement");
+      toast.success("Process Template Created Successfully!");
+
+      setProcess({ name: "", description: "" });
+      setSections([]);
+
+      sessionStorage.removeItem('processTemplateState');
+
+    } catch (error) {
+      console.error("Error creating process template:", error);
+      toast.error(
+        "Failed to create process template"
+      );
+    }
+  };
+
+
   return (
     <div>
       <div
@@ -480,7 +588,7 @@ const CreateProcessTemplateForm = () => {
           <GoBackButton />
         </div>
         <div style={{ position: "absolute", right: "2rem" }}>
-          <CreateTemplateButton />
+          <CreateTemplateButton onCreate={createTemplate} />
         </div>
         <h1
           style={{
@@ -494,8 +602,14 @@ const CreateProcessTemplateForm = () => {
           Create New Process Template
         </h1>
       </div>
-      <ProcessForm />
-      <SectionTable />
+      <ProcessForm 
+      process={process}
+      setProcess={setProcess}
+      createTemplate={createTemplate}/>
+      <SectionTable 
+      sections={sections}
+      setSections={setSections}
+      onSaveState={handleSaveState}/>
     </div>
   );
 };

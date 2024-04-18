@@ -912,7 +912,7 @@ app.post("/procedureTemplates", async (req, res) => {
   }
 });
 
-app.put("/procedureTemplates/:id", async (req, res) => {
+    app.put("/procedureTemplates/:id", async (req, res) => {
   try {
     // Resolve ResourceTemplate names to IDs
     const resourceIdsWithQuantity = await Promise.all(
@@ -1081,6 +1081,36 @@ app.delete("/processTemplates/:id", async (req, res) => {
     });
   }
 });
+
+app.post('/processTemplates', async (req, res) => {
+  try {
+    const { processName, description, sections } = req.body;
+
+    const sectionIds = await Promise.all(sections.map(async (section) => {
+      const newSection = new SectionTemplate({
+        sectionName: section.sectionName,
+        description: section.description,
+        procedureTemplates: section.procedureTemplates, 
+      });
+      await newSection.save();
+      return newSection._id;
+    }));
+
+    const newProcessTemplate = new ProcessTemplate({
+      processName,
+      description,
+      sectionTemplates: sectionIds,
+    });
+
+    await newProcessTemplate.save();
+    res.status(201).json(newProcessTemplate);
+  } catch (error) {
+    console.error("Failed to create process template:", error);
+    res.status(400).json({ message: "Failed to create process template", error: error.message });
+  }
+});
+
+
 
 module.exports = {
   app,

@@ -3,23 +3,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../providers/authProvider.js";
 import axios from "axios";
-import { useReducer } from "react";
-import { DateRangePicker } from "rsuite";
-import "rsuite/dist/rsuite-no-reset.min.css";
-import {
-  TextField,
-  FormControl,
-  Select,
-  MenuItem,
-  InputLabel,
-  Button,
-} from "@mui/material";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-import "./Calendar.css";
-import styled from "styled-components";
-import { FiberPin } from "@mui/icons-material";
-import { FormControlLabel, Checkbox } from "@mui/material";
+import { DateRangePicker } from 'rsuite';
+import "rsuite/dist/rsuite-no-reset.min.css"; 
+import { TextField, FormControl, Select, MenuItem, InputLabel } from '@mui/material';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import './Calendar.css';
+import { FormControlLabel, Checkbox } from '@mui/material';
 
 const notify = () => toast.success("Profile successfully updated.");
 const notifyErr = () => toast.error("There was an error updating the profile.");
@@ -175,9 +165,9 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
 
       if (response.status === 200) {
         onClose();
-        alert("Password has been successfully reset.");
+        toast("Password has been successfully reset.");
       } else {
-        setError("Failed to reset password.");
+        toast("Failed to reset password.");
       }
     } catch (error) {
       setError("Error resetting password.");
@@ -211,14 +201,14 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
           <button
             type="button"
             onClick={handleSubmit}
-            className="px-4 py-1 bg-red-800 text-white rounded-lg border border-solid border-neutral-600 text-xs"
+            className="px-4 py-1 bg-red-800 text-white rounded-lg border border-solid border-neutral-600 text-xs mb-5"
           >
             Reset Password
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1 bg-zinc-300 text-black rounded-lg border border-solid border-neutral-600 text-xs"
+            className="px-4 py-1 bg-zinc-300 text-black rounded-lg border border-solid border-neutral-600 text-xs mb-5"
           >
             Close
           </button>
@@ -610,7 +600,6 @@ function ProfileDetails({ user }) {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       notify();
       setEditMode(false); // Optionally reset edit mode
-      console.log(response.data);
     } catch (error) {
       console.error("Failed to update profile:", error);
       notifyErr();
@@ -746,7 +735,7 @@ function ScheduleCalendar({ user, onScheduleChange, preview }) {
           segments.push(
             `${currentStart.hours}:${currentStart.minutes
               .toString()
-              .padStart(2, "0")}-${timeOffStart.hours}:${timeOffStart.minutes
+              .padStart(2, "0")} - ${timeOffStart.hours}:${timeOffStart.minutes
               .toString()
               .padStart(2, "0")}`
           );
@@ -758,7 +747,7 @@ function ScheduleCalendar({ user, onScheduleChange, preview }) {
       segments.push(
         `${currentStart.hours}:${currentStart.minutes
           .toString()
-          .padStart(2, "0")}-${parseTime(usualHours.end).hours}:${parseTime(
+          .padStart(2, "0")} - ${parseTime(usualHours.end).hours}:${parseTime(
           usualHours.end
         )
           .minutes.toString()
@@ -770,18 +759,9 @@ function ScheduleCalendar({ user, onScheduleChange, preview }) {
   };
 
   const getUsualHoursForDay = (day) => {
-    const weekdayNames = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-    const weekday = weekdayNames[day]; // No need to adjust if array is aligned properly
-    const hours = user.usualHours.find((uh) => uh.day === weekday);
-    console.log(`Day index: ${day}, Day name: ${weekday}, Usual hours:`, hours);
+    const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const weekday = weekdayNames[day];  // No need to adjust if array is aligned properly
+    const hours = user.usualHours.find(uh => uh.day === weekday);
 
     return hours || { start: "0:00", end: "0:00" }; // Provide default 'Off' hours if no match is found
   };
@@ -807,10 +787,6 @@ function ScheduleCalendar({ user, onScheduleChange, preview }) {
           if (view === "month") {
             const usualHours = getUsualHoursForDay(date.getDay());
             const workingHours = getWorkingHoursForDay(date, usualHours);
-
-            if (date.getDay() === 0) {
-              console.log("Sunday: ", usualHours, workingHours);
-            }
             return (
               <div style={customStyles.tile}>
                 <div className="text-md mt-4">{workingHours.join(", ")}</div>
@@ -929,10 +905,6 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
   };
 
   const handleSubmitWeeklySchedule = async () => {
-    if (Object.keys(errors).length > 0) {
-      toast.error("Please correct the errors before submitting.");
-      return;
-    }
 
     const updateData = {
       usualHours: weeklySchedule,
@@ -962,8 +934,9 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
         Back to Profile
       </button>
       <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
-        <header className="flex justify-between items-center max-w-full text-red-800">
+        <header className="flex justify-between items-center max-w-full text-red-800 mb-5">
           <h1 className="text-4xl">Time-Off Request</h1>
+          <p className="text-lg">Please select a status before submitting.</p>
         </header>
         <div className="flex flex-col mt-4">
           <DateRangePicker
@@ -976,7 +949,12 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
           />
           <FormControl fullWidth margin="normal">
             <InputLabel>Status</InputLabel>
-            <Select value={status} label="Status" onChange={handleStatusChange}>
+            <Select
+              value={status}
+              label="Status"
+              onChange={handleStatusChange}
+              defaultValue="Time-Off"
+            >
               <MenuItem value="Time-Off">Time-Off</MenuItem>
               <MenuItem value="Vacation">Vacation</MenuItem>
             </Select>
@@ -991,8 +969,10 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
         </div>
       </section>
       <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
-        <header className="flex justify-between items-center max-w-full text-red-800">
+        <header className="flex justify-between items-center max-w-full text-red-800 mb-5">
           <h1 className="text-4xl">Weekly Schedule Update</h1>
+          <p className="text-lg">Please ensure that the start time is before the end time.</p>
+
         </header>
         <div className="flex flex-col mt-4 space-y-6">
           {weeklySchedule.map((schedule, index) => (
