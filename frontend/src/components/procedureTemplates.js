@@ -4,6 +4,7 @@ import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import ConfirmationModal from "./templateConfirmationModal";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -104,6 +105,7 @@ const ProcedureTable = ({ filter }) => {
         const response = await axios.get("/procedureTemplates");
         setData(
           response.data.map((template) => ({
+            id: template._id,
             name: template.procedureName,
             description: template.description || "",
             resources: template.requiredResources
@@ -172,8 +174,8 @@ const ProcedureTable = ({ filter }) => {
         Cell: ({ row }) => {
           const navigate = useNavigate();
 
-          const handleEditClick = () => {
-            navigate("/ModifyProcedureTemplateForm");
+          const handleEditClick = (templateId) => {
+            navigate(`/ModifyProcedureTemplateForm/${templateId}`);
           };
 
           return (
@@ -185,7 +187,7 @@ const ProcedureTable = ({ filter }) => {
               }}
             >
               <button
-                onClick={handleEditClick}
+                onClick={() => handleEditClick(row.original.id)}
                 style={{
                   background: "none",
                   border: "none",
@@ -206,7 +208,7 @@ const ProcedureTable = ({ filter }) => {
                 </svg>
               </button>
               <button
-                onClick={notify}
+                onClick={() => promptDelete(row.original)}
                 style={{
                   background: "none",
                   border: "none",
@@ -253,8 +255,38 @@ const ProcedureTable = ({ filter }) => {
     usePagination
   );
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentTemplate, setCurrentTemplate] = useState(null);
+
+  const deleteProcedureTemplate = async (templateId) => {
+    setIsModalOpen(false);
+    try {
+      const response = await axios.delete(`/procedureTemplates/${templateId}`);
+      if (response.status === 200) {
+        setData((prevData) =>
+          prevData.filter((template) => template.id !== templateId)
+        );
+        toast.success("Procedure template deleted successfully.");
+      }
+    } catch (error) {
+      console.error("Failed to delete procedure template:", error);
+      toast.error(error.response.data.message);
+    }
+  };
+
+  const promptDelete = (template) => {
+    setCurrentTemplate(template);
+    setIsModalOpen(true);
+  };
+
   return (
     <>
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={() => deleteProcedureTemplate(currentTemplate.id)}
+        templateName={currentTemplate?.name}
+      />
       <div
         style={{
           maxWidth: "95%",

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import {
   TextField,
@@ -21,21 +21,15 @@ import { useTable, useSortBy, usePagination } from "react-table";
 import Autocomplete from "@mui/material/Autocomplete";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from 'axios';
 
 const notify = () => toast.success("Section Modified!");
 
-const ModifySectionButton = () => {
-  const navigate = useNavigate();
-
-  const handleModifySectionClick = () => {
-    navigate("/ModifyProcessTemplateForm");
-    notify();
-  };
-
+const ModifySectionButton = ({ onModifySection,sectionDetails }) => {
   return (
     <button
-      onClick={handleModifySectionClick}
+      onClick={() => onModifySection(sectionDetails)}
       className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
     >
       <svg
@@ -57,7 +51,7 @@ const GoBackButton = () => {
   const navigate = useNavigate();
 
   const handleGoBackClick = () => {
-    navigate("/ModifyProcessTemplateForm");
+    navigate(-1); //Note: needs further testing
   };
 
   return (
@@ -83,18 +77,9 @@ const GoBackButton = () => {
   );
 };
 
-const SectionForm = () => {
-  const [section, setSection] = useState({
-    name: "Intraoperative",
-    description: "Procedures administered during the surgery.",
-    procedureName: "",
-  });
-
-  const [procedureOptions, setProcedureOptions] = useState([
-    "General Anesthesia",
-    "MRI Scan",
-    "Physical Therapy",
-  ]);
+const SectionForm = ({ onModifyProcedure, section, setSection }) => {
+  const [procedureOptions, setProcedureOptions] = useState([]);
+  const [currentProcedure, setCurrentProcedure] = useState(null); // New state for currently selected procedure
 
   const theme = createTheme({
     typography: {
@@ -164,23 +149,39 @@ const SectionForm = () => {
     },
   });
 
+  useEffect(() => {
+    const fetchProcedureTemplates = async () => {
+      try {
+        const response = await axios.get("/procedureTemplates");
+        setProcedureOptions(response.data);
+      } catch (error) {
+        console.error("Error fetching procedure templates:", error);
+        toast.error("Failed to load procedure templates");
+      }
+    };
+    fetchProcedureTemplates();
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setSection({ ...section, [name]: value });
+    setSection(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
   };
 
   const handleProcedureChange = (event, newValue) => {
-    setSection({ ...section, procedureName: newValue });
+    setCurrentProcedure(newValue);
   };
 
-  const createTemplate = () => {
-    console.log({ section });
-  };
-
-  const navigate = useNavigate();
-
-  const handleCreateProcedureTemplateClick = () => {
-    navigate("/CreateProcedureTemplateForm");
+  const addProcedureToSection = () => {
+    if (currentProcedure && !section.procedureTemplates.some(proc => proc._id === currentProcedure._id)) {
+      setSection(prevState => ({
+        ...prevState,
+        procedureTemplates: [...prevState.procedureTemplates, currentProcedure]
+      }));
+      setCurrentProcedure(null);
+    }
   };
 
   return (
@@ -206,8 +207,8 @@ const SectionForm = () => {
         <TextField
           fullWidth
           label="Section Name"
-          name="name"
-          value={section.name}
+          name="sectionName"
+          value={section.sectionName || ''}
           onChange={handleInputChange}
           margin="normal"
           InputLabelProps={{ style: { color: "#8E0000" } }}
@@ -219,7 +220,7 @@ const SectionForm = () => {
           rows={4}
           label="Description"
           name="description"
-          value={section.description}
+          value={section.description || ''}
           onChange={handleInputChange}
           margin="normal"
           InputLabelProps={{ style: { color: "#8E0000" } }}
@@ -228,23 +229,19 @@ const SectionForm = () => {
 
         <Grid container spacing={3} alignItems="center">
           <Grid item xs>
-            <Autocomplete
+          <Autocomplete
+              key={section.procedureTemplates.length}  
               id="procedure-name"
-              value={section.procedureName}
-              onChange={handleProcedureChange}
-              onInputChange={(event, newInputValue) => {
-                setProcedureOptions([
-                  "General Anesthesia",
-                  "MRI Scan",
-                  "Physical Therapy",
-                ]);
-              }}
               options={procedureOptions}
+              getOptionLabel={(option) => option ? option.procedureName : ''}
+              isOptionEqualToValue={(option, value) => option._id === value._id}
+              value={currentProcedure}
+              onChange={handleProcedureChange}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Procedure Name"
-                  placeholder="Search for procedure templates to add to the section."
+                  placeholder="Search for procedure templates to add to this section"
                   margin="normal"
                   fullWidth
                   InputLabelProps={{
@@ -261,6 +258,7 @@ const SectionForm = () => {
           </Grid>
           <Grid item>
             <Button
+              onClick={addProcedureToSection} 
               variant="outlined"
               startIcon={
                 <AddCircleOutlineIcon
@@ -279,37 +277,6 @@ const SectionForm = () => {
             >
               Add Procedure
             </Button>
-            <Button
-              onClick={handleCreateProcedureTemplateClick}
-              variant="outlined"
-              startIcon={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="currentColor"
-                  class="bi bi-clipboard-plus"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M8 7a.5.5 0 0 1 .5.5V9H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V10H6a.5.5 0 0 1 0-1h1.5V7.5A.5.5 0 0 1 8 7"
-                  />
-                  <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z" />
-                  <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z" />
-                </svg>
-              }
-              style={{
-                color: "#8E0000",
-                backgroundColor: "white",
-                borderColor: "#8E0000",
-                minWidth: "100px",
-                fontSize: "0.9rem",
-                textTransform: "none",
-              }}
-            >
-              Create New Procedure Template
-            </Button>
           </Grid>
         </Grid>
       </div>
@@ -317,37 +284,14 @@ const SectionForm = () => {
   );
 };
 
-const SectionTable = () => {
-  const data = React.useMemo(
-    () => [
-      {
-        name: "General Anesthesia",
-        description:
-          "A state of controlled unconsciousness during which a patient is asleep.",
-        resources:
-          "Anesthesia Machine, Monitoring System, Propofol, Suction Device",
-        roles: "Anesthesiologist, Anesthesia Technician, Nurse Anesthetist",
-        time: "45 minutes",
-        notes: "NPO (nothing by mouth) for 8 hours before the procedure.",
-      },
-      {
-        name: "Appendix Removal",
-        description:
-          "A surgical procedure to remove the appendix when it is inflamed or infected.",
-        resources: "Scalpel, Forceps, Suture Kit, Laparoscope",
-        roles: "Surgeon, Surgical Assistant, Scrub Nurse, Circulating Nurse",
-        time: "60 minutes",
-        notes: "Patient must be informed of the risks of the procedure.",
-      },
-    ],
-    []
-  );
+const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
+  const data = React.useMemo(() => procedures, [procedures]);
 
   const columns = React.useMemo(
     () => [
       {
         Header: "Name",
-        accessor: "name",
+        accessor: "procedureName",
         style: { backgroundColor: "#F5F5DC" },
       },
       {
@@ -356,33 +300,47 @@ const SectionTable = () => {
       },
       {
         Header: "Resources",
-        accessor: "resources",
+        accessor: "requiredResources",
         style: { backgroundColor: "#F5F5DC" },
+        Cell: ({ value }) => value ? (
+          <div>
+            {value.map((item, index) => (
+              <span key={index}>
+                {item.resource.name}{index < value.length - 1 ? ', ' : ''}
+              </span>
+            ))}
+          </div>
+        ) : "No resources"
       },
       {
         Header: "Roles",
         accessor: "roles",
+        Cell: ({ value }) => value ? (
+          <div>
+            {value.map((role, index) => (
+              <span key={index}>
+                {role.role.name.charAt(0).toUpperCase() + role.role.name.slice(1)}{index < value.length - 1 ? ', ' : ''}
+              </span>
+            ))}
+          </div>
+        ) : "No roles"
       },
       {
         Header: "Estimated Time",
-        accessor: "time",
+        accessor: "estimatedTime",
         style: { backgroundColor: "#F5F5DC" },
       },
       {
         Header: "Special Notes",
-        accessor: "notes",
+        accessor: "specialNotes"
       },
       {
         Header: "Actions",
-        Cell: () => (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+        Cell: ({ row }) => (
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
             <button
+            onClick={() => onMoveProcedure(row.index, "up")}
+              className="moveUpProc"
               style={{
                 background: "none",
                 border: "none",
@@ -406,6 +364,8 @@ const SectionTable = () => {
               </svg>
             </button>
             <button
+            onClick={() => onMoveProcedure(row.index, "down")}
+              className="moveDownProc"
               style={{
                 background: "none",
                 border: "none",
@@ -429,6 +389,8 @@ const SectionTable = () => {
               </svg>
             </button>
             <button
+            onClick={() => onDeleteProcedure(row.index)}
+              className="deleteProc"
               style={{
                 background: "none",
                 border: "none",
@@ -452,7 +414,7 @@ const SectionTable = () => {
         disableSortBy: true,
       },
     ],
-    []
+    [onMoveProcedure, onDeleteProcedure]
   );
 
   const { getTableProps, getTableBodyProps, headerGroups, prepareRow, rows } =
@@ -568,6 +530,71 @@ const SectionTable = () => {
 };
 
 const ModifySectionForm = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [section, setSection] = useState({
+    sectionName: "",
+    description: "",
+    procedureTemplates: [],
+  });
+
+  useEffect(() => {
+    if (location.state?.section) {
+      setSection(location.state.section);
+    }
+  }, [location.state]);
+
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setSection(prev => ({ ...prev, [name]: value }));
+  };
+
+  const addProcedure = (procedure) => {
+    setSection(prev => ({
+      ...prev,
+      procedureTemplates: [...prev.procedureTemplates, procedure]
+    }));
+  };
+
+  const deleteProcedure = (index) => {
+    setSection(prev => ({
+      ...prev,
+      procedureTemplates: prev.procedureTemplates.filter((_, i) => i !== index)
+    }));
+  };
+
+  const onModifySection = () => {
+    if(!section.sectionName){
+      toast.error("Section name is required.");
+      return;
+    }
+    if(!section.description){
+      toast.error("A description is required.");
+      return;
+    }
+    if(section.procedureTemplates.length === 0){
+      toast.error("At least one procedure is required.");
+      return;
+    }    
+    
+    navigate("/CreateProcessTemplateForm", { state: { newSection: section } });
+    setSection({ sectionName: "", description: "", procedureTemplates: [] }); // Clear state
+    notify();
+  };
+
+  const moveProcedure = (index, direction) => {
+    setSection(prev => {
+      let newProcedures = [...prev.procedureTemplates];
+      if ((direction === "up" && index > 0) || (direction === "down" && index < newProcedures.length - 1)) {
+        const positionChange = direction === "up" ? -1 : 1;
+        [newProcedures[index], newProcedures[index + positionChange]] = [newProcedures[index + positionChange], newProcedures[index]];
+      }
+      return { ...prev, procedureTemplates: newProcedures };
+    });
+  };
+
   return (
     <div>
       <div
@@ -584,7 +611,9 @@ const ModifySectionForm = () => {
           <GoBackButton />
         </div>
         <div style={{ position: "absolute", right: "2rem" }}>
-          <ModifySectionButton />
+          <ModifySectionButton 
+                  onModifySection={onModifySection}
+                  sectionDetails={section}/>
         </div>
         <h1
           style={{
@@ -598,8 +627,8 @@ const ModifySectionForm = () => {
           Modify Section
         </h1>
       </div>
-      <SectionForm />
-      <SectionTable />
+      <SectionForm onAddProcedure={addProcedure} section={section} setSection={setSection} />
+      <SectionTable procedures={section.procedureTemplates} onMoveProcedure={moveProcedure} onDeleteProcedure={deleteProcedure} />
     </div>
   );
 };
