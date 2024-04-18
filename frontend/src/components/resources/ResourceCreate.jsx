@@ -59,12 +59,14 @@ const ResourceCreate = ({ navToViewResource }) => {
 
   const makeTypeSelection = (type) => {
     setResourceType(type);
+    if (type === "roles") setFormData({ ...formData, location: "" });
     setResourceCreatePage("form");
   };
 
   const navToTypeSelection = () => {
     setResourceCreatePage("type");
   };
+
   const theme = createTheme({
     typography: {
       fontSize: 12,
@@ -149,7 +151,7 @@ const ResourceCreate = ({ navToViewResource }) => {
 
 const SelectType = ({ navToViewResource, makeTypeSelection }) => {
   const selectEquipment = () => {
-    makeTypeSelection("equipments");
+    makeTypeSelection("equipment");
   };
 
   const selectRole = () => {
@@ -182,7 +184,7 @@ const SelectType = ({ navToViewResource, makeTypeSelection }) => {
           id="selectEquipmentsBtn"
         >
           <MdOutlineMedicalServices className="w-8 h-8" />
-          <p>Equipments</p>
+          <p>Equipment</p>
         </button>
         <button
           className="flex flex-col items-center"
@@ -212,6 +214,7 @@ const ResourceForm = ({
   handleSubmit,
   navToTypeSelection,
 }) => {
+  const typeIsRole = resourceType === "roles";
   return (
     <div className="py-8 px-4">
       <section className="flex justify-center items-center relative py-4">
@@ -248,7 +251,7 @@ const ResourceForm = ({
               Type
             </label>
             <div className="flex items-center justify-center text-primary">
-              {resourceType === "equipments" && (
+              {resourceType === "equipment" && (
                 <MdOutlineMedicalServices className="w-6 h-6" />
               )}
               {resourceType === "personnel" && (
@@ -263,7 +266,7 @@ const ResourceForm = ({
         </div>
         <div className="mb-4">
           <TextField
-            label="*Location"
+            label={`${typeIsRole ? "" : "*"}Location`}
             name="location"
             value={formData.location}
             onChange={handleChange}
@@ -271,13 +274,14 @@ const ResourceForm = ({
             InputLabelProps={{ style: { color: "#8E0000" } }}
             inputProps={{ style: { color: "#8E0000" } }}
             className="shadow rounded w-full py-2 px-3"
+            disabled={typeIsRole}
           />
         </div>
         <div className="mb-4">
           <TextField
             multiline
             rows={4}
-            label="*Description"
+            label={`${typeIsRole ? "" : "*"}Description`}
             name="description"
             value={formData.description}
             onChange={handleChange}

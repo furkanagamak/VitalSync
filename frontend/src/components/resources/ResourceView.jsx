@@ -1,4 +1,3 @@
-import tmpResources from "../../tmp/data/resources";
 import ResourceDeleteModal from "./ResourceDeleteModal";
 import { useState, useEffect, useMemo } from "react";
 import { useTable, useSortBy, usePagination } from "react-table";
@@ -6,66 +5,83 @@ import { AiOutlineSearch } from "react-icons/ai";
 import { FaPen, FaTrashAlt } from "react-icons/fa";
 import { MdArrowDropDown, MdArrowDropUp } from "react-icons/md";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
-const ResourceView = ({ navToEditResource }) => {
+const ResourceView = ({ resources, setResources, navToEditResource }) => {
   // all resources
-  const [resources, setResources] = useState(null);
+  const [equipment, setEquipment] = useState(null);
+  const [roles, setRoles] = useState(null);
 
   // filters
   const [tabFilter, setTabFilter] = useState("All");
   const [textFilter, setTextFilter] = useState("");
 
   // all resources displayed inside the table
-  const [displayingResources, setDisplayingResources] = useState(resources);
+  const [displayingResources, setDisplayingResources] = useState([]);
+
+  const removeResourceById = (uniqueIdentifier) => {
+    if (resources)
+      setResources((resources) =>
+        resources.filter(
+          (resource) => resource.uniqueIdentifier !== uniqueIdentifier
+        )
+      );
+  };
 
   // initial fetch
   useEffect(() => {
     const fetchResources = async () => {
-      setResources(tmpResources);
+      try {
+        const resPromise = axios.get("/resources");
+        const rolePromise = axios.get("/roles");
+        const [resResponse, roleResponse] = await Promise.all([
+          resPromise,
+          rolePromise,
+        ]);
+
+        // Setting state for each category
+        setEquipment(resResponse.data);
+        setRoles(roleResponse.data);
+
+        // Combining both arrays and setting the combined array to resources
+        const combinedResources = [...resResponse.data, ...roleResponse.data];
+        setResources(combinedResources);
+
+        console.log("Combined Resources:", combinedResources);
+      } catch (error) {
+        console.error("Error fetching resources:", error);
+      }
     };
     fetchResources();
   }, []);
 
   // updates the display resources whenever a filter is updated
   useEffect(() => {
+    let filteredDataByType;
     if (!resources) return;
-    const filteredDataByType =
-      tabFilter === "All"
-        ? resources
-        : resources.filter((resource) => resource.type === tabFilter);
+
+    if (tabFilter === "All") {
+      filteredDataByType = resources; // Show all resources when "All" is selected
+    } else if (tabFilter === "Personnel") {
+      filteredDataByType = roles;  // Show only roles when "Personnel" is selected
+    } else if (tabFilter === "Equipments") {
+      filteredDataByType = resources.filter(resource => resource.type === "equipment");  // Show only roles when "Personnel" is selected
+    } else {
+      filteredDataByType = resources.filter(
+        (resource) => resource.type === tabFilter.toLowerCase()
+      );
+    }
 
     const filteredResources =
       textFilter === ""
         ? filteredDataByType
         : filteredDataByType.filter((resource) => {
             const searchText = textFilter.toLowerCase();
-            const {
-              type,
-              name,
-              location,
-              description,
-              uniqueIdentifier,
-              status,
-            } = resource;
-
-            const matchesType = type.toLowerCase().includes(searchText);
-            const matchesName = name.toLowerCase().includes(searchText);
-            const matchesLocation = location.toLowerCase().includes(searchText);
-            const matchesDescription = description
-              .toLowerCase()
-              .includes(searchText);
-            const matchesUniqueIdentifier = uniqueIdentifier
-              .toLowerCase()
-              .includes(searchText);
-            const matchesStatus = status.toLowerCase().includes(searchText);
-
             return (
-              matchesType ||
-              matchesName ||
-              matchesLocation ||
-              matchesDescription ||
-              matchesUniqueIdentifier ||
-              matchesStatus
+              resource.name.toLowerCase().includes(searchText) ||
+              resource.description.toLowerCase().includes(searchText) ||
+              (resource.location &&
+                resource.location.toLowerCase().includes(searchText))
             );
           });
     setDisplayingResources(filteredResources);
@@ -86,6 +102,7 @@ const ResourceView = ({ navToEditResource }) => {
         <Table
           resources={displayingResources}
           navToEditResource={navToEditResource}
+          removeResourceById={removeResourceById}
         />
       </section>
     </div>
@@ -163,7 +180,7 @@ const Filters = ({ tabFilter, setTabFilter }) => {
   );
 };
 
-const Table = ({ resources, navToEditResource }) => {
+const Table = ({ resources, navToEditResource, removeResourceById }) => {
   // define all columns and their accessors
   const columns = useMemo(
     () => [
@@ -251,6 +268,7 @@ const Table = ({ resources, navToEditResource }) => {
   const handleDelete = () => {
     // Perform deletion logic here
     console.log("Deleting resource:", resourceToDelete);
+    removeResourceById(resourceToDelete.uniqueIdentifier);
     setShowDeleteModal(false);
     setResourceToDelete(null);
   };
