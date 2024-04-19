@@ -10,7 +10,7 @@ describe('Create Process Template Form Tests', () => {
 
     it('successfully loads Create Process Template Form', () => {
         cy.contains('Create New Process Template').should('be.visible');
-        cy.contains('Create Template').should('be.visible');
+        cy.contains('Save Template').should('be.visible');
         cy.contains('Go Back').should('be.visible');
     });
 

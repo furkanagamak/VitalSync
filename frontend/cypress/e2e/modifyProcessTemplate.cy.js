@@ -15,7 +15,7 @@ describe('Modify Process Template Form Tests', () => {
     });
   
     it('should notify and navigate when Modify Template button is clicked', () => {
-      cy.get('button').contains('Modify Template').click();
+      cy.get('button').contains('Save Template').click();
       cy.url().should('include', '/ProcessTemplateManagement');
     });
 
