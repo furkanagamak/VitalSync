@@ -114,6 +114,10 @@ const ProcedureForm = ({
           }
           typesToNames[template.type].push(template.name);
         });
+        // Iterate through each property of typesToNames and sort the array
+        Object.keys(typesToNames).forEach((type) => {
+          typesToNames[type].sort();
+        });
         setResourceNames(typesToNames);
         setResourceTypes(Object.keys(typesToNames));
       } catch (error) {
@@ -124,6 +128,7 @@ const ProcedureForm = ({
     const fetchRoles = async () => {
       const response = await axios.get("/roles");
       const names = response.data.map((role) => role.name);
+      names.sort();
       setRoleNames(names);
     };
 
@@ -411,7 +416,7 @@ const ProcedureForm = ({
               >
                 {newResource.type &&
                   resourceNames[newResource.type]?.map((name, index) => (
-                    <MenuItem key={index} value={name}>
+                    <MenuItem className="capitalize" key={index} value={name}>
                       {name}
                     </MenuItem>
                   ))}
@@ -536,7 +541,7 @@ const ProcedureForm = ({
                 style={{ color: "#8E0000" }}
               >
                 {roleNames.map((name, index) => (
-                  <MenuItem key={index} value={name}>
+                  <MenuItem className="capitalize" key={index} value={name}>
                     {name}
                   </MenuItem>
                 ))}
@@ -680,7 +685,7 @@ const CreateProcedureTemplateForm = () => {
       return;
     }
 
-    if(procedure.estimatedTime < 1) {
+    if (procedure.estimatedTime < 1) {
       toast.error("Estimated time cannot be less than 1 minute.");
       return;
     }
