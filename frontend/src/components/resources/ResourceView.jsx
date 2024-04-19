@@ -146,7 +146,7 @@ const CreateNewButton = () => {
   return (
     <Link
       to="/resources/create"
-      className="w-1/4 flex justify-center"
+      className="w-1/6 flex justify-center"
       id="createNewResourceBtn"
     >
       <button className="bg-primary text-white text-lg font-semibold rounded-md w-32 py-2">
@@ -199,24 +199,6 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
       {
         Header: "Unique ID",
         accessor: "uniqueIdentifier",
-      },
-      {
-        Header: "Status",
-        accessor: "status",
-        Cell: ({ value }) => (
-          <span
-            style={{
-              color:
-                value === "In-use"
-                  ? "#AA0000"
-                  : value === "Available"
-                  ? "#009020"
-                  : "black",
-            }}
-          >
-            {value}
-          </span>
-        ),
       },
       {
         Header: "Actions",
