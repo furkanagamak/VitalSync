@@ -989,19 +989,25 @@ app.delete("/procedureTemplates/:id", async (req, res) => {
   const procedureTemplateId = req.params.id;
   try {
     // Check if any SectionTemplate is using the ProcedureTemplate
-    const isUsed = await SectionTemplate.findOne({
+    const sectionUsingProcedure = await SectionTemplate.findOne({
       procedureTemplates: new mongoose.Types.ObjectId(procedureTemplateId),
     });
 
-    if (isUsed) {
-      // If the ProcedureTemplate is in use, do not delete and send a message
-      return res.status(403).json({
-        message:
-          "Cannot delete procedure template because it is in use by a process template.",
+    if (sectionUsingProcedure) {
+      // Check if the SectionTemplate is part of any ProcessTemplate
+      const isPartOfProcess = await ProcessTemplate.findOne({
+        sectionTemplates: sectionUsingProcedure._id
       });
+
+      // If the ProcedureTemplate is in use and part of a process template, do not delete and send a message
+      if (isPartOfProcess) {
+        return res.status(403).json({
+          message: "Cannot delete procedure template because it is in use by a process template."
+        });
+      }
     }
 
-    // If the ProcedureTemplate is not in use, proceed to delete
+    // If the ProcedureTemplate is not in use by a process template, proceed to delete
     await ProcedureTemplate.findByIdAndDelete(procedureTemplateId);
 
     res.status(200).json({

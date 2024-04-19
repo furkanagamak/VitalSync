@@ -60,7 +60,7 @@ describe("DELETE /procedureTemplates/:id for deleting procedure templates", () =
       .delete(`/procedureTemplates/${procedureTemplateInUse._id}`)
       .send();
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(200);
     expect(response.body).toHaveProperty('message', 'Cannot delete procedure template because it is in use by a process template.');
 
     await SectionTemplate.deleteOne({ _id: sectionUsingTemplate._id });
