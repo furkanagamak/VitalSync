@@ -167,6 +167,7 @@ const ProcessTable = ({ filter }) => {
               }}
             >
               <button
+              className="modify-process-template-button"
                 onClick={handleEditClick}
                 style={{
                   background: "none",

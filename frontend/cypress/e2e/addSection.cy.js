@@ -5,7 +5,8 @@ describe('Add Section Form Tests', () => {
         cy.get('#passwordInput').type('password123');
         cy.get('button').contains('Sign in').click();
         cy.wait(1000);
-        cy.visit('/AddSectionForm');
+        cy.visit('/CreateProcessTemplateForm');
+        cy.get('button').contains('Add Section').click();
     });
 
     it('successfully loads Add Section Form', () => {
