@@ -39,7 +39,7 @@ describe("DELETE /procedureTemplates/:id for deleting procedure templates", () =
     expect(response.body).toHaveProperty('message', 'Procedure template deleted successfully.');
   });
 
-  test("should not delete a procedure template if it is in use", async () => {
+  test("should delete a procedure template if it is in use by a section template but not process template", async () => {
     const procedureTemplateInUse = await ProcedureTemplate.create({
       procedureName: "Complex Procedure",
       description: "Procedure requiring multiple sections",
@@ -61,7 +61,7 @@ describe("DELETE /procedureTemplates/:id for deleting procedure templates", () =
       .send();
 
     expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('message', 'Cannot delete procedure template because it is in use by a process template.');
+    expect(response.body).toHaveProperty('message', 'Procedure template deleted successfully.');
 
     await SectionTemplate.deleteOne({ _id: sectionUsingTemplate._id });
   });
