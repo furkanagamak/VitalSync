@@ -45,7 +45,7 @@ describe("GET /user/profilePicture/url/:id get signed profile picture url", () =
         department: "HR",
         degree: "MBA",
         phoneNumber: "1234567890",
-        eligibleRoles: "physician",
+        eligibleRoles: "Physician",
       });
 
     expect(response.status).toBe(400);
@@ -76,7 +76,7 @@ describe("GET /user/profilePicture/url/:id get signed profile picture url", () =
         department: "HR",
         degree: "MBA",
         phoneNumber: "1234567890",
-        eligibleRoles: "physician",
+        eligibleRoles: "Physician",
       });
 
     expect(response.status).toBe(400);
@@ -139,7 +139,7 @@ describe("GET /user/profilePicture/url/:id get signed profile picture url", () =
         department: "Heart Department",
         degree: "bachelors",
         phoneNumber: "1234567890",
-        eligibleRoles: "physician",
+        eligibleRoles: "Physician",
       });
 
     expect(response.status).toBe(201);
