@@ -21,7 +21,7 @@ import { useTable, useSortBy, usePagination } from "react-table";
 import Autocomplete from "@mui/material/Autocomplete";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation} from "react-router-dom";
 import axios from 'axios';
 
 const notify = () => toast.success("Section Added!");
@@ -43,7 +43,7 @@ const AddSectionButton = ({ onAddSection,sectionDetails }) => {
         <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
       </svg>
-      Add Section
+      Save Section
     </button>
   );
 };
@@ -541,12 +541,14 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
 const AddSectionForm = () => {
   //const [procedures, setProcedures] = useState([]);
   const [section, setSection] = useState({
+    _id: Date.now(),
     sectionName: "",
     description: "",
     procedureTemplates: [],
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -581,9 +583,9 @@ const AddSectionForm = () => {
       return;
     }    
     
-    navigate("/CreateProcessTemplateForm", { state: { newSection: section } });
-    setSection({ sectionName: "", description: "", procedureTemplates: [] }); // Clear state
-    notify();
+    navigate(location.state.url, { state: { newSection: section } });
+    setSection({ _id: "", sectionName: "", description: "", procedureTemplates: [] }); // Clear state
+    //notify();
   };
 
   const moveProcedure = (index, direction) => {

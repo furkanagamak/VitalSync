@@ -155,7 +155,7 @@ const ProcessTable = ({ filter }) => {
           const navigate = useNavigate();
 
           const handleEditClick = () => {
-            navigate("/ModifyProcessTemplateForm");
+            navigate(`/ModifyProcessTemplateForm/${row.original.id}`);
           };
 
           return (
@@ -167,6 +167,7 @@ const ProcessTable = ({ filter }) => {
               }}
             >
               <button
+              className="modify-process-template-button"
                 onClick={handleEditClick}
                 style={{
                   background: "none",
