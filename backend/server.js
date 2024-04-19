@@ -54,7 +54,6 @@ mongoose
       { name: "physician", uniqueIdentifier: "physician" },
       { name: "nurse", uniqueIdentifier: "nurse" },
       { name: "surgeon", uniqueIdentifier: "surgeon" },
-      { name: "other", uniqueIdentifier: "other" },
     ];
 
     // Function to add roles if they do not exist
