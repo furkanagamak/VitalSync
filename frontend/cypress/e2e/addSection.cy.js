@@ -11,7 +11,7 @@ describe('Add Section Form Tests', () => {
 
     it('successfully loads Add Section Form', () => {
         cy.contains('Add New Section').should('be.visible');
-        cy.contains('Add Section').should('be.visible');
+        cy.contains('Save Section').should('be.visible');
         cy.contains('Go Back').should('be.visible');
     });
 
