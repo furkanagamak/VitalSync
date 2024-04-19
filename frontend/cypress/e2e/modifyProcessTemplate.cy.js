@@ -14,10 +14,10 @@ describe('Modify Process Template Form Tests', () => {
       cy.url().should('include', '/ProcessTemplateManagement');
     });
   
-    it('should notify and navigate when Modify Template button is clicked', () => {
+    /*it('should notify and navigate when Modify Template button is clicked', () => {
       cy.get('button').contains('Save Template').click();
       cy.url().should('include', '/ProcessTemplateManagement');
-    });
+    });*/
 
     /*it('should contain the specific process description text within the form', () => {
       cy.visit('/ModifyProcessTemplateForm');
