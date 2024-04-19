@@ -51,9 +51,10 @@ mongoose
     console.log("MongoDB Connected.");
     console.log("Iniitializing roles");
     const rolesToAdd = [
-      { name: "Physician", uniqueIdentifier: "Physician" },
-      { name: "Nurse", uniqueIdentifier: "Nurse" },
-      { name: "Surgeon", uniqueIdentifier: "Surgeon" },
+      { name: "physician", uniqueIdentifier: "physician" },
+      { name: "nurse", uniqueIdentifier: "nurse" },
+      { name: "surgeon", uniqueIdentifier: "surgeon" },
+      { name: "other", uniqueIdentifier: "other" },
     ];
 
     // Function to add roles if they do not exist
@@ -543,9 +544,9 @@ app.post("/resetPassword", async (req, res) => {
 });
 
 async function initializePredefinedAccounts() {
-  const nurseRole = await Role.findOne({ name: "Nurse" });
-  const physicianRole = await Role.findOne({ name: "Physician" });
-  const surgeonRole = await Role.findOne({ name: "Surgeon" });
+  const nurseRole = await Role.findOne({ name: "nurse" });
+  const physicianRole = await Role.findOne({ name: "physician" });
+  const surgeonRole = await Role.findOne({ name: "surgeon" });
   try {
     const predefinedAccounts = [
       {
