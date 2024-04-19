@@ -133,7 +133,7 @@ const ProcedureForm = ({
 
   const theme = createTheme({
     typography: {
-      fontSize: 12,
+      fontSize: 14,
       button: {
         textTransform: "none",
       },
@@ -447,8 +447,8 @@ const ProcedureForm = ({
               color: "#8E0000",
               backgroundColor: "white",
               borderColor: "#8E0000",
-              minWidth: "150px",
-              fontSize: "0.9rem",
+              minWidth: "175px",
+              fontSize: "1rem",
             }}
             onClick={addResource}
           >
@@ -572,8 +572,8 @@ const ProcedureForm = ({
               color: "#8E0000",
               backgroundColor: "white",
               borderColor: "#8E0000",
-              minWidth: "150px",
-              fontSize: "0.9rem",
+              minWidth: "175px",
+              fontSize: "1rem",
             }}
             onClick={addRole}
           >
