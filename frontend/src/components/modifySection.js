@@ -540,6 +540,7 @@ const ModifySectionForm = () => {
   const navigate = useNavigate();
 
   const [section, setSection] = useState({
+    _id: "",
     sectionName: "",
     description: "",
     procedureTemplates: [],
@@ -585,9 +586,9 @@ const ModifySectionForm = () => {
       return;
     }    
     
-    navigate("/CreateProcessTemplateForm", { state: { newSection: section } });
+    navigate(location.state.url, { state: { newSection: section } });
     setSection({ sectionName: "", description: "", procedureTemplates: [] }); // Clear state
-    notify();
+    //notify();
   };
 
   const moveProcedure = (index, direction) => {

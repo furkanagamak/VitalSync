@@ -21,7 +21,7 @@ import { useTable, useSortBy, usePagination } from "react-table";
 import Autocomplete from "@mui/material/Autocomplete";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation} from "react-router-dom";
 import axios from 'axios';
 
 const notify = () => toast.success("Section Added!");
@@ -541,12 +541,14 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
 const AddSectionForm = () => {
   //const [procedures, setProcedures] = useState([]);
   const [section, setSection] = useState({
+    _id: Date.now(),
     sectionName: "",
     description: "",
     procedureTemplates: [],
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -581,9 +583,9 @@ const AddSectionForm = () => {
       return;
     }    
     
-    navigate("/CreateProcessTemplateForm", { state: { newSection: section } });
-    setSection({ sectionName: "", description: "", procedureTemplates: [] }); // Clear state
-    notify();
+    navigate(location.state.url, { state: { newSection: section } });
+    setSection({ _id: "", sectionName: "", description: "", procedureTemplates: [] }); // Clear state
+    //notify();
   };
 
   const moveProcedure = (index, direction) => {

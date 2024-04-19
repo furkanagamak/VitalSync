@@ -1072,6 +1072,78 @@ app.get("/processTemplates", async (req, res) => {
   }
 });
 
+app.get("/processTemplates/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const template = await ProcessTemplate.findById(id).populate({
+      path: "sectionTemplates",
+      populate: {
+        path: "procedureTemplates",
+        populate: {
+          path: "requiredResources.resource roles.role",
+        },
+      },
+    });
+
+    if (!template) {
+      return res.status(404).json({ message: "Process template not found" });
+    }
+
+    res.status(200).json(template);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error retrieving process template", error: error.message });
+  }
+});
+
+
+app.put('/processTemplates/:id', async (req, res) => {
+  try {
+    const { processName, description, sections } = req.body;
+    const { id } = req.params;
+
+    const sectionIds = await Promise.all(sections.map(async (section) => {
+      if ('_id' in section && mongoose.Types.ObjectId.isValid(section._id.toString())) {
+        const updatedSection = await SectionTemplate.findByIdAndUpdate(section._id, {
+          sectionName: section.sectionName,
+          description: section.description,
+          procedureTemplates: section.procedureTemplates.filter(id => mongoose.Types.ObjectId.isValid(id)),
+        }, { new: true });
+        return updatedSection ? updatedSection._id : null;
+      } else {
+        // Create new section
+        const newSection = new SectionTemplate({
+          sectionName: section.sectionName,
+          description: section.description,
+          procedureTemplates: section.procedureTemplates.filter(id => mongoose.Types.ObjectId.isValid(id)),
+        });
+        await newSection.save();
+        return newSection._id;
+      }
+    }));
+
+    const filteredSectionIds = sectionIds.filter(id => id !== null);
+
+
+    const updatedTemplate = await ProcessTemplate.findByIdAndUpdate(id, {
+      processName,
+      description,
+      sectionTemplates: filteredSectionIds
+    }, { new: true }).populate('sectionTemplates');
+
+    if (!updatedTemplate) {
+      return res.status(404).json({ message: "Process template not found" });
+    }
+
+    res.status(200).json(updatedTemplate);
+  } catch (error) {
+    console.error("Failed to update process template:", error);
+    res.status(400).json({ message: "Failed to update process template", error: error.message });
+  }
+});
+
+
+
 app.delete("/processTemplates/:id", async (req, res) => {
   try {
     const processTemplateId = req.params.id;
@@ -1088,21 +1160,19 @@ app.delete("/processTemplates/:id", async (req, res) => {
   }
 });
 
-app.post("/processTemplates", async (req, res) => {
+app.post('/processTemplates', async (req, res) => {
   try {
     const { processName, description, sections } = req.body;
 
-    const sectionIds = await Promise.all(
-      sections.map(async (section) => {
-        const newSection = new SectionTemplate({
-          sectionName: section.sectionName,
-          description: section.description,
-          procedureTemplates: section.procedureTemplates,
-        });
-        await newSection.save();
-        return newSection._id;
-      })
-    );
+    const sectionIds = await Promise.all(sections.map(async (section) => {
+      const newSection = new SectionTemplate({
+        sectionName: section.sectionName,
+        description: section.description,
+        procedureTemplates: section.procedureTemplates, 
+      });
+      await newSection.save();
+      return newSection._id;
+    }));
 
     const newProcessTemplate = new ProcessTemplate({
       processName,
@@ -1114,12 +1184,7 @@ app.post("/processTemplates", async (req, res) => {
     res.status(201).json(newProcessTemplate);
   } catch (error) {
     console.error("Failed to create process template:", error);
-    res
-      .status(400)
-      .json({
-        message: "Failed to create process template",
-        error: error.message,
-      });
+    res.status(400).json({ message: "Failed to create process template", error: error.message });
   }
 });
 
