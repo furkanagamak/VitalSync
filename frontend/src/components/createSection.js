@@ -21,7 +21,7 @@ import { useTable, useSortBy, usePagination } from "react-table";
 import Autocomplete from "@mui/material/Autocomplete";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation} from "react-router-dom";
 import axios from 'axios';
 
 const notify = () => toast.success("Section Added!");
@@ -541,10 +541,10 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
 const AddSectionForm = () => {
   //const [procedures, setProcedures] = useState([]);
   const [section, setSection] = useState({
+    _id: Date.now(),
     sectionName: "",
     description: "",
     procedureTemplates: [],
-    _id: Date.now()
   });
 
   const navigate = useNavigate();
@@ -582,11 +582,10 @@ const AddSectionForm = () => {
       toast.error("At least one procedure is required.");
       return;
     }    
-    console.log(location.state.from);
-    navigate(location.state.from, { state: { newSection: section } });
-    console.log("Adding this section:",section);
-    setSection({ sectionName: "", description: "", procedureTemplates: [] }); // Clear state
-    notify();
+    
+    navigate(location.state.url, { state: { newSection: section } });
+    setSection({ _id: "", sectionName: "", description: "", procedureTemplates: [] }); // Clear state
+    //notify();
   };
 
   const moveProcedure = (index, direction) => {

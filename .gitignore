@@ -6,5 +6,4 @@ cypress/e2e/spec.cy.js
 cypress/fixtures/example.json
 cypress/support/commands.js
 /frontend/cypress/screenshots
-VitalSyncScript.bat
-backend/dbpseed.js
+

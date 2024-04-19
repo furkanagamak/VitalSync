@@ -193,7 +193,7 @@ const ProcessForm = ({ process, setProcess, createTemplate }) => {
   );
 };
 
-const SectionTable = ({ sections, setSections, onSaveState }) => {
+const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate, process }) => {
   const data = React.useMemo(() => sections, [sections]);
   const navigate = useNavigate();
   const location = useLocation(); 
@@ -201,62 +201,50 @@ const SectionTable = ({ sections, setSections, onSaveState }) => {
 
   const handleAddSection = () => {
     console.log('Navigating to add new section');
-    onSaveState();
-    navigate("/AddSectionForm", { state: { from: '/CreateProcessTemplateForm', isAddingNew: true } });
+    handleSessionUpdate(process, sections); // Save current state before navigating
+    navigate("/AddSectionForm", { state: { isAddingNew: true, url: "/CreateProcessTemplateForm" } });
   };
 
   const handleModifySection = (index) => {
-    console.log("Going to update this section: ", index);
     const sectionToModify = sections[index];
-    navigate("/ModifySectionForm", { state: { from: '/CreateProcessTemplateForm', section: sectionToModify} });
+    handleSessionUpdate(process, sections); // Save current state before navigating
+    navigate("/ModifySectionForm", { state: { section: sectionToModify, url: "/CreateProcessTemplateForm"} });
 };
 
-/*const updateSections = debounce((newSection) => {
-  console.log(sections.length);
-  setSections(prevSections => {
-    const index = prevSections.findIndex(sec => sec._id === newSection._id);
-    console.log("Before update", prevSections.map(sec => ({ ...sec })));
-    
-    if (index !== -1) {
-      const newSections = [...prevSections];
-      newSections[index] = {...newSections[index], ...newSection};
-      console.log("Updating section at index", index, "with", newSection);
-      console.log("After update", newSections.length);
-      return newSections;
-    } else {
-      console.log("Adding new section", newSection, prevSections.length + 1);
-      return [...prevSections, newSection];
-    }
-  });
-}, 10);*/ //1 second millisecond delay to avoid rapid re-update of section state on location change. Need to solve underlying issue
-const updateSections = (newSection) => {
-  console.log("Attempting to update or add section:", newSection);
-  setSections(prevSections => {
-    const index = prevSections.findIndex(sec => sec._id === newSection._id);
-    console.log("Index found:", index); // Check if -1 or valid index
-    console.log("Previous sections:", prevSections);
+  const updateSections = debounce((newSection) => {
+    setSections(prevSections => {
+      const nameConflict = prevSections.some(section =>
+        section.sectionName.toLowerCase() === newSection.sectionName.toLowerCase() && 
+        section._id !== newSection._id
+      );
 
-    if (index !== -1) {
-      // Update existing section
+      if (nameConflict) {
+        toast.error("A section with the same name already exists.");
+        return prevSections; 
+      }
+
+      const sectionIndex = prevSections.findIndex(section => section._id === newSection._id);
+    if (sectionIndex !== -1) {
       const updatedSections = [...prevSections];
-      updatedSections[index] = { ...updatedSections[index], ...newSection };
-      console.log("Updated sections array:", updatedSections);
+      updatedSections[sectionIndex] = newSection;
+      handleSessionUpdate(process, updatedSections);
+      toast.success("Section Modified!");
       return updatedSections;
     } else {
-      // Add new section
       const newSections = [...prevSections, newSection];
-      console.log("New sections array with added section:", newSections);
+      handleSessionUpdate(process, newSections);
+      toast.success("Section Added!");
       return newSections;
     }
-  });
-};
+    });
+  }, 1);  //1 second millisecond delay to avoid rapid re-update of section state on location change. Need to solve underlying issue
+  
+  useEffect(() => {
+    if (location.state?.newSection) {
+      updateSections(location.state.newSection);
+    }
+  }, [location.state?.newSection]);
 
-useEffect(() => {
-  console.log("Effect location state:", location.state);
-  if (location.state?.newSection) {
-    updateSections(location.state.newSection);
-  }
-}, [location.state]);
 
   const moveSection = (index, direction) => {
     setSections(currentSections => {
@@ -266,12 +254,17 @@ useEffect(() => {
       } else if (direction === 'down' && index < newSections.length - 1) {
         [newSections[index], newSections[index + 1]] = [newSections[index + 1], newSections[index]];
       }
+      handleSessionUpdate(process, newSections); // Update session storage
       return newSections;
     });
   };
 
   const deleteSection = (index) => {
-    setSections(currentSections => currentSections.filter((_, i) => i !== index));
+    setSections(currentSections => {
+      const newSections = currentSections.filter((_, i) => i !== index);
+      handleSessionUpdate(process, newSections); // Update session storage
+      return newSections;
+    });
   };
 
   const columns = React.useMemo(() => [
@@ -547,33 +540,29 @@ const CreateProcessTemplateForm = () => {
   const [process, setProcess] = useState({
     name: "",
     description: "",
+    sections: []
   });
   const [sections, setSections] = useState([]);
 
   const handleSaveState = () => {
     const stateToSave = { process, sections };
-    console.log(stateToSave);
     sessionStorage.setItem('processTemplateState', JSON.stringify(stateToSave));
   };
 
   useEffect(() => {
     const savedState = JSON.parse(sessionStorage.getItem('processTemplateState'));
     if (savedState) {
-      console.log(savedState);
       setProcess(savedState.process);
       setSections(savedState.sections);
     }
   }, []);
 
+  const updateSessionStorage = (newProcess, newSections) => {
+    const stateToSave = { process: newProcess, sections: newSections };
+    sessionStorage.setItem('processTemplateState', JSON.stringify(stateToSave));
+  };
+
   const createTemplate = async () => {
-
-    const procData = {
-      processName: process.name,
-      description: process.description,
-      sections: sections, 
-    };
-
-    console.log(procData);
 
     if(!process.name){
       toast.error("Process name is required.");
@@ -588,13 +577,24 @@ const CreateProcessTemplateForm = () => {
       return;
     }
 
+    const procData = {
+      processName: process.name,
+      description: process.description,
+      sections: sections.map(section => ({
+          _id: section._id, 
+          sectionName: section.sectionName,
+          description: section.description,
+          procedureTemplates: section.procedureTemplates.map(p => p._id || p) 
+      }))
+  };
+
     try {
       const response = await axios.post("/processTemplates", procData);
       console.log("Template Created:", response.data);
       navigate("/ProcessTemplateManagement");
       toast.success("Process Template Created Successfully!");
 
-      setProcess({ name: "", description: "" });
+      setProcess({ name: "", description: "", sections: "" });
       setSections([]);
 
       sessionStorage.removeItem('processTemplateState');
@@ -643,9 +643,11 @@ const CreateProcessTemplateForm = () => {
       setProcess={setProcess}
       createTemplate={createTemplate}/>
       <SectionTable 
+      handleSessionUpdate={updateSessionStorage}
       sections={sections}
       setSections={setSections}
-      onSaveState={handleSaveState}/>
+      process={process}
+      setProcess={setProcess}/>
     </div>
   );
 };

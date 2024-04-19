@@ -351,7 +351,6 @@ const transformAccount = async (account) => {
 
 app.post("/login", async (req, res) => {
   console.log("Login route hit with body:", req.body);
-
   try {
     const { email, password } = req.body;
 
@@ -912,7 +911,7 @@ app.post("/procedureTemplates", async (req, res) => {
   }
 });
 
-    app.put("/procedureTemplates/:id", async (req, res) => {
+app.put("/procedureTemplates/:id", async (req, res) => {
   try {
     // Resolve ResourceTemplate names to IDs
     const resourceIdsWithQuantity = await Promise.all(
@@ -1018,32 +1017,39 @@ app.delete("/procedureTemplates/:id", async (req, res) => {
 
 app.get("/resources", async (req, res) => {
   try {
-      const resources = await ResourceInstance.find();
-      res.json(resources);
+    const resources = await ResourceInstance.find();
+    res.json(resources);
   } catch (error) {
-      res.status(500).json({ message: "Error fetching resources", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching resources", error: error.message });
   }
 });
 
 // Fetch a specific resource by ID
 app.get("/resources/:id", async (req, res) => {
   try {
-      const resource = await ResourceInstance.findById(req.params.id);
-      if (!resource) return res.status(404).send({ message: "Resource not found" });
-      res.json(resource);
+    const resource = await ResourceInstance.findById(req.params.id);
+    if (!resource)
+      return res.status(404).send({ message: "Resource not found" });
+    res.json(resource);
   } catch (error) {
-      res.status(500).json({ message: "Error fetching the resource", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching the resource", error: error.message });
   }
 });
 
 // Delete a resource
 app.delete("/resources/:id", async (req, res) => {
   try {
-      const result = await ResourceInstance.findByIdAndDelete(req.params.id);
-      if (!result) return res.status(404).send({ message: "Resource not found" });
-      res.send({ message: "Resource deleted successfully" });
+    const result = await ResourceInstance.findByIdAndDelete(req.params.id);
+    if (!result) return res.status(404).send({ message: "Resource not found" });
+    res.send({ message: "Resource deleted successfully" });
   } catch (error) {
-      res.status(500).send({ message: "Error deleting the resource", error: error.message });
+    res
+      .status(500)
+      .send({ message: "Error deleting the resource", error: error.message });
   }
 });
 
@@ -1097,37 +1103,33 @@ app.put('/processTemplates/:id', async (req, res) => {
     const { id } = req.params;
 
     const sectionIds = await Promise.all(sections.map(async (section) => {
-      if (section._id) {
-        await SectionTemplate.findByIdAndUpdate(section._id, {
+      if ('_id' in section && mongoose.Types.ObjectId.isValid(section._id.toString())) {
+        const updatedSection = await SectionTemplate.findByIdAndUpdate(section._id, {
           sectionName: section.sectionName,
           description: section.description,
-          procedureTemplates: section.procedureTemplates,
-        });
-        return section._id;
+          procedureTemplates: section.procedureTemplates.filter(id => mongoose.Types.ObjectId.isValid(id)),
+        }, { new: true });
+        return updatedSection ? updatedSection._id : null;
       } else {
+        // Create new section
         const newSection = new SectionTemplate({
           sectionName: section.sectionName,
           description: section.description,
-          procedureTemplates: section.procedureTemplates,
+          procedureTemplates: section.procedureTemplates.filter(id => mongoose.Types.ObjectId.isValid(id)),
         });
         await newSection.save();
         return newSection._id;
       }
     }));
 
+    const filteredSectionIds = sectionIds.filter(id => id !== null);
+
+
     const updatedTemplate = await ProcessTemplate.findByIdAndUpdate(id, {
       processName,
       description,
-      sectionTemplates: sectionIds
-    }, { new: true }).populate({
-      path: "sectionTemplates",
-      populate: {
-        path: "procedureTemplates",
-        populate: {
-          path: "requiredResources.resource roles.role",
-        },
-      },
-    });
+      sectionTemplates: filteredSectionIds
+    }, { new: true }).populate('sectionTemplates');
 
     if (!updatedTemplate) {
       return res.status(404).json({ message: "Process template not found" });
@@ -1139,6 +1141,7 @@ app.put('/processTemplates/:id', async (req, res) => {
     res.status(400).json({ message: "Failed to update process template", error: error.message });
   }
 });
+
 
 
 app.delete("/processTemplates/:id", async (req, res) => {
@@ -1184,8 +1187,6 @@ app.post('/processTemplates', async (req, res) => {
     res.status(400).json({ message: "Failed to create process template", error: error.message });
   }
 });
-
-
 
 module.exports = {
   app,

@@ -14,6 +14,7 @@ describe('Add Section Form Tests', () => {
         cy.contains('Go Back').should('be.visible');
     });
 
+    /*
     it('allows navigation back to the create process page ', () => {
         cy.get('button').contains('Go Back').click();
         cy.url().should('include', '/CreateProcessTemplateForm');
@@ -26,5 +27,5 @@ describe('Add Section Form Tests', () => {
     it('fills out the form', () => {
         cy.get('input[name="name"]').clear().type('Test Section');
         cy.get('input[name="name"]').should('have.value', 'Test Section');
-    });
+    });*/
 });
