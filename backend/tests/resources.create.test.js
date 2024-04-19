@@ -151,7 +151,7 @@ describe("POST /resources for creating resources", () => {
       .withCredentials()
       .set("Cookie", [`accountId=${accountId}`])
       .send({
-        name: "Physician",
+        name: "physician",
         type: "roles",
         location: "",
         description: "",
