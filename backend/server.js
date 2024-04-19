@@ -351,7 +351,6 @@ const transformAccount = async (account) => {
 
 app.post("/login", async (req, res) => {
   console.log("Login route hit with body:", req.body);
-
   try {
     const { email, password } = req.body;
 
