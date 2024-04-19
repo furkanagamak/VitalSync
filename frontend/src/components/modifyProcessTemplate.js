@@ -208,16 +208,18 @@ const SectionTable = ({ sections, setSections, onSaveState }) => {
   const data = React.useMemo(() => sections, [sections]);
   const navigate = useNavigate();
   const location = useLocation(); 
+  const { id } = useParams(); 
+
 
   const handleAddSection = () => {
     console.log('Navigating to add new section');
     onSaveState();
-    navigate("/AddSectionForm", { state: { isAddingNew: true } });
+    navigate("/AddSectionForm", { state: { from: `/ModifyProcessTemplateForm/${id}`, isAddingNew: true } });
   };
 
   const handleModifySection = (index) => {
     const sectionToModify = sections[index];
-    navigate("/ModifySectionForm", { state: { section: sectionToModify} });
+    navigate("/ModifySectionForm", { state: { from: `/ModifyProcessTemplateForm/${id}`, section: sectionToModify} });
 };
 
   const updateSections = debounce((newSection) => {
@@ -229,6 +231,7 @@ const SectionTable = ({ sections, setSections, onSaveState }) => {
   
   useEffect(() => {
     if (location.state?.newSection) {
+      console.log("location state updated", location.state.newSection);
       updateSections(location.state.newSection);
     }
   }, [location.state]);
@@ -587,6 +590,7 @@ const ModifyProcessTemplateForm = () => {
       sections: sections, 
     };
 
+    console.log(procData);
     try {
       const response = await axios.put(`/processTemplates/${id}`, {
         processName: procData.processName,

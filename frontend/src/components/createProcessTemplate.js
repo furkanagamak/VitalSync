@@ -202,27 +202,61 @@ const SectionTable = ({ sections, setSections, onSaveState }) => {
   const handleAddSection = () => {
     console.log('Navigating to add new section');
     onSaveState();
-    navigate("/AddSectionForm", { state: { isAddingNew: true } });
+    navigate("/AddSectionForm", { state: { from: '/CreateProcessTemplateForm', isAddingNew: true } });
   };
 
   const handleModifySection = (index) => {
+    console.log("Going to update this section: ", index);
     const sectionToModify = sections[index];
-    navigate("/ModifySectionForm", { state: { section: sectionToModify} });
+    navigate("/ModifySectionForm", { state: { from: '/CreateProcessTemplateForm', section: sectionToModify} });
 };
 
-  const updateSections = debounce((newSection) => {
-    setSections(prevSections => {
-      const alreadyExists = prevSections.some(section => section.sectionName === newSection.sectionName);
-      return alreadyExists ? prevSections : [...prevSections, newSection];
-    });
-  }, 1);  //1 second millisecond delay to avoid rapid re-update of section state on location change. Need to solve underlying issue
-  
-  useEffect(() => {
-    if (location.state?.newSection) {
-      updateSections(location.state.newSection);
+/*const updateSections = debounce((newSection) => {
+  console.log(sections.length);
+  setSections(prevSections => {
+    const index = prevSections.findIndex(sec => sec._id === newSection._id);
+    console.log("Before update", prevSections.map(sec => ({ ...sec })));
+    
+    if (index !== -1) {
+      const newSections = [...prevSections];
+      newSections[index] = {...newSections[index], ...newSection};
+      console.log("Updating section at index", index, "with", newSection);
+      console.log("After update", newSections.length);
+      return newSections;
+    } else {
+      console.log("Adding new section", newSection, prevSections.length + 1);
+      return [...prevSections, newSection];
     }
-  }, [location.state]);
+  });
+}, 10);*/ //1 second millisecond delay to avoid rapid re-update of section state on location change. Need to solve underlying issue
+const updateSections = (newSection) => {
+  console.log("Attempting to update or add section:", newSection);
+  setSections(prevSections => {
+    const index = prevSections.findIndex(sec => sec._id === newSection._id);
+    console.log("Index found:", index); // Check if -1 or valid index
+    console.log("Previous sections:", prevSections);
 
+    if (index !== -1) {
+      // Update existing section
+      const updatedSections = [...prevSections];
+      updatedSections[index] = { ...updatedSections[index], ...newSection };
+      console.log("Updated sections array:", updatedSections);
+      return updatedSections;
+    } else {
+      // Add new section
+      const newSections = [...prevSections, newSection];
+      console.log("New sections array with added section:", newSections);
+      return newSections;
+    }
+  });
+};
+
+useEffect(() => {
+  console.log("Effect location state:", location.state);
+  if (location.state?.newSection) {
+    updateSections(location.state.newSection);
+  }
+}, [location.state]);
 
   const moveSection = (index, direction) => {
     setSections(currentSections => {
@@ -518,12 +552,14 @@ const CreateProcessTemplateForm = () => {
 
   const handleSaveState = () => {
     const stateToSave = { process, sections };
+    console.log(stateToSave);
     sessionStorage.setItem('processTemplateState', JSON.stringify(stateToSave));
   };
 
   useEffect(() => {
     const savedState = JSON.parse(sessionStorage.getItem('processTemplateState'));
     if (savedState) {
+      console.log(savedState);
       setProcess(savedState.process);
       setSections(savedState.sections);
     }

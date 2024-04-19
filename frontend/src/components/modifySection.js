@@ -585,7 +585,8 @@ const ModifySectionForm = () => {
       return;
     }    
     
-    navigate(-1, { state: { newSection: section } });
+    console.log("from modify: ", section);
+    navigate(location.state.from, { state: { newSection: section } });
     setSection({ sectionName: "", description: "", procedureTemplates: [] }); // Clear state
     notify();
   };
