@@ -300,13 +300,6 @@ async function deleteResource(req, res) {
         "The resource you are trying to delete is occupied to one or more process instance!"
       );
 
-  // delete resource
-  await ResourceInstance.deleteOne({ uniqueIdentifier: uniqueIdentifier });
-
-  // remove resource template if needed
-  const otherResWithSameTemplate = await ResourceInstance.findOne({
-    name: targetResource.name,
-  });
   // Check if resource is used in any procedureTemplate
   const resourceTemplate = await ResourceTemplate.findOne({
     name: targetResource.name,
@@ -316,7 +309,20 @@ async function deleteResource(req, res) {
       $elemMatch: { resource: resourceTemplate._id },
     },
   });
-  if (!otherResWithSameTemplate && !procedureTemplateAssigned) {
+  if (procedureTemplateAssigned)
+    return res
+      .status(409)
+      .send(
+        "The resource you are trying to delete is assigned to one or more procedure templates!"
+      );
+  // delete resource
+  await ResourceInstance.deleteOne({ uniqueIdentifier: uniqueIdentifier });
+
+  // remove resource template if needed
+  const otherResWithSameTemplate = await ResourceInstance.findOne({
+    name: targetResource.name,
+  });
+  if (!otherResWithSameTemplate) {
     await ResourceTemplate.deleteOne({ name: targetResource.name });
   }
 

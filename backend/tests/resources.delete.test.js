@@ -234,6 +234,29 @@ describe("DELETE /resources for deleting resources", () => {
       "The role you are trying to delete is assigned to one or more procedure templates!"
     );
     expect(await Role.findOne({ uniqueIdentifier: "t-901" })).not.toBeNull();
+
+    // resources assigned to procedure templates cannot be deleted
+    const equipmentRepRes = await request(app)
+      .delete(`/resources`)
+      .withCredentials()
+      .set("Cookie", [`accountId=${accountId}`])
+      .send({
+        uniqueIdentifier: "t-129",
+      });
+    expect(equipmentRepRes.status).toEqual(409);
+    expect(equipmentRepRes.text).toEqual(
+      "The resource you are trying to delete is assigned to one or more procedure templates!"
+    );
+    expect(
+      await ResourceTemplate.findOne({
+        name: "testequipmentprocedure",
+      })
+    ).not.toBeNull();
+    expect(
+      await ResourceInstance.findOne({
+        uniqueIdentifier: "t-129",
+      })
+    ).not.toBeNull();
   });
 
   it("deleting existing resources", async () => {
@@ -280,22 +303,6 @@ describe("DELETE /resources for deleting resources", () => {
       name: "testequipment",
     });
     expect(findDeletedEquipmentTemplate).not.toBeNull();
-
-    expect(
-      await ResourceTemplate.findOne({
-        name: "testequipmentprocedure",
-      })
-    ).not.toBeNull();
-    // resources templates assigned to procedure templates should not have their template deleted
-    const equipmentRepRes = await request(app)
-      .delete(`/resources`)
-      .withCredentials()
-      .set("Cookie", [`accountId=${accountId}`])
-      .send({
-        uniqueIdentifier: "t-129",
-      });
-    expect(equipmentRepRes.status).toEqual(200);
-    expect(equipmentRepRes.text).toEqual("The resource has been delete!");
 
     expect(
       await ResourceTemplate.findOne({
