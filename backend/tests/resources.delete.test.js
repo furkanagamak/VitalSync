@@ -9,6 +9,7 @@ const mongoose = require("mongoose");
 const Role = require("../models/role.js");
 const ResourceInstance = require("../models/resourceInstance.js");
 const ResourceTemplate = require("../models/resourceTemplate.js");
+const ProcedureTemplate = require("../models/procedureTemplate.js");
 const Account = require("../models/account.js");
 
 describe("DELETE /resources for deleting resources", () => {
@@ -37,6 +38,18 @@ describe("DELETE /resources for deleting resources", () => {
     uniqueIdentifier: "t-111",
     unavailableTimes: [{ start: new Date(), end: new Date() }],
   });
+  const testingEquipmentProcedureTemplate = new ResourceTemplate({
+    type: "equipment",
+    name: "testequipmentprocedure",
+    description: "testDescription",
+  });
+  const testingProcedureEquipment = new ResourceInstance({
+    type: "equipment",
+    name: "testequipmentprocedure",
+    location: "testingLocation",
+    description: "testDescription",
+    uniqueIdentifier: "t-129",
+  });
   const testingSpaceTemplate = new ResourceTemplate({
     type: "spaces",
     name: "testspaces",
@@ -52,6 +65,11 @@ describe("DELETE /resources for deleting resources", () => {
   const testingRole = new Role({
     uniqueIdentifier: "t-900",
     name: "testrole",
+    description: "testDescription",
+  });
+  const testingRepRole = new Role({
+    uniqueIdentifier: "t-901",
+    name: "testreprole",
     description: "testDescription",
   });
   const testingAssignedRole = new Role({
@@ -71,6 +89,24 @@ describe("DELETE /resources for deleting resources", () => {
     password: "staffPassword123", // Password for staff
     eligibleRoles: [testingAssignedRole._id],
   });
+  const testProcedureTemplate = new ProcedureTemplate({
+    procedureName: "testName",
+    description: "testDescription",
+    requiredResources: [
+      {
+        resource: testingEquipmentProcedureTemplate._id,
+        quantity: 1,
+      },
+    ],
+    roles: [
+      {
+        role: testingRepRole._id,
+        quantity: 1,
+      },
+    ],
+    estimatedTime: 500,
+    specialNotes: "",
+  });
   let server;
   let uids;
 
@@ -87,6 +123,10 @@ describe("DELETE /resources for deleting resources", () => {
     await testingEquipment.save();
     await testingOccupiedEquipment.save();
     await testAccount.save();
+    await testingEquipmentProcedureTemplate.save();
+    await testingProcedureEquipment.save();
+    await testProcedureTemplate.save();
+    await testingRepRole.save();
   });
 
   it("unauthorized requests should be rejected", async () => {
@@ -173,11 +213,27 @@ describe("DELETE /resources for deleting resources", () => {
       .send({
         uniqueIdentifier: "test_assigned_role",
       });
-    console.log(roleRes);
     expect(roleRes.status).toEqual(409);
     expect(roleRes.text).toEqual(
       "The role you are trying to delete is assigned to one or more accounts!"
     );
+    expect(
+      await Role.findOne({ uniqueIdentifier: "test_assigned_role" })
+    ).not.toBeNull();
+
+    // delete existing role that is assigned to a procedure template
+    const roleRepRes = await request(app)
+      .delete(`/resources`)
+      .withCredentials()
+      .set("Cookie", [`accountId=${accountId}`])
+      .send({
+        uniqueIdentifier: "t-901",
+      });
+    expect(roleRepRes.status).toEqual(409);
+    expect(roleRepRes.text).toEqual(
+      "The role you are trying to delete is assigned to one or more procedure templates!"
+    );
+    expect(await Role.findOne({ uniqueIdentifier: "t-901" })).not.toBeNull();
   });
 
   it("deleting existing resources", async () => {
@@ -219,6 +275,34 @@ describe("DELETE /resources for deleting resources", () => {
     });
     expect(findDeletedEquipment).toBeNull();
 
+    // same equipment template should not be deleted when another resource with the same template is present
+    const findDeletedEquipmentTemplate = await ResourceTemplate.findOne({
+      name: "testequipment",
+    });
+    expect(findDeletedEquipmentTemplate).not.toBeNull();
+
+    expect(
+      await ResourceTemplate.findOne({
+        name: "testequipmentprocedure",
+      })
+    ).not.toBeNull();
+    // resources templates assigned to procedure templates should not have their template deleted
+    const equipmentRepRes = await request(app)
+      .delete(`/resources`)
+      .withCredentials()
+      .set("Cookie", [`accountId=${accountId}`])
+      .send({
+        uniqueIdentifier: "t-129",
+      });
+    expect(equipmentRepRes.status).toEqual(200);
+    expect(equipmentRepRes.text).toEqual("The resource has been delete!");
+
+    expect(
+      await ResourceTemplate.findOne({
+        name: "testequipmentprocedure",
+      })
+    ).not.toBeNull();
+
     // delete existing spaces
     const spacesRes = await request(app)
       .delete(`/resources`)
@@ -246,11 +330,15 @@ describe("DELETE /resources for deleting resources", () => {
     await ResourceInstance.deleteOne({ uniqueIdentifier: "t-111" });
     await ResourceInstance.deleteOne({ uniqueIdentifier: "t-123" });
     await ResourceInstance.deleteOne({ uniqueIdentifier: "t-124" });
+    await ResourceInstance.deleteOne({ uniqueIdentifier: "t-129" });
     await ResourceTemplate.deleteOne({ name: "testequipment" });
     await ResourceTemplate.deleteOne({ name: "testspaces" });
+    await ResourceTemplate.deleteOne({ name: "testequipmentprocedure" });
     await Account.deleteOne({ email: "test@test.com" });
     await Role.deleteOne({ uniqueIdentifier: "test_assigned_role" });
     await Role.deleteOne({ uniqueIdentifier: "t-900" });
+    await Role.deleteOne({ uniqueIdentifier: "t-901" });
+    await ProcedureTemplate.deleteOne({ _id: testProcedureTemplate._id });
     await server.close();
     await mongoose.disconnect();
   });

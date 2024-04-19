@@ -2,6 +2,7 @@ const Account = require("../models/account.js");
 const Role = require("../models/role.js");
 const ResourceTemplate = require("../models/resourceTemplate.js");
 const ResourceInstance = require("../models/resourceInstance.js");
+const ProcedureTemplate = require("../models/procedureTemplate.js");
 
 function generateRandomString(length) {
   const chars =
@@ -273,6 +274,18 @@ async function deleteResource(req, res) {
         .send(
           "The role you are trying to delete is assigned to one or more accounts!"
         );
+    // Check if resource is used in any procedureTemplate
+    const procedureTemplateAssigned = await ProcedureTemplate.findOne({
+      roles: {
+        $elemMatch: { role: targetResource._id },
+      },
+    });
+    if (procedureTemplateAssigned)
+      return res
+        .status(409)
+        .send(
+          "The role you are trying to delete is assigned to one or more procedure templates!"
+        );
     await Role.deleteOne({ uniqueIdentifier: uniqueIdentifier });
     return res.status(200).send("The role has been delete!");
   }
@@ -294,7 +307,16 @@ async function deleteResource(req, res) {
   const otherResWithSameTemplate = await ResourceInstance.findOne({
     name: targetResource.name,
   });
-  if (!otherResWithSameTemplate) {
+  // Check if resource is used in any procedureTemplate
+  const resourceTemplate = await ResourceTemplate.findOne({
+    name: targetResource.name,
+  });
+  const procedureTemplateAssigned = await ProcedureTemplate.findOne({
+    requiredResources: {
+      $elemMatch: { resource: resourceTemplate._id },
+    },
+  });
+  if (!otherResWithSameTemplate && !procedureTemplateAssigned) {
     await ResourceTemplate.deleteOne({ name: targetResource.name });
   }
 

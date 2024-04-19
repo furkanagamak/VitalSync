@@ -912,7 +912,7 @@ app.post("/procedureTemplates", async (req, res) => {
   }
 });
 
-    app.put("/procedureTemplates/:id", async (req, res) => {
+app.put("/procedureTemplates/:id", async (req, res) => {
   try {
     // Resolve ResourceTemplate names to IDs
     const resourceIdsWithQuantity = await Promise.all(
@@ -1018,32 +1018,39 @@ app.delete("/procedureTemplates/:id", async (req, res) => {
 
 app.get("/resources", async (req, res) => {
   try {
-      const resources = await ResourceInstance.find();
-      res.json(resources);
+    const resources = await ResourceInstance.find();
+    res.json(resources);
   } catch (error) {
-      res.status(500).json({ message: "Error fetching resources", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching resources", error: error.message });
   }
 });
 
 // Fetch a specific resource by ID
 app.get("/resources/:id", async (req, res) => {
   try {
-      const resource = await ResourceInstance.findById(req.params.id);
-      if (!resource) return res.status(404).send({ message: "Resource not found" });
-      res.json(resource);
+    const resource = await ResourceInstance.findById(req.params.id);
+    if (!resource)
+      return res.status(404).send({ message: "Resource not found" });
+    res.json(resource);
   } catch (error) {
-      res.status(500).json({ message: "Error fetching the resource", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching the resource", error: error.message });
   }
 });
 
 // Delete a resource
 app.delete("/resources/:id", async (req, res) => {
   try {
-      const result = await ResourceInstance.findByIdAndDelete(req.params.id);
-      if (!result) return res.status(404).send({ message: "Resource not found" });
-      res.send({ message: "Resource deleted successfully" });
+    const result = await ResourceInstance.findByIdAndDelete(req.params.id);
+    if (!result) return res.status(404).send({ message: "Resource not found" });
+    res.send({ message: "Resource deleted successfully" });
   } catch (error) {
-      res.status(500).send({ message: "Error deleting the resource", error: error.message });
+    res
+      .status(500)
+      .send({ message: "Error deleting the resource", error: error.message });
   }
 });
 
@@ -1082,19 +1089,21 @@ app.delete("/processTemplates/:id", async (req, res) => {
   }
 });
 
-app.post('/processTemplates', async (req, res) => {
+app.post("/processTemplates", async (req, res) => {
   try {
     const { processName, description, sections } = req.body;
 
-    const sectionIds = await Promise.all(sections.map(async (section) => {
-      const newSection = new SectionTemplate({
-        sectionName: section.sectionName,
-        description: section.description,
-        procedureTemplates: section.procedureTemplates, 
-      });
-      await newSection.save();
-      return newSection._id;
-    }));
+    const sectionIds = await Promise.all(
+      sections.map(async (section) => {
+        const newSection = new SectionTemplate({
+          sectionName: section.sectionName,
+          description: section.description,
+          procedureTemplates: section.procedureTemplates,
+        });
+        await newSection.save();
+        return newSection._id;
+      })
+    );
 
     const newProcessTemplate = new ProcessTemplate({
       processName,
@@ -1106,11 +1115,14 @@ app.post('/processTemplates', async (req, res) => {
     res.status(201).json(newProcessTemplate);
   } catch (error) {
     console.error("Failed to create process template:", error);
-    res.status(400).json({ message: "Failed to create process template", error: error.message });
+    res
+      .status(400)
+      .json({
+        message: "Failed to create process template",
+        error: error.message,
+      });
   }
 });
-
-
 
 module.exports = {
   app,
