@@ -68,99 +68,19 @@ function App() {
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/RecoveryPage" element={<RecoveryPage />} />
-
-            <Route
-              path="/Roster"
-              element={
-                <>
-                  <Navbar />
-                  <Roster />
-                </>
-              }
-            />
-            <Route
-              path="/Profile/:id"
-              element={
-                <>
-                  <Navbar />
-                  <Profile />
-                </>
-              }
-            />
           </Routes>
+          <Navbar />
           <Routes>
-            <Route
-              path="/home"
-              element={
-                <>
-                  <Navbar />
-                  <AssignedProcesses />
-                </>
-              }
-            />
-            <Route
-              path="/adminActions"
-              element={
-                <>
-                  <Navbar />
-                  <AdminActions />
-                </>
-              }
-            />
-            <Route
-              path="/createAccount"
-              element={
-                <>
-                  <Navbar />
-                  <CreateAccount />
-                </>
-              }
-            />
-            <Route
-              path="/resources"
-              element={
-                <>
-                  <Navbar />
-                  <Resources />
-                </>
-              }
-            />
-            <Route
-              path="/resources/create"
-              element={
-                <>
-                  <Navbar />
-                  <ResourceCreate />
-                </>
-              }
-            />
-            <Route
-              path="/notifications"
-              element={
-                <>
-                  <Navbar />
-                  <NotificationBox />
-                </>
-              }
-            />
-            <Route
-              path="/boardProcess"
-              element={
-                <>
-                  <Navbar />
-                  <BoardProcessView />
-                </>
-              }
-            />
-            <Route
-              path="/processDetails"
-              element={
-                <>
-                  <Navbar />
-                  <ProcessDetails />
-                </>
-              }
-            />
+            <Route path="/Roster" element={<Roster />} />
+            <Route path="/Profile/:id" element={<Profile />} />
+            <Route path="/home" element={<AssignedProcesses />} />
+            <Route path="/adminActions" element={<AdminActions />} />
+            <Route path="/createAccount" element={<CreateAccount />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/resources/create" element={<ResourceCreate />} />
+            <Route path="/notifications" element={<NotificationBox />} />
+            <Route path="/boardProcess" element={<BoardProcessView />} />
+            <Route path="/processDetails" element={<ProcessDetails />} />
 
             <Route
               path="/processManagement"
@@ -266,106 +186,36 @@ function App() {
               />
             </Route>
 
-            <Route
-              path="/recordLookup"
-              element={
-                <>
-                  <Navbar />
-                  <CompletedProcessRecords />
-                </>
-              }
-            />
+            <Route path="/recordLookup" element={<CompletedProcessRecords />} />
 
-            <Route
-              path="/recordProcess"
-              element={
-                <>
-                  <Navbar />
-                  <CompletedProcess />
-                </>
-              }
-            />
+            <Route path="/recordProcess" element={<CompletedProcess />} />
 
             <Route
               path="/ProcedureTemplateManagement"
-              element={
-                <>
-                  <Toaster />
-                  <Navbar />
-                  <ProcedureTemplateManagement />
-                </>
-              }
+              element={<ProcedureTemplateManagement />}
             />
             <Route
               path="/ProcessTemplateManagement"
-              element={
-                <>
-                  <Toaster />
-                  <Navbar />
-                  <ProcessTemplateManagement />
-                </>
-              }
+              element={<ProcessTemplateManagement />}
             />
             <Route
               path="/CreateProcedureTemplateForm"
-              element={
-                <>
-                  <Toaster />
-                  <Navbar />
-                  <CreateProcedureTemplateForm />
-                </>
-              }
+              element={<CreateProcedureTemplateForm />}
             />
             <Route
               path="/CreateProcessTemplateForm"
-              element={
-                <>
-                  <Toaster />
-                  <Navbar />
-                  <CreateProcessTemplateForm />
-                </>
-              }
+              element={<CreateProcessTemplateForm />}
             />
-            <Route
-              path="/AddSectionForm"
-              element={
-                <>
-                  <Toaster />
-                  <Navbar />
-                  <AddSectionForm />
-                </>
-              }
-            />
+            <Route path="/AddSectionForm" element={<AddSectionForm />} />
             <Route
               path="/ModifyProcedureTemplateForm/:templateId"
-              element={
-                <>
-                  <Toaster />
-                  <Navbar />
-                  <ModifyProcedureTemplateForm />
-                </>
-              }
+              element={<ModifyProcedureTemplateForm />}
             />
             <Route
               path="/ModifyProcessTemplateForm/:id"
-              element={
-                <>
-                  <Toaster />
-                  <Navbar />
-                  <ModifyProcessTemplateForm />
-                </>
-              }
+              element={<ModifyProcessTemplateForm />}
             />
-            <Route
-              path="/ModifySectionForm"
-              element={
-                <>
-                  <Toaster />
-                  <Navbar />
-                  <ModifySectionForm />
-                </>
-              }
-            />
+            <Route path="/ModifySectionForm" element={<ModifySectionForm />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
