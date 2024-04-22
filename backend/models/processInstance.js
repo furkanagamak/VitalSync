@@ -11,9 +11,7 @@ const processInstanceSchema = new mongoose.Schema({
     },
   ],
   patient: { type: mongoose.Schema.Types.ObjectId, ref: "Patient" },
-  messageHistory: [
-    { type: mongoose.Schema.Types.ObjectId, ref: "ProcessInstance" },
-  ],
+  messageHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }],
 });
 
 module.exports = mongoose.model("ProcessInstance", processInstanceSchema);
