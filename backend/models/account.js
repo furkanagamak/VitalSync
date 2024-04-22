@@ -57,6 +57,9 @@ const accountSchema = new mongoose.Schema({
     expiry: { type: Date, default: null },
     used: { type: Boolean, default: false },
   },
+  notificationBox: [
+    { type: mongoose.Schema.Types.ObjectId, ref: "Notification" },
+  ],
 });
 
 module.exports = mongoose.model("Account", accountSchema);
