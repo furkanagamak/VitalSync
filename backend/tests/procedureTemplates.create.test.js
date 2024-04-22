@@ -1,4 +1,4 @@
-const { app } = require("../server.js");
+const { server: app } = require("../server.js");
 const request = require("supertest");
 const mongoose = require("mongoose");
 const ProcedureTemplate = require("../models/procedureTemplate.js");
@@ -13,12 +13,12 @@ describe("POST /procedureTemplates for creating procedure templates", () => {
 
   const resources = [
     { type: "Equipment", name: "X-Ray Machine" },
-    { type: "Medicine", name: "Aspirin" }
+    { type: "Medicine", name: "Aspirin" },
   ];
 
   const roles = [
     { name: "Surgeons", uniqueIdentifier: "surgeons-001" },
-    { name: "Nurses", uniqueIdentifier: "nurses-001" }
+    { name: "Nurses", uniqueIdentifier: "nurses-001" },
   ];
 
   beforeAll(async () => {
@@ -26,12 +26,14 @@ describe("POST /procedureTemplates for creating procedure templates", () => {
 
     const insertedResources = await ResourceTemplate.insertMany(resources);
     const insertedRoles = await Role.insertMany(roles);
-    createdResourceIds = insertedResources.map(item => item._id);
-    createdRoleIds = insertedRoles.map(item => item._id);
+    createdResourceIds = insertedResources.map((item) => item._id);
+    createdRoleIds = insertedRoles.map((item) => item._id);
   });
 
   afterAll(async () => {
-    await ProcedureTemplate.deleteMany({ _id: { $in: createdProcedureTemplateIds } });
+    await ProcedureTemplate.deleteMany({
+      _id: { $in: createdProcedureTemplateIds },
+    });
     await ResourceTemplate.deleteMany({ _id: { $in: createdResourceIds } });
     await Role.deleteMany({ _id: { $in: createdRoleIds } });
     await server.close();
@@ -45,10 +47,13 @@ describe("POST /procedureTemplates for creating procedure templates", () => {
     const procedureData = {
       procedureName: "Appendectomy",
       description: "Appendix removal surgery",
-      requiredResources: resourceTemplates.map(r => ({ resourceName: r.name, quantity: 1 })),
-      roles: roles.map(r => ({ roleName: r.name, quantity: 2 })),
+      requiredResources: resourceTemplates.map((r) => ({
+        resourceName: r.name,
+        quantity: 1,
+      })),
+      roles: roles.map((r) => ({ roleName: r.name, quantity: 2 })),
       estimatedTime: 120,
-      specialNotes: "Requires anesthesia."
+      specialNotes: "Requires anesthesia.",
     };
 
     const response = await request(server)
@@ -56,8 +61,13 @@ describe("POST /procedureTemplates for creating procedure templates", () => {
       .send(procedureData);
 
     expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty('procedureName', procedureData.procedureName);
-    expect(response.body.requiredResources).toHaveLength(procedureData.requiredResources.length);
+    expect(response.body).toHaveProperty(
+      "procedureName",
+      procedureData.procedureName
+    );
+    expect(response.body.requiredResources).toHaveLength(
+      procedureData.requiredResources.length
+    );
     expect(response.body.roles).toHaveLength(procedureData.roles.length);
 
     createdProcedureTemplateIds.push(response.body._id);
@@ -65,7 +75,7 @@ describe("POST /procedureTemplates for creating procedure templates", () => {
 
   test("should handle errors when missing required fields", async () => {
     const procedureData = {
-      description: "No procedure name provided"
+      description: "No procedure name provided",
     };
 
     const response = await request(server)
@@ -73,6 +83,9 @@ describe("POST /procedureTemplates for creating procedure templates", () => {
       .send(procedureData);
 
     expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty('message', 'Failed to create procedure template');
+    expect(response.body).toHaveProperty(
+      "message",
+      "Failed to create procedure template"
+    );
   });
 });

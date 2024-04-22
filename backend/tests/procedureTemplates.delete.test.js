@@ -1,4 +1,4 @@
-const { app } = require("../server.js");
+const { server: app } = require("../server.js");
 const request = require("supertest");
 const mongoose = require("mongoose");
 const ProcedureTemplate = require("../models/procedureTemplate.js");
@@ -15,7 +15,9 @@ describe("DELETE /procedureTemplates/:id for deleting procedure templates", () =
   });
 
   afterAll(async () => {
-    await ProcedureTemplate.deleteMany({ _id: { $in: createdProcedureTemplateIds } });
+    await ProcedureTemplate.deleteMany({
+      _id: { $in: createdProcedureTemplateIds },
+    });
     await server.close();
     await mongoose.disconnect();
   });
@@ -27,7 +29,7 @@ describe("DELETE /procedureTemplates/:id for deleting procedure templates", () =
       requiredResources: [],
       roles: [],
       estimatedTime: 90,
-      specialNotes: "None"
+      specialNotes: "None",
     });
     createdProcedureTemplateIds.push(newProcedureTemplate._id);
 
@@ -36,7 +38,10 @@ describe("DELETE /procedureTemplates/:id for deleting procedure templates", () =
       .send();
 
     expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('message', 'Procedure template deleted successfully.');
+    expect(response.body).toHaveProperty(
+      "message",
+      "Procedure template deleted successfully."
+    );
   });
 
   test("should delete a procedure template if it is in use by a section template but not process template", async () => {
@@ -46,14 +51,14 @@ describe("DELETE /procedureTemplates/:id for deleting procedure templates", () =
       requiredResources: [],
       roles: [],
       estimatedTime: 120,
-      specialNotes: "Extensive preparation required"
+      specialNotes: "Extensive preparation required",
     });
     createdProcedureTemplateIds.push(procedureTemplateInUse._id);
 
     const sectionUsingTemplate = await SectionTemplate.create({
       sectionName: "Section A",
       description: "Section using the procedure",
-      procedureTemplates: [procedureTemplateInUse._id]
+      procedureTemplates: [procedureTemplateInUse._id],
     });
 
     const response = await request(server)
@@ -61,7 +66,10 @@ describe("DELETE /procedureTemplates/:id for deleting procedure templates", () =
       .send();
 
     expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('message', 'Procedure template deleted successfully.');
+    expect(response.body).toHaveProperty(
+      "message",
+      "Procedure template deleted successfully."
+    );
 
     await SectionTemplate.deleteOne({ _id: sectionUsingTemplate._id });
   });
