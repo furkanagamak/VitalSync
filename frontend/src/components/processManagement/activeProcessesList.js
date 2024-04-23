@@ -235,3 +235,5 @@ const exampleProcesses = [
       </div>
     );
   }
+
+  export default ActiveProcessesList;
