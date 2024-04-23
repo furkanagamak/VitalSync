@@ -1,5 +1,5 @@
 const {
-  app,
+  server: app,
   initializePredefinedAccounts,
   removePredefinedAccounts,
 } = require("../server.js");

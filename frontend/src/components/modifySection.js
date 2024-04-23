@@ -42,7 +42,7 @@ const ModifySectionButton = ({ onModifySection,sectionDetails }) => {
       >
         <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
       </svg>
-      Modify Section
+      Save Section
     </button>
   );
 };
@@ -83,7 +83,7 @@ const SectionForm = ({ onModifyProcedure, section, setSection }) => {
 
   const theme = createTheme({
     typography: {
-      fontSize: 12,
+      fontSize: 14,
       button: {
         textTransform: "none",
       },
@@ -276,7 +276,7 @@ const SectionForm = ({ onModifyProcedure, section, setSection }) => {
                 backgroundColor: "white",
                 borderColor: "#8E0000",
                 minWidth: "100px",
-                fontSize: "0.9rem",
+                fontSize: "1.1rem",
                 textTransform: "none",
                 marginRight: "120px",
               }}
@@ -446,7 +446,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
           style={{
             textAlign: "center",
             color: "#8E0000",
-            fontSize: "1.29rem",
+            fontSize: "1.45rem",
             fontWeight: "bold",
           }}
         >
@@ -471,7 +471,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
               tableLayout: "fixed",
               borderCollapse: "separate",
               borderSpacing: "0 1px",
-              fontSize: "0.9rem",
+              fontSize: "1.1rem",
               textAlign: "center",
               marginBottom: "1rem",
             }}
@@ -540,6 +540,7 @@ const ModifySectionForm = () => {
   const navigate = useNavigate();
 
   const [section, setSection] = useState({
+    _id: "",
     sectionName: "",
     description: "",
     procedureTemplates: [],
@@ -585,9 +586,9 @@ const ModifySectionForm = () => {
       return;
     }    
     
-    navigate("/CreateProcessTemplateForm", { state: { newSection: section } });
+    navigate(location.state.url, { state: { newSection: section } });
     setSection({ sectionName: "", description: "", procedureTemplates: [] }); // Clear state
-    notify();
+    //notify();
   };
 
   const moveProcedure = (index, direction) => {

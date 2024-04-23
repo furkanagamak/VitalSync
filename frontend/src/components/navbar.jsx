@@ -5,9 +5,12 @@ import NotificationDropDown from "./notifications/NotificationDropDown";
 import { useNavigate } from "react-router-dom";
 import { TbLogout } from "react-icons/tb";
 import { useAuth } from "../providers/authProvider.js";
+import { useSocketContext } from "../providers/SocketProvider.js";
 
 const Navbar = () => {
   const { user, fetchImg } = useAuth();
+  const socket = useSocketContext();
+
   if (!user) return "error loading user!";
   return (
     <nav className="h-20 bg-primary flex text-white">

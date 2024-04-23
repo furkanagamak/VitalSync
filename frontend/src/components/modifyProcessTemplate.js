@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import {
   TextField,
@@ -17,19 +17,26 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTable, useSortBy, usePagination } from "react-table";
+import { TbLayoutGridAdd } from "react-icons/tb";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
+import axios from 'axios';
+import { debounce } from 'lodash';
+
+
+axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
+axios.defaults.withCredentials = true;
 
 const notify = () => toast.success("Process Template Modified!");
 
-const ModifyTemplateButton = () => {
+const ModifyTemplateButton = ({ onModify }) => {
   const navigate = useNavigate();
 
-  const handleModifyClick = () => {
-    navigate("/ProcessTemplateManagement");
-    notify();
+  const handleModifyClick = async () => {
+    await onModify();
   };
+
 
   return (
     <button
@@ -46,7 +53,7 @@ const ModifyTemplateButton = () => {
       >
         <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
       </svg>
-      Modify Template
+      Save Template
     </button>
   );
 };
@@ -81,16 +88,12 @@ const GoBackButton = () => {
   );
 };
 
-const ProcessForm = () => {
-  const [process, setProcess] = useState({
-    name: "Appendectomy",
-    description:
-      "The standard process for performing an appendectomy, which is the surgical removal of the appendix.",
-  });
+const ProcessForm = ({ process, setProcess, createTemplate }) => {
+
 
   const theme = createTheme({
     typography: {
-      fontSize: 12,
+      fontSize: 14,
       button: {
         textTransform: "none",
       },
@@ -154,10 +157,6 @@ const ProcessForm = () => {
     setProcess({ ...process, [name]: value });
   };
 
-  const createTemplate = () => {
-    console.log({ process });
-  };
-
   return (
     <ThemeProvider theme={theme}>
       <div
@@ -205,54 +204,89 @@ const ProcessForm = () => {
   );
 };
 
-const SectionTable = () => {
-  const data = React.useMemo(
-    () => [
-      {
-        name: "Preoperative",
-        description: "Procedures administered before the surgery.",
-        procedures: "Fasting, IV Access",
-      },
-      {
-        name: "Intraoperative",
-        description: "Procedures administered during the surgery.",
-        procedures: "General Anesthesia, Appendix Removal",
-      },
-      {
-        name: "Postoperative",
-        description: "Procedures administered after the surgery.",
-        procedures: "Pain Management, Postoperative Monitoring",
-      },
-      {
-        name: "Discharge",
-        description:
-          "Procedures administered before the patient leaves the hospital.",
-        procedures: "Discharge Instructions, Follow-up Appointment",
-      },
-      {
-        name: "Miscellaneous",
-        description: "Other procedures.",
-        procedures: "Change Dressing, Administer Medication",
-      },
-    ],
-    []
-  );
+/*const handleSaveState = () => {
+  const stateToSave = { process, sections };
+  sessionStorage.setItem('processTemplateState', JSON.stringify(stateToSave));
+};*/
 
+const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate, process }) => {
+  const data = React.useMemo(() => sections, [sections]);
   const navigate = useNavigate();
+  const location = useLocation(); 
+  const { id } = useParams();
 
-  const handleAddSectionClick = () => {
-    navigate("/AddSectionForm");
+  const handleAddSection = () => {
+    handleSessionUpdate(process, sections); // Save current state before navigating
+    navigate("/AddSectionForm", { state: { isAddingNew: true, url:`/ModifyProcessTemplateForm/${id}` } });
   };
 
-  const handleModifySectionClick = () => {
-    navigate("/ModifySectionForm");
+  const handleModifySection = (index) => {
+    const sectionToModify = sections[index];
+    handleSessionUpdate(process, sections); // Save current state before navigating
+    navigate("/ModifySectionForm", { state: { section: sectionToModify, url:`/ModifyProcessTemplateForm/${id}` } });
+  };
+
+  const updateSections = debounce((newSection) => {
+    setSections(prevSections => {
+      const nameConflict = prevSections.some(section =>
+        section.sectionName.toLowerCase() === newSection.sectionName.toLowerCase() && 
+        section._id !== newSection._id
+      );
+
+      if (nameConflict) {
+        toast.error("A section with the same name already exists.");
+        return prevSections; 
+      }
+
+      const sectionIndex = prevSections.findIndex(section => section._id === newSection._id);
+    if (sectionIndex !== -1) {
+      const updatedSections = [...prevSections];
+      updatedSections[sectionIndex] = newSection;
+      handleSessionUpdate(process, updatedSections);
+      toast.success("Section Modified!");
+      return updatedSections;
+    } else {
+      const newSections = [...prevSections, newSection];
+      handleSessionUpdate(process, newSections);
+      toast.success("Section Added!");
+      return newSections;
+    }
+    });
+  }, 1); //1 second millisecond delay to avoid rapid re-update of section state on location change. Need to solve underlying issue
+  
+  useEffect(() => {
+    if (location.state?.newSection) {
+      updateSections(location.state.newSection);
+    }
+  }, [location.state?.newSection]);
+
+
+  const moveSection = (index, direction) => {
+    setSections(currentSections => {
+      let newSections = [...currentSections];
+      if (direction === 'up' && index > 0) {
+        [newSections[index], newSections[index - 1]] = [newSections[index - 1], newSections[index]];
+      } else if (direction === 'down' && index < newSections.length - 1) {
+        [newSections[index], newSections[index + 1]] = [newSections[index + 1], newSections[index]];
+      }
+      handleSessionUpdate(process, newSections); // Update session storage
+      return newSections;
+    });
+  };
+
+  const deleteSection = (index) => {
+    setSections(currentSections => {
+      const newSections = currentSections.filter((_, i) => i !== index);
+      handleSessionUpdate(process, newSections); // Update session storage
+      return newSections;
+    });
   };
 
   const columns = React.useMemo(
     () => [
       {
         Header: "Name",
-        accessor: "name",
+        accessor: "sectionName",
         style: { backgroundColor: "#F5F5DC" },
       },
       {
@@ -261,12 +295,21 @@ const SectionTable = () => {
       },
       {
         Header: "Procedures",
-        accessor: "procedures",
+        accessor: "procedureTemplates",
         style: { backgroundColor: "#F5F5DC" },
-      },
+        Cell: ({ value }) => value && Array.isArray(value) ? (
+            <div>
+                {value.map((procedure, index) => (
+                    <span key={index}>
+                        {procedure.procedureName}{index < value.length - 1 ? ', ' : ''}
+                    </span>
+                ))}
+            </div>
+        ) : "No procedures listed"
+    },
       {
         Header: "Actions",
-        Cell: () => (
+        Cell: ({ row }) => (
           <div
             style={{
               display: "flex",
@@ -275,6 +318,8 @@ const SectionTable = () => {
             }}
           >
             <button
+                          onClick={() => moveSection(row.index, 'up')}
+
               style={{
                 background: "none",
                 border: "none",
@@ -298,6 +343,8 @@ const SectionTable = () => {
               </svg>
             </button>
             <button
+                        onClick={() => moveSection(row.index, 'down')}
+
               style={{
                 background: "none",
                 border: "none",
@@ -321,8 +368,8 @@ const SectionTable = () => {
               </svg>
             </button>
             <button
-              onClick={handleModifySectionClick}
-              style={{
+                onClick={() => handleModifySection(row.index)}
+                style={{
                 background: "none",
                 border: "none",
                 padding: "0",
@@ -342,6 +389,8 @@ const SectionTable = () => {
               </svg>
             </button>
             <button
+                        onClick={() => deleteSection(row.index)}
+
               style={{
                 background: "none",
                 border: "none",
@@ -365,7 +414,7 @@ const SectionTable = () => {
         disableSortBy: true,
       },
     ],
-    []
+    [sections]
   );
 
   const { getTableProps, getTableBodyProps, headerGroups, prepareRow, rows } =
@@ -390,7 +439,7 @@ const SectionTable = () => {
           style={{
             textAlign: "center",
             color: "#8E0000",
-            fontSize: "1.29rem",
+            fontSize: "1.45rem",
             fontWeight: "bold",
           }}
         >
@@ -415,7 +464,7 @@ const SectionTable = () => {
               tableLayout: "fixed",
               borderCollapse: "separate",
               borderSpacing: "0 1px",
-              fontSize: "0.9rem",
+              fontSize: "1.1rem",
               textAlign: "center",
               marginBottom: "1rem",
             }}
@@ -483,7 +532,7 @@ const SectionTable = () => {
           }}
         >
           <Button
-            onClick={handleAddSectionClick}
+            onClick={handleAddSection}
             variant="outlined"
             startIcon={<AddCircleOutlineIcon style={{ color: "#8E0000" }} />}
             style={{
@@ -491,7 +540,7 @@ const SectionTable = () => {
               backgroundColor: "white",
               borderColor: "#8E0000",
               minWidth: "100px",
-              fontSize: "0.9rem",
+              fontSize: "1.1rem",
               textTransform: "none",
             }}
           >
@@ -504,6 +553,89 @@ const SectionTable = () => {
 };
 
 const ModifyProcessTemplateForm = () => {
+  const navigate = useNavigate();
+
+  const { id } = useParams(); 
+
+  const [process, setProcess] = useState({
+    name: "",
+    description: "",
+    sections: []
+  });
+  const [sections, setSections] = useState([]);
+
+
+  useEffect(() => {
+    const fetchProcessTemplate = async () => {
+      const savedState = JSON.parse(sessionStorage.getItem('processTemplateState'));
+      if (savedState) {
+        setProcess(savedState.process);
+        setSections(savedState.sections);
+      } else {
+        try {
+          const response = await axios.get(`/processTemplates/${id}`);
+          setProcess({
+            name: response.data.processName,
+            description: response.data.description,
+            sections: response.data.sectionTemplates
+          });
+          setSections(response.data.sectionTemplates);
+        } catch (error) {
+          console.error("Error fetching process template:", error);
+          toast.error("Failed to load process template");
+        }
+      }
+    };
+    fetchProcessTemplate();
+  }, [id]);
+  
+  const updateSessionStorage = (newProcess, newSections) => {
+    const stateToSave = { process: newProcess, sections: newSections };
+    sessionStorage.setItem('processTemplateState', JSON.stringify(stateToSave));
+  };
+
+
+  const updateTemplate = async () => {
+    if(!process.name){
+      toast.error("Process name is required.");
+      return;
+    }
+    if(!process.description){
+      toast.error("A description is required.");
+      return;
+    }
+    if(sections.length === 0){
+      toast.error("At least one section is required.");
+      return;
+    }
+
+    const procData = {
+      processName: process.name,
+      description: process.description,
+      sections: sections.map(section => ({
+          _id: section._id, 
+          sectionName: section.sectionName,
+          description: section.description,
+          procedureTemplates: section.procedureTemplates.map(p => p._id || p) 
+      }))
+  };
+
+  console.log(procData);
+
+  try {
+      const response = await axios.put(`/processTemplates/${id}`, procData);
+      toast.success("Process Template Updated Successfully!");
+      navigate("/ProcessTemplateManagement");
+      setProcess({ name: "", description: "", sections:"" });
+      setSections([]);
+      sessionStorage.removeItem('processTemplateState');
+  } catch (error) {
+      console.error("Error updating process template:", error);
+      toast.error("Failed to update process template");
+  }
+  };
+
+
   return (
     <div>
       <div
@@ -520,7 +652,7 @@ const ModifyProcessTemplateForm = () => {
           <GoBackButton />
         </div>
         <div style={{ position: "absolute", right: "2rem" }}>
-          <ModifyTemplateButton />
+          <ModifyTemplateButton onModify={updateTemplate}/>
         </div>
         <h1
           style={{
@@ -534,8 +666,16 @@ const ModifyProcessTemplateForm = () => {
           Modify Process Template
         </h1>
       </div>
-      <ProcessForm />
-      <SectionTable />
+      <ProcessForm 
+      process={process}
+      setProcess={setProcess}
+      />
+      <SectionTable 
+      handleSessionUpdate={updateSessionStorage}
+      sections={sections}
+      setSections={setSections}
+      process={process}
+      setProcess={setProcess}/>
     </div>
   );
 };
