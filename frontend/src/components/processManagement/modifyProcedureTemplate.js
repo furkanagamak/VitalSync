@@ -436,6 +436,7 @@ const ProcedureForm = ({
                 name="name"
                 onChange={handleResourceChange}
                 style={{ color: "#8E0000" }}
+                className="capitalize"
               >
                 {newResource.type &&
                   resourceNames[newResource.type]?.map((name, index) => (
@@ -510,6 +511,7 @@ const ProcedureForm = ({
               {resources.map((resource, index) => (
                 <ListItem
                   style={{ color: "#8E0000" }}
+                  className="capitalize"
                   key={index}
                   secondaryAction={
                     <>
@@ -557,6 +559,7 @@ const ProcedureForm = ({
               </InputLabel>
               <Select
                 labelId="rolename"
+                className="capitalize"
                 label="Role Name"
                 value={newRole.name}
                 name="name"
@@ -636,6 +639,7 @@ const ProcedureForm = ({
                 <ListItem
                   style={{ color: "#8E0000" }}
                   key={index}
+                  className="capitalize"
                   secondaryAction={
                     <>
                       <IconButton

@@ -99,6 +99,12 @@ const CreateTemplateButton = () => {
 const ProcedureTable = ({ filter }) => {
   const [data, setData] = useState([]);
 
+  function capitalizeWords(string) {
+    return string.split(' ')
+                 .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                 .join(' ');
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -109,13 +115,19 @@ const ProcedureTable = ({ filter }) => {
             name: template.procedureName,
             description: template.description || "",
             resources: template.requiredResources
-              .map((resource) => resource.resource?.name)
-              .filter((name) => name)
-              .join(", "),
-            roles: template.roles
-              .map((role) => role.role?.name)
-              .filter((name) => name)
-              .join(", "),
+            .map((resource) => {
+              const name = resource.resource?.name;
+              return name ? capitalizeWords(name) : null;
+            })
+            .filter((name) => name)
+            .join(", "),
+          roles: template.roles
+            .map((role) => {
+              const name = role.role?.name;
+              return name ? capitalizeWords(name) : null;
+            })
+            .filter((name) => name)
+            .join(", "),
             time: template.estimatedTime + " minutes",
             notes: template.specialNotes || "",
           }))
