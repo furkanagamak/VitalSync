@@ -1,71 +1,45 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 
-const ProcessCreationContext = createContext();
+const ProcessCreationContext  = createContext(null);
 
-export const useProcessCreation = () => useContext(ProcessCreationContext);
+export const useProcessCreation  = () => useContext(ProcessCreationContext);
 
-export const ProcessCreationProvider = ({ children }) => {
-  const [processDetails, setProcessDetails] = useState({
-    processName: '',
-    description: '',
-    sections: []
-  });
 
-  // Update process details
-  const updateProcessDetails = (details) => {
-    setProcessDetails(prev => ({ ...prev, ...details }));
+export const ProcessTemplateProvider = ({ children }) => {
+    const [processTemplate, setProcessTemplate] = useState({
+      processName: '',
+      description: '',
+      sections: []
+    });
+  
+    const updateProcessTemplate = (data) => {
+      setProcessTemplate(prev => ({
+        ...prev,
+        ...data
+      }));
+    };
+  
+    const addSection = (section) => {
+      setProcessTemplate(prev => ({
+        ...prev,
+        sections: [...prev.sections, section]
+      }));
+    };
+  
+    const updateSection = (sectionId, sectionData) => {
+      setProcessTemplate(prev => ({
+        ...prev,
+        sections: prev.sections.map(section => 
+          section._id === sectionId ? { ...section, ...sectionData } : section
+        )
+      }));
+    };
+  
+    return (
+      <ProcessCreationContext.Provider value={{ processTemplate, updateProcessTemplate, addSection, updateSection }}>
+        {children}
+      </ProcessCreationContext.Provider>
+    );
   };
 
-  // Add a new section to the process
-  const addSection = (section) => {
-    setProcessDetails(prev => ({
-      ...prev,
-      sections: [...prev.sections, { ...section, procedureInstances: [] }]
-    }));
-  };
-
-  // Update an existing section
-  const updateSection = (index, updates) => {
-    setProcessDetails(prev => ({
-      ...prev,
-      sections: prev.sections.map((sec, idx) => idx === index ? { ...sec, ...updates } : sec)
-    }));
-  };
-
-  // Delete a section
-  const deleteSection = (index) => {
-    setProcessDetails(prev => ({
-      ...prev,
-      sections: prev.sections.filter((_, idx) => idx !== index)
-    }));
-  };
-
-  // Add a procedure to a section
-  const addProcedureToSection = (sectionIndex, procedure) => {
-    setProcessDetails(prev => ({
-      ...prev,
-      sections: prev.sections.map((section, idx) => {
-        if (idx === sectionIndex) {
-          return { ...section, procedureInstances: [...section.procedureInstances, procedure] };
-        }
-        return section;
-      })
-    }));
-  };
-
-  // Context provider value
-  const value = {
-    processDetails,
-    updateProcessDetails,
-    addSection,
-    updateSection,
-    deleteSection,
-    addProcedureToSection
-  };
-
-  return (
-    <ProcessCreationContext.Provider value={value}>
-      {children}
-    </ProcessCreationContext.Provider>
-  );
-};
+  

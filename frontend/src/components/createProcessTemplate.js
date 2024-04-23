@@ -23,6 +23,8 @@ import toast, { Toaster } from "react-hot-toast";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from 'axios';
 import { debounce } from 'lodash';
+import { useProcessCreation } from '../providers/ProcessCreationProvider';
+
 
 
 
@@ -546,6 +548,8 @@ const CreateProcessTemplateForm = () => {
   const [sections, setSections] = useState([]);
   const [incomingUrl, setIncomingUrl] = useState("");
 
+  const { updateProcessTemplate } = useProcessCreation();
+
   useEffect(() => {
     console.log(location.state);
     if (location.state && location.state.incomingUrl) {
@@ -598,7 +602,11 @@ const CreateProcessTemplateForm = () => {
           procedureTemplates: section.procedureTemplates.map(p => p._id || p) 
       }))
   };
-
+    if(incomingUrl){
+      updateProcessTemplate(procData);
+      navigate("/patientForm");
+    }
+    else{
     try {
       const response = await axios.post("/processTemplates", procData);
       console.log("Template Created:", response.data);
@@ -615,6 +623,7 @@ const CreateProcessTemplateForm = () => {
       toast.error(
         "Failed to create process template"
       );
+    }
     }
   };
 

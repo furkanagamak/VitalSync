@@ -23,6 +23,8 @@ import toast, { Toaster } from "react-hot-toast";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import axios from 'axios';
 import { debounce } from 'lodash';
+import { useProcessCreation } from '../providers/ProcessCreationProvider';
+
 
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
@@ -566,6 +568,9 @@ const ModifyProcessTemplateForm = () => {
   const [sections, setSections] = useState([]);
   const [incomingUrl, setIncomingUrl] = useState("");
 
+  const { updateProcessTemplate } = useProcessCreation();
+
+
   useEffect(() => {
     console.log(location.state);
     if (location.state && location.state.incomingUrl) {
@@ -628,21 +633,26 @@ const ModifyProcessTemplateForm = () => {
           description: section.description,
           procedureTemplates: section.procedureTemplates.map(p => p._id || p) 
       }))
-  };
+    };
 
-  console.log(procData);
+    if(incomingUrl){
+      updateProcessTemplate(procData);
+      navigate("/patientForm");
+    }
+    else{
+    console.log(procData);
 
-  try {
-      const response = await axios.put(`/processTemplates/${id}`, procData);
-      toast.success("Process Template Updated Successfully!");
-      navigate("/ProcessTemplateManagement");
-      setProcess({ name: "", description: "", sections:"" });
-      setSections([]);
-      sessionStorage.removeItem('processTemplateState');
-  } catch (error) {
-      console.error("Error updating process template:", error);
-      toast.error("Failed to update process template");
-  }
+    try {
+        const response = await axios.put(`/processTemplates/${id}`, procData);
+        toast.success("Process Template Updated Successfully!");
+        navigate("/ProcessTemplateManagement");
+        setProcess({ name: "", description: "", sections:"" });
+        setSections([]);
+        sessionStorage.removeItem('processTemplateState');
+    } catch (error) {
+        console.error("Error updating process template:", error);
+        toast.error("Failed to update process template");
+    }}
   };
 
 

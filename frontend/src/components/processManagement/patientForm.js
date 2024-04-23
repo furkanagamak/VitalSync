@@ -1,18 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from "react";
 import { FaArrowLeft, FaCheck } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useProcessCreation } from '../../providers/ProcessCreationProvider';
 
 
-function PatientInformationForm({ onBack, onProceed }) {
+
+function PatientInformationForm() {
+  const { processTemplate } = useProcessCreation();
+
+  useEffect(() => {
+    console.log(processTemplate);
+  }, [processTemplate]);
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    onProceed();
+    handleProceed();
   };
 
   const navigate = useNavigate();
 
   const handleGoBack = () => {
-    navigate("/processManagement/newProcess/processTemplates");
+    navigate(-1);
   };
 
   const handleProceed = () => {
