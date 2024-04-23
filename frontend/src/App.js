@@ -19,7 +19,7 @@ import ContainedProcedureTemplateList from "./components/processManagement/conta
 import ContainedCreateProcedureTemplateForm from "./components/processManagement/containedNewProcedure.js";
 import CreateProcessForm from "./components/processManagement/containedProcessForm.js";
 import ContainedProcessModify from "./components/processManagement/containedProcessModify.js";
-import ProcessTable from "./components/processManagement/processTable.js";
+//import ProcessTable from "./components/processManagement/processTable.js";
 
 //Starting new processes
 import PatientInformationForm from "./components/processManagement/patientForm.js";
@@ -97,7 +97,7 @@ function App() {
               <Route
               path="/processManagement"
               element={<ProcessManagementContainer />}
-            >
+              >
               <Route
                 index
                 element={
@@ -115,7 +115,7 @@ function App() {
               <Route path="modifyProcess/reviewStaffAssignments" element={<ReviewStaffAssignments />}/>
               <Route path="modifyProcess/reviewResourceAssignments" element={<ReviewResourceAssignments />}/>
               <Route path="modifyProcess/activeProcesses" element={<ActiveProcessesList />}/>
-              <Route path="newProcess/processTemplates" element={<ProcessTable />}/>
+              <Route path="newProcess/processTemplates" element={<ProcessTemplateManagement />}/>
               <Route path="newProcess/processTemplateForm" element={<CreateProcessForm />} />
               <Route path="newProcess/processTemplateModifyForm" element={<ContainedProcessModify />}/>
               <Route path="newProcess/addSection" element={<ContainedNewSection />} />

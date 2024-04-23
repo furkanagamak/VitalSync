@@ -3,9 +3,10 @@ import { useTable, useSortBy, usePagination } from "react-table";
 import { TbLayoutGridAdd } from "react-icons/tb";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ConfirmationModal from "./templateConfirmationModal";
+import { useNavigate, useLocation } from "react-router-dom";
+
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -405,17 +406,34 @@ const ProcessTable = ({ filter }) => {
 
 const ProcessTemplateManagement = () => {
   const [searchInput, setSearchInput] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation(); 
+  const [incomingUrl, setIncomingUrl] = useState("");
+
+  useEffect(() => {
+    if (location.state && location.state.incomingUrl) {
+      setIncomingUrl(location.state.incomingUrl);
+    }
+  }, [location.state]);
+
+
   return (
     <div className="flex flex-col items-center space-y-4 relative">
-      <h1 className="text-4xl text-[#8E0000] text-center underline font-bold mt-5">
-        Process Template Management
-      </h1>
+          {incomingUrl ? (
+              <h1 className="text-4xl text-[#8E0000] text-center underline font-bold mt-5">
+            Create from Existing or New Template            </h1>
+            ) : (
+              <h1 className="text-4xl text-[#8E0000] text-center underline font-bold mt-5">
+                  Process Template Management
+              </h1>
+            )}
+
       <div className="absolute right-8">
-        <CreateTemplateButton />
+        <CreateTemplateButton location={incomingUrl}/>
       </div>
-      <SearchBar inputValue={searchInput} setInputValue={setSearchInput} />
+      <SearchBar inputValue={searchInput} setInputValue={setSearchInput} location={incomingUrl}/>
       <div>
-        <ProcessTable filter={searchInput} />
+        <ProcessTable filter={searchInput} location={incomingUrl}/>
       </div>
     </div>
   );
