@@ -1,3 +1,5 @@
+//parent component of all process management functions to wrap them in container with tab switching functionality.
+
 import React from "react";
 import { useState } from "react";
 import Tabs from "@mui/material/Tabs";
