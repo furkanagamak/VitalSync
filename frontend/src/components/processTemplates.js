@@ -66,11 +66,14 @@ const SearchBar = ({ inputValue, setInputValue }) => {
   );
 };
 
-const CreateTemplateButton = () => {
+const CreateTemplateButton = ({fromLocation} ) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate("/CreateProcessTemplateForm");
+    if(fromLocation){
+      navigate("/CreateProcessTemplateForm", {state: {incomingUrl: "/processManagement/newProcess/processTemplates"} });
+    }else{
+    navigate("/CreateProcessTemplateForm");}
   };
 
   return (
@@ -79,12 +82,13 @@ const CreateTemplateButton = () => {
       onClick={handleClick}
     >
       <TbLayoutGridAdd className="mr-2 size-10" />
-      Create Template
+      Create New Template
     </button>
   );
 };
 
-const ProcessTable = ({ filter }) => {
+const ProcessTable = ({ filter , fromLocation}) => {
+  console.log(fromLocation);
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -156,7 +160,12 @@ const ProcessTable = ({ filter }) => {
           const navigate = useNavigate();
 
           const handleEditClick = () => {
-            navigate(`/ModifyProcessTemplateForm/${row.original.id}`);
+            console.log(fromLocation);
+            if(fromLocation){
+                navigate(`/ModifyProcessTemplateForm/${row.original.id}`, {state: {incomingUrl: "/processManagement/newProcess/processTemplates"} });
+            }
+            else{
+            navigate(`/ModifyProcessTemplateForm/${row.original.id}`);}
           };
 
           return (
@@ -189,6 +198,7 @@ const ProcessTable = ({ filter }) => {
                   <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
                 </svg>
               </button>
+              {(!fromLocation) && (
               <button
                 onClick={() => promptDelete(row.original)}
                 style={{
@@ -208,7 +218,7 @@ const ProcessTable = ({ filter }) => {
                 >
                   <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5" />
                 </svg>
-              </button>
+              </button>)}
             </div>
           );
         },
@@ -411,6 +421,7 @@ const ProcessTemplateManagement = () => {
   const [incomingUrl, setIncomingUrl] = useState("");
 
   useEffect(() => {
+    console.log(location.state);
     if (location.state && location.state.incomingUrl) {
       setIncomingUrl(location.state.incomingUrl);
     }
@@ -429,11 +440,11 @@ const ProcessTemplateManagement = () => {
             )}
 
       <div className="absolute right-8">
-        <CreateTemplateButton location={incomingUrl}/>
+        <CreateTemplateButton fromLocation={incomingUrl}/>
       </div>
-      <SearchBar inputValue={searchInput} setInputValue={setSearchInput} location={incomingUrl}/>
+      <SearchBar inputValue={searchInput} setInputValue={setSearchInput} fromLocation={incomingUrl}/>
       <div>
-        <ProcessTable filter={searchInput} location={incomingUrl}/>
+        <ProcessTable filter={searchInput} fromLocation={incomingUrl}/>
       </div>
     </div>
   );

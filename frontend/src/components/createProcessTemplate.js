@@ -53,7 +53,7 @@ const GoBackButton = () => {
   const navigate = useNavigate();
 
   const handleGoBackClick = () => {
-    navigate("/ProcessTemplateManagement");
+    navigate(-1);
   };
 
   return (
@@ -534,8 +534,9 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
 };
 
 const CreateProcessTemplateForm = () => {
-
   const navigate = useNavigate();
+  const location = useLocation();
+
 
   const [process, setProcess] = useState({
     name: "",
@@ -543,6 +544,16 @@ const CreateProcessTemplateForm = () => {
     sections: []
   });
   const [sections, setSections] = useState([]);
+  const [incomingUrl, setIncomingUrl] = useState("");
+
+  useEffect(() => {
+    console.log(location.state);
+    if (location.state && location.state.incomingUrl) {
+      console.log(location.state.incomingUrl);
+
+      setIncomingUrl(location.state.incomingUrl);
+    }
+  }, [location.state]);
 
   const handleSaveState = () => {
     const stateToSave = { process, sections };
