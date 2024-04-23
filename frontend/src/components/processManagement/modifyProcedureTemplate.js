@@ -141,6 +141,9 @@ const ProcedureForm = ({
           }
           typesToNames[template.type].push(template.name);
         });
+        Object.keys(typesToNames).forEach((type) => {
+          typesToNames[type].sort();
+        });
         setResourceNames(typesToNames);
         setResourceTypes(Object.keys(typesToNames));
       } catch (error) {
@@ -151,6 +154,8 @@ const ProcedureForm = ({
     const fetchRoles = async () => {
       const response = await axios.get("/roles");
       const names = response.data.map((role) => role.name);
+
+      names.sort();
       setRoleNames(names);
     };
 
@@ -161,7 +166,7 @@ const ProcedureForm = ({
 
   const theme = createTheme({
     typography: {
-      fontSize: 12,
+      fontSize: 14,
       button: {
         textTransform: "none",
       },
@@ -414,7 +419,7 @@ const ProcedureForm = ({
                 style={{ color: "#8E0000" }}
               >
                 {resourceTypes.map((type, index) => (
-                  <MenuItem key={index} value={type}>
+                  <MenuItem className="capitalize" key={index} value={type}>
                     {type}
                   </MenuItem>
                 ))}
@@ -434,7 +439,7 @@ const ProcedureForm = ({
               >
                 {newResource.type &&
                   resourceNames[newResource.type]?.map((name, index) => (
-                    <MenuItem key={index} value={name}>
+                    <MenuItem className="capitalize" key={index} value={name}>
                       {name}
                     </MenuItem>
                   ))}
@@ -470,8 +475,8 @@ const ProcedureForm = ({
               color: "#8E0000",
               backgroundColor: "white",
               borderColor: "#8E0000",
-              minWidth: "150px",
-              fontSize: "0.9rem",
+              minWidth: "175px",
+              fontSize: "1rem",
             }}
             onClick={addResource}
           >
@@ -559,7 +564,7 @@ const ProcedureForm = ({
                 style={{ color: "#8E0000" }}
               >
                 {roleNames.map((name, index) => (
-                  <MenuItem key={index} value={name}>
+                  <MenuItem className="capitalize" key={index} value={name}>
                     {name}
                   </MenuItem>
                 ))}
@@ -595,8 +600,8 @@ const ProcedureForm = ({
               color: "#8E0000",
               backgroundColor: "white",
               borderColor: "#8E0000",
-              minWidth: "150px",
-              fontSize: "0.9rem",
+              minWidth: "175px",
+              fontSize: "1rem",
             }}
             onClick={addRole}
           >
@@ -704,7 +709,7 @@ const ModifyProcedureTemplateForm = () => {
       return;
     }
 
-    if(procedure.estimatedTime < 1) {
+    if (procedure.estimatedTime < 1) {
       toast.error("Estimated time cannot be less than 1 minute.");
       return;
     }

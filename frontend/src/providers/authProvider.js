@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import { useSocketContext } from "./SocketProvider";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -15,6 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [fetchImg, setFetchImg] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const socket = useSocketContext();
 
   const triggerNavImgRefetch = () => {
     setFetchImg((fetchImg) => !fetchImg);
@@ -26,6 +28,7 @@ export const AuthProvider = ({ children }) => {
       if (response.status === 200) {
         console.log(response.data);
         setUser(response.data.account);
+        socket.emit("login", response.data.account.id);
       }
     } catch (error) {
       console.error(
@@ -63,7 +66,7 @@ export const AuthProvider = ({ children }) => {
           const data = await res.json();
           if (data.isLoggedIn) {
             setUser(data.account);
-            console.log(location.pathname);
+            socket.emit("login", data.account.id);
             if (
               location.pathname === "/" ||
               location.pathname === "/RecoveryPage"

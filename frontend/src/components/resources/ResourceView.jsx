@@ -63,9 +63,11 @@ const ResourceView = ({ resources, setResources, navToEditResource }) => {
     if (tabFilter === "All") {
       filteredDataByType = resources; // Show all resources when "All" is selected
     } else if (tabFilter === "Personnel") {
-      filteredDataByType = roles;  // Show only roles when "Personnel" is selected
+      filteredDataByType = roles; // Show only roles when "Personnel" is selected
     } else if (tabFilter === "Equipments") {
-      filteredDataByType = resources.filter(resource => resource.type === "equipment");  // Show only roles when "Personnel" is selected
+      filteredDataByType = resources.filter(
+        (resource) => resource.type === "equipment"
+      ); // Show only roles when "Personnel" is selected
     } else {
       filteredDataByType = resources.filter(
         (resource) => resource.type === tabFilter.toLowerCase()
@@ -146,7 +148,7 @@ const CreateNewButton = () => {
   return (
     <Link
       to="/resources/create"
-      className="w-1/4 flex justify-center"
+      className="w-1/6 flex justify-center"
       id="createNewResourceBtn"
     >
       <button className="bg-primary text-white text-lg font-semibold rounded-md w-32 py-2">
@@ -187,6 +189,7 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
       {
         Header: "Name",
         accessor: "name",
+        Cell: ({ value }) => <div className="capitalize">{value}</div>,
       },
       {
         Header: "Description",
@@ -195,28 +198,11 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
       {
         Header: "Location",
         accessor: "location",
+        Cell: ({ value }) => <div className="capitalize">{value}</div>,
       },
       {
         Header: "Unique ID",
         accessor: "uniqueIdentifier",
-      },
-      {
-        Header: "Status",
-        accessor: "status",
-        Cell: ({ value }) => (
-          <span
-            style={{
-              color:
-                value === "In-use"
-                  ? "#AA0000"
-                  : value === "Available"
-                  ? "#009020"
-                  : "black",
-            }}
-          >
-            {value}
-          </span>
-        ),
       },
       {
         Header: "Actions",

@@ -3,13 +3,19 @@ import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../providers/authProvider.js";
 import axios from "axios";
-import { DateRangePicker } from 'rsuite';
-import "rsuite/dist/rsuite-no-reset.min.css"; 
-import { TextField, FormControl, Select, MenuItem, InputLabel } from '@mui/material';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
-import './Calendar.css';
-import { FormControlLabel, Checkbox } from '@mui/material';
+import { DateRangePicker } from "rsuite";
+import "rsuite/dist/rsuite-no-reset.min.css";
+import {
+  TextField,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
+} from "@mui/material";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import "./Calendar.css";
+import { FormControlLabel, Checkbox } from "@mui/material";
 
 const notify = () => toast.success("Profile successfully updated.");
 const notifyErr = () => toast.error("There was an error updating the profile.");
@@ -365,12 +371,15 @@ function ProfileImage({ imgUrl, setImgUrl }) {
 
   return (
     <div className="flex flex-col self-stretch my-auto text-sm font-medium text-neutral-600 max-md:mt-10">
-      <img
-        loading="lazy"
-        alt=""
-        src={imgUrl}
-        className="w-full aspect-[0.93]"
-      />
+      {/* <img loading="lazy" alt="" src={imgUrl} className="w-full aspect-[1]" /> */}
+      <div className="h-[300px] w-[300px] overflow-hidden m-auto">
+        <img
+          src={imgUrl}
+          alt="Profile"
+          className="h-full w-full object-cover"
+          loading="lazy"
+        />
+      </div>
       <div
         className="justify-center self-center p-1 mt-3.5 rounded-lg border border-solid bg-primary text-white border-neutral-600 cursor-pointer"
         onClick={() => setShowUploader(true)}
@@ -759,9 +768,17 @@ function ScheduleCalendar({ user, onScheduleChange, preview }) {
   };
 
   const getUsualHoursForDay = (day) => {
-    const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const weekday = weekdayNames[day];  // No need to adjust if array is aligned properly
-    const hours = user.usualHours.find(uh => uh.day === weekday);
+    const weekdayNames = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    const weekday = weekdayNames[day]; // No need to adjust if array is aligned properly
+    const hours = user.usualHours.find((uh) => uh.day === weekday);
 
     return hours || { start: "0:00", end: "0:00" }; // Provide default 'Off' hours if no match is found
   };
@@ -905,7 +922,6 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
   };
 
   const handleSubmitWeeklySchedule = async () => {
-
     const updateData = {
       usualHours: weeklySchedule,
     };
@@ -971,8 +987,9 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
       <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
         <header className="flex justify-between items-center max-w-full text-red-800 mb-5">
           <h1 className="text-4xl">Weekly Schedule Update</h1>
-          <p className="text-lg">Please ensure that the start time is before the end time.</p>
-
+          <p className="text-lg">
+            Please ensure that the start time is before the end time.
+          </p>
         </header>
         <div className="flex flex-col mt-4 space-y-6">
           {weeklySchedule.map((schedule, index) => (
@@ -1131,7 +1148,7 @@ function MyComponent() {
   // Default view rendering (profile view)
   return (
     <div className="flex flex-col items-center pt-10 pr-5 pb-8 pl-14 bg-white max-md:pl-5">
-      {id && authUser && (authUser.id !== id) && (
+      {id && authUser && authUser.id !== id && (
         <button
           onClick={handleTerminateAccount}
           className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-highlightRed rounded-lg border border-solid border-neutral-600"

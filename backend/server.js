@@ -54,7 +54,6 @@ mongoose
       { name: "physician", uniqueIdentifier: "physician" },
       { name: "nurse", uniqueIdentifier: "nurse" },
       { name: "surgeon", uniqueIdentifier: "surgeon" },
-      { name: "other", uniqueIdentifier: "other" },
     ];
 
     // Function to add roles if they do not exist
@@ -95,6 +94,33 @@ const corsOptions = {
   optionsSuccessStatus: 204,
 };
 app.use(cors(corsOptions));
+
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL,
+  },
+});
+
+// Socket.IO events
+io.on("connection", async (socket) => {
+  console.log("Socket connected!", socket.id);
+
+  socket.on("login", (userId) => {
+    socket._uid = userId;
+    console.log(
+      `User login! Associating socket id ${socket.id} with user: ${userId}`
+    );
+  });
+
+  socket.on("test", () => {
+    console.log(`This is socket id ${socket.id} with user: ${socket._uid}`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`A user with id ${socket._uid} disconnected`);
+  });
+});
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
@@ -169,13 +195,6 @@ app.get("/user/profilePicture/url/:id", async (req, res) => {
     res.status(500).send(error);
   }
 });
-
-const server = http.createServer(app);
-/* const io = socketIo(server, {
-  cors: {
-    origin: process.env.FRONTEND_URL,
-  },
-}); */
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -989,19 +1008,26 @@ app.delete("/procedureTemplates/:id", async (req, res) => {
   const procedureTemplateId = req.params.id;
   try {
     // Check if any SectionTemplate is using the ProcedureTemplate
-    const isUsed = await SectionTemplate.findOne({
+    const sectionUsingProcedure = await SectionTemplate.findOne({
       procedureTemplates: new mongoose.Types.ObjectId(procedureTemplateId),
     });
 
-    if (isUsed) {
-      // If the ProcedureTemplate is in use, do not delete and send a message
-      return res.status(403).json({
-        message:
-          "Cannot delete procedure template because it is in use by a process template.",
+    if (sectionUsingProcedure) {
+      // Check if the SectionTemplate is part of any ProcessTemplate
+      const isPartOfProcess = await ProcessTemplate.findOne({
+        sectionTemplates: sectionUsingProcedure._id,
       });
+
+      // If the ProcedureTemplate is in use and part of a process template, do not delete and send a message
+      if (isPartOfProcess) {
+        return res.status(403).json({
+          message:
+            "Cannot delete procedure template because it is in use by a process template.",
+        });
+      }
     }
 
-    // If the ProcedureTemplate is not in use, proceed to delete
+    // If the ProcedureTemplate is not in use by a process template, proceed to delete
     await ProcedureTemplate.findByIdAndDelete(procedureTemplateId);
 
     res.status(200).json({
@@ -1092,44 +1118,62 @@ app.get("/processTemplates/:id", async (req, res) => {
     res.status(200).json(template);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error retrieving process template", error: error.message });
+    res.status(500).json({
+      message: "Error retrieving process template",
+      error: error.message,
+    });
   }
 });
 
-
-app.put('/processTemplates/:id', async (req, res) => {
+app.put("/processTemplates/:id", async (req, res) => {
   try {
     const { processName, description, sections } = req.body;
     const { id } = req.params;
 
-    const sectionIds = await Promise.all(sections.map(async (section) => {
-      if ('_id' in section && mongoose.Types.ObjectId.isValid(section._id.toString())) {
-        const updatedSection = await SectionTemplate.findByIdAndUpdate(section._id, {
-          sectionName: section.sectionName,
-          description: section.description,
-          procedureTemplates: section.procedureTemplates.filter(id => mongoose.Types.ObjectId.isValid(id)),
-        }, { new: true });
-        return updatedSection ? updatedSection._id : null;
-      } else {
-        // Create new section
-        const newSection = new SectionTemplate({
-          sectionName: section.sectionName,
-          description: section.description,
-          procedureTemplates: section.procedureTemplates.filter(id => mongoose.Types.ObjectId.isValid(id)),
-        });
-        await newSection.save();
-        return newSection._id;
-      }
-    }));
+    const sectionIds = await Promise.all(
+      sections.map(async (section) => {
+        if (
+          "_id" in section &&
+          mongoose.Types.ObjectId.isValid(section._id.toString())
+        ) {
+          const updatedSection = await SectionTemplate.findByIdAndUpdate(
+            section._id,
+            {
+              sectionName: section.sectionName,
+              description: section.description,
+              procedureTemplates: section.procedureTemplates.filter((id) =>
+                mongoose.Types.ObjectId.isValid(id)
+              ),
+            },
+            { new: true }
+          );
+          return updatedSection ? updatedSection._id : null;
+        } else {
+          // Create new section
+          const newSection = new SectionTemplate({
+            sectionName: section.sectionName,
+            description: section.description,
+            procedureTemplates: section.procedureTemplates.filter((id) =>
+              mongoose.Types.ObjectId.isValid(id)
+            ),
+          });
+          await newSection.save();
+          return newSection._id;
+        }
+      })
+    );
 
-    const filteredSectionIds = sectionIds.filter(id => id !== null);
+    const filteredSectionIds = sectionIds.filter((id) => id !== null);
 
-
-    const updatedTemplate = await ProcessTemplate.findByIdAndUpdate(id, {
-      processName,
-      description,
-      sectionTemplates: filteredSectionIds
-    }, { new: true }).populate('sectionTemplates');
+    const updatedTemplate = await ProcessTemplate.findByIdAndUpdate(
+      id,
+      {
+        processName,
+        description,
+        sectionTemplates: filteredSectionIds,
+      },
+      { new: true }
+    ).populate("sectionTemplates");
 
     if (!updatedTemplate) {
       return res.status(404).json({ message: "Process template not found" });
@@ -1138,11 +1182,12 @@ app.put('/processTemplates/:id', async (req, res) => {
     res.status(200).json(updatedTemplate);
   } catch (error) {
     console.error("Failed to update process template:", error);
-    res.status(400).json({ message: "Failed to update process template", error: error.message });
+    res.status(400).json({
+      message: "Failed to update process template",
+      error: error.message,
+    });
   }
 });
-
-
 
 app.delete("/processTemplates/:id", async (req, res) => {
   try {
@@ -1160,19 +1205,21 @@ app.delete("/processTemplates/:id", async (req, res) => {
   }
 });
 
-app.post('/processTemplates', async (req, res) => {
+app.post("/processTemplates", async (req, res) => {
   try {
     const { processName, description, sections } = req.body;
 
-    const sectionIds = await Promise.all(sections.map(async (section) => {
-      const newSection = new SectionTemplate({
-        sectionName: section.sectionName,
-        description: section.description,
-        procedureTemplates: section.procedureTemplates, 
-      });
-      await newSection.save();
-      return newSection._id;
-    }));
+    const sectionIds = await Promise.all(
+      sections.map(async (section) => {
+        const newSection = new SectionTemplate({
+          sectionName: section.sectionName,
+          description: section.description,
+          procedureTemplates: section.procedureTemplates,
+        });
+        await newSection.save();
+        return newSection._id;
+      })
+    );
 
     const newProcessTemplate = new ProcessTemplate({
       processName,
@@ -1184,12 +1231,15 @@ app.post('/processTemplates', async (req, res) => {
     res.status(201).json(newProcessTemplate);
   } catch (error) {
     console.error("Failed to create process template:", error);
-    res.status(400).json({ message: "Failed to create process template", error: error.message });
+    res.status(400).json({
+      message: "Failed to create process template",
+      error: error.message,
+    });
   }
 });
 
 module.exports = {
-  app,
+  server,
   initializePredefinedAccounts,
   removePredefinedAccounts,
 };

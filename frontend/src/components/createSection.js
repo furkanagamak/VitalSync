@@ -127,7 +127,7 @@ const SectionForm = ({ onAddProcedure, section, setSection }) => {
 
   const theme = createTheme({
     typography: {
-      fontSize: 12,
+      fontSize: 14,
       button: {
         textTransform: "none",
       },
@@ -279,7 +279,7 @@ const SectionForm = ({ onAddProcedure, section, setSection }) => {
                 backgroundColor: "white",
                 borderColor: "#8E0000",
                 minWidth: "100px",
-                fontSize: "0.9rem",
+                fontSize: "1.1rem",
                 textTransform: "none",
                 marginRight: "120px",
               }}
@@ -449,7 +449,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
           style={{
             textAlign: "center",
             color: "#8E0000",
-            fontSize: "1.29rem",
+            fontSize: "1.45rem",
             fontWeight: "bold",
           }}
         >
@@ -474,7 +474,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
               tableLayout: "fixed",
               borderCollapse: "separate",
               borderSpacing: "0 1px",
-              fontSize: "0.9rem",
+              fontSize: "1.1rem",
               textAlign: "center",
               marginBottom: "1rem",
             }}
