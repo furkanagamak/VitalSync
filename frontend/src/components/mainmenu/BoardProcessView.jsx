@@ -7,10 +7,19 @@ import { FaArrowLeft } from "react-icons/fa";
 import { calculateTimeUntilDate } from "../../utils/helperFunctions";
 import ProcessChat from "../ProcessChat";
 import { Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useAuth } from "../../providers/authProvider.js";
+import toast from "react-hot-toast";
 
-const BoardProcessView = ({ id, navToDashboard }) => {
+const apiUrl = process.env.REACT_APP_API_BASE_URL;
+
+const BoardProcessView = () => {
   const [process, setProcess] = useState(null);
   const [boardProcessPage, setBoardProcessPage] = useState("procedures");
+  const { id } = useParams();
+  const { user } = useAuth();
+
+  console.log(user);
 
   const navToProcedures = () => {
     setBoardProcessPage("procedures");
@@ -21,8 +30,17 @@ const BoardProcessView = ({ id, navToDashboard }) => {
 
   useEffect(() => {
     const fetchBoardProcess = async () => {
-      setProcess(tmpBoardProcess);
-      console.log(tmpBoardProcess);
+      const res = await fetch(`${apiUrl}/boardProcess/${id}`, {
+        credentials: "include",
+      });
+      if (!res.ok) {
+        console.log("assigned processes fetch failed");
+        toast.error(await res.text());
+      } else {
+        const data = await res.json();
+        setProcess(data);
+        console.log(data);
+      }
     };
     fetchBoardProcess();
   }, []);
@@ -34,13 +52,15 @@ const BoardProcessView = ({ id, navToDashboard }) => {
         navToProcedures={navToProcedures}
         navToChat={navToChat}
         processId={process.processId}
-        navToDashboard={navToDashboard}
         processName={process.processName}
         patientName={process.patientName}
         boardProcessPage={boardProcessPage}
       />
       {boardProcessPage === "procedures" && (
-        <BoardProcessProcedures procedures={process.proceduresLeft} />
+        <BoardProcessProcedures
+          procedures={process.proceduresLeft}
+          currUser={user.id}
+        />
       )}
       {boardProcessPage === "chat" && <BoardProcessChat />}
     </div>
@@ -51,7 +71,6 @@ const BoardProcessHeader = ({
   navToProcedures,
   navToChat,
   processId,
-  navToDashboard,
   processName,
   patientName,
   boardProcessPage,
@@ -108,8 +127,7 @@ const BoardProcessHeader = ({
   );
 };
 
-const BoardProcessProcedures = ({ procedures }) => {
-  const currUser = "001";
+const BoardProcessProcedures = ({ procedures, currUser }) => {
   return (
     <div className="p-8" id="boardProcessProcedures">
       <section className="text-2xl mb-4">
