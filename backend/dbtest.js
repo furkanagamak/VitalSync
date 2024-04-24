@@ -23,6 +23,14 @@ async function addInstances() {
     });
     console.log("Connected to MongoDB");
 
+    // Add one instance of Role
+    const roleData = {
+      name: "Name",
+      description: "Description",
+      uniqueIdentifier: "UniqueIdentifier",
+    };
+    const newRole = new Role(roleData);
+
     // Add one instance of each model
     const accountData = {
       firstName: "John",
@@ -36,13 +44,13 @@ async function addInstances() {
       phoneNumber: "1234567890",
       officePhoneNumber: "0987654321",
       officeLocation: "Room 101",
+      eligibleRoles: [newRole._id],
+      assignedProcedures: [],
     };
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(accountData.password, salt);
     accountData.password = hashedPassword;
     const newAccount = new Account(accountData);
-    const savedAccount = await newAccount.save();
-    console.log("Account saved:", savedAccount);
 
     const patientData = {
       fullName: "Alice Smith",
@@ -63,8 +71,6 @@ async function addInstances() {
       allergies: ["Peanuts", "Penicillin"],
     };
     const newPatient = new Patient(patientData);
-    const savedPatient = await newPatient.save();
-    console.log("Patient saved:", savedPatient);
 
     // Add one instance of ResourceInstance
     const resourceInstanceData = {
@@ -77,8 +83,6 @@ async function addInstances() {
       unavailableTimes: [],
     };
     const newResourceInstance = new ResourceInstance(resourceInstanceData);
-    const savedResourceInstance = await newResourceInstance.save();
-    console.log("ResourceInstance saved:", savedResourceInstance);
 
     // Add one instance of ResourceTemplate
     const resourceTemplateData = {
@@ -87,70 +91,20 @@ async function addInstances() {
       description: "Description",
     };
     const newResourceTemplate = new ResourceTemplate(resourceTemplateData);
-    const savedResourceTemplate = await newResourceTemplate.save();
-    console.log("ResourceTemplate saved:", savedResourceTemplate);
 
-    // Add one instance of Role
-    const roleData = {
-      name: "Name",
-      description: "Description",
-      uniqueIdentifier: "UniqueIdentifier",
-    };
-    const newRole = new Role(roleData);
-    const savedRole = await newRole.save();
-    console.log("Role saved:", savedRole);
+    const testRoomTemplate = new ResourceTemplate({
+      type: "spaces",
+      name: "test room",
+    });
 
-    // Add one instance of ProcedureTemplate
-    const procedureTemplateData = {
-      procedureName: "ProcedureName",
-      description: "Description",
-      requiredResources: [],
-      roles: [],
-      estimatedTime: 60, // in minutes
-      specialNotes: "SpecialNotes",
-    };
-    const newProcedureTemplate = new ProcedureTemplate(procedureTemplateData);
-    const savedProcedureTemplate = await newProcedureTemplate.save();
-    console.log("ProcedureTemplate saved:", savedProcedureTemplate);
+    const testRoom = new ResourceInstance({
+      type: "spaces",
+      name: "test room",
+      location: "TRoom 102",
+      uniqueIdentifier: "TR-102",
+    });
 
-    // Add one instance of ProcedureInstance
-    const procedureInstanceData = {
-      procedureName: "ProcedureName",
-      description: "Description",
-      requiredResources: [],
-      assignedResources: [],
-      rolesAssignedPeople: [],
-      numOfPeopleCompleted: 0,
-      timeStart: new Date(),
-      timeEnd: new Date(),
-      processID: null,
-      sectionID: null,
-    };
-    const newProcedureInstance = new ProcedureInstance(procedureInstanceData);
-    const savedProcedureInstance = await newProcedureInstance.save();
-    console.log("ProcedureInstance saved:", savedProcedureInstance);
-
-    // Add one instance of ProcessTemplate
-    const processTemplateData = {
-      processName: "ProcessName",
-      description: "Description",
-      sectionTemplates: [],
-    };
-    const newProcessTemplate = new ProcessTemplate(processTemplateData);
-    const savedProcessTemplate = await newProcessTemplate.save();
-    console.log("ProcessTemplate saved:", savedProcessTemplate);
-
-    // Add one instance of ProcessInstance
-    const processInstanceData = {
-      processID: "ProcessID",
-      processName: "ProcessName",
-      description: "Description",
-      sectionInstances: [],
-      patient: null,
-    };
-    const newProcessInstance = new ProcessInstance(processInstanceData);
-    const savedProcessInstance = await newProcessInstance.save();
-    console.log("ProcessInstance saved:", savedProcessInstance);
+    const processID = "TPID-123";
 
     // Add one instance of SectionTemplate
     const sectionTemplateData = {
@@ -159,19 +113,102 @@ async function addInstances() {
       procedureTemplates: [],
     };
     const newSectionTemplate = new SectionTemplate(sectionTemplateData);
-    const savedSectionTemplate = await newSectionTemplate.save();
-    console.log("SectionTemplate saved:", savedSectionTemplate);
 
     // Add one instance of SectionInstance
     const sectionInstanceData = {
       name: "Name",
       description: "Description",
       procedureInstances: [],
-      processID: null,
+      processID: processID,
     };
     const newSectionInstance = new SectionInstance(sectionInstanceData);
+
+    // Add one instance of ProcedureTemplate
+    const procedureTemplateData = {
+      procedureName: "ProcedureName",
+      description: "Description",
+      requiredResources: [
+        {
+          resource: testRoomTemplate._id,
+          quantity: 1,
+        },
+      ],
+      roles: [
+        {
+          role: newRole._id,
+          quantity: 1,
+        },
+      ],
+      estimatedTime: 60, // in minutes
+      specialNotes: "SpecialNotes",
+    };
+    const newProcedureTemplate = new ProcedureTemplate(procedureTemplateData);
+
+    // Add one instance of ProcedureInstance
+    const procedureInstanceData = {
+      procedureName: "ProcedureName",
+      description: "Description",
+      requiredResources: [testRoomTemplate._id],
+      assignedResources: [testRoom._id],
+      rolesAssignedPeople: [
+        {
+          role: newRole._id,
+          accounts: [newAccount._id],
+        },
+      ],
+      peopleMarkAsCompleted: [],
+      timeStart: new Date(),
+      timeEnd: new Date(),
+      processID: processID,
+      sectionID: sectionInstanceData._id,
+    };
+    const newProcedureInstance = new ProcedureInstance(procedureInstanceData);
+    newSectionInstance.procedureInstances.push(newProcedureInstance._id);
+    newAccount.assignedProcedures.push(newProcedureInstance._id);
+
+    // Add one instance of ProcessTemplate
+    const processTemplateData = {
+      processName: "ProcessName",
+      description: "Description",
+      sectionTemplates: [],
+    };
+    const newProcessTemplate = new ProcessTemplate(processTemplateData);
+
+    // Add one instance of ProcessInstance
+    const processInstanceData = {
+      processID: processID,
+      processName: "ProcessName",
+      description: "Description",
+      sectionInstances: [newSectionInstance._id],
+      currentProcedure: newProcedureInstance._id,
+      patient: newPatient._id,
+    };
+    const newProcessInstance = new ProcessInstance(processInstanceData);
+
+    await testRoomTemplate.save();
+    await testRoom.save();
+    const savedRole = await newRole.save();
+    console.log("Role saved:", savedRole);
+    const savedAccount = await newAccount.save();
+    console.log("Account saved:", savedAccount);
+    const savedPatient = await newPatient.save();
+    console.log("Patient saved:", savedPatient);
+    const savedResourceInstance = await newResourceInstance.save();
+    console.log("ResourceInstance saved:", savedResourceInstance);
+    const savedResourceTemplate = await newResourceTemplate.save();
+    console.log("ResourceTemplate saved:", savedResourceTemplate);
+    const savedSectionTemplate = await newSectionTemplate.save();
+    console.log("SectionTemplate saved:", savedSectionTemplate);
+    const savedProcedureTemplate = await newProcedureTemplate.save();
+    console.log("ProcedureTemplate saved:", savedProcedureTemplate);
+    const savedProcedureInstance = await newProcedureInstance.save();
+    console.log("ProcedureInstance saved:", savedProcedureInstance);
     const savedSectionInstance = await newSectionInstance.save();
     console.log("SectionInstance saved:", savedSectionInstance);
+    const savedProcessTemplate = await newProcessTemplate.save();
+    console.log("ProcessTemplate saved:", savedProcessTemplate);
+    const savedProcessInstance = await newProcessInstance.save();
+    console.log("ProcessInstance saved:", savedProcessInstance);
 
     /*await Promise.all([
       Account.deleteMany({}),
