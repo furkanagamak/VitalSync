@@ -1248,6 +1248,47 @@ app.post("/processTemplates", async (req, res) => {
   }
 });
 
+const getLocationOfProcedure = async (myProcedure) => {
+  await myProcedure.populate("assignedResources");
+  const assignedResources = myProcedure.assignedResources;
+  let myProcedureLocation = "";
+  assignedResources.forEach((resource) => {
+    if (resource.type === "spaces") {
+      myProcedureLocation = resource.location;
+      return;
+    }
+  });
+  if (!myProcedureLocation)
+    throw new Error(
+      `No space resource type exist in the assigned resources of procedure ${assignedResources._id}`
+    );
+
+  return myProcedureLocation;
+};
+
+const getIncompleteProcedureInProcess = async (processInstance) => {
+  const procedureInstances = [];
+  for (const sectionInstanceID of processInstance.sectionInstances) {
+    const sectionInstance = await SectionInstance.findById(
+      sectionInstanceID
+    ).populate("procedureInstances");
+
+    if (!sectionInstance)
+      throw new Error("Section ids inside process instances cannot be found");
+
+    // add to procedure instances array if procedure is not completed
+    sectionInstance.procedureInstances.forEach((procedureInstance) => {
+      if (
+        procedureInstance.peopleMarkAsCompleted.length !==
+        procedureInstance.rolesAssignedPeople.length
+      )
+        procedureInstances.push(procedureInstance);
+    });
+  }
+
+  return procedureInstances;
+};
+
 const getAssignedProcessesByUser = async (user) => {
   // Step 1: Find all unique processInstances related to assignedProcedures
   const assignedProcedures = await user.populate("assignedProcedures");
@@ -1269,25 +1310,10 @@ const getAssignedProcessesByUser = async (user) => {
     if (!processInstance)
       throw new Error(`Process ID ${processID} does not exists!`);
 
-    // Step 4: Resolve procedureInstances for each sectionInstance
-    const procedureInstances = [];
-    for (const sectionInstanceID of processInstance.sectionInstances) {
-      const sectionInstance = await SectionInstance.findById(
-        sectionInstanceID
-      ).populate("procedureInstances");
-
-      if (!sectionInstance)
-        throw new Error("Section ids inside process instances cannot be found");
-
-      // add to procedure instances array if procedure is not completed
-      sectionInstance.procedureInstances.forEach((procedureInstance) => {
-        if (
-          procedureInstance.peopleMarkAsCompleted.length !==
-          procedureInstance.rolesAssignedPeople.length
-        )
-          procedureInstances.push(procedureInstance);
-      });
-    }
+    // Step 4: Resolve incomplete procedureInstances for each sectionInstance
+    const procedureInstances = await getIncompleteProcedureInProcess(
+      processInstance
+    );
 
     // Step 5: Find the first incomplete procedureInstance assigned to the user
     let procedureAhead = 0;
@@ -1315,21 +1341,9 @@ const getAssignedProcessesByUser = async (user) => {
       }
     }
 
-    let myProcedureLocation = "";
-    if (myProcedure) {
-      await myProcedure.populate("assignedResources");
-      const assignedResources = myProcedure.assignedResources;
-      assignedResources.forEach((resource) => {
-        if (resource.type === "spaces") {
-          myProcedureLocation = resource.location;
-          return;
-        }
-      });
-      if (!myProcedureLocation)
-        throw new Error(
-          `No space resource type exist in the assigned resources of procedure ${assignedResources._id}`
-        );
-    }
+    const myProcedureLocation = myProcedure
+      ? await getLocationOfProcedure(myProcedure)
+      : "";
 
     let currentProcedure = null;
     if (procedureInstances.length > 0) currentProcedure = procedureInstances[0];
@@ -1375,6 +1389,67 @@ app.get("/assignedProcesses", async (req, res) => {
 
   if (currUser.assignedProcedures.length === 0) return res.status(200).json([]);
   const data = await getAssignedProcessesByUser(currUser);
+  return res.status(200).json(data);
+});
+
+const getBoardProcessInfo = async (process) => {
+  process.populate("patient");
+
+  const incompleteProcedures = await getIncompleteProcedureInProcess(process);
+
+  const proceduresLeft = await Promise.all(
+    incompleteProcedures.map(async (procedure) => {
+      const peopleAssigned = procedure.rolesAssignedPeople.reduce(
+        (accum, obj) => accum.concat(obj.accounts),
+        []
+      );
+      const peopleCompleted = procedure.peopleMarkAsCompleted.reduce(
+        (accum, obj) => accum.concat(obj.accounts),
+        []
+      );
+
+      const location = await getLocationOfProcedure(procedure);
+
+      return {
+        procedureName: procedure.procedureName,
+        timeStart: procedure.timeStart,
+        location,
+        description: procedure.description,
+        specialInstructions: procedure.specialInstructions,
+        peopleAssigned,
+        peopleCompleted,
+      };
+    })
+  );
+
+  return {
+    processID: process.processID,
+    processName: process.processName,
+    patientName: process.patient.fullName,
+    proceduresLeft,
+  };
+};
+
+app.get("/boardProcess/:id", async (req, res) => {
+  const processID = req.params.id;
+  const accountId = req.cookies.accountId;
+  if (!accountId) return res.status(401).send("User not logged in");
+  const currUser = await Account.findOne({ _id: accountId });
+  if (!currUser)
+    return res
+      .status(404)
+      .send("User does not exist! Malformed session, please login again!");
+
+  // process existence check
+  const process = await ProcessInstance.findOne({ processID: processID });
+  if (!process)
+    return res
+      .status(404)
+      .send(
+        "The provided process ID is not associated with any process instance!"
+      );
+
+  const data = await getBoardProcessInfo(process);
   return res.status(200).json(data);
 });
 

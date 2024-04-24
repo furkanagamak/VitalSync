@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const procedureInstanceSchema = new mongoose.Schema({
   procedureName: { type: String, required: true },
   description: { type: String, default: "" },
+  specialInstructions: { type: String, default: "" },
   requiredResources: [
     {
       type: mongoose.Schema.Types.ObjectId,
