@@ -65,23 +65,20 @@ function PatientInformationForm() {
 
   const handleProceed = () => {
     setPatientInformation(patientInfo);
-    navigate("/processManagement/newProcess/pendingStaffAssignments");
+    navigate("/processManagement/newProcess/startTime");
   };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    console.log(`Handling change for ${name} with value ${value}`); // Debug output
   
     if (['zip', 'insuranceGroup', 'insurancePolicy'].includes(name)) {
       if (!/^\d*$/.test(value)) {
-        console.log("Blocking non-numeric input for " + name); // Debug output
         return;
       }
     }
   
     if (['phone', 'emergencyContact1Phone', 'emergencyContact2Phone'].includes(name)) {
       if (!/^(\d{0,3}-?)?(\d{0,3}-?)?\d{0,4}$/.test(value) && value !== '') {
-        console.log("Blocking invalid phone input for " + name); // Debug output
         return;
       }
     }
