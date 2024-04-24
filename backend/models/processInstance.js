@@ -10,6 +10,10 @@ const processInstanceSchema = new mongoose.Schema({
       ref: "SectionInstance",
     },
   ],
+  currentProcedure: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ProcedureInstance",
+  },
   patient: { type: mongoose.Schema.Types.ObjectId, ref: "Patient" },
   messageHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message" }],
 });

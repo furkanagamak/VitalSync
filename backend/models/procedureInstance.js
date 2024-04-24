@@ -21,7 +21,12 @@ const procedureInstanceSchema = new mongoose.Schema({
       accounts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Account" }],
     },
   ],
-  numOfPeopleCompleted: { type: Number, required: true },
+  peopleMarkAsCompleted: [
+    {
+      role: { type: mongoose.Schema.Types.ObjectId, ref: "Role" },
+      accounts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Account" }],
+    },
+  ],
   timeStart: { type: Date, required: true },
   timeEnd: { type: Date, required: true },
   processID: { type: mongoose.Schema.Types.ObjectId, ref: "ProcessInstance" },
