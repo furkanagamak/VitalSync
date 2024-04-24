@@ -580,6 +580,12 @@ const ModifyProcessTemplateForm = () => {
     }
   }, [location.state]);
 
+  //remove
+  useEffect(() => {
+    console.log(incomingUrl);
+
+  }, [incomingUrl]);
+
   useEffect(() => {
     const fetchProcessTemplate = async () => {
       const savedState = JSON.parse(sessionStorage.getItem('processTemplateState'));
@@ -636,8 +642,9 @@ const ModifyProcessTemplateForm = () => {
     };
 
     if(incomingUrl){
+      console.log(incomingUrl);
       updateProcessTemplate(procData);
-      navigate("/patientForm");
+      navigate("/processManagement/newProcess/patientForm");
     }
     else{
     console.log(procData);

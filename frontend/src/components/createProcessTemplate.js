@@ -604,7 +604,7 @@ const CreateProcessTemplateForm = () => {
   };
     if(incomingUrl){
       updateProcessTemplate(procData);
-      navigate("/patientForm");
+      navigate("/processManagement/newProcess/patientForm");
     }
     else{
     try {

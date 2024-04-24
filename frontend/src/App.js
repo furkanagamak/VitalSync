@@ -67,6 +67,9 @@ import ModifySectionForm from "./components/modifySection.js";
 
 import { AuthProvider } from "./providers/authProvider.js";
 import { SocketContextProvider } from "./providers/SocketProvider";
+import { ProcessCreationProvider } from "./providers/ProcessCreationProvider";
+
+
 
 const notify = () => toast("Here is your toast.");
 
@@ -77,6 +80,7 @@ function App() {
       <SocketContextProvider>
         <BrowserRouter>
           <AuthProvider>
+          <ProcessCreationProvider>
             <Routes>
               <Route path="/" element={<Login />} />
               <Route path="/RecoveryPage" element={<RecoveryPage />} />
@@ -166,6 +170,7 @@ function App() {
                 element={<ModifySectionForm />}
               />
             </Routes>
+          </ProcessCreationProvider>
           </AuthProvider>
         </BrowserRouter>
       </SocketContextProvider>

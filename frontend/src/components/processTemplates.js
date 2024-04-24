@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useTable, useSortBy, usePagination } from "react-table";
 import { TbLayoutGridAdd } from "react-icons/tb";
 import "./TemplateStyles.css";
@@ -90,6 +90,20 @@ const CreateTemplateButton = ({fromLocation} ) => {
 const ProcessTable = ({ filter , fromLocation}) => {
   console.log(fromLocation);
   const [data, setData] = useState([]);
+  const navigate = useNavigate();
+
+
+  const handleEditClick = useCallback((rowId) => {
+    console.log(fromLocation);
+    if (fromLocation) {
+      navigate(`/ModifyProcessTemplateForm/${rowId}`, { state: { incomingUrl: "/processManagement/newProcess/processTemplates" } });
+    } else {
+      console.log(fromLocation);
+
+      navigate(`/ModifyProcessTemplateForm/${rowId}`);
+    }
+  }, [navigate, fromLocation]);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -157,17 +171,6 @@ const ProcessTable = ({ filter , fromLocation}) => {
       {
         Header: "Actions",
         Cell: ({ row }) => {
-          const navigate = useNavigate();
-
-          const handleEditClick = () => {
-            console.log(fromLocation);
-            if(fromLocation){
-                navigate(`/ModifyProcessTemplateForm/${row.original.id}`, {state: {incomingUrl: "/processManagement/newProcess/processTemplates"} });
-            }
-            else{
-            navigate(`/ModifyProcessTemplateForm/${row.original.id}`);}
-          };
-
           return (
             <div
               style={{
@@ -178,8 +181,8 @@ const ProcessTable = ({ filter , fromLocation}) => {
             >
               <button
               className="modify-process-template-button"
-                onClick={handleEditClick}
-                style={{
+              onClick={() => handleEditClick(row.original.id)}                
+              style={{
                   background: "none",
                   border: "none",
                   padding: "0",
@@ -226,7 +229,7 @@ const ProcessTable = ({ filter , fromLocation}) => {
         style: { backgroundColor: "#F5F5DC" },
       },
     ],
-    []
+    [fromLocation]
   );
 
   const {

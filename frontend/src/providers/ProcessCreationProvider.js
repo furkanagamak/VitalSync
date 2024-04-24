@@ -5,11 +5,34 @@ const ProcessCreationContext  = createContext(null);
 export const useProcessCreation  = () => useContext(ProcessCreationContext);
 
 
-export const ProcessTemplateProvider = ({ children }) => {
+export const ProcessCreationProvider = ({ children }) => {
     const [processTemplate, setProcessTemplate] = useState({
       processName: '',
       description: '',
       sections: []
+    });
+
+    const [patientInformation, setPatientInformation] = useState({
+    firstName: '',
+    lastName: '',
+    street: '',
+    city: '',
+    state: '',
+    zip: '',
+    dob: '',
+    sex: '',
+    phone: '',
+    emergencyContact1Name: '',
+    emergencyContact1Relation: '',
+    emergencyContact1Phone: '',
+    emergencyContact2Name: '',
+    emergencyContact2Relation: '',
+    emergencyContact2Phone: '',
+    knownConditions: '',
+    allergies: '',
+    insuranceProvider: '',
+    insuranceGroup: '',
+    insurancePolicy: ''
     });
   
     const updateProcessTemplate = (data) => {
@@ -36,7 +59,7 @@ export const ProcessTemplateProvider = ({ children }) => {
     };
   
     return (
-      <ProcessCreationContext.Provider value={{ processTemplate, updateProcessTemplate, addSection, updateSection }}>
+      <ProcessCreationContext.Provider value={{ processTemplate, updateProcessTemplate, addSection, updateSection, patientInformation, setPatientInformation}}>
         {children}
       </ProcessCreationContext.Provider>
     );
