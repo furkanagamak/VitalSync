@@ -2,6 +2,7 @@ import tmpAssignedProcesses from "../../tmp/data/assignedProcesses";
 import { useState, useEffect } from "react";
 import { calculateTimeUntilDate } from "../../utils/helperFunctions";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const AssignedProcesses = () => {
   const [assignedProcesses, setAssignedProcesses] = useState(null);
@@ -10,7 +11,19 @@ const AssignedProcesses = () => {
 
   useEffect(() => {
     const fetchAssignedProcesses = async () => {
-      setAssignedProcesses(tmpAssignedProcesses);
+      const res = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/assignedProcesses`,
+        {
+          credentials: "include",
+        }
+      );
+      if (!res.ok) {
+        console.log("assigned processes fetch failed");
+        toast.error(await res.text());
+      } else {
+        const data = await res.json();
+        setAssignedProcesses(data);
+      }
     };
     fetchAssignedProcesses();
   }, []);
