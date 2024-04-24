@@ -1238,6 +1238,101 @@ app.post("/processTemplates", async (req, res) => {
   }
 });
 
+const getAssignedProcessesByUser = async (user) => {
+  // Step 1: Find all unique processInstances related to assignedProcedures
+  const assignedProcedures = await user.populate("assignedProcedures");
+  const uniqueProcessInstances = new Set();
+  assignedProcedures.assignedProcedures.forEach((procedure) => {
+    uniqueProcessInstances.add(procedure.processID);
+  });
+
+  // Step 2: Iterate through each unique processInstance
+  const assignedProcesses = [];
+  for (const processID of uniqueProcessInstances) {
+    // Step 3: Retrieve process details
+    const processInstance = await ProcessInstance.findById(processID).populate(
+      "currentProcedure patient"
+    );
+
+    if (!processInstance) continue;
+
+    // Step 4: Resolve procedureInstances for each sectionInstance
+    const procedureInstances = [];
+    for (const sectionInstanceID of processInstance.sectionInstances) {
+      const sectionInstance = await SectionInstance.findById(
+        sectionInstanceID
+      ).populate("procedureInstances");
+
+      if (!sectionInstance) continue;
+
+      sectionInstance.procedureInstances.forEach((procedureInstance) => {
+        procedureInstances.push(procedureInstance);
+      });
+    }
+
+    // Step 5: Find the first incomplete procedureInstance assigned to the user
+    let procedureAhead = 0;
+    let currentProcedure = null;
+    for (const procedureInstance of procedureInstances) {
+      const isAssigned = procedureInstance.rolesAssignedPeople.some(
+        (roleAssigned) => roleAssigned.accounts === user._id
+      );
+      if (
+        !isAssigned &&
+        procedureInstance.numOfPeopleCompleted !==
+          procedureInstance.rolesAssignedPeople.length
+      ) {
+        procedureAhead++;
+      } else {
+        currentProcedure = procedureInstance;
+        break;
+      }
+    }
+
+    // Step 6: Create the return object
+    const assignedProcess = {
+      processID: processInstance.processID,
+      processName: processInstance.processName,
+      description: processInstance.description,
+      myProcedure: currentProcedure
+        ? {
+            procedureName: currentProcedure.procedureName,
+            location: currentProcedure.location,
+            timeStart: currentProcedure.timeStart.toString(),
+            timeEnd: currentProcedure.timeEnd.toString(),
+          }
+        : null,
+      currentProcedure: currentProcedure
+        ? currentProcedure.procedureName
+        : null,
+      patientName: processInstance.patient
+        ? processInstance.patient.fullName
+        : null,
+      procedureAhead: procedureAhead,
+    };
+
+    // Step 7: Push the object to the result array
+    assignedProcesses.push(assignedProcess);
+  }
+
+  return assignedProcesses;
+};
+
+app.get("/assignedProcesses", async (req, res) => {
+  const accountId = req.cookies.accountId;
+  if (!accountId) return res.status(401).send("User not logged in");
+  const currUser = await Account.findOne({ _id: accountId });
+  if (!currUser)
+    return res
+      .status(404)
+      .send("User does not exist! Malformed session, please login again!");
+
+  console.log(currUser.assignedProcedures);
+  if (currUser.assignedProcedures.length === 0) return res.status(200).json([]);
+  const data = getAssignedProcessesByUser(currUser);
+  return res.status(200).json(data);
+});
+
 module.exports = {
   server,
   initializePredefinedAccounts,
