@@ -29,7 +29,7 @@ const procedureInstanceSchema = new mongoose.Schema({
   ],
   timeStart: { type: Date, required: true },
   timeEnd: { type: Date, required: true },
-  processID: { type: mongoose.Schema.Types.ObjectId, ref: "ProcessInstance" },
+  processID: { type: String, ref: "ProcessInstance.processID" },
   sectionID: { type: mongoose.Schema.Types.ObjectId, ref: "SectionInstance" },
 });
 

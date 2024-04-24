@@ -30,6 +30,10 @@ const ResourceTemplate = require("./models/resourceTemplate.js");
 const ResourceInstance = require("./models/resourceInstance.js");
 const SectionTemplate = require("./models/sectionTemplate.js");
 const ProcessTemplate = require("./models/processTemplate.js");
+const ProcessInstance = require("./models/processInstance.js");
+const SectionInstance = require("./models/sectionInstance.js");
+const ProcedureInstance = require("./models/procedureInstance.js");
+const Patient = require("./models/patient.js");
 dotenv.config();
 
 const bucketName = process.env.BUCKET_NAME;
@@ -579,6 +583,8 @@ async function initializePredefinedAccounts() {
         phoneNumber: "1234567890",
         password: "staffPassword123", // Password for staff
         eligibleRoles: [nurseRole._id],
+        assignedProcedures: [],
+        notificationBox: [],
       },
       {
         firstName: "Hospital",
@@ -591,6 +597,8 @@ async function initializePredefinedAccounts() {
         phoneNumber: "9876543210",
         password: "hospitalAdminPassword123", // Password for hospital admin
         eligibleRoles: [physicianRole._id],
+        assignedProcedures: [],
+        notificationBox: [],
       },
       {
         firstName: "System",
@@ -603,6 +611,8 @@ async function initializePredefinedAccounts() {
         phoneNumber: "5555555555",
         password: "systemAdminPassword123", // Password for system admin
         eligibleRoles: [surgeonRole._id],
+        assignedProcedures: [],
+        notificationBox: [],
       },
     ];
 
@@ -1250,11 +1260,14 @@ const getAssignedProcessesByUser = async (user) => {
   const assignedProcesses = [];
   for (const processID of uniqueProcessInstances) {
     // Step 3: Retrieve process details
-    const processInstance = await ProcessInstance.findById(processID).populate(
-      "currentProcedure patient"
-    );
+    const processInstance = await ProcessInstance.findOne({
+      processID: processID,
+    })
+      .populate("currentProcedure")
+      .populate("patient");
 
-    if (!processInstance) continue;
+    if (!processInstance)
+      throw new Error(`Process ID ${processID} does not exists!`);
 
     // Step 4: Resolve procedureInstances for each sectionInstance
     const procedureInstances = [];
@@ -1263,43 +1276,76 @@ const getAssignedProcessesByUser = async (user) => {
         sectionInstanceID
       ).populate("procedureInstances");
 
-      if (!sectionInstance) continue;
+      if (!sectionInstance)
+        throw new Error("Section ids inside process instances cannot be found");
 
+      // add to procedure instances array if procedure is not completed
       sectionInstance.procedureInstances.forEach((procedureInstance) => {
-        procedureInstances.push(procedureInstance);
+        if (
+          procedureInstance.peopleMarkAsCompleted.length !==
+          procedureInstance.rolesAssignedPeople.length
+        )
+          procedureInstances.push(procedureInstance);
       });
     }
 
     // Step 5: Find the first incomplete procedureInstance assigned to the user
     let procedureAhead = 0;
-    let currentProcedure = null;
+    let myProcedure = null;
     for (const procedureInstance of procedureInstances) {
       const isAssigned = procedureInstance.rolesAssignedPeople.some(
-        (roleAssigned) => roleAssigned.accounts === user._id
+        (roleAssigned) =>
+          roleAssigned.accounts.some((account) => account.equals(user._id))
       );
+      const hasCompleted = procedureInstance.peopleMarkAsCompleted.some(
+        (roleAssigned) =>
+          roleAssigned.accounts.some((account) => account.equals(user._id))
+      );
+
+      if (isAssigned && !hasCompleted) {
+        myProcedure = procedureInstance;
+        break;
+      }
       if (
         !isAssigned &&
-        procedureInstance.numOfPeopleCompleted !==
+        procedureInstance.peopleMarkAsCompleted.length !==
           procedureInstance.rolesAssignedPeople.length
       ) {
         procedureAhead++;
-      } else {
-        currentProcedure = procedureInstance;
-        break;
       }
     }
+
+    let myProcedureLocation = "";
+    if (myProcedure) {
+      await myProcedure.populate("assignedResources");
+      const assignedResources = myProcedure.assignedResources;
+      assignedResources.forEach((resource) => {
+        if (resource.type === "spaces") {
+          myProcedureLocation = resource.location;
+          return;
+        }
+      });
+      if (!myProcedureLocation)
+        throw new Error(
+          `No space resource type exist in the assigned resources of procedure ${assignedResources._id}`
+        );
+    }
+
+    let currentProcedure = null;
+    if (procedureInstances.length > 0) currentProcedure = procedureInstances[0];
 
     // Step 6: Create the return object
     const assignedProcess = {
       processID: processInstance.processID,
       processName: processInstance.processName,
       description: processInstance.description,
-      myProcedure: currentProcedure
+      myProcedure: myProcedure
         ? {
-            procedureName: currentProcedure.procedureName,
-            location: currentProcedure.location,
-            timeStart: currentProcedure.timeStart.toString(),
-            timeEnd: currentProcedure.timeEnd.toString(),
+            // procedureId: myProcedure._id,
+            procedureName: myProcedure.procedureName,
+            location: myProcedureLocation,
+            timeStart: myProcedure.timeStart.toISOString(),
+            timeEnd: myProcedure.timeEnd.toISOString(),
           }
         : null,
       currentProcedure: currentProcedure
@@ -1327,9 +1373,8 @@ app.get("/assignedProcesses", async (req, res) => {
       .status(404)
       .send("User does not exist! Malformed session, please login again!");
 
-  console.log(currUser.assignedProcedures);
   if (currUser.assignedProcedures.length === 0) return res.status(200).json([]);
-  const data = getAssignedProcessesByUser(currUser);
+  const data = await getAssignedProcessesByUser(currUser);
   return res.status(200).json(data);
 });
 

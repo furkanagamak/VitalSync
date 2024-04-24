@@ -9,7 +9,7 @@ const sectionInstanceSchema = new mongoose.Schema({
       ref: "ProcedureInstance",
     },
   ],
-  processID: { type: mongoose.Schema.Types.ObjectId, ref: "ProcessInstance" },
+  processID: { type: String, ref: "ProcessInstance.processID" },
 });
 
 module.exports = mongoose.model("SectionInstance", sectionInstanceSchema);
