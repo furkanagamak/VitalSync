@@ -1551,6 +1551,15 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
       await procedure.save();
     }
 
+    console.l;
+    // remove completed procedure inside user's assigned procedure
+    account.assignedProcedures = account.assignedProcedures.filter(
+      (assignedProcedure) => {
+        return !assignedProcedure.equals(procedure._id);
+      }
+    );
+    await account.save();
+
     const assignedCount = procedure.rolesAssignedPeople.length;
     const completedCount = procedure.peopleMarkAsCompleted.length;
 

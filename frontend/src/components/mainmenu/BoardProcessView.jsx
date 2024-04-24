@@ -51,7 +51,7 @@ const BoardProcessView = () => {
       <BoardProcessHeader
         navToProcedures={navToProcedures}
         navToChat={navToChat}
-        processId={process.processId}
+        processId={process.processID}
         processName={process.processName}
         patientName={process.patientName}
         boardProcessPage={boardProcessPage}

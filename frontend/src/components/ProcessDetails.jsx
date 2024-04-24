@@ -16,6 +16,7 @@ const ProcessDetails = ({ id }) => {
       try {
         const response = await axios.get(`/processInstance/AB12CD34`);
         setProcess(response.data);
+        console.log(response.data);
       } catch (error) {
         console.error("Failed to fetch process details:", error);
       }

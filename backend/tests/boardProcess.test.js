@@ -282,12 +282,9 @@ testSectionInstanceIntra.procedureInstances.push(testProcedureInstance3._id);
 testSectionInstanceIntra.procedureInstances.push(testProcedureInstance4._id);
 testSectionInstancePost.procedureInstances.push(testProcedureInstance5._id);
 
-testPhysician.assignedProcedures.push(testProcedureInstance2._id);
 testPhysician.assignedProcedures.push(testProcedureInstance4._id);
 testPhysician.assignedProcedures.push(testProcedureInstance5._id);
-testNurse.assignedProcedures.push(testProcedureInstance1._id);
-testNurse.assignedProcedures.push(testProcedureInstance2._id);
-testNurse.assignedProcedures.push(testProcedureInstance2._id);
+testNurse.assignedProcedures.push(testProcedureInstance3._id);
 testNurse.assignedProcedures.push(testProcedureInstance4._id);
 testNurse.assignedProcedures.push(testProcedureInstance5._id);
 
@@ -478,7 +475,7 @@ describe("POST /resources for creating resources", () => {
     uids = await initializePredefinedAccounts();
 
     // comment this function call and the same function call in afterAll to persist the test data
-    // await clearTestData();
+    await clearTestData();
 
     await addTestData();
   });
@@ -559,7 +556,7 @@ describe("POST /resources for creating resources", () => {
     await removePredefinedAccounts();
 
     // comment this function call and the same function call in beforeAll to persist the test data
-    // await clearTestData();
+    await clearTestData();
 
     await server.close();
     await mongoose.disconnect();
