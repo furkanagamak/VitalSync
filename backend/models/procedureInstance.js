@@ -27,7 +27,6 @@ const procedureInstanceSchema = new mongoose.Schema({
       accounts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Account" }],
     },
   ],
-  completed: { type: Boolean, required: true, default: false },
   timeStart: { type: Date, required: true },
   timeEnd: { type: Date, required: true },
   processID: { type: mongoose.Schema.Types.ObjectId, ref: "ProcessInstance" },
