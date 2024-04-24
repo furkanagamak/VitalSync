@@ -3,6 +3,7 @@ const { server: app } = require("../server.js");
 const mongoose = require("mongoose");
 const ProcessTemplate = require("../models/processTemplate.js");
 const SectionTemplate = require("../models/sectionTemplate.js");
+const SectionInstance = require("../models/sectionTemplate.js");
 const Role = require("../models/role.js");
 const ResourceTemplate = require("../models/resourceTemplate.js");
 const ProcedureTemplate = require("../models/procedureTemplate.js");
@@ -40,7 +41,8 @@ describe("POST /processTemplates", () => {
       specialNotes: "Patient must be fasting for 12 hours prior.",
     };
 
-    const procedure = await new ProcedureTemplate(procedureData).save();
+    const procedure = await new ProcedureTemplate(procedureData);
+    await procedure.save();
 
     // Sections referencing the procedure template
     const sections = [
@@ -70,5 +72,14 @@ describe("POST /processTemplates", () => {
     expect(response.body).toHaveProperty("_id");
     expect(response.body.processName).toEqual("Craniotomy Brain Surgery");
     expect(response.body.sectionTemplates).toHaveLength(2);
+
+    await Role.deleteOne({ _id: role._id });
+    await ResourceTemplate.deleteOne({ _id: resource._id });
+    await SectionTemplate.deleteOne({ sectionName: "Pre-Op" });
+    await SectionTemplate.deleteOne({ sectionName: "Surgery" });
+    await ProcedureTemplate.deleteOne({ _id: procedure._id });
+    await ProcessTemplate.deleteOne({
+      processName: newTemplate.processName,
+    });
   });
 });

@@ -326,7 +326,7 @@ const clearTestData = async () => {
   await ProcedureInstance.deleteOne({
     procedureName: testProcedureInstance5.procedureName,
   });
-  await ProcessInstance.deleteOne({ procedureName: testProcess.procedureName });
+  await ProcessInstance.deleteOne({ processName: testProcess.processName });
   await Role.deleteOne({ name: testRolePhyscian.name });
   await Role.deleteOne({ name: testRoleNurse.name });
   await ResourceInstance.deleteOne({
@@ -387,7 +387,7 @@ describe("POST /resources for creating resources", () => {
     uids = await initializePredefinedAccounts();
 
     // comment this function call and the same function call in afterAll to persist the test data
-    await clearTestData();
+    // await clearTestData();
 
     await addTestData();
   });
