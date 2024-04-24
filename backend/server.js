@@ -1613,7 +1613,7 @@ const getBoardProcessInfo = async (process) => {
         timeStart: procedure.timeStart,
         location,
         description: procedure.description,
-        specialInstructions: procedure.specialInstructions,
+        specialInstructions: procedure.specialNotes,
         peopleAssigned,
         peopleCompleted,
       };
