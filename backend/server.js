@@ -1378,6 +1378,189 @@ app.get("/assignedProcesses", async (req, res) => {
   return res.status(200).json(data);
 });
 
+app.get('/processInstance/:processID', async (req, res) => {
+  try {
+    const processInstance = await ProcessInstance.findOne({ processID: req.params.processID })
+      .populate({
+        path: 'sectionInstances',
+        populate: {
+          path: 'procedureInstances',
+          populate: [
+            { path: 'requiredResources', model: 'ResourceTemplate' },
+            { path: 'assignedResources', model: 'ResourceInstance' },
+            {
+              path: 'rolesAssignedPeople',
+              populate: { 
+                path: 'role',
+                model: 'Role'
+              }
+            },
+            {
+              path: 'rolesAssignedPeople',
+              populate: { 
+                path: 'accounts',
+                model: 'Account'
+              }
+            },
+            {
+              path: 'peopleMarkAsCompleted',
+              populate: { 
+                path: 'role',
+                model: 'Role'
+              }
+            },
+            {
+              path: 'peopleMarkAsCompleted',
+              populate: { 
+                path: 'accounts',
+                model: 'Account'
+              }
+            }
+          ]
+        }
+      })
+      .populate({
+        path: 'currentProcedure',
+        populate: [
+          { path: 'requiredResources', model: 'ResourceTemplate' },
+          { path: 'assignedResources', model: 'ResourceInstance' },
+          {
+            path: 'rolesAssignedPeople',
+            populate: { 
+              path: 'role',
+              model: 'Role'
+            }
+          },
+          {
+            path: 'rolesAssignedPeople',
+            populate: { 
+              path: 'accounts',
+              model: 'Account'
+            }
+          },
+          {
+            path: 'peopleMarkAsCompleted',
+            populate: { 
+              path: 'role',
+              model: 'Role'
+            }
+          },
+          {
+            path: 'peopleMarkAsCompleted',
+            populate: { 
+              path: 'accounts',
+              model: 'Account'
+            }
+          }
+        ]
+      })
+      .populate({
+        path: 'patient',
+        model: 'Patient'
+      });
+
+    if (!processInstance) {
+      return res.status(404).send('Process instance not found');
+    }
+
+    const processInstanceObject = processInstance.toObject();
+    let totalProcedures = 0;
+    let completedProcedures = 0;
+
+    processInstanceObject.sectionInstances.forEach(section => {
+      let allCompleted = true;
+      section.procedureInstances.forEach(procedure => {
+        totalProcedures++;
+        const assignedCount = procedure.rolesAssignedPeople.length;
+        const completedCount = procedure.peopleMarkAsCompleted.length;
+        if (assignedCount > 0 && completedCount === assignedCount) {
+          completedProcedures++;
+        }
+        if (completedCount !== assignedCount || assignedCount === 0) {
+          allCompleted = false;
+        }
+      });
+      section.isCompleted = allCompleted;
+    });
+
+    processInstanceObject.totalProcedures = totalProcedures;
+    processInstanceObject.completedProcedures = completedProcedures;
+
+    res.json(processInstanceObject);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+
+app.put('/markProcedureComplete/:procedureId', async (req, res) => {
+  const procedureInstanceId = req.params.procedureId;
+  const accountId = req.cookies.accountId;
+
+  try {
+    const account = await Account.findById(accountId);
+    if (!account) {
+      return res.status(404).send('Account not found');
+    }
+
+    const procedure = await ProcedureInstance.findById(procedureInstanceId);
+    if (!procedure) {
+      return res.status(404).send('Procedure instance not found');
+    }
+
+    const eligible = await Role.find({ _id: { $in: account.eligibleRoles } });
+    const eligibleRoleIds = eligible.map(role => role._id.toString());
+
+    const roleAssigned = procedure.rolesAssignedPeople.some(assigned => {
+      return eligibleRoleIds.includes(assigned.role.toString()) &&
+             assigned.accounts.includes(account._id);
+    });
+
+    if (!roleAssigned) {
+      return res.status(403).send('You do not have permission to mark this procedure as complete');
+    }
+
+    const isAlreadyMarked = procedure.peopleMarkAsCompleted.some(record =>
+      record.accounts.includes(account._id)
+    );
+
+    if (!isAlreadyMarked) {
+      procedure.peopleMarkAsCompleted.push({ role: account.eligibleRoles[0], accounts: [account._id] });
+      await procedure.save();
+    }
+
+    const assignedCount = procedure.rolesAssignedPeople.length;
+    const completedCount = procedure.peopleMarkAsCompleted.length;
+    
+    if(assignedCount === completedCount) {
+      const section = await SectionInstance.findOne({ procedureInstances: procedure._id });
+      const process = await ProcessInstance.findOne({ sectionInstances: section._id });
+
+      const procedureIndex = section.procedureInstances.indexOf(procedure._id);
+      let nextProcedureId = null;
+
+      if (procedureIndex < section.procedureInstances.length - 1) {
+        nextProcedureId = section.procedureInstances[procedureIndex + 1];
+      } else {
+        const sectionIndex = process.sectionInstances.indexOf(section._id);
+        if (sectionIndex < process.sectionInstances.length - 1) {
+          const nextSection = await SectionInstance.findById(process.sectionInstances[sectionIndex + 1]);
+          nextProcedureId = nextSection.procedureInstances[0];
+        }
+      }
+
+      process.currentProcedure = nextProcedureId;
+      await process.save();
+
+      res.send('Procedure marked as complete');
+  } else {
+    res.send('Procedure marked as complete');
+  }
+  } catch (error) {
+    console.error('Error updating procedure instance:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
 module.exports = {
   server,
   initializePredefinedAccounts,

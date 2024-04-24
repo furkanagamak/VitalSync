@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const processInstanceSchema = new mongoose.Schema({
-  processID: { type: String, required: true },
+  processID: { type: String, required: true, unique: true},
   processName: { type: String, required: true },
   description: { type: String, default: "" },
   sectionInstances: [
