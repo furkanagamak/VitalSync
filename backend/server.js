@@ -1551,7 +1551,6 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
       await procedure.save();
     }
 
-    console.l;
     // remove completed procedure inside user's assigned procedure
     account.assignedProcedures = account.assignedProcedures.filter(
       (assignedProcedure) => {
@@ -1601,6 +1600,7 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
 
 const getBoardProcessInfo = async (process) => {
   process.populate("patient");
+  process.populate("currentProcedure");
 
   const incompleteProcedures = await getIncompleteProcedureInProcess(process);
 
@@ -1618,6 +1618,7 @@ const getBoardProcessInfo = async (process) => {
       const location = await getLocationOfProcedure(procedure);
 
       return {
+        _id: procedure._id,
         procedureName: procedure.procedureName,
         timeStart: procedure.timeStart,
         location,
@@ -1631,6 +1632,7 @@ const getBoardProcessInfo = async (process) => {
 
   return {
     processID: process.processID,
+    currentProcedure: process.currentProcedure,
     processName: process.processName,
     patientName: process.patient.fullName,
     proceduresLeft,

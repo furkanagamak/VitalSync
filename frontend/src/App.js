@@ -92,7 +92,7 @@ function App() {
               <Route path="/resources/create" element={<ResourceCreate />} />
               <Route path="/notifications" element={<NotificationBox />} />
               <Route path="/boardProcess/:id" element={<BoardProcessView />} />
-              <Route path="/processDetails" element={<ProcessDetails />} />
+              <Route path="/processDetails/:id" element={<ProcessDetails />} />
 
               <Route
                 path="/processManagement"
