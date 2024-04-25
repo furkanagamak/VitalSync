@@ -110,11 +110,20 @@ const io = socketIo(server, {
 io.on("connection", async (socket) => {
   console.log("Socket connected!", socket.id);
 
-  socket.on("login", (userId) => {
+  socket.on("login", async (userId) => {
     socket._uid = userId;
     console.log(
       `User login! Associating socket id ${socket.id} with user: ${userId}`
     );
+    const currUser = await Account.findOne({ _id: userId });
+    if (!currUser)
+      throw new Error("Could not find account associated to user", userId);
+
+    const assignedProcesses = await getAssignedProcessesByUser(currUser);
+    assignedProcesses.forEach((process) => {
+      socket.join(process.processID);
+      console.log(`socket ${socket.id} joined room: ${process.processID}`);
+    });
   });
 
   socket.on("test", () => {
@@ -1289,13 +1298,19 @@ const getIncompleteProcedureInProcess = async (processInstance) => {
   return procedureInstances;
 };
 
-const getAssignedProcessesByUser = async (user) => {
-  // Step 1: Find all unique processInstances related to assignedProcedures
+const getUniqueProcessesByUser = async (user) => {
   const assignedProcedures = await user.populate("assignedProcedures");
   const uniqueProcessInstances = new Set();
   assignedProcedures.assignedProcedures.forEach((procedure) => {
     uniqueProcessInstances.add(procedure.processID);
   });
+
+  return uniqueProcessInstances;
+};
+
+const getAssignedProcessesByUser = async (user) => {
+  // Step 1: Find all unique processInstances related to assignedProcedures
+  const uniqueProcessInstances = await getUniqueProcessesByUser(user);
 
   // Step 2: Iterate through each unique processInstance
   const assignedProcesses = [];

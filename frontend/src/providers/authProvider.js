@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [fetchImg, setFetchImg] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const socket = useSocketContext();
+  const { socket, resetSocket } = useSocketContext();
 
   const triggerNavImgRefetch = () => {
     setFetchImg((fetchImg) => !fetchImg);
@@ -43,6 +43,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await axios.post("/logout");
       setUser(null);
+      resetSocket();
     } catch (error) {
       console.error(
         "Logout error:",
