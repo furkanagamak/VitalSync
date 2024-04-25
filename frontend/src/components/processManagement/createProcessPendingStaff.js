@@ -4,15 +4,27 @@ import { FaArrowLeft, FaCheck, FaRegCalendarTimes } from 'react-icons/fa';
 import { MdOutlineOpenInNew } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { useProcessCreation } from '../../providers/ProcessCreationProvider';
+import axios from "axios";
 
 
 
-export function RoleDropdownContent({ role }) {
+
+export function RoleDropdownContent({ role, startTime, endTime }) {
+  const { eligibleStaffByRole, updateRoleAssignment } = useProcessCreation();
+
+  // Safeguard to ensure role and eligibleStaffByRole are defined
+  const staffList = eligibleStaffByRole && role && eligibleStaffByRole[role._id] ? eligibleStaffByRole[role._id] : [];
+
+  const handleAssign = (staffId) => {
+    updateRoleAssignment(role.uniqueId, role._id, staffId);
+    // Since eligibleStaffByRole is managed globally, no need to locally manipulate it here
+  };
+
   return (
     <div className="flex mx-10 ">
       <div className="flex flex-col w-2/5 text-3xl mt-5">
         <p>Currently Assigned:</p>
-        <p className="text-primary mb-2">{role.assigned}</p>
+        <p className="text-primary mb-2">{role.account ? `${role.account.firstName} ${role.account.lastName}` : "Not assigned"}</p>
         <button
           className="bg-primary text-white rounded-full px-5 py-3 text-xl shadow self-start border-black border-2 mt-16"
         >
@@ -25,20 +37,21 @@ export function RoleDropdownContent({ role }) {
           <table className="w-full text-left">
             <thead className="border-b border-primary">
               <tr>
-                <th className="text-primary text-2xl">Name {/*<BiSolidDownArrow />*/}</th>
-                <th className="text-primary text-2xl">Title {/*<BiSolidDownArrow />*/}</th>
-                <th className="text-primary text-2xl">ID {/*<BiSolidDownArrow />*/}</th>
+                <th className="text-primary text-2xl">Name</th>
+                <th className="text-primary text-2xl">Title</th>
                 <th className="text-primary text-2xl">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {role.staff.map((staff, index) => (
-                <tr key={index} className={`border-b border-black ${index === role.staff.length - 1 ? 'border-b-0' : ''}`}>
-                  <td className="py-2 text-2xl">{staff.Name}</td>
-                  <td>{staff.Title}</td>
-                  <td>{staff.ID}</td>
+              {staffList.map((staff, index) => (
+                <tr key={index}>
+                  <td className="py-2 text-2xl">{staff.firstName} {staff.lastName}</td>
+                  <td>{staff.position}</td>
                   <td>
-                    <button className="text-xl bg-green-500 hover:bg-green-700 text-white border-black border-2 rounded-full px-3 py-1">
+                    <button 
+                      className="text-xl bg-green-500 hover:bg-green-700 text-white border-black border-2 rounded-full px-3 py-1"
+                      onClick={() => handleAssign(staff._id)}
+                    >
                       Assign
                     </button>
                   </td>
@@ -71,13 +84,12 @@ export function CreateStaffAssignments({ procedureName, roles, onClose, onProcee
     navigate("/processManagement/newProcess/pendingStaffAssignments");
   };
 
-
-  const toggleRole = (roleName) => {
+  const toggleRole = (uniqueId) => {
     const newOpenRoles = new Set(openRoles);
-    if (newOpenRoles.has(roleName)) {
-      newOpenRoles.delete(roleName);
+    if (newOpenRoles.has(uniqueId)) {
+      newOpenRoles.delete(uniqueId);
     } else {
-      newOpenRoles.add(roleName);
+      newOpenRoles.add(uniqueId);
     }
     setOpenRoles(newOpenRoles);
   };
@@ -95,11 +107,11 @@ export function CreateStaffAssignments({ procedureName, roles, onClose, onProcee
         </button>
 
         <button
-          className="mr-10 mt-5 hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-10 py-5 text-4xl"
+          className="mr-10 mt-5 hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-7 py-3 text-3xl"
           style={{ maxWidth: '30%' }}
           onClick={onProceed}
         >
-          Proceed
+          Save
         </button>
       </div>
 
@@ -110,7 +122,7 @@ export function CreateStaffAssignments({ procedureName, roles, onClose, onProcee
 
         <div>
           {roles.map((role) => (
-            <div key={role.name} className="py-10 border-b border-primary">
+            <div key={role.uniqueId} className="py-10 border-b border-primary">
               <div className="flex justify-between items-center">
               <div className="text-3xl font-bold flex items-center">
                   <span>{role.name}</span>
@@ -120,12 +132,12 @@ export function CreateStaffAssignments({ procedureName, roles, onClose, onProcee
                     <FaRegCalendarTimes className="text-highlightRed ml-4 text-4xl" />
                   )}
                 </div>
-                <button onClick={() => toggleRole(role.name)} className="flex items-center">
-                  {openRoles.has(role.name) ?  <BsChevronUp className='text-4xl' /> : <BsChevronDown className='text-4xl' />}
+                <button onClick={() => toggleRole(role.uniqueId)} className="flex items-center">
+                  {openRoles.has(role.uniqueId) ?  <BsChevronUp className='text-4xl' /> : <BsChevronDown className='text-4xl' />}
                 </button>
               </div>
 
-              {openRoles.has(role.name) && (
+              {openRoles.has(role.uniqueId) && (
                 <div className=" mx-auto mt-16 mb-8 p-2 bg-white rounded-2xl shadow w-4/5">
                  <RoleDropdownContent className="w-1/3" role={role}/>
                 </div>
@@ -137,8 +149,6 @@ export function CreateStaffAssignments({ procedureName, roles, onClose, onProcee
     </div>
   );
 }
-
-
 
 function NavButtons({ onBack, onProceed }) {
 
@@ -157,7 +167,7 @@ function NavButtons({ onBack, onProceed }) {
 }
 
 export function PendingNewStaff() {
-  const { fetchedSections } = useProcessCreation(); // Using the fetched sections from context
+  const { fetchedSections } = useProcessCreation(); 
   const [openSections, setOpenSections] = useState(new Set(fetchedSections.map(section => section.name)));
   const navigate = useNavigate();
   const [viewAlternateComponent, setViewAlternateComponent] = useState(false);  //change name

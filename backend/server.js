@@ -738,6 +738,17 @@ app.get("/user/:userId", async (req, res) => {
   }
 });
 
+app.get("/users/accountsByRole/:roleId", async (req, res) => {
+  try {
+    const { roleId } = req.params;
+    const accounts = await Account.find({ eligibleRoles: roleId }).populate('eligibleRoles');
+    res.json(accounts);
+  } catch (error) {
+    console.error("Error fetching accounts by role:", error);
+    res.status(500).json({ message: "Error fetching accounts", error: error.message });
+  }
+});
+
 app.put("/user/:userId", async (req, res) => {
   const { userId } = req.params;
   const updateData = req.body;
@@ -770,6 +781,30 @@ app.get("/users", async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching users", error: error.message });
+  }
+});
+
+app.get("users/accountsByRole/:roleId", async (req, res) => {
+  try {
+    const { roleId } = req.params;
+    const accounts = await Account.find({
+      eligibleRoles: { $in: [roleId] },
+      isTerminated: false,
+    }, {
+      firstName: 1,
+      lastName: 1,
+      position: 1,
+      unavailableTimes: 1,
+      assignedProcedures: 1
+    }).populate('eligibleRoles'); 
+
+    res.json(accounts);
+  } catch (error) {
+    console.error("Error fetching accounts by role:", error);
+    res.status(500).json({
+      message: "Error fetching accounts",
+      error: error.message
+    });
   }
 });
 
