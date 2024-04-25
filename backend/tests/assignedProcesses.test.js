@@ -531,6 +531,7 @@ describe("POST /resources for creating resources", () => {
       patientName: "Alice Johnson",
       procedureAhead: 0,
     };
+
     const expectedData2 = {
       processID: testProcessID2,
       processName: "Routine Checkup",
@@ -545,11 +546,60 @@ describe("POST /resources for creating resources", () => {
       patientName: "John Smith",
       procedureAhead: 0,
     };
+
     console.log("Got data:");
     console.log(nurseAssignedProcessRes.body);
+
+    // Check length of the array
     expect(nurseAssignedProcessRes.body.length).toBe(2);
-    expect(nurseAssignedProcessRes.body[0]).toEqual(expectedData1);
-    expect(nurseAssignedProcessRes.body[1]).toEqual(expectedData2);
+
+    // Check each item individually
+    const receivedData1 = nurseAssignedProcessRes.body[0];
+    const receivedData2 = nurseAssignedProcessRes.body[1];
+
+    // Check fields for expectedData1
+    expect(receivedData1.processID).toBe(expectedData1.processID);
+    expect(receivedData1.processName).toBe(expectedData1.processName);
+    expect(receivedData1.description).toBe(expectedData1.description);
+    expect(receivedData1.myProcedure.procedureName).toBe(
+      expectedData1.myProcedure.procedureName
+    );
+    expect(receivedData1.myProcedure.location).toBe(
+      expectedData1.myProcedure.location
+    );
+    expect(receivedData1.myProcedure.timeStart).toBe(
+      expectedData1.myProcedure.timeStart
+    );
+    expect(receivedData1.myProcedure.timeEnd).toBe(
+      expectedData1.myProcedure.timeEnd
+    );
+    expect(receivedData1.currentProcedure.procedureName).toBe(
+      expectedData1.currentProcedure
+    );
+    expect(receivedData1.patientName).toBe(expectedData1.patientName);
+    expect(receivedData1.procedureAhead).toBe(expectedData1.procedureAhead);
+
+    // Check fields for expectedData2
+    expect(receivedData2.processID).toBe(expectedData2.processID);
+    expect(receivedData2.processName).toBe(expectedData2.processName);
+    expect(receivedData2.description).toBe(expectedData2.description);
+    expect(receivedData2.myProcedure.procedureName).toBe(
+      expectedData2.myProcedure.procedureName
+    );
+    expect(receivedData2.myProcedure.location).toBe(
+      expectedData2.myProcedure.location
+    );
+    expect(receivedData2.myProcedure.timeStart).toBe(
+      expectedData2.myProcedure.timeStart
+    );
+    expect(receivedData2.myProcedure.timeEnd).toBe(
+      expectedData2.myProcedure.timeEnd
+    );
+    expect(receivedData2.currentProcedure.procedureName).toBe(
+      expectedData2.currentProcedure
+    );
+    expect(receivedData2.patientName).toBe(expectedData2.patientName);
+    expect(receivedData2.procedureAhead).toBe(expectedData2.procedureAhead);
   });
 
   it("View test physician assignedProcesses", async () => {
@@ -580,10 +630,35 @@ describe("POST /resources for creating resources", () => {
       patientName: "Alice Johnson",
       procedureAhead: 0,
     };
+
     console.log("Got data:");
     console.log(physicianAssignedProcessRes.body);
     expect(physicianAssignedProcessRes.body.length).not.toBe(0);
-    expect(physicianAssignedProcessRes.body[0]).toEqual(expectedData);
+
+    // Get the first item from the response array
+    const receivedData = physicianAssignedProcessRes.body[0];
+
+    // Check each field individually
+    expect(receivedData.processID).toBe(expectedData.processID);
+    expect(receivedData.processName).toBe(expectedData.processName);
+    expect(receivedData.description).toBe(expectedData.description);
+    expect(receivedData.myProcedure.procedureName).toBe(
+      expectedData.myProcedure.procedureName
+    );
+    expect(receivedData.myProcedure.location).toBe(
+      expectedData.myProcedure.location
+    );
+    expect(receivedData.myProcedure.timeStart).toBe(
+      expectedData.myProcedure.timeStart
+    );
+    expect(receivedData.myProcedure.timeEnd).toBe(
+      expectedData.myProcedure.timeEnd
+    );
+    expect(receivedData.currentProcedure.procedureName).toBe(
+      expectedData.currentProcedure
+    );
+    expect(receivedData.patientName).toBe(expectedData.patientName);
+    expect(receivedData.procedureAhead).toBe(expectedData.procedureAhead);
   });
 
   // remove dummy accounts
@@ -591,7 +666,7 @@ describe("POST /resources for creating resources", () => {
     await removePredefinedAccounts();
 
     // comment this function call and the same function call in beforeAll to persist the test data
-    await clearTestData();
+    // await clearTestData();
 
     await server.close();
     await mongoose.disconnect();

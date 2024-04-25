@@ -1377,9 +1377,7 @@ const getAssignedProcessesByUser = async (user) => {
             timeEnd: myProcedure.timeEnd.toISOString(),
           }
         : null,
-      currentProcedure: currentProcedure
-        ? currentProcedure.procedureName
-        : null,
+      currentProcedure: currentProcedure,
       patientName: processInstance.patient
         ? processInstance.patient.fullName
         : null,
@@ -1602,6 +1600,19 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
 
       process.currentProcedure = nextProcedureId;
       await process.save();
+
+      // signals to frontend of the current procedure update
+      console.log(
+        `sending 'procedure complete - current procedure reflect' event to room ${process.processID}`
+      );
+      const newCurrentProcedure = await ProcedureInstance.findOne({
+        _id: nextProcedureId,
+      });
+      io.to(process.processID).emit(
+        "procedure complete - current procedure reflect",
+        newCurrentProcedure,
+        process.processID
+      );
 
       res.send("Procedure marked as complete");
     } else {

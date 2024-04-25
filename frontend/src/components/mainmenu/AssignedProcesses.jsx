@@ -3,12 +3,16 @@ import { useState, useEffect } from "react";
 import { calculateTimeUntilDate } from "../../utils/helperFunctions";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useSocketContext } from "../../providers/SocketProvider";
 
 const AssignedProcesses = () => {
   const [assignedProcesses, setAssignedProcesses] = useState(null);
   const [displayingProcesses, setDisplayingProcesses] = useState(null);
   const [tablePage, setTablePage] = useState(0);
 
+  const { socket } = useSocketContext();
+
+  // fethces assigned processes
   useEffect(() => {
     const fetchAssignedProcesses = async () => {
       const res = await fetch(
@@ -28,6 +32,7 @@ const AssignedProcesses = () => {
     fetchAssignedProcesses();
   }, []);
 
+  // pagination updates
   useEffect(() => {
     if (assignedProcesses) {
       const startIndex = tablePage * 3;
@@ -35,6 +40,32 @@ const AssignedProcesses = () => {
       setDisplayingProcesses(assignedProcesses.slice(startIndex, endIndex));
     }
   }, [assignedProcesses, tablePage]);
+
+  // socket events
+  useEffect(() => {
+    if (!socket) return;
+
+    // updates process's current procedure field upon procedure completion event
+    socket.on(
+      "procedure complete - current procedure reflect",
+      (currentProcedure, processID) => {
+        setAssignedProcesses((assignedProcesses) =>
+          assignedProcesses.map((assignedProcess) => {
+            if (assignedProcess.processID === processID) {
+              console.log("found matching!");
+              assignedProcess.proceduresAhead--;
+              return {
+                ...assignedProcess,
+                currentProcedure: currentProcedure,
+              };
+            } else {
+              return assignedProcess;
+            }
+          })
+        );
+      }
+    );
+  }, []);
 
   const handleNextPage = () => {
     setTablePage((prevPage) => prevPage + 1);
@@ -53,7 +84,11 @@ const AssignedProcesses = () => {
         </h1>
         <div className="space-y-8 mb-4 mt-8">
           {displayingProcesses.map((process) => (
-            <Process key={process.processID} process={process} />
+            <Process
+              key={process.processID}
+              process={process}
+              socket={socket}
+            />
           ))}
         </div>
       </div>
@@ -84,7 +119,7 @@ const AssignedProcesses = () => {
   );
 };
 
-const Process = ({ process }) => {
+const Process = ({ process, socket }) => {
   const myProcedure = process.myProcedure;
   const myProcedureStartDate = new Date(myProcedure.timeStart);
 
@@ -122,7 +157,7 @@ const Process = ({ process }) => {
       <section className="col-start-8 col-end-11 flex flex-col justify-evenly md:items-center mt-2 md:mt-0 text-xl">
         <div>
           <h1 className="underline">Current Procedure:</h1>
-          <p>{process.currentProcedure}</p>
+          <p>{process.currentProcedure.procedureName}</p>
         </div>
         <h1>
           {process.procedureAhead === 0 ? (
