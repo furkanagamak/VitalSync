@@ -65,6 +65,8 @@ export const AuthProvider = ({ children }) => {
         if (res.ok) {
           const data = await res.json();
           if (data.isLoggedIn) {
+            console.log("User is logged in!");
+            console.log(data);
             setUser(data.account);
             socket.emit("login", data.account.id);
             if (
@@ -73,6 +75,8 @@ export const AuthProvider = ({ children }) => {
             )
               navigate("/home");
           } else {
+            console.log("User is not logged in!");
+            console.log(data);
             if (location.pathname !== "/RecoveryPage") {
               navigate("/");
             }

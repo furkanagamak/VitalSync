@@ -4,18 +4,21 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../providers/authProvider.js";
 import toast, { Toaster } from "react-hot-toast";
+import { useParams } from "react-router-dom";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
 
-const ProcessDetails = ({ id }) => {
+const ProcessDetails = () => {
+  const { id } = useParams();
   const [process, setProcess] = useState(null);
 
   useEffect(() => {
     const fetchProcessDetail = async () => {
       try {
-        const response = await axios.get(`/processInstance/AB12CD34`);
+        const response = await axios.get(`/processInstance/${id}`);
         setProcess(response.data);
+        console.log(response.data);
       } catch (error) {
         console.error("Failed to fetch process details:", error);
       }

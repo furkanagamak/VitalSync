@@ -7,10 +7,23 @@ import { FaArrowLeft } from "react-icons/fa";
 import { calculateTimeUntilDate } from "../../utils/helperFunctions";
 import ProcessChat from "../ProcessChat";
 import { Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useAuth } from "../../providers/authProvider.js";
+import toast from "react-hot-toast";
+import axios from "axios";
 
-const BoardProcessView = ({ id, navToDashboard }) => {
+axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
+axios.defaults.withCredentials = true;
+
+const apiUrl = process.env.REACT_APP_API_BASE_URL;
+
+const BoardProcessView = () => {
   const [process, setProcess] = useState(null);
   const [boardProcessPage, setBoardProcessPage] = useState("procedures");
+  const { id } = useParams();
+  const { user } = useAuth();
+
+  console.log(user);
 
   const navToProcedures = () => {
     setBoardProcessPage("procedures");
@@ -21,8 +34,17 @@ const BoardProcessView = ({ id, navToDashboard }) => {
 
   useEffect(() => {
     const fetchBoardProcess = async () => {
-      setProcess(tmpBoardProcess);
-      console.log(tmpBoardProcess);
+      const res = await fetch(`${apiUrl}/boardProcess/${id}`, {
+        credentials: "include",
+      });
+      if (!res.ok) {
+        console.log("assigned processes fetch failed");
+        toast.error(await res.text());
+      } else {
+        const data = await res.json();
+        setProcess(data);
+        console.log(data);
+      }
     };
     fetchBoardProcess();
   }, []);
@@ -33,14 +55,17 @@ const BoardProcessView = ({ id, navToDashboard }) => {
       <BoardProcessHeader
         navToProcedures={navToProcedures}
         navToChat={navToChat}
-        processId={process.processId}
-        navToDashboard={navToDashboard}
+        processId={process.processID}
         processName={process.processName}
         patientName={process.patientName}
         boardProcessPage={boardProcessPage}
       />
-      {boardProcessPage === "procedures" && (
-        <BoardProcessProcedures procedures={process.proceduresLeft} />
+      {boardProcessPage === "procedures" && user && (
+        <BoardProcessProcedures
+          procedures={process.proceduresLeft}
+          currUser={user.id}
+          currentProcedure={process.currentProcedure}
+        />
       )}
       {boardProcessPage === "chat" && <BoardProcessChat />}
     </div>
@@ -51,7 +76,6 @@ const BoardProcessHeader = ({
   navToProcedures,
   navToChat,
   processId,
-  navToDashboard,
   processName,
   patientName,
   boardProcessPage,
@@ -96,7 +120,7 @@ const BoardProcessHeader = ({
             <BsChatLeftText className="w-8 h-8" />
           </button>
           <Link
-            to="/processDetails"
+            to={`/processDetails/${processId}`}
             className="border-l-2 border-black"
             id="processDetailsBtn"
           >
@@ -108,8 +132,7 @@ const BoardProcessHeader = ({
   );
 };
 
-const BoardProcessProcedures = ({ procedures }) => {
-  const currUser = "001";
+const BoardProcessProcedures = ({ procedures, currUser, currentProcedure }) => {
   return (
     <div className="p-8" id="boardProcessProcedures">
       <section className="text-2xl mb-4">
@@ -121,7 +144,12 @@ const BoardProcessProcedures = ({ procedures }) => {
       <section className="flex flex-col space-y-8">
         {procedures.map((procedure, i) => {
           return (
-            <Procedure key={i} procedure={procedure} currUser={currUser} />
+            <Procedure
+              key={i}
+              procedure={procedure}
+              currUser={currUser}
+              currentProcedure={currentProcedure}
+            />
           );
         })}
       </section>
@@ -129,8 +157,22 @@ const BoardProcessProcedures = ({ procedures }) => {
   );
 };
 
-const Procedure = ({ procedure, currUser }) => {
+const Procedure = ({ procedure, currUser, currentProcedure }) => {
   const procedureStartDate = new Date(procedure.timeStart);
+
+  const markProcedureAsComplete = async () => {
+    try {
+      const response = await axios.put(
+        `/markProcedureComplete/${procedure._id}`
+      );
+      if (response.status === 200) {
+        toast.success("Procedure marked as complete!");
+      }
+    } catch (error) {
+      console.error("Error marking procedure as complete:", error);
+      toast.error("Failed to mark procedure as complete.");
+    }
+  };
 
   return (
     <div className="bg-primary text-white p-4 rounded-3xl flex flex-col md:grid grid-cols-10 space-y-4 space-x-4 drop-shadow-lg">
@@ -175,8 +217,12 @@ const Procedure = ({ procedure, currUser }) => {
           </div>
         )}
         {!procedure.peopleCompleted.includes(currUser) &&
-          procedure.peopleAssigned.includes(currUser) && (
-            <button className="text-highlightGreen underline">
+          procedure.peopleAssigned.includes(currUser) &&
+          currentProcedure?._id === procedure?._id && (
+            <button
+              onClick={markProcedureAsComplete}
+              className="text-highlightGreen underline"
+            >
               Mark as completed ✅
             </button>
           )}

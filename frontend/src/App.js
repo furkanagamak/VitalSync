@@ -34,7 +34,7 @@ import ProcessStartTime from "./components/processManagement/processStartTime.js
 
 
 //Modifying process instances
-import  ActiveProcessesList  from "./components/processManagement/activeProcessesList.js";
+import ActiveProcessesList from "./components/processManagement/activeProcessesList.js";
 import { ModifyProcessLanding } from "./components/processManagement/modifyProcessInstanceLanding.js";
 import ModifyStaffAssignments from "./components/processManagement/modifyProcessAssignStaff.js";
 import ModifyResourceAssignments from "./components/processManagement/modifyProcessAssignResources.js";
@@ -97,8 +97,8 @@ function App() {
               <Route path="/resources" element={<Resources />} />
               <Route path="/resources/create" element={<ResourceCreate />} />
               <Route path="/notifications" element={<NotificationBox />} />
-              <Route path="/boardProcess" element={<BoardProcessView />} />
-              <Route path="/processDetails" element={<ProcessDetails />} />
+              <Route path="/boardProcess/:id" element={<BoardProcessView />} />
+              <Route path="/processDetails/:id" element={<ProcessDetails />} />
 
               <Route
               path="/processManagement"

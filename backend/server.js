@@ -1283,6 +1283,47 @@ app.post("/processTemplates", async (req, res) => {
   }
 });
 
+const getLocationOfProcedure = async (myProcedure) => {
+  await myProcedure.populate("assignedResources");
+  const assignedResources = myProcedure.assignedResources;
+  let myProcedureLocation = "";
+  assignedResources.forEach((resource) => {
+    if (resource.type === "spaces") {
+      myProcedureLocation = resource.location;
+      return;
+    }
+  });
+  if (!myProcedureLocation)
+    throw new Error(
+      `No space resource type exist in the assigned resources of procedure ${assignedResources._id}`
+    );
+
+  return myProcedureLocation;
+};
+
+const getIncompleteProcedureInProcess = async (processInstance) => {
+  const procedureInstances = [];
+  for (const sectionInstanceID of processInstance.sectionInstances) {
+    const sectionInstance = await SectionInstance.findById(
+      sectionInstanceID
+    ).populate("procedureInstances");
+
+    if (!sectionInstance)
+      throw new Error("Section ids inside process instances cannot be found");
+
+    // add to procedure instances array if procedure is not completed
+    sectionInstance.procedureInstances.forEach((procedureInstance) => {
+      if (
+        procedureInstance.peopleMarkAsCompleted.length !==
+        procedureInstance.rolesAssignedPeople.length
+      )
+        procedureInstances.push(procedureInstance);
+    });
+  }
+
+  return procedureInstances;
+};
+
 const getAssignedProcessesByUser = async (user) => {
   // Step 1: Find all unique processInstances related to assignedProcedures
   const assignedProcedures = await user.populate("assignedProcedures");
@@ -1304,25 +1345,10 @@ const getAssignedProcessesByUser = async (user) => {
     if (!processInstance)
       throw new Error(`Process ID ${processID} does not exists!`);
 
-    // Step 4: Resolve procedureInstances for each sectionInstance
-    const procedureInstances = [];
-    for (const sectionInstanceID of processInstance.sectionInstances) {
-      const sectionInstance = await SectionInstance.findById(
-        sectionInstanceID
-      ).populate("procedureInstances");
-
-      if (!sectionInstance)
-        throw new Error("Section ids inside process instances cannot be found");
-
-      // add to procedure instances array if procedure is not completed
-      sectionInstance.procedureInstances.forEach((procedureInstance) => {
-        if (
-          procedureInstance.peopleMarkAsCompleted.length !==
-          procedureInstance.rolesAssignedPeople.length
-        )
-          procedureInstances.push(procedureInstance);
-      });
-    }
+    // Step 4: Resolve incomplete procedureInstances for each sectionInstance
+    const procedureInstances = await getIncompleteProcedureInProcess(
+      processInstance
+    );
 
     // Step 5: Find the first incomplete procedureInstance assigned to the user
     let procedureAhead = 0;
@@ -1350,21 +1376,9 @@ const getAssignedProcessesByUser = async (user) => {
       }
     }
 
-    let myProcedureLocation = "";
-    if (myProcedure) {
-      await myProcedure.populate("assignedResources");
-      const assignedResources = myProcedure.assignedResources;
-      assignedResources.forEach((resource) => {
-        if (resource.type === "spaces") {
-          myProcedureLocation = resource.location;
-          return;
-        }
-      });
-      if (!myProcedureLocation)
-        throw new Error(
-          `No space resource type exist in the assigned resources of procedure ${assignedResources._id}`
-        );
-    }
+    const myProcedureLocation = myProcedure
+      ? await getLocationOfProcedure(myProcedure)
+      : "";
 
     let currentProcedure = null;
     if (procedureInstances.length > 0) currentProcedure = procedureInstances[0];
@@ -1413,98 +1427,100 @@ app.get("/assignedProcesses", async (req, res) => {
   return res.status(200).json(data);
 });
 
-app.get('/processInstance/:processID', async (req, res) => {
+app.get("/processInstance/:processID", async (req, res) => {
   try {
-    const processInstance = await ProcessInstance.findOne({ processID: req.params.processID })
+    const processInstance = await ProcessInstance.findOne({
+      processID: req.params.processID,
+    })
       .populate({
-        path: 'sectionInstances',
+        path: "sectionInstances",
         populate: {
-          path: 'procedureInstances',
+          path: "procedureInstances",
           populate: [
-            { path: 'requiredResources', model: 'ResourceTemplate' },
-            { path: 'assignedResources', model: 'ResourceInstance' },
+            { path: "requiredResources", model: "ResourceTemplate" },
+            { path: "assignedResources", model: "ResourceInstance" },
             {
-              path: 'rolesAssignedPeople',
-              populate: { 
-                path: 'role',
-                model: 'Role'
-              }
+              path: "rolesAssignedPeople",
+              populate: {
+                path: "role",
+                model: "Role",
+              },
             },
             {
-              path: 'rolesAssignedPeople',
-              populate: { 
-                path: 'accounts',
-                model: 'Account'
-              }
+              path: "rolesAssignedPeople",
+              populate: {
+                path: "accounts",
+                model: "Account",
+              },
             },
             {
-              path: 'peopleMarkAsCompleted',
-              populate: { 
-                path: 'role',
-                model: 'Role'
-              }
+              path: "peopleMarkAsCompleted",
+              populate: {
+                path: "role",
+                model: "Role",
+              },
             },
             {
-              path: 'peopleMarkAsCompleted',
-              populate: { 
-                path: 'accounts',
-                model: 'Account'
-              }
-            }
-          ]
-        }
+              path: "peopleMarkAsCompleted",
+              populate: {
+                path: "accounts",
+                model: "Account",
+              },
+            },
+          ],
+        },
       })
       .populate({
-        path: 'currentProcedure',
+        path: "currentProcedure",
         populate: [
-          { path: 'requiredResources', model: 'ResourceTemplate' },
-          { path: 'assignedResources', model: 'ResourceInstance' },
+          { path: "requiredResources", model: "ResourceTemplate" },
+          { path: "assignedResources", model: "ResourceInstance" },
           {
-            path: 'rolesAssignedPeople',
-            populate: { 
-              path: 'role',
-              model: 'Role'
-            }
+            path: "rolesAssignedPeople",
+            populate: {
+              path: "role",
+              model: "Role",
+            },
           },
           {
-            path: 'rolesAssignedPeople',
-            populate: { 
-              path: 'accounts',
-              model: 'Account'
-            }
+            path: "rolesAssignedPeople",
+            populate: {
+              path: "accounts",
+              model: "Account",
+            },
           },
           {
-            path: 'peopleMarkAsCompleted',
-            populate: { 
-              path: 'role',
-              model: 'Role'
-            }
+            path: "peopleMarkAsCompleted",
+            populate: {
+              path: "role",
+              model: "Role",
+            },
           },
           {
-            path: 'peopleMarkAsCompleted',
-            populate: { 
-              path: 'accounts',
-              model: 'Account'
-            }
-          }
-        ]
+            path: "peopleMarkAsCompleted",
+            populate: {
+              path: "accounts",
+              model: "Account",
+            },
+          },
+        ],
       })
       .populate({
-        path: 'patient',
-        model: 'Patient'
+        path: "patient",
+        model: "Patient",
       });
 
     if (!processInstance) {
-      return res.status(404).send('Process instance not found');
+      return res.status(404).send("Process instance not found");
     }
 
     const processInstanceObject = processInstance.toObject();
     let totalProcedures = 0;
     let completedProcedures = 0;
 
-    processInstanceObject.sectionInstances.forEach(section => {
+    processInstanceObject.sectionInstances.forEach((section) => {
       let allCompleted = true;
-      section.procedureInstances.forEach(procedure => {
+      section.procedureInstances.forEach((procedure) => {
         totalProcedures++;
         const assignedCount = procedure.rolesAssignedPeople.length;
         const completedCount = procedure.peopleMarkAsCompleted.length;
@@ -1527,48 +1543,67 @@ app.get('/processInstance/:processID', async (req, res) => {
   }
 });
 
-app.put('/markProcedureComplete/:procedureId', async (req, res) => {
+app.put("/markProcedureComplete/:procedureId", async (req, res) => {
   const procedureInstanceId = req.params.procedureId;
   const accountId = req.cookies.accountId;
 
   try {
     const account = await Account.findById(accountId);
     if (!account) {
-      return res.status(404).send('Account not found');
+      return res.status(404).send("Account not found");
     }
 
     const procedure = await ProcedureInstance.findById(procedureInstanceId);
     if (!procedure) {
-      return res.status(404).send('Procedure instance not found');
+      return res.status(404).send("Procedure instance not found");
     }
 
     const eligible = await Role.find({ _id: { $in: account.eligibleRoles } });
-    const eligibleRoleIds = eligible.map(role => role._id.toString());
+    const eligibleRoleIds = eligible.map((role) => role._id.toString());
 
-    const roleAssigned = procedure.rolesAssignedPeople.some(assigned => {
-      return eligibleRoleIds.includes(assigned.role.toString()) &&
-             assigned.accounts.includes(account._id);
+    const roleAssigned = procedure.rolesAssignedPeople.some((assigned) => {
+      return (
+        eligibleRoleIds.includes(assigned.role.toString()) &&
+        assigned.accounts.includes(account._id)
+      );
     });
 
     if (!roleAssigned) {
-      return res.status(403).send('You do not have permission to mark this procedure as complete');
+      return res
+        .status(403)
+        .send("You do not have permission to mark this procedure as complete");
     }
 
-    const isAlreadyMarked = procedure.peopleMarkAsCompleted.some(record =>
+    const isAlreadyMarked = procedure.peopleMarkAsCompleted.some((record) =>
       record.accounts.includes(account._id)
     );
 
     if (!isAlreadyMarked) {
-      procedure.peopleMarkAsCompleted.push({ role: account.eligibleRoles[0], accounts: [account._id] });
+      procedure.peopleMarkAsCompleted.push({
+        role: account.eligibleRoles[0],
+        accounts: [account._id],
+      });
       await procedure.save();
     }
 
+    // remove completed procedure inside user's assigned procedure
+    account.assignedProcedures = account.assignedProcedures.filter(
+      (assignedProcedure) => {
+        return !assignedProcedure.equals(procedure._id);
+      }
+    );
+    await account.save();
+
     const assignedCount = procedure.rolesAssignedPeople.length;
     const completedCount = procedure.peopleMarkAsCompleted.length;
-    
-    if(assignedCount === completedCount) {
-      const section = await SectionInstance.findOne({ procedureInstances: procedure._id });
-      const process = await ProcessInstance.findOne({ sectionInstances: section._id });
+
+    if (assignedCount === completedCount) {
+      const section = await SectionInstance.findOne({
+        procedureInstances: procedure._id,
+      });
+      const process = await ProcessInstance.findOne({
+        sectionInstances: section._id,
+      });
 
       const procedureIndex = section.procedureInstances.indexOf(procedure._id);
       let nextProcedureId = null;
@@ -1578,7 +1613,9 @@ app.put('/markProcedureComplete/:procedureId', async (req, res) => {
       } else {
         const sectionIndex = process.sectionInstances.indexOf(section._id);
         if (sectionIndex < process.sectionInstances.length - 1) {
-          const nextSection = await SectionInstance.findById(process.sectionInstances[sectionIndex + 1]);
+          const nextSection = await SectionInstance.findById(
+            process.sectionInstances[sectionIndex + 1]
+          );
           nextProcedureId = nextSection.procedureInstances[0];
         }
       }
@@ -1586,14 +1623,78 @@ app.put('/markProcedureComplete/:procedureId', async (req, res) => {
       process.currentProcedure = nextProcedureId;
       await process.save();
 
-      res.send('Procedure marked as complete');
-  } else {
-    res.send('Procedure marked as complete');
-  }
+      res.send("Procedure marked as complete");
+    } else {
+      res.send("Procedure marked as complete");
+    }
   } catch (error) {
-    console.error('Error updating procedure instance:', error);
-    res.status(500).send('Internal server error');
+    console.error("Error updating procedure instance:", error);
+    res.status(500).send("Internal server error");
   }
+});
+
+const getBoardProcessInfo = async (process) => {
+  process.populate("patient");
+  process.populate("currentProcedure");
+
+  const incompleteProcedures = await getIncompleteProcedureInProcess(process);
+
+  const proceduresLeft = await Promise.all(
+    incompleteProcedures.map(async (procedure) => {
+      const peopleAssigned = procedure.rolesAssignedPeople.reduce(
+        (accum, obj) => accum.concat(obj.accounts),
+        []
+      );
+      const peopleCompleted = procedure.peopleMarkAsCompleted.reduce(
+        (accum, obj) => accum.concat(obj.accounts),
+        []
+      );
+
+      const location = await getLocationOfProcedure(procedure);
+
+      return {
+        _id: procedure._id,
+        procedureName: procedure.procedureName,
+        timeStart: procedure.timeStart,
+        location,
+        description: procedure.description,
+        specialInstructions: procedure.specialNotes,
+        peopleAssigned,
+        peopleCompleted,
+      };
+    })
+  );
+
+  return {
+    processID: process.processID,
+    currentProcedure: process.currentProcedure,
+    processName: process.processName,
+    patientName: process.patient.fullName,
+    proceduresLeft,
+  };
+};
+
+app.get("/boardProcess/:id", async (req, res) => {
+  const processID = req.params.id;
+  const accountId = req.cookies.accountId;
+  if (!accountId) return res.status(401).send("User not logged in");
+  const currUser = await Account.findOne({ _id: accountId });
+  if (!currUser)
+    return res
+      .status(404)
+      .send("User does not exist! Malformed session, please login again!");
+
+  // process existence check
+  const process = await ProcessInstance.findOne({ processID: processID });
+  if (!process)
+    return res
+      .status(404)
+      .send(
+        "The provided process ID is not associated with any process instance!"
+      );
+
+  const data = await getBoardProcessInfo(process);
+  return res.status(200).json(data);
 });
 
 module.exports = {

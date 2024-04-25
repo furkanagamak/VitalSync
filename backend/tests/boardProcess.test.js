@@ -282,11 +282,8 @@ testSectionInstanceIntra.procedureInstances.push(testProcedureInstance3._id);
 testSectionInstanceIntra.procedureInstances.push(testProcedureInstance4._id);
 testSectionInstancePost.procedureInstances.push(testProcedureInstance5._id);
 
-testPhysician.assignedProcedures.push(testProcedureInstance2._id);
 testPhysician.assignedProcedures.push(testProcedureInstance4._id);
 testPhysician.assignedProcedures.push(testProcedureInstance5._id);
-testNurse.assignedProcedures.push(testProcedureInstance1._id);
-testNurse.assignedProcedures.push(testProcedureInstance2._id);
 testNurse.assignedProcedures.push(testProcedureInstance3._id);
 testNurse.assignedProcedures.push(testProcedureInstance4._id);
 testNurse.assignedProcedures.push(testProcedureInstance5._id);
@@ -490,72 +487,7 @@ describe("POST /resources for creating resources", () => {
     expect(unauthorizedRes.text).toEqual("User not logged in");
   });
 
-  it("View empty assignedProcesses", async () => {
-    const loginRes = await request(app).post(`/login`).withCredentials().send({
-      email: dummyAdminEmail,
-      password: dummyAdminPassword,
-    });
-    const accountId = loginRes.headers["set-cookie"][0]
-      .split(";")[0]
-      .split("=")[1];
-    const emptyAssignedProcessesRes = await request(app)
-      .get(`/assignedProcesses`)
-      .set("Cookie", [`accountId=${accountId}`])
-      .withCredentials();
-    expect(emptyAssignedProcessesRes.status).toEqual(200);
-    expect(emptyAssignedProcessesRes.body).toEqual([]);
-  });
-
-  it("View test nurse assignedProcesses", async () => {
-    const loginRes = await request(app).post(`/login`).withCredentials().send({
-      email: "maryjane@gmail.com",
-      password: "123",
-    });
-    const accountId = loginRes.headers["set-cookie"][0]
-      .split(";")[0]
-      .split("=")[1];
-    const nurseAssignedProcessRes = await request(app)
-      .get(`/assignedProcesses`)
-      .set("Cookie", [`accountId=${accountId}`])
-      .withCredentials();
-    expect(nurseAssignedProcessRes.status).toEqual(200);
-
-    const expectedData1 = {
-      processID: testProcessID,
-      processName: "Radical Prostatectomy",
-      description: "Surgical removal of the prostate gland",
-      myProcedure: {
-        procedureName: "Anesthesia Shot",
-        location: "Room 102",
-        timeStart: new Date("2024-04-26T12:00:00").toISOString(),
-        timeEnd: new Date("2024-04-26T12:30:00").toISOString(),
-      },
-      currentProcedure: "Anesthesia Shot",
-      patientName: "Alice Johnson",
-      procedureAhead: 0,
-    };
-    const expectedData2 = {
-      processID: testProcessID2,
-      processName: "Routine Checkup",
-      description: "Regular health assessment and tests",
-      myProcedure: {
-        procedureName: "Blood Test",
-        location: "Room 101",
-        timeStart: new Date("2024-04-27T09:00:00").toISOString(),
-        timeEnd: new Date("2024-04-27T09:30:00").toISOString(),
-      },
-      currentProcedure: "Blood Test",
-      patientName: "John Smith",
-      procedureAhead: 0,
-    };
-    console.log("Got data:");
-    console.log(nurseAssignedProcessRes.body);
-    expect(nurseAssignedProcessRes.body.length).toBe(2);
-    expect(nurseAssignedProcessRes.body[0]).toEqual(expectedData1);
-    expect(nurseAssignedProcessRes.body[1]).toEqual(expectedData2);
-  });
-
-  it("View test physician assignedProcesses", async () => {
+  it("View test board process 1", async () => {
     const loginRes = await request(app).post(`/login`).withCredentials().send({
       email: "johndoe@gmail.com",
       password: "123",
@@ -563,30 +495,60 @@ describe("POST /resources for creating resources", () => {
     const accountId = loginRes.headers["set-cookie"][0]
       .split(";")[0]
       .split("=")[1];
-    const physicianAssignedProcessRes = await request(app)
-      .get(`/assignedProcesses`)
+    const testBoardProcess1Res = await request(app)
+      .get(`/boardProcess/${testProcessID}`)
       .set("Cookie", [`accountId=${accountId}`])
       .withCredentials();
-    expect(physicianAssignedProcessRes.status).toEqual(200);
+    expect(testBoardProcess1Res.status).toEqual(200);
 
     const expectedData = {
       processID: testProcessID,
       processName: "Radical Prostatectomy",
-      description: "Surgical removal of the prostate gland",
-      myProcedure: {
-        procedureName: "Prostate Removal",
-        location: "Room 222",
-        timeStart: new Date("2024-04-26T13:00:00").toISOString(),
-        timeEnd: new Date("2024-04-26T13:30:00").toISOString(),
-      },
-      currentProcedure: "Anesthesia Shot",
       patientName: "Alice Johnson",
-      procedureAhead: 0,
+      proceduresLeft: [
+        {
+          procedureName: "Anesthesia Shot",
+          timeStart: new Date("2024-04-26T12:00:00").toISOString(),
+          location: "Room 102",
+          specialInstructions: "",
+          description:
+            "An anesthesia shot should be given to the patient before surgery",
+          peopleAssigned: [
+            testNurse._id.toString(),
+            testPhysician._id.toString(),
+          ],
+          peopleCompleted: [testPhysician._id.toString()],
+        },
+        {
+          procedureName: "Prostate Removal",
+          timeStart: new Date("2024-04-26T13:00:00").toISOString(),
+          location: "Room 222",
+          specialInstructions: "",
+          description: "Surgery to remove the prostate from the patient",
+          peopleAssigned: [
+            testNurse._id.toString(),
+            testPhysician._id.toString(),
+          ],
+          peopleCompleted: [],
+        },
+        {
+          procedureName: "Post Operation Follow-up",
+          timeStart: new Date("2024-04-26T14:00:00").toISOString(),
+          location: "Room 105",
+          specialInstructions: "",
+          description:
+            "Information is given to the patient and the patient's family on what they should do and should not do for a speedy recovery.",
+          peopleAssigned: [
+            testNurse._id.toString(),
+            testPhysician._id.toString(),
+          ],
+          peopleCompleted: [],
+        },
+      ],
     };
     console.log("Got data:");
-    console.log(physicianAssignedProcessRes.body);
-    expect(physicianAssignedProcessRes.body.length).not.toBe(0);
-    expect(physicianAssignedProcessRes.body[0]).toEqual(expectedData);
+    console.log(testBoardProcess1Res.body);
+    expect(testBoardProcess1Res.body).toEqual(expectedData);
   });
 
   // remove dummy accounts
