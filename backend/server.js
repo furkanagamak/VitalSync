@@ -1322,6 +1322,9 @@ const getAssignedProcessesByUser = async (user) => {
       .populate("currentProcedure")
       .populate("patient");
 
+    // skip completed processes
+    // if (processInstance.currentProcedure === null) continue;
+
     if (!processInstance)
       throw new Error(`Process ID ${processID} does not exists!`);
 
@@ -1565,12 +1568,12 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
     }
 
     // remove completed procedure inside user's assigned procedure
-    // account.assignedProcedures = account.assignedProcedures.filter(
-    //   (assignedProcedure) => {
-    //     return !assignedProcedure.equals(procedure._id);
-    //   }
-    // );
-    // await account.save();
+    account.assignedProcedures = account.assignedProcedures.filter(
+      (assignedProcedure) => {
+        return !assignedProcedure.equals(procedure._id);
+      }
+    );
+    await account.save();
 
     const assignedCount = procedure.rolesAssignedPeople.length;
     const completedCount = procedure.peopleMarkAsCompleted.length;
