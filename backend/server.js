@@ -110,11 +110,20 @@ const io = socketIo(server, {
 io.on("connection", async (socket) => {
   console.log("Socket connected!", socket.id);
 
-  socket.on("login", (userId) => {
+  socket.on("login", async (userId) => {
     socket._uid = userId;
     console.log(
       `User login! Associating socket id ${socket.id} with user: ${userId}`
     );
+    const currUser = await Account.findOne({ _id: userId });
+    if (!currUser)
+      throw new Error("Could not find account associated to user", userId);
+
+    const assignedProcesses = await getAssignedProcessesByUser(currUser);
+    assignedProcesses.forEach((process) => {
+      socket.join(process.processID);
+      console.log(`socket ${socket.id} joined room: ${process.processID}`);
+    });
   });
 
   socket.on("test", () => {
@@ -1324,13 +1333,19 @@ const getIncompleteProcedureInProcess = async (processInstance) => {
   return procedureInstances;
 };
 
-const getAssignedProcessesByUser = async (user) => {
-  // Step 1: Find all unique processInstances related to assignedProcedures
+const getUniqueProcessesByUser = async (user) => {
   const assignedProcedures = await user.populate("assignedProcedures");
   const uniqueProcessInstances = new Set();
   assignedProcedures.assignedProcedures.forEach((procedure) => {
     uniqueProcessInstances.add(procedure.processID);
   });
+
+  return uniqueProcessInstances;
+};
+
+const getAssignedProcessesByUser = async (user) => {
+  // Step 1: Find all unique processInstances related to assignedProcedures
+  const uniqueProcessInstances = await getUniqueProcessesByUser(user);
 
   // Step 2: Iterate through each unique processInstance
   const assignedProcesses = [];
@@ -1341,6 +1356,9 @@ const getAssignedProcessesByUser = async (user) => {
     })
       .populate("currentProcedure")
       .populate("patient");
+
+    // skip completed processes
+    // if (processInstance.currentProcedure === null) continue;
 
     if (!processInstance)
       throw new Error(`Process ID ${processID} does not exists!`);
@@ -1397,9 +1415,7 @@ const getAssignedProcessesByUser = async (user) => {
             timeEnd: myProcedure.timeEnd.toISOString(),
           }
         : null,
-      currentProcedure: currentProcedure
-        ? currentProcedure.procedureName
-        : null,
+      currentProcedure: currentProcedure,
       patientName: processInstance.patient
         ? processInstance.patient.fullName
         : null,
@@ -1622,6 +1638,19 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
 
       process.currentProcedure = nextProcedureId;
       await process.save();
+
+      // signals to frontend of the current procedure update
+      console.log(
+        `sending 'procedure complete - current procedure reflect' event to room ${process.processID}`
+      );
+      const newCurrentProcedure = await ProcedureInstance.findOne({
+        _id: nextProcedureId,
+      });
+      io.to(process.processID).emit(
+        "procedure complete - current procedure reflect",
+        newCurrentProcedure,
+        process.processID
+      );
 
       res.send("Procedure marked as complete");
     } else {

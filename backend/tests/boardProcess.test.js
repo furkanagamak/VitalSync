@@ -501,12 +501,14 @@ describe("POST /resources for creating resources", () => {
       .withCredentials();
     expect(testBoardProcess1Res.status).toEqual(200);
 
+    delete testBoardProcess1Res.body.currentProcedure;
     const expectedData = {
       processID: testProcessID,
       processName: "Radical Prostatectomy",
       patientName: "Alice Johnson",
       proceduresLeft: [
         {
+          _id: testProcedureInstance3._id.toString(),
           procedureName: "Anesthesia Shot",
           timeStart: new Date("2024-04-26T12:00:00").toISOString(),
           location: "Room 102",
@@ -520,6 +522,7 @@ describe("POST /resources for creating resources", () => {
           peopleCompleted: [testPhysician._id.toString()],
         },
         {
+          _id: testProcedureInstance4._id.toString(),
           procedureName: "Prostate Removal",
           timeStart: new Date("2024-04-26T13:00:00").toISOString(),
           location: "Room 222",
@@ -532,6 +535,7 @@ describe("POST /resources for creating resources", () => {
           peopleCompleted: [],
         },
         {
+          _id: testProcedureInstance5._id.toString(),
           procedureName: "Post Operation Follow-up",
           timeStart: new Date("2024-04-26T14:00:00").toISOString(),
           location: "Room 105",

@@ -11,6 +11,7 @@ import { useParams } from "react-router-dom";
 import { useAuth } from "../../providers/authProvider.js";
 import toast from "react-hot-toast";
 import axios from "axios";
+import { useSocketContext } from "../../providers/SocketProvider";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
