@@ -1323,7 +1323,7 @@ const getAssignedProcessesByUser = async (user) => {
       .populate("patient");
 
     // skip completed processes
-    // if (processInstance.currentProcedure === null) continue;
+    if (processInstance.currentProcedure === null) continue;
 
     if (!processInstance)
       throw new Error(`Process ID ${processID} does not exists!`);
@@ -1568,12 +1568,12 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
     }
 
     // remove completed procedure inside user's assigned procedure
-    account.assignedProcedures = account.assignedProcedures.filter(
-      (assignedProcedure) => {
-        return !assignedProcedure.equals(procedure._id);
-      }
-    );
-    await account.save();
+    // account.assignedProcedures = account.assignedProcedures.filter(
+    //   (assignedProcedure) => {
+    //     return !assignedProcedure.equals(procedure._id);
+    //   }
+    // );
+    // await account.save();
 
     const assignedCount = procedure.rolesAssignedPeople.length;
     const completedCount = procedure.peopleMarkAsCompleted.length;
@@ -1605,17 +1605,10 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
       await process.save();
 
       // signals to frontend of the current procedure update
-      console.log(
-        `sending 'procedure complete - current procedure reflect' event to room ${process.processID}`
-      );
       const newCurrentProcedure = await ProcedureInstance.findOne({
         _id: nextProcedureId,
       });
-      io.to(process.processID).emit(
-        "procedure complete - current procedure reflect",
-        newCurrentProcedure,
-        process.processID
-      );
+      io.to(process.processID).emit("procedure complete - refresh");
 
       res.send("Procedure marked as complete");
     } else {

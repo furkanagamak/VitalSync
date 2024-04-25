@@ -9,8 +9,12 @@ const AssignedProcesses = () => {
   const [assignedProcesses, setAssignedProcesses] = useState(null);
   const [displayingProcesses, setDisplayingProcesses] = useState(null);
   const [tablePage, setTablePage] = useState(0);
-
+  const [refreshTick, setRefreshTick] = useState(false);
   const { socket } = useSocketContext();
+
+  const triggerRefresh = () => {
+    setRefreshTick((refreshTick) => !refreshTick);
+  };
 
   // fethces assigned processes
   useEffect(() => {
@@ -26,11 +30,13 @@ const AssignedProcesses = () => {
         toast.error(await res.text());
       } else {
         const data = await res.json();
+        console.log("Received process");
+        console.log(data);
         setAssignedProcesses(data);
       }
     };
     fetchAssignedProcesses();
-  }, []);
+  }, [refreshTick]);
 
   // pagination updates
   useEffect(() => {
@@ -46,25 +52,28 @@ const AssignedProcesses = () => {
     if (!socket) return;
 
     // updates process's current procedure field upon procedure completion event
-    socket.on(
-      "procedure complete - current procedure reflect",
-      (currentProcedure, processID) => {
-        setAssignedProcesses((assignedProcesses) =>
-          assignedProcesses.map((assignedProcess) => {
-            if (assignedProcess.processID === processID) {
-              console.log("found matching!");
-              assignedProcess.proceduresAhead--;
-              return {
-                ...assignedProcess,
-                currentProcedure: currentProcedure,
-              };
-            } else {
-              return assignedProcess;
-            }
-          })
-        );
-      }
-    );
+    // socket.on(
+    //   "procedure complete - current procedure reflect",
+    //   (currentProcedure, processID) => {
+    //     setAssignedProcesses((assignedProcesses) =>
+    //       assignedProcesses.map((assignedProcess) => {
+    //         if (assignedProcess.processID === processID) {
+    //           console.log("found matching!");
+    //           assignedProcess.proceduresAhead--;
+    //           return {
+    //             ...assignedProcess,
+    //             currentProcedure: currentProcedure,
+    //           };
+    //         } else {
+    //           return assignedProcess;
+    //         }
+    //       })
+    //     );
+    //   }
+    // );
+    socket.on("procedure complete - refresh", () => {
+      triggerRefresh();
+    });
   }, []);
 
   const handleNextPage = () => {
@@ -121,11 +130,16 @@ const AssignedProcesses = () => {
 
 const Process = ({ process, socket }) => {
   const myProcedure = process.myProcedure;
-  const myProcedureStartDate = new Date(myProcedure.timeStart);
+  const myProcedureStartDate = myProcedure
+    ? new Date(myProcedure.timeStart)
+    : null;
 
-  return (
-    <div className="bg-primary text-white p-4 rounded-3xl flex flex-col md:grid grid-cols-10 space-x-4 drop-shadow-lg">
-      <section className="col-start-1 col-end-3 text-center md:space-y-4 border-b-2 md:border-r-2 md:border-b-0 border-white">
+  let displayMyProcedure;
+  console.log(myProcedure);
+
+  if (myProcedure) {
+    displayMyProcedure = (
+      <>
         <Link
           to={`/boardProcess/${process.processID}`}
           className="text-2xl hover:underline"
@@ -143,6 +157,21 @@ const Process = ({ process, socket }) => {
           <div className="font-bold">|</div>
           <p>{myProcedure.location}</p>
         </div>
+      </>
+    );
+  } else {
+    displayMyProcedure = (
+      <div className="h-full flex justify-center items-center">
+        You have completed all of the procedures assigned to you in this
+        process!
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-primary text-white p-4 rounded-3xl flex flex-col md:grid grid-cols-10 space-x-4 drop-shadow-lg">
+      <section className="col-start-1 col-end-3 text-center md:space-y-4 border-b-2 md:border-r-2 md:border-b-0 border-white">
+        {displayMyProcedure}
       </section>
       <section className="mt-2 md:mt-0 col-start-3 col-end-8 flex flex-col justify-center md:space-y-8 text-2xl">
         <div className="flex">
@@ -159,13 +188,15 @@ const Process = ({ process, socket }) => {
           <h1 className="underline">Current Procedure:</h1>
           <p>{process.currentProcedure.procedureName}</p>
         </div>
-        <h1>
-          {process.procedureAhead === 0 ? (
-            <span className="text-green-500">Your Turn!</span>
-          ) : (
-            <span>{`${process.procedureAhead} more procedures ahead`}</span>
-          )}
-        </h1>
+        {myProcedure && (
+          <h1>
+            {process.procedureAhead === 0 ? (
+              <span className="text-green-500">Your Turn!</span>
+            ) : (
+              <span>{`${process.procedureAhead} more procedures ahead`}</span>
+            )}
+          </h1>
+        )}
       </section>
     </div>
   );
