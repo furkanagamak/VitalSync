@@ -55,41 +55,41 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const fetchCheckLogin = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.REACT_APP_API_BASE_URL}/checkLogin`,
-          {
-            credentials: "include",
-          }
-        );
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data.isLoggedIn) {
-            console.log("User is logged in!");
-            console.log(data);
-            setUser(data.account);
-            socket.emit("login", data.account.id);
-            if (
-              location.pathname === "/" ||
-              location.pathname === "/RecoveryPage"
-            )
-              navigate("/home");
-          } else {
-            console.log("User is not logged in!");
-            console.log(data);
-            if (location.pathname !== "/RecoveryPage") {
-              navigate("/");
-            }
-          }
-        } else {
-          navigate("/");
-          console.log("server send back error response");
+      // try {
+      const res = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/checkLogin`,
+        {
+          credentials: "include",
         }
-      } catch (e) {
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.isLoggedIn) {
+          console.log("User is logged in!");
+          console.log(data);
+          setUser(data.account);
+          if (socket) socket.emit("login", data.account.id);
+          if (
+            location.pathname === "/" ||
+            location.pathname === "/RecoveryPage"
+          )
+            navigate("/home");
+        } else {
+          console.log("User is not logged in!");
+          console.log(data);
+          if (location.pathname !== "/RecoveryPage") {
+            navigate("/");
+          }
+        }
+      } else {
         navigate("/");
-        console.log("fetch fail");
+        console.log("server send back error response");
       }
+      // } catch (e) {
+      //   navigate("/");
+      //   console.log("fetch fail");
+      // }
     };
 
     fetchCheckLogin();
