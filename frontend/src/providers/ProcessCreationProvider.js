@@ -38,7 +38,6 @@ export const ProcessCreationProvider = ({ children }) => {
 
     const [fetchedSections, setFetchedSections] = useState([]);
     const [startTime, setStartTime] = useState('');
-    const [eligibleStaffByRole, setEligibleStaffByRole] = useState({});
 
 
   
@@ -48,22 +47,7 @@ export const ProcessCreationProvider = ({ children }) => {
         ...data
       }));
     };
-  
-    const addSection = (section) => {
-      setProcessTemplate(prev => ({
-        ...prev,
-        sections: [...prev.sections, section]
-      }));
-    };
-  
-    const updateSection = (sectionId, sectionData) => {
-      setProcessTemplate(prev => ({
-        ...prev,
-        sections: prev.sections.map(section => 
-          section._id === sectionId ? { ...section, ...sectionData } : section
-        )
-      }));
-    };
+
 
     useEffect(() => {
       console.log(fetchedSections);
@@ -119,74 +103,8 @@ export const ProcessCreationProvider = ({ children }) => {
       }));
 
       setFetchedSections(updatedSections);
+      console.log(updatedSections);
   };
-
-  const updateRoleAssignment = (uniqueRoleId, roleId, accountId) => {
-    setFetchedSections(prevSections => {
-      return prevSections.map(section => ({
-        ...section,
-        procedureTemplates: section.procedureTemplates.map(procedure => ({
-          ...procedure,
-          roles: procedure.roles.map(role => {
-            if (role.uniqueId === uniqueRoleId) {
-              return { ...role, account: accountId };
-            }
-            return role;
-          })
-        }))
-      }));
-    });
-    removeAssignedStaffGlobally(roleId, accountId); // Remove assigned staff from global list
-  };
-
-  const removeAssignedStaffGlobally = (roleId, staffId) => {
-    setEligibleStaffByRole(prev => ({
-      ...prev,
-      [roleId]: prev[roleId].filter(staff => staff._id !== staffId)
-    }));
-  }
-
-  const fetchEligibleStaff = async () => {
-    try {
-        // This will aggregate all role IDs across all sections and templates into a unique set to prevent duplicate requests.
-        let allRoleIds = new Set();
-        fetchedSections.forEach(section => {
-            section.procedureTemplates.forEach(template => {
-                template.roles.forEach(role => {
-                    allRoleIds.add(role._id);
-                });
-            });
-        });
-
-        // Convert Set to Array for mapping over it to fetch data
-        allRoleIds = Array.from(allRoleIds);
-
-        const responses = await Promise.all(
-            allRoleIds.map(roleId => axios.get(`/users/accountsByRole/${roleId}`)
-                .then(response => ({ roleId, data: response.data }))
-                .catch(error => {
-                    console.error(`Error fetching staff for role ${roleId}:`, error);
-                    return { roleId, data: [] }; // Return empty data on error
-                })
-            )
-        );
-
-        // Create an object where keys are roleIds and values are staff data
-        const staffByRole = {};
-        responses.forEach(item => {
-            staffByRole[item.roleId] = item.data;
-        });
-
-        setEligibleStaffByRole(staffByRole);
-        console.log("Eligible staff by role:", staffByRole);
-    } catch (error) {
-        console.error('Error fetching eligible staff globally:', error);
-    }
-};
-
-useEffect(() => {
-  fetchEligibleStaff();
-}, [fetchedSections]);
 
   useEffect(() => {
       if (processTemplate.sections.length > 0 && startTime) {
@@ -195,8 +113,33 @@ useEffect(() => {
   }, [processTemplate.sections, startTime]);
 
 
+  const assignStaffToRole = (sectionId, procedureId, roleId, staffId) => {
+    setFetchedSections(sections => sections.map(section => {
+      if (section._id === sectionId) {
+        return {
+          ...section,
+          procedureTemplates: section.procedureTemplates.map(procedure => {
+            if (procedure._id === procedureId) {
+              return {
+                ...procedure,
+                roles: procedure.roles.map(role => {
+                  if (role.uniqueId === roleId) {
+                    return { ...role, account: staffId };
+                  }
+                  return role;
+                })
+              };
+            }
+            return procedure;
+          })
+        };
+      }
+      return section;
+    }));
+  };
+
     return (
-      <ProcessCreationContext.Provider value={{ eligibleStaffByRole, updateRoleAssignment , processTemplate, updateProcessTemplate, addSection, updateSection, 
+      <ProcessCreationContext.Provider value={{assignStaffToRole,processTemplate, updateProcessTemplate, 
       patientInformation, setPatientInformation, fetchedSections, startTime, setStartTime}}>
         {children}
       </ProcessCreationContext.Provider>
