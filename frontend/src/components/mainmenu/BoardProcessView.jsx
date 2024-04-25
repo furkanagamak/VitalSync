@@ -56,7 +56,7 @@ const BoardProcessView = () => {
         patientName={process.patientName}
         boardProcessPage={boardProcessPage}
       />
-      {boardProcessPage === "procedures" && (
+      {boardProcessPage === "procedures" && user && (
         <BoardProcessProcedures
           procedures={process.proceduresLeft}
           currUser={user.id}
