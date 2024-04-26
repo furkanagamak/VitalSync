@@ -548,14 +548,14 @@ const CreateProcessTemplateForm = () => {
   const [sections, setSections] = useState([]);
   const [incomingUrl, setIncomingUrl] = useState("");
 
-  const { updateProcessTemplate } = useProcessCreation();
+  const { updateProcessTemplate, currentlyCreatingTemplate, setCurrentlyCreatingTemplate } = useProcessCreation();
 
   useEffect(() => {
-    console.log(location.state);
     if (location.state && location.state.incomingUrl) {
       console.log(location.state.incomingUrl);
 
       setIncomingUrl(location.state.incomingUrl);
+      setCurrentlyCreatingTemplate(true);
     }
   }, [location.state]);
 
@@ -602,7 +602,7 @@ const CreateProcessTemplateForm = () => {
           procedureTemplates: section.procedureTemplates.map(p => p._id || p) 
       }))
   };
-    if(incomingUrl){
+    if(currentlyCreatingTemplate){
       updateProcessTemplate(procData);
       navigate("/processManagement/newProcess/patientForm");
     }

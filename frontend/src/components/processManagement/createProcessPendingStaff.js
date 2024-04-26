@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { useProcessCreation } from '../../providers/ProcessCreationProvider';
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import moment from 'moment'; 
+
 
 
 
@@ -34,8 +36,8 @@ export function RoleDropdownContent({ role, eligibleStaff, assignStaff, assigned
             </thead>
             <tbody>
               {eligibleStaff.map((staff, index) => (
-                <tr key={index}>
-                  <td className="py-2 text-2xl">{staff.firstName} {staff.lastName}</td>
+                <tr key={index} style={{ borderBottom: '1px solid black' }}>
+                <td className="py-2 text-2xl">{staff.firstName} {staff.lastName}</td>
                   <td className="text-2xl">{staff.position}</td>
                   <td>
                     <button 
@@ -56,7 +58,7 @@ export function RoleDropdownContent({ role, eligibleStaff, assignStaff, assigned
 }
 
 export function CreateStaffAssignments({ sectionId, procedureId, procedureName, roles, onClose, onProceed,
-  assignedStaffGlobal, setAssignedStaffGlobal,}) {
+  assignedStaffGlobal, setAssignedStaffGlobal,startTime, endTime}) {
   const [openRoles, setOpenRoles] = useState(new Set());
   const [eligibleStaff, setEligibleStaff] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -68,17 +70,61 @@ export function CreateStaffAssignments({ sectionId, procedureId, procedureName, 
   useEffect(() => {
     if (!roles.length) return;
     const fetchEligibleStaff = async () => {
+      const procedureDate = moment(startTime);
+      const dayOfWeek = procedureDate.format('dddd');
+      
       const roleIds = roles.map(role => role._id);
-      const responses = await Promise.all(roleIds.map(id => axios.get(`/users/accountsByRole/${id}`)));
-      const initialStaff = responses.reduce((acc, res, index) => {
-        acc[roles[index].uniqueId] = res.data.filter(staff => !assignedStaffGlobal.has(staff._id));
-        return acc;
-      }, {});
-      setEligibleStaff(initialStaff);
+      try {
+        const responses = await Promise.all(roleIds.map(id => axios.get(`/users/accountsByRole/${id}`)));
+        const initialStaff = responses.reduce((acc, res, index) => {
+          acc[roles[index].uniqueId] = res.data.filter(staff => {
+            if (staff.isTerminated || assignedStaffGlobal.has(staff._id)) return false;
+            
+            // Exclude staff already assigned to any role in this procedure
+            const assignedInProcedure = Object.values(assignedStaff).some(assigned => assigned._id === staff._id);
+            if (assignedInProcedure) return false;
+  
+            const userUsualHours = staff.usualHours.find(uh => uh.day === dayOfWeek);
+            if (!userUsualHours) return false;
+  
+            // Convert usual work hours to datetime on the procedure date
+            const workStart = moment(`${procedureDate.format('YYYY-MM-DD')}T${userUsualHours.start}`);
+            const workEnd = moment(`${procedureDate.format('YYYY-MM-DD')}T${userUsualHours.end}`);
+            if (workEnd.isBefore(workStart)) {
+              // Adjust for overnight shift ending on the next day
+              workEnd.add(1, 'days');
+            }
+  
+            const procStart = moment(startTime);
+            const procEnd = moment(endTime);
+            if (procEnd.isBefore(procStart)) {
+              // Adjust for procedures ending on the next day
+              procEnd.add(1, 'days');
+            }
+  
+            // Check if work hours fully encompass the procedure time
+            if (!workStart.isBefore(procStart) || !workEnd.isAfter(procEnd)) {
+              console.log("Work hours didn't cover", staff.firstName, workStart.format(), procStart.format(), workEnd.format(), procEnd.format());
+              return false;
+            }
+  
+            // Check for unavailable times overlapping with procedure time
+            return !staff.unavailableTimes.some(unavailable => {
+              const unavailableStart = moment(unavailable.start);
+              const unavailableEnd = moment(unavailable.end);
+              return procStart.isBefore(unavailableEnd) && procEnd.isAfter(unavailableStart);
+            });
+          });
+          return acc;
+        }, {});
+        setEligibleStaff(initialStaff);
+      } catch (error) {
+        console.error("Failed to fetch staff:", error);
+      }
       setIsLoading(false);
     };
     fetchEligibleStaff();
-  }, [roles, assignedStaffGlobal]);
+  }, [roles, assignedStaffGlobal, startTime, endTime]);
 
   const assignStaff = (roleId, staff) => {
     setAssignedStaffGlobal(prev => new Set([...prev, staff._id])); // Add to global assigned list
@@ -119,6 +165,10 @@ export function CreateStaffAssignments({ sectionId, procedureId, procedureName, 
     onProceed();
   };
 
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+
   if (isLoading) return <div>Loading...</div>;
 
 
@@ -153,7 +203,7 @@ export function CreateStaffAssignments({ sectionId, procedureId, procedureName, 
             <div key={role.uniqueId} className="py-10 border-b border-primary">
               <div className="flex justify-between items-center">
                 <div className="text-3xl font-bold flex items-center">
-                  <span>{role.name}</span>
+                  <span>{capitalizeFirstLetter(role.name)}</span>
                   {role.account ? (
                     <FaCheck className="text-green-500 ml-4 text-4xl" />
                   ) : (
@@ -191,7 +241,7 @@ function NavButtons({ onBack, onProceed }) {
                 Go Back
             </button>
             <h1 className="text-primary text-4xl font-bold">Pending Staff Assignments</h1>
-            <button className="hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-7 py-5 text-4xl" onClick={onProceed}>
+            <button className="flex items-center justify-center bg-highlightGreen text-white rounded-3xl px-7 py-5 text-3xl" onClick={onProceed}>
                 Proceed
             </button>
         </div>
@@ -206,6 +256,7 @@ export function PendingNewStaff() {
   const [selectedProcedure, setSelectedProcedure] = useState(null);
   const [selectedSectionId, setSelectedSectionId] = useState(null);  // Add state to track selected section ID
   const [assignedStaffGlobal, setAssignedStaffGlobal] = useState(new Set()); // Store assigned staff IDs globally
+  const [assignmentCompletion, setAssignmentCompletion] = useState({});
 
 
 
@@ -220,11 +271,11 @@ export function PendingNewStaff() {
   };
 
   const handleGoBack = () => {
-    navigate("/processManagement/newProcess/patientForm");
+    navigate(-1);
   };
 
   const handleProceed = () => {
-    navigate("/processManagement/newProcess/pendingResourceAssignments");
+    navigate("/processManagement/newProcess/reviewStaffAssignments");
   };
 
   const handleClick = (procedure, sectionId) => {  // Pass sectionId as an additional parameter
@@ -233,9 +284,18 @@ export function PendingNewStaff() {
     setViewAlternateComponent(true);
   };
 
-  const isFullyAssigned = (procedure) => {
-    return procedure.roles.every(role => role.account !== null) &&
-           procedure.requiredResources.every(resource => resource.resourceInstance !== null);
+  useEffect(() => {
+    const newAssignmentCompletion = {};
+    fetchedSections.forEach(section => {
+      section.procedureTemplates.forEach(procedure => {
+        newAssignmentCompletion[procedure._id] = procedure.roles.every(role => role.account);
+      });
+    });
+    setAssignmentCompletion(newAssignmentCompletion);
+  }, [fetchedSections]);
+
+  const isFullyAssigned = (procedureId) => {
+    return assignmentCompletion[procedureId] || false;
   };
 
   const handleClose = () => {
@@ -248,7 +308,7 @@ export function PendingNewStaff() {
     sectionId={selectedSectionId} procedureId={selectedProcedure._id} 
     procedureName={selectedProcedure.procedureName} roles={selectedProcedure.roles}  
     onClose={handleClose} onProceed={handleClose} assignedStaffGlobal={assignedStaffGlobal}
-    setAssignedStaffGlobal={setAssignedStaffGlobal}/>;
+    setAssignedStaffGlobal={setAssignedStaffGlobal} startTime={selectedProcedure.startTime} endTime={selectedProcedure.endTime}/>;
   }
 
   return (
@@ -272,12 +332,22 @@ export function PendingNewStaff() {
             {section.procedureTemplates.map((procedure, idx) => (
               <div key={idx} className={`flex justify-between items-center py-2 ${idx < section.procedureTemplates.length - 1 ? 'border-b' : ''} border-black`}>
                 <span className='text-2xl'>{procedure.procedureName}</span>
-                <div className={`flex items-center text-2xl font-bold ${isFullyAssigned(procedure) ? 'text-green-500' : 'text-highlightRed underline'}`}>
+                <div className={`flex items-center text-2xl font-bold ${isFullyAssigned(procedure._id) ? 'text-green-500' : 'text-highlightRed underline'}`}>
                   <button
                     className="flex items-center text-current p-0 border-none bg-transparent"
                     onClick={() => handleClick(procedure, section._id)}  // Pass the current section ID
                   >
-                    {isFullyAssigned(procedure) ? "Assigned" : "Assignments Required"}
+                    <div>
+                  {isFullyAssigned(procedure._id) ? (
+                    <div className="flex items-center text-green-500">
+                      <FaCheck className="mr-2" /> Assigned
+                    </div>
+                  ) : (
+                    <div className="flex items-center text-highlightRed">
+                      <MdOutlineOpenInNew className="mr-2" /> Assignments Required
+                    </div>
+                  )}
+                </div>
                   </button>
                 </div>
               </div>

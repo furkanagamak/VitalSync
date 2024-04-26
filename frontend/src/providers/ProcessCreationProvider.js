@@ -39,6 +39,8 @@ export const ProcessCreationProvider = ({ children }) => {
     const [fetchedSections, setFetchedSections] = useState([]);
     const [startTime, setStartTime] = useState('');
 
+    const [currentlyModifyingTemplate, setCurrentlyModifyingTemplate] = useState(false)
+    const [currentlyCreatingTemplate, setCurrentlyCreatingTemplate] = useState(false)
 
   
     const updateProcessTemplate = (data) => {
@@ -138,12 +140,47 @@ export const ProcessCreationProvider = ({ children }) => {
     }));
   };
 
-    return (
-      <ProcessCreationContext.Provider value={{assignStaffToRole,processTemplate, updateProcessTemplate, 
-      patientInformation, setPatientInformation, fetchedSections, startTime, setStartTime}}>
-        {children}
-      </ProcessCreationContext.Provider>
-    );
+  const assignResourceToRequiredResource = (sectionId, procedureId, resourceId, resourceInstanceId) => {
+    setFetchedSections(sections => sections.map(section => {
+      if (section._id === sectionId) {
+        return {
+          ...section,
+          procedureTemplates: section.procedureTemplates.map(procedure => {
+            if (procedure._id === procedureId) {
+              return {
+                ...procedure,
+                requiredResources: procedure.requiredResources.map(resource => {
+                  if (resource.uniqueId === resourceId) {
+                    return { ...resource, resourceInstance: resourceInstanceId };
+                  }
+                  return resource;
+                })
+              };
+            }
+            return procedure;
+          })
+        };
+      }
+      return section;
+    }));
   };
 
+  return (
+    <ProcessCreationContext.Provider value={{
+      assignStaffToRole,
+      assignResourceToRequiredResource,  
+      processTemplate,
+      updateProcessTemplate,
+      patientInformation,
+      setPatientInformation,
+      fetchedSections,
+      startTime,
+      setStartTime,
+      currentlyModifyingTemplate, setCurrentlyModifyingTemplate,
+   currentlyCreatingTemplate, setCurrentlyCreatingTemplate
+    }}>
+      {children}
+    </ProcessCreationContext.Provider>
+  );
+}
   

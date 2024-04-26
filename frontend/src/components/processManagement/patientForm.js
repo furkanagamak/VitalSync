@@ -25,6 +25,10 @@ import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 
 
+const states = [
+  "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", 
+  "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+];
 
 
 function PatientInformationForm() {
@@ -157,14 +161,11 @@ function PatientInformationForm() {
   return (
     <ThemeProvider theme={theme}>
       <div className="p-8">
-        <div className="flex justify-between items-center mb-6">
-          <Button
-            startIcon={<FaArrowLeft />}
-            onClick={handleGoBack}
-            style={{ backgroundColor: '#8E0000', color: 'white', maxWidth: '30%' }}
-          >
-            Go Back
-          </Button>
+        <div className="flex justify-between items-center mb-6"> 
+          <button className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center" onClick={handleGoBack}>
+                <FaArrowLeft className="mr-2" />
+                Go Back
+            </button>
           <Typography variant="h4" component="h2" color="primary.main" fontWeight="bold">
             Patient Information
           </Typography>
@@ -212,8 +213,31 @@ function PatientInformationForm() {
                 <TextField label="City" variant="outlined" name="city" value={patientInfo.city} onChange={handleChange} fullWidth required />
               </Box>
               <Box mb={2}>
-                <TextField label="State" variant="outlined" name="state" value={patientInfo.state} onChange={handleChange} fullWidth required />
-              </Box>
+                  <FormControl variant="outlined" fullWidth required>
+                    <InputLabel htmlFor="state-select">State</InputLabel>
+                    <Select
+                      labelId="state-select"
+                      label="State"
+                      variant="outlined"
+                      name="state"
+                      value={patientInfo.state}
+                      onChange={handleChange}
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            maxHeight: 200,
+                          },
+                        },
+                      }}
+                    >
+                      {states.map((state) => (
+                        <MenuItem key={state} value={state}>
+                          {state}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
               <Box mb={2}>
                 <TextField label="ZIP" variant="outlined" name="zip" value={patientInfo.zip} onChange={handleChange} fullWidth required />
               </Box>
@@ -248,7 +272,7 @@ function PatientInformationForm() {
               onChange={(phone ) => handlePhoneChange(phone , 'emergencyContact2Phone')}/>
               </Box>
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} md={6}>
               <Typography variant="h6">Insurance Information</Typography>
               <Box mb={2} mt={1}>
                 <TextField label="Insurance Provider" variant="outlined" name="insuranceProvider" value={patientInfo.insuranceProvider} onChange={handleChange} fullWidth required />
@@ -258,21 +282,26 @@ function PatientInformationForm() {
               <Box mb={2}><TextField label="Policy #" variant="outlined" name="insurancePolicy" value={patientInfo.insurancePolicy} onChange={handleChange} fullWidth required />
               </Box>
             </Grid>
-            <Grid item xs={12}>
-              <Box mb={2}>
-                <TextField label="Known Conditions" variant="outlined" name="knownConditions" value={patientInfo.knownConditions} onChange={handleChange} fullWidth  required/>
+            <Grid item xs={12} md={6}>
+            <Typography variant="h6">Health Information</Typography>
+              <Box mb={2} mt={1}>
+                <TextField multiline
+                  rows={2}
+                label="Known Conditions" variant="outlined" name="knownConditions" value={patientInfo.knownConditions} onChange={handleChange} fullWidth  required/>
               </Box>
               <Box mb={2}>
-                <TextField label="Allergies" variant="outlined" name="allergies" onChange={handleChange} value={patientInfo.allergies} fullWidth required/>
+                <TextField multiline
+                  rows={2}
+                label="Allergies" variant="outlined" name="allergies" onChange={handleChange} value={patientInfo.allergies} fullWidth required/>
               </Box>
             </Grid>
-            <Grid item xs={12}>
-            <button
-              type="submit"
-              className="bg-highlightGreen text-white mx-auto text-2xl py-4 px-16 rounded-3xl"
-            >
-              Proceed
-            </button>
+            <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
+              <button
+                type="submit"
+                className="bg-highlightGreen text-white mx-auto text-2xl py-4 px-16 rounded-3xl mt-10 mb-5"
+              >
+                Proceed
+              </button>
             </Grid>
           </Grid>
           </form>

@@ -1106,6 +1106,18 @@ app.get("/resources", async (req, res) => {
   }
 });
 
+app.get("/resources/byName/:name", async (req, res) => {
+  try {
+    const resourceInstances = await ResourceInstance.find({ 
+      name: req.params.name, 
+    });
+    res.json(resourceInstances);
+  } catch (error) {
+    console.error("Error fetching resource instances by name:", error);
+    res.status(500).json({ message: "Error fetching resource instances", error: error.message });
+  }
+});
+
 // Fetch a specific resource by ID
 app.get("/resources/:id", async (req, res) => {
   try {

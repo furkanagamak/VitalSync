@@ -32,9 +32,11 @@ function ProcessStartTime() {
   return (
     <div className="container mx-auto p-8">
       <div className="flex justify-between items-center mb-6">
-        <Button startIcon={<FaArrowLeft />} onClick={handleGoBack} style={{ backgroundColor: '#8E0000', color: 'white' }}>
-          Go Back
-        </Button>
+    
+        <button className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center" onClick={handleGoBack}>
+                <FaArrowLeft className="mr-2" />
+                Go Back
+            </button>
       </div>
       <div className="flex justify-center items-center mb-6 mx-auto">
         <Typography variant="h4" component="h2" color="#8E0000" fontWeight="bold">

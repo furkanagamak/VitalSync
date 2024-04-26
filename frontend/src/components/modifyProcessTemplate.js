@@ -568,7 +568,7 @@ const ModifyProcessTemplateForm = () => {
   const [sections, setSections] = useState([]);
   const [incomingUrl, setIncomingUrl] = useState("");
 
-  const { updateProcessTemplate } = useProcessCreation();
+  const { updateProcessTemplate, currentlyModifyingTemplate, setCurrentlyModifyingTemplate } = useProcessCreation();
 
 
   useEffect(() => {
@@ -577,14 +577,10 @@ const ModifyProcessTemplateForm = () => {
       console.log(location.state.incomingUrl);
 
       setIncomingUrl(location.state.incomingUrl);
+      setCurrentlyModifyingTemplate(true);
     }
   }, [location.state]);
 
-  //remove
-  useEffect(() => {
-    console.log(incomingUrl);
-
-  }, [incomingUrl]);
 
   useEffect(() => {
     const fetchProcessTemplate = async () => {
@@ -641,8 +637,7 @@ const ModifyProcessTemplateForm = () => {
       }))
     };
 
-    if(incomingUrl){
-      console.log(incomingUrl);
+    if(currentlyModifyingTemplate){
       updateProcessTemplate(procData);
       navigate("/processManagement/newProcess/patientForm");
     }
