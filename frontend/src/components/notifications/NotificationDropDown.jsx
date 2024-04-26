@@ -66,6 +66,7 @@ const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
               <NotificationDDItem
                 key={notification._id}
                 notification={notification}
+                closeDropDown={closeDropDown}
               />
             );
           else return null;
@@ -87,7 +88,7 @@ const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
   );
 };
 
-const NotificationDDItem = ({ notification }) => {
+const NotificationDDItem = ({ notification, closeDropDown }) => {
   let CurrIcon = null;
 
   // Determine which icon component to use based on the notification type
@@ -104,7 +105,7 @@ const NotificationDDItem = ({ notification }) => {
   const processId = notification.processID;
 
   return (
-    <Link to={`/processDetails/${processId}`} className="no-underline">
+    <Link to={`/processDetails/${processId}`} onClick={closeDropDown} className="no-underline">
       <div className="bg-primary text-white p-4 space-y-4">
         <section className="grid grid-cols-5">
           {CurrIcon}
