@@ -1,16 +1,20 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect,useState, useMemo } from "react";
 import { useTable, useSortBy, usePagination } from "react-table";
 import { TbLayoutGridAdd } from "react-icons/tb";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 const notify = () => toast.success("Process Template Deleted!");
 
-const SearchBar = () => {
+const SearchBar = ({ searchText, onSearchChange}) => {
   const [inputValue, setInputValue] = useState("");
 
-  const handleClearInput = () => setInputValue("");
+  const handleClearInput = () => {
+    setInputValue("");
+    onSearchChange(""); 
+  };
 
   return (
     <div className="w-1/5 inline-flex items-center rounded-full text-xl border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative">
@@ -36,7 +40,10 @@ const SearchBar = () => {
         className="bg-transparent border-none outline-none placeholder-[#8E0000] text-[#8E0000] pl-2"
         style={{ minWidth: "275px" }}
         value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
+        onChange={(e) => {
+          setInputValue(e.target.value.toLowerCase());
+          onSearchChange(e.target.value.toLowerCase());
+        }}
       />
       {inputValue && (
         <button
@@ -80,67 +87,39 @@ const CreateTemplateButton = () => {
   );
 };
 
-const ProcessTable = () => {
-  const data = React.useMemo(
-    () => [
-      {
-        patient: "Abigail Hobbs",
-        id: "13941",
-        name: "Appendectomy",
-        description:
-          "The standard process for performing an appendectomy, which is the surgical removal of the appendix.",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Appendix Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        patient: "Bradley Johnson",
-        id: "12482",
-        name: "Cholecystectomy",
-        description:
-          "The standard process for performing a cholecystectomy, which is the surgical removal of the gallbladder.",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Gallbladder Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        patient: "John Doe",
-        id: "19321",
-        name: "Hysterectomy",
-        description:
-          "The standard process for performing a hysterectomy, which is the surgical removal of the uterus.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Uterus Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        patient: "Ashton Smith",
-        id: "15234",
-        name: "Laminectomy",
-        description:
-          "The standard process for performing a laminectomy, which is the surgical removal of the lamina.",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Lamina Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        patient: "John Proctor",
-        id: "14837",
-        name: "Mastectomy",
-        description:
-          "The standard process for performing a mastectomy, which is the surgical removal of the breast.",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Breast Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        patient: "Ana Wiseman",
-        id: "10093",
-        name: "Nephrectomy",
-        description:
-          "The standard process for performing a nephrectomy, which is the surgical removal of the kidney.",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Kidney Removal, Pain Management, Postoperative Monitoring",
-      },
-    ],
-    []
-  );
+const ProcessTable = ({ searchText }) => {
+  const [processes, setProcesses] = useState([]);
+
+  useEffect(() => {
+    const fetchProcesses = async () => {
+      try {
+        const response = await axios.get('/processInstances');
+        setProcesses(response.data.map(process => ({
+          id: process.processID,
+          patient: process.patientFullName, 
+          description: process.description,
+          name: process.processName,
+          procedures: process.procedures
+        })));
+      } catch (error) {
+        console.error('Failed to fetch processes:', error);
+      }
+    };
+
+    fetchProcesses();
+  }, []);
+
+  const filteredProcesses = useMemo(() => {
+    return processes.filter(process =>
+      process.patient.toLowerCase().includes(searchText) ||
+      process.description.toLowerCase().includes(searchText) ||
+      process.name.toLowerCase().includes(searchText)
+    );
+  }, [processes, searchText]);
+
+
+  const data = useMemo(() => filteredProcesses, [filteredProcesses]);
+  
 
   const columns = React.useMemo(
     () => [
@@ -173,9 +152,8 @@ const ProcessTable = () => {
         Header: "Actions",
         Cell: ({ row }) => {
           const navigate = useNavigate();
-
           const handleEditClick = () => {
-            navigate("/recordProcess");
+            navigate(`/boardProcess/${row.values.id}`);
           };
 
           return (
@@ -217,6 +195,10 @@ const ProcessTable = () => {
     ],
     []
   );
+
+  const tableInstance = useTable({ columns, data: filteredProcesses }, useSortBy, usePagination);
+
+  
 
   const {
     getTableProps,
@@ -374,15 +356,17 @@ const ProcessTable = () => {
 };
 
 const ProcessTemplateManagement = () => {
+  const [searchText, setSearchText] = useState("");
+
   return (
     <div className="flex flex-col items-center space-y-4 relative">
       <h1 className="text-4xl text-[#8E0000] text-center underline font-bold mt-5">
       Completed Process Records
       </h1>
 
-      <SearchBar />
+      <SearchBar searchText={searchText} onSearchChange={setSearchText}/>
       <div>
-        <ProcessTable />
+        <ProcessTable searchText={searchText}/>
       </div>
     </div>
   );
