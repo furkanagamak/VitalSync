@@ -20,6 +20,7 @@ const notificationSchema = new mongoose.Schema({
     required: true,
     default: new Date(),
   },
+  processID: { type: String, ref: "ProcessInstance.processID" },
 });
 
 module.exports = mongoose.model("Notification", notificationSchema);

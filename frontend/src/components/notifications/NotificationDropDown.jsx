@@ -71,7 +71,9 @@ const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
           else return null;
         })
       ) : (
-        <div className="text-2xl text-center my-20 text-black">No new notifications.</div>
+        <div className="text-2xl text-center my-20 text-black">
+          No new notifications.
+        </div>
       )}
       <Link
         to="/notifications"
@@ -99,20 +101,23 @@ const NotificationDDItem = ({ notification }) => {
     CurrIcon = <FiAlertTriangle className="text-red-500 w-8 h-8 m-auto" />;
   }
   const firstSentence = notification.text.split(".")[0];
+  const processId = notification.processID;
 
   return (
-    <div className="bg-primary text-white p-4 space-y-4">
-      <section className="grid grid-cols-5">
-        {CurrIcon}
-        <h1 className="col-start-2 col-end-5 mx-auto text-xl">
-          {notification.title}
-        </h1>
-      </section>
-      <section>
-        <p>{firstSentence + "."}</p>
-      </section>
-      <p className="flex justify-end">{timeAgo(notification.timeCreated)}</p>
-    </div>
+    <Link to={`/processDetails/${processId}`} className="no-underline">
+      <div className="bg-primary text-white p-4 space-y-4">
+        <section className="grid grid-cols-5">
+          {CurrIcon}
+          <h1 className="col-start-2 col-end-5 mx-auto text-xl">
+            {notification.title}
+          </h1>
+        </section>
+        <section>
+          <p>{firstSentence + "."}</p>
+        </section>
+        <p className="flex justify-end">{timeAgo(notification.timeCreated)}</p>
+      </div>
+    </Link>
   );
 };
 
