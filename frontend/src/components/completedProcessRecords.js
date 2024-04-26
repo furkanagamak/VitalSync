@@ -8,10 +8,13 @@ import axios from 'axios';
 
 const notify = () => toast.success("Process Template Deleted!");
 
-const SearchBar = () => {
+const SearchBar = ({ searchText, onSearchChange}) => {
   const [inputValue, setInputValue] = useState("");
 
-  const handleClearInput = () => setInputValue("");
+  const handleClearInput = () => {
+    setInputValue("");
+    onSearchChange(""); 
+  };
 
   return (
     <div className="w-1/5 inline-flex items-center rounded-full text-xl border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative">
@@ -37,7 +40,10 @@ const SearchBar = () => {
         className="bg-transparent border-none outline-none placeholder-[#8E0000] text-[#8E0000] pl-2"
         style={{ minWidth: "275px" }}
         value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
+        onChange={(e) => {
+          setInputValue(e.target.value.toLowerCase());
+          onSearchChange(e.target.value.toLowerCase());
+        }}
       />
       {inputValue && (
         <button
@@ -81,18 +87,16 @@ const CreateTemplateButton = () => {
   );
 };
 
-const ProcessTable = () => {
+const ProcessTable = ({ searchText }) => {
   const [processes, setProcesses] = useState([]);
 
   useEffect(() => {
     const fetchProcesses = async () => {
       try {
         const response = await axios.get('/processInstances');
-        setProcesses(response.data.filter(process => 
-          process.procedures.every(proc => proc.completed) // Check if every procedure in a process is completed
-        ).map(process => ({
+        setProcesses(response.data.map(process => ({
           id: process.processID,
-          patient: process.patientFullName, // Ensure these names match the response object's keys
+          patient: process.patientFullName, 
           description: process.description,
           name: process.processName,
           procedures: process.procedures
@@ -105,8 +109,17 @@ const ProcessTable = () => {
     fetchProcesses();
   }, []);
 
+  const filteredProcesses = useMemo(() => {
+    return processes.filter(process =>
+      process.patient.toLowerCase().includes(searchText) ||
+      process.description.toLowerCase().includes(searchText) ||
+      process.name.toLowerCase().includes(searchText)
+    );
+  }, [processes, searchText]);
 
-  const data = useMemo(() => processes, [processes]);
+
+  const data = useMemo(() => filteredProcesses, [filteredProcesses]);
+  
 
   const columns = React.useMemo(
     () => [
@@ -182,6 +195,10 @@ const ProcessTable = () => {
     ],
     []
   );
+
+  const tableInstance = useTable({ columns, data: filteredProcesses }, useSortBy, usePagination);
+
+  
 
   const {
     getTableProps,
@@ -339,15 +356,17 @@ const ProcessTable = () => {
 };
 
 const ProcessTemplateManagement = () => {
+  const [searchText, setSearchText] = useState("");
+
   return (
     <div className="flex flex-col items-center space-y-4 relative">
       <h1 className="text-4xl text-[#8E0000] text-center underline font-bold mt-5">
       Completed Process Records
       </h1>
 
-      <SearchBar />
+      <SearchBar searchText={searchText} onSearchChange={setSearchText}/>
       <div>
-        <ProcessTable />
+        <ProcessTable searchText={searchText}/>
       </div>
     </div>
   );

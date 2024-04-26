@@ -67,6 +67,7 @@ const testPatient = new Patient({
   zip: 54321,
   dob: new Date("1985-05-15"),
   sex: "Female",
+  phone: "444-323-3456",
   emergencyContacts: [
     {
       name: "Bob Johnson",
@@ -79,8 +80,8 @@ const testPatient = new Patient({
       phone: "555-333-4444",
     },
   ],
-  knownConditions: ["Asthma", "Heart disease"],
-  allergies: ["Shellfish", "Pollen"],
+  knownConditions: "Asthma, Heart disease",
+  allergies: "Shellfish, Pollen",
 });
 
 const testAneRoomTemplate = new ResourceTemplate({
@@ -311,6 +312,7 @@ const testPatient2 = new Patient({
   zip: 12345,
   dob: new Date("1978-10-20"),
   sex: "Male",
+  phone: "434-313-3441",
   emergencyContacts: [
     {
       name: "Jane Smith",
@@ -323,8 +325,8 @@ const testPatient2 = new Patient({
       phone: "555-789-0123",
     },
   ],
-  knownConditions: ["Diabetes", "Hypertension"],
-  allergies: ["Penicillin", "Bee stings"],
+  knownConditions: "Diabetes ,Hypertension",
+  allergies: "Penicillin, Bee stings",
 });
 
 const testLabRoomTemplate = new ResourceTemplate({

@@ -23,6 +23,8 @@ import toast, { Toaster } from "react-hot-toast";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import axios from 'axios';
 import { debounce } from 'lodash';
+import { useProcessCreation } from '../providers/ProcessCreationProvider';
+
 
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
@@ -62,7 +64,7 @@ const GoBackButton = () => {
   const navigate = useNavigate();
 
   const handleGoBackClick = () => {
-    navigate("/ProcessTemplateManagement");
+    navigate(-1);
   };
 
   return (
@@ -554,6 +556,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
 
 const ModifyProcessTemplateForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { id } = useParams(); 
 
@@ -563,6 +566,20 @@ const ModifyProcessTemplateForm = () => {
     sections: []
   });
   const [sections, setSections] = useState([]);
+  const [incomingUrl, setIncomingUrl] = useState("");
+
+  const { updateProcessTemplate, currentlyModifyingTemplate, setCurrentlyModifyingTemplate } = useProcessCreation();
+
+
+  useEffect(() => {
+    console.log(location.state);
+    if (location.state && location.state.incomingUrl) {
+      console.log(location.state.incomingUrl);
+
+      setIncomingUrl(location.state.incomingUrl);
+      setCurrentlyModifyingTemplate(true);
+    }
+  }, [location.state]);
 
 
   useEffect(() => {
@@ -618,21 +635,26 @@ const ModifyProcessTemplateForm = () => {
           description: section.description,
           procedureTemplates: section.procedureTemplates.map(p => p._id || p) 
       }))
-  };
+    };
 
-  console.log(procData);
+    if(currentlyModifyingTemplate){
+      updateProcessTemplate(procData);
+      navigate("/processManagement/newProcess/patientForm");
+    }
+    else{
+    console.log(procData);
 
-  try {
-      const response = await axios.put(`/processTemplates/${id}`, procData);
-      toast.success("Process Template Updated Successfully!");
-      navigate("/ProcessTemplateManagement");
-      setProcess({ name: "", description: "", sections:"" });
-      setSections([]);
-      sessionStorage.removeItem('processTemplateState');
-  } catch (error) {
-      console.error("Error updating process template:", error);
-      toast.error("Failed to update process template");
-  }
+    try {
+        const response = await axios.put(`/processTemplates/${id}`, procData);
+        toast.success("Process Template Updated Successfully!");
+        navigate("/ProcessTemplateManagement");
+        setProcess({ name: "", description: "", sections:"" });
+        setSections([]);
+        sessionStorage.removeItem('processTemplateState');
+    } catch (error) {
+        console.error("Error updating process template:", error);
+        toast.error("Failed to update process template");
+    }}
   };
 
 

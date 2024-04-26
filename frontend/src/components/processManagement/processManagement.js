@@ -34,7 +34,7 @@ export function ProcessManagementContainer() {
   );
 
   const handleChange = (event, newValue) => {
-    navigate(tabPaths[newValue]);
+    navigate(tabPaths[newValue], {state: {incomingUrl: "/processManagement"} });
   };
 
   return (
