@@ -88,11 +88,9 @@ const ProcessTable = () => {
     const fetchProcesses = async () => {
       try {
         const response = await axios.get('/processInstances');
-        setProcesses(response.data.filter(process => 
-          process.procedures.every(proc => proc.completed) 
-        ).map(process => ({
+        setProcesses(response.data.map(process => ({
           id: process.processID,
-          patient: process.patientFullName, 
+          patient: process.patientFullName,
           description: process.description,
           name: process.processName,
           procedures: process.procedures

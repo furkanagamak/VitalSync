@@ -23,8 +23,12 @@ const BoardProcessView = () => {
   const [boardProcessPage, setBoardProcessPage] = useState("procedures");
   const { id } = useParams();
   const { user } = useAuth();
+  const { socket } = useSocketContext();
+  const [refreshTick, setRefreshTick] = useState(false);
 
-  console.log(user);
+  const triggerRefresh = () => {
+    setRefreshTick((refreshTick) => !refreshTick);
+  };
 
   const navToProcedures = () => {
     setBoardProcessPage("procedures");
@@ -48,7 +52,15 @@ const BoardProcessView = () => {
       }
     };
     fetchBoardProcess();
-  }, []);
+  }, [refreshTick]);
+
+  // socket events
+  useEffect(() => {
+    if (!socket) return;
+    socket.on("procedure complete - refresh", () => {
+      triggerRefresh();
+    });
+  }, [socket]);
 
   if (!process) return <div>Loading ...</div>;
   return (

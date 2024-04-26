@@ -47,6 +47,6 @@ describe("Navbar", () => {
     cy.visit("http://localhost:3000/home");
 
     cy.get("#notificationsBtn").click();
-    cy.contains("Your turn");
+    cy.contains("No new notifications.");
   });
 });

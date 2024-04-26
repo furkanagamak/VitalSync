@@ -1578,14 +1578,17 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
     const assignedCount = procedure.rolesAssignedPeople.length;
     const completedCount = procedure.peopleMarkAsCompleted.length;
 
-    if (assignedCount === completedCount) {
-      const section = await SectionInstance.findOne({
-        procedureInstances: procedure._id,
-      });
-      const process = await ProcessInstance.findOne({
-        sectionInstances: section._id,
-      });
+    const section = await SectionInstance.findOne({
+      procedureInstances: procedure._id,
+    });
+    const process = await ProcessInstance.findOne({
+      sectionInstances: section._id,
+    });
 
+    // signals to frontend of the current procedure update
+    io.to(process.processID).emit("procedure complete - refresh");
+
+    if (assignedCount === completedCount) {
       const procedureIndex = section.procedureInstances.indexOf(procedure._id);
       let nextProcedureId = null;
 
@@ -1603,6 +1606,98 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
 
       process.currentProcedure = nextProcedureId;
       await process.save();
+
+      // Fetch all sections of the process
+      const sections = await SectionInstance.find({
+        _id: { $in: process.sectionInstances },
+      });
+      const procedureIds = sections.flatMap(
+        (section) => section.procedureInstances
+      );
+
+      // Fetch all procedures to gather all roles and accounts involved
+      const procedures = await ProcedureInstance.find({
+        _id: { $in: procedureIds },
+      });
+      let userIds = new Set();
+      procedures.forEach((proc) => {
+        proc.rolesAssignedPeople.forEach((role) => {
+          role.accounts.forEach((accountId) => {
+            userIds.add(accountId.toString());
+          });
+        });
+      });
+
+      // Calculate the number of procedures left
+      const index = procedures.findIndex((p) => p._id.equals(nextProcedureId));
+      let remainingProceduresCount = 0;
+      if (index !== -1) {
+        remainingProceduresCount =
+          procedureIds.length -
+          procedures.findIndex((p) => p._id.equals(nextProcedureId));
+      }
+
+      // Get the name of the next procedure
+      const nextProcedure = procedures.find((p) =>
+        p._id.equals(nextProcedureId)
+      );
+      const nextProcedureName = nextProcedure
+        ? nextProcedure.procedureName
+        : "None";
+
+      let nextProcedureAssignedUserIds = [];
+      if (nextProcedure) {
+        nextProcedure.rolesAssignedPeople.forEach((role) => {
+          role.accounts.forEach((accountId) => {
+            nextProcedureAssignedUserIds.push(accountId);
+          });
+        });
+      }
+
+      let notificationText = "";
+      if (nextProcedure) {
+        notificationText = `A procedure ${procedure.procedureName} has been completed for the process ${process.processName} with the process ID ${process.processID} that you are a part of. The next procedure is ${nextProcedureName}. There are ${remainingProceduresCount} procedures left until the process is fully complete.`;
+      } else {
+        notificationText = `A procedure ${procedure.procedureName} has been completed for the process ${process.processName} with the process ID ${process.processID} that you are a part of. There are no more procedures left in the process. The process is fully complete.`;
+      }
+
+      await Promise.all(
+        Array.from(userIds).map(async (userId) => {
+          const notification = new Notification({
+            userId: userId,
+            type: "check",
+            title: "Procedure Completion",
+            text: notificationText,
+            timeCreated: new Date(),
+          });
+
+          await notification.save();
+
+          // Push the notification to the user's notification box
+          return Account.findByIdAndUpdate(userId, {
+            $push: { notificationBox: notification._id },
+          });
+        })
+      );
+
+      await Promise.all(
+        nextProcedureAssignedUserIds.map(async (userId) => {
+          const notification = new Notification({
+            userId: userId,
+            type: "action",
+            title: "Your Turn",
+            text: `Your assigned procedure ${nextProcedure.procedureName} for the process ${process.processName} with the process ID ${process.processID} is the current procedure to be completed.`,
+            timeCreated: new Date(),
+          });
+
+          await notification.save();
+
+          // Push the notification to the user's notification box
+          return Account.findByIdAndUpdate(userId, {
+            $push: { notificationBox: notification._id },
+          });
+        })
+      );
 
       // signals to frontend of the current procedure update
       const newCurrentProcedure = await ProcedureInstance.findOne({
@@ -1817,7 +1912,7 @@ app.get("/processInstances", async (req, res) => {
         processName: pi.processName,
         description: pi.description,
         patientFullName: pi.patient ? pi.patient.fullName : 'No patient',
-        procedures: procedureDetails,
+        procedures: pi.sectionInstances.flatMap(section => section.procedureInstances.map(proc => proc.procedureName)),
         totalProcedures: totalProcedures,
         completedProcedures: completedProcedures
       };
