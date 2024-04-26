@@ -1806,33 +1806,6 @@ app.get("/users/:userId/notifications", async (req, res) => {
   }
 });
 
-app.get("/users/:userId/notifications", async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).send("Invalid User ID");
-    }
-
-    const user = await Account.findById(userId).populate({
-      path: "notificationBox",
-      populate: {
-        path: "userId",
-        model: "Account",
-      },
-      options: { sort: { timeCreated: -1 } },
-    });
-
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-
-    res.json(user.notificationBox);
-  } catch (error) {
-    res.status(500).send("Server error");
-  }
-});
-
-
 app.get("/processInstances", async (req, res) => {
   try {
     const processInstances = await ProcessInstance.find({})
