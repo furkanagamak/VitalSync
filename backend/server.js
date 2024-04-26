@@ -36,6 +36,7 @@ const ProcedureInstance = require("./models/procedureInstance.js");
 const Patient = require("./models/patient.js");
 const Notification = require("./models/notification.js");
 dotenv.config();
+const Message = require("./models/message.js");
 
 const bucketName = process.env.BUCKET_NAME;
 const bucketRegion = process.env.BUCKET_REGION;
@@ -46,6 +47,7 @@ const s3 = new S3Client({
 });
 
 const resourceController = require("./controllers/ResourceController.js");
+const messagesController = require("./controllers/MessagesController.js");
 
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -125,6 +127,60 @@ io.on("connection", async (socket) => {
       socket.join(process.processID);
       console.log(`socket ${socket.id} joined room: ${process.processID}`);
     });
+  });
+
+  socket.on("chatMessage", async (userId, text, processID) => {
+    // checks for valid userId and processID
+    const messageUser = await Account.findOne({ _id: userId });
+    if (!messageUser)
+      throw new Error(`User ${UserId} sending message does not exists`);
+    const process = await ProcessInstance.findOne({ processID: processID });
+    if (!process) throw new Error(`Process ${processID} does not exists`);
+
+    // creates new message and add them to message history
+    const newMessage = await Message({
+      userId: messageUser._id,
+      text: text,
+      timeCreated: new Date(),
+    });
+    process.messageHistory.push(newMessage._id);
+
+    await newMessage.save();
+    await process.save();
+
+    // Find all unique users associated with this process (excluding the message sender)
+    const procedureInstances = await ProcedureInstance.find({ processID: processID });
+    const usersSet = new Set();
+    for (let procedure of procedureInstances) {
+      for (let roleAssignment of procedure.rolesAssignedPeople) {
+        for (let account of roleAssignment.accounts) {
+          const accountId = account.toString();  // Convert ObjectId to string
+          if (accountId !== userId.toString()) { // Compare strings and exclude the sender
+            usersSet.add(accountId);
+          }
+        }
+      }
+    }
+
+    // Create and send a notification to each user
+    usersSet.forEach(async (accountId) => {
+      const notification = new Notification({
+        userId: accountId,
+        type: 'Chat Message',
+        title: 'Chat Message',
+        text: `${messageUser.firstName} ${messageUser.lastName} has sent a new message in the process ${process.processName} with the process ID ${processID}.`,
+        timeCreated: new Date(),
+      });
+      await notification.save();
+
+      const account = await Account.findById(accountId);
+      if (account) {
+        account.notificationBox.push(notification._id);
+        await account.save();
+      }
+    });
+
+    io.to(processID).emit("new chat message - refresh");
   });
 
   socket.on("test", () => {
@@ -751,11 +807,15 @@ app.get("/user/:userId", async (req, res) => {
 app.get("/users/accountsByRole/:roleId", async (req, res) => {
   try {
     const { roleId } = req.params;
-    const accounts = await Account.find({ eligibleRoles: roleId }).populate('eligibleRoles');
+    const accounts = await Account.find({ eligibleRoles: roleId }).populate(
+      "eligibleRoles"
+    );
     res.json(accounts);
   } catch (error) {
     console.error("Error fetching accounts by role:", error);
-    res.status(500).json({ message: "Error fetching accounts", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching accounts", error: error.message });
   }
 });
 
@@ -797,23 +857,26 @@ app.get("/users", async (req, res) => {
 app.get("users/accountsByRole/:roleId", async (req, res) => {
   try {
     const { roleId } = req.params;
-    const accounts = await Account.find({
-      eligibleRoles: { $in: [roleId] },
-      isTerminated: false,
-    }, {
-      firstName: 1,
-      lastName: 1,
-      position: 1,
-      unavailableTimes: 1,
-      assignedProcedures: 1
-    }).populate('eligibleRoles'); 
+    const accounts = await Account.find(
+      {
+        eligibleRoles: { $in: [roleId] },
+        isTerminated: false,
+      },
+      {
+        firstName: 1,
+        lastName: 1,
+        position: 1,
+        unavailableTimes: 1,
+        assignedProcedures: 1,
+      }
+    ).populate("eligibleRoles");
 
     res.json(accounts);
   } catch (error) {
     console.error("Error fetching accounts by role:", error);
     res.status(500).json({
       message: "Error fetching accounts",
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -1109,13 +1172,18 @@ app.get("/resources", async (req, res) => {
 
 app.get("/resources/byName/:name", async (req, res) => {
   try {
-    const resourceInstances = await ResourceInstance.find({ 
-      name: req.params.name, 
+    const resourceInstances = await ResourceInstance.find({
+      name: req.params.name,
     });
     res.json(resourceInstances);
   } catch (error) {
     console.error("Error fetching resource instances by name:", error);
-    res.status(500).json({ message: "Error fetching resource instances", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Error fetching resource instances",
+        error: error.message,
+      });
   }
 });
 
@@ -1934,66 +2002,85 @@ app.get("/processInstancesActive", async (req, res) => {
   }
 });
 
+
+app.get("/chatMessages/:pid", messagesController.getChatMessagesByProcess);
+
 app.get("/processInstances", async (req, res) => {
   //NOTE this is for records and filters for complete processes
   try {
     const processInstances = await ProcessInstance.find({})
       .populate({
-        path: 'patient',
-        select: 'fullName'
+        path: "patient",
+        select: "fullName",
       })
       .populate({
-        path: 'sectionInstances',
+        path: "sectionInstances",
         populate: {
-          path: 'procedureInstances',
-          model: 'ProcedureInstance',
+          path: "procedureInstances",
+          model: "ProcedureInstance",
           populate: [
             { path: "requiredResources", model: "ResourceTemplate" },
             { path: "assignedResources", model: "ResourceInstance" },
-            { path: "rolesAssignedPeople", populate: { path: "role", model: "Role" }},
-            { path: "rolesAssignedPeople", populate: { path: "accounts", model: "Account" }},
-            { path: "peopleMarkAsCompleted", populate: { path: "role", model: "Role" }},
-            { path: "peopleMarkAsCompleted", populate: { path: "accounts", model: "Account" }}
+            {
+              path: "rolesAssignedPeople",
+              populate: { path: "role", model: "Role" },
+            },
+            {
+              path: "rolesAssignedPeople",
+              populate: { path: "accounts", model: "Account" },
+            },
+            {
+              path: "peopleMarkAsCompleted",
+              populate: { path: "role", model: "Role" },
+            },
+            {
+              path: "peopleMarkAsCompleted",
+              populate: { path: "accounts", model: "Account" },
+            },
           ],
-          select: 'procedureName timeStart timeEnd'
-        }
+          select: "procedureName timeStart timeEnd",
+        },
       });
 
-    const filteredInstances = processInstances.map(pi => {
-      let totalProcedures = 0;
-      let completedProcedures = 0;
-      pi.sectionInstances.forEach(section => {
-        section.procedureInstances.forEach(proc => {
-          totalProcedures++;
-          const assignedCount = proc.rolesAssignedPeople.length;
-          const completedCount = proc.peopleMarkAsCompleted.length;
-          if (assignedCount > 0 && completedCount === assignedCount) {
-            completedProcedures++;
-          }
+    const filteredInstances = processInstances
+      .map((pi) => {
+        let totalProcedures = 0;
+        let completedProcedures = 0;
+        pi.sectionInstances.forEach((section) => {
+          section.procedureInstances.forEach((proc) => {
+            totalProcedures++;
+            const assignedCount = proc.rolesAssignedPeople.length;
+            const completedCount = proc.peopleMarkAsCompleted.length;
+            if (assignedCount > 0 && completedCount === assignedCount) {
+              completedProcedures++;
+            }
+          });
         });
-      });
 
-      return {
-        processID: pi.processID,
-        processName: pi.processName,
-        description: pi.description,
-        patientFullName: pi.patient ? pi.patient.fullName : 'No patient',
-        procedures: pi.sectionInstances.flatMap(section => section.procedureInstances.map(proc => proc.procedureName)),
-        totalProcedures: totalProcedures,
-        completedProcedures: completedProcedures
-      };
-    }).filter(pi => pi.totalProcedures === pi.completedProcedures); // Filter processes where all procedures are completed
+        return {
+          processID: pi.processID,
+          processName: pi.processName,
+          description: pi.description,
+          patientFullName: pi.patient ? pi.patient.fullName : "No patient",
+          procedures: pi.sectionInstances.flatMap((section) =>
+            section.procedureInstances.map((proc) => proc.procedureName)
+          ),
+          totalProcedures: totalProcedures,
+          completedProcedures: completedProcedures,
+        };
+      })
+      .filter((pi) => pi.totalProcedures === pi.completedProcedures); // Filter processes where all procedures are completed
 
     res.json(filteredInstances);
   } catch (error) {
-    console.error('Error fetching process instances:', error);
-    res.status(500).send('Internal server error');
+    console.error("Error fetching process instances:", error);
+    res.status(500).send("Internal server error");
   }
 });
 
-app.post('/processInstances', async (req, res) => {
+app.post("/processInstances", async (req, res) => {
   try {
-    const { nanoid } = await import('nanoid');
+    const { nanoid } = await import("nanoid");
 
     // Create patient
     const patient = new Patient({
@@ -2015,7 +2102,7 @@ app.post('/processInstances', async (req, res) => {
           name: req.body.patientInformation.emergencyContact2Name,
           relation: req.body.patientInformation.emergencyContact2Relation,
           phone: req.body.patientInformation.emergencyContact2Phone,
-        }
+        },
       ],
       knownConditions: req.body.patientInformation.knownConditions,
       allergies: req.body.patientInformation.allergies,
@@ -2046,9 +2133,13 @@ app.post('/processInstances', async (req, res) => {
           procedureName: procedure.procedureName,
           description: procedure.description,
           specialNotes: procedure.specialNotes,
-          requiredResources: procedure.requiredResources.map(resource => resource._id),
-          assignedResources: procedure.requiredResources.map(resource => resource.resourceInstance),
-          rolesAssignedPeople: procedure.roles.map(role => ({
+          requiredResources: procedure.requiredResources.map(
+            (resource) => resource._id
+          ),
+          assignedResources: procedure.requiredResources.map(
+            (resource) => resource.resourceInstance
+          ),
+          rolesAssignedPeople: procedure.roles.map((role) => ({
             role: role._id,
             accounts: [role.account],
           })),
@@ -2065,25 +2156,41 @@ app.post('/processInstances', async (req, res) => {
         }
 
         // Update account unavailable times
-        await Promise.all(procedure.roles.map(async role => {
-          await Account.updateOne({ _id: role.account }, {
-            $push: {
-              assignedProcedures: procedureInstance._id,
-              unavailableTimes: { start: procedure.startTime, end: procedure.endTime }
-            }
-          });
-        }));
+        await Promise.all(
+          procedure.roles.map(async (role) => {
+            await Account.updateOne(
+              { _id: role.account },
+              {
+                $push: {
+                  assignedProcedures: procedureInstance._id,
+                  unavailableTimes: {
+                    start: procedure.startTime,
+                    end: procedure.endTime,
+                  },
+                },
+              }
+            );
+          })
+        );
 
         // Update resource unavailable times
-        await Promise.all(procedure.requiredResources.map(async resource => {
-          if (resource.resourceInstance) {
-            await ResourceInstance.updateOne({ _id: resource.resourceInstance }, {
-              $push: {
-                unavailableTimes: { start: procedure.startTime, end: procedure.endTime }
-              }
-            });
-          }
-        }));
+        await Promise.all(
+          procedure.requiredResources.map(async (resource) => {
+            if (resource.resourceInstance) {
+              await ResourceInstance.updateOne(
+                { _id: resource.resourceInstance },
+                {
+                  $push: {
+                    unavailableTimes: {
+                      start: procedure.startTime,
+                      end: procedure.endTime,
+                    },
+                  },
+                }
+              );
+            }
+          })
+        );
       }
 
       await sectionInstance.save();
@@ -2093,10 +2200,14 @@ app.post('/processInstances', async (req, res) => {
     await processInstance.save();
     res.status(201).send(processInstance);
   } catch (error) {
-    res.status(500).send({ message: 'Failed to create process instance', error: error.toString() });
+    res
+      .status(500)
+      .send({
+        message: "Failed to create process instance",
+        error: error.toString(),
+      });
   }
 });
-
 
 module.exports = {
   server,
