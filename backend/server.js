@@ -1684,6 +1684,40 @@ app.get("/boardProcess/:id", async (req, res) => {
   return res.status(200).json(data);
 });
 
+app.get("/processInstances", async (req, res) => {
+  try {
+    const processInstances = await ProcessInstance.find({})
+      .populate({
+        path: 'patient',
+        select: 'fullName' // Select only the fullName field from the populated patient document
+      })
+      .populate({
+        path: 'sectionInstances', // Populate the section instances
+        populate: {
+          path: 'procedureInstances', // Further populate the procedure instances within each section
+          model: 'ProcedureInstance', // Make sure this is the correct model name
+          select: 'procedureName' // Select only the procedure name
+        }
+      })
+      .select('processID processName description patient sectionInstances'); // Including sectionInstances in the select for population
+
+    const transformedInstances = processInstances.map(pi => ({
+      processID: pi.processID,
+      processName: pi.processName,
+      description: pi.description,
+      patientFullName: pi.patient ? pi.patient.fullName : 'No patient', // Check if patient is populated
+      procedures: pi.sectionInstances.flatMap(section => 
+        section.procedureInstances.map(proc => proc.procedureName) // Extracting procedure names
+      )
+    }));
+
+    res.json(transformedInstances);
+  } catch (error) {
+    console.error('Error fetching process instances:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
 module.exports = {
   server,
   initializePredefinedAccounts,
