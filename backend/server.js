@@ -1838,7 +1838,7 @@ app.get("/processInstances", async (req, res) => {
     const processInstances = await ProcessInstance.find({})
       .populate({
         path: 'patient',
-        select: 'fullName' // Fetch patient full name
+        select: 'fullName'
       })
       .populate({
         path: 'sectionInstances',
@@ -1848,64 +1848,27 @@ app.get("/processInstances", async (req, res) => {
           populate: [
             { path: "requiredResources", model: "ResourceTemplate" },
             { path: "assignedResources", model: "ResourceInstance" },
-            {
-              path: "rolesAssignedPeople",
-              populate: {
-                path: "role",
-                model: "Role",
-              },
-            },
-            {
-              path: "rolesAssignedPeople",
-              populate: {
-                path: "accounts",
-                model: "Account",
-              },
-            },
-            {
-              path: "peopleMarkAsCompleted",
-              populate: {
-                path: "role",
-                model: "Role",
-              },
-            },
-            {
-              path: "peopleMarkAsCompleted",
-              populate: {
-                path: "accounts",
-                model: "Account",
-              },
-            },
+            { path: "rolesAssignedPeople", populate: { path: "role", model: "Role" }},
+            { path: "rolesAssignedPeople", populate: { path: "accounts", model: "Account" }},
+            { path: "peopleMarkAsCompleted", populate: { path: "role", model: "Role" }},
+            { path: "peopleMarkAsCompleted", populate: { path: "accounts", model: "Account" }}
           ],
-          select: 'procedureName timeStart timeEnd' // Customize this select based on the data needed
+          select: 'procedureName timeStart timeEnd'
         }
       });
 
-    const transformedInstances = processInstances.map(pi => {
+    const filteredInstances = processInstances.map(pi => {
       let totalProcedures = 0;
       let completedProcedures = 0;
-      const procedureDetails = pi.sectionInstances.flatMap(section => {
-        let allCompleted = true;
-        const procedures = section.procedureInstances.map(proc => {
+      pi.sectionInstances.forEach(section => {
+        section.procedureInstances.forEach(proc => {
           totalProcedures++;
           const assignedCount = proc.rolesAssignedPeople.length;
           const completedCount = proc.peopleMarkAsCompleted.length;
-          const isCompleted = assignedCount > 0 && completedCount === assignedCount;
-          if (!isCompleted || assignedCount === 0) {
-            allCompleted = false;
-          }
-          if (isCompleted) {
+          if (assignedCount > 0 && completedCount === assignedCount) {
             completedProcedures++;
           }
-          return {
-            name: proc.procedureName,
-            startTime: proc.timeStart,
-            endTime: proc.timeEnd,
-            completed: isCompleted
-          };
         });
-        section.isCompleted = allCompleted; // You may decide to include this in your response if needed
-        return procedures;
       });
 
       return {
@@ -1917,14 +1880,15 @@ app.get("/processInstances", async (req, res) => {
         totalProcedures: totalProcedures,
         completedProcedures: completedProcedures
       };
-    });
+    }).filter(pi => pi.totalProcedures === pi.completedProcedures); // Filter processes where all procedures are completed
 
-    res.json(transformedInstances);
+    res.json(filteredInstances);
   } catch (error) {
     console.error('Error fetching process instances:', error);
     res.status(500).send('Internal server error');
   }
 });
+
 
 
 module.exports = {
