@@ -91,7 +91,7 @@ const NotificationBoxItem = ({ notification }) => {
     <div>
       <div className="bg-primary text-white space-y-4 flex flex-col md:grid grid-cols-10">
         <section className="flex flex-col items-center space-y-8 col-start-1 col-end-3 md:border-r-4 p-4 text-center relative">
-          <p className="mr-auto absolute top-2 left-2">X</p>
+          <p className="mr-auto absolute top-2 left-2"></p>
           {CurrIcon}
           <h1 className="text-2xl">{notification.title}</h1>
         </section>
