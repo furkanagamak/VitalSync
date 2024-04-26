@@ -9,24 +9,66 @@ import { HiOutlineDotsVertical } from "react-icons/hi";
 
 import { timeAgo } from "../../utils/helperFunctions";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../providers/authProvider";
+import { useSocketContext } from "../../providers/SocketProvider";
+import axios from "axios";
+
+axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
+axios.defaults.withCredentials = true;
 
 const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
   const [notifications, setNotifications] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const { socket } = useSocketContext();
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      setNotifications(tmpNotifications);
+      try {
+        const response = await axios.get(`/users/${user?.id}/notifications`);
+        setNotifications(response.data);
+      } catch (error) {
+        console.error("Failed to fetch notifications:", error);
+        setNotifications([]);
+      } finally {
+        setIsLoading(false);
+      }
     };
-    fetchNotifications();
-  }, []);
 
-  if (!notifications) return <div>Loading ...</div>;
+    if (user?.id) {
+      fetchNotifications();
+    }
+
+    const handleNewNotification = () => {
+      if (user?.id) {
+        fetchNotifications();
+      }
+    };
+
+    socket?.on("procedure complete - refresh", handleNewNotification);
+
+    return () => {
+      socket?.off("procedure complete - refresh", handleNewNotification);
+    };
+  }, [user?.id, socket]);
+
+  if (isLoading) return <div>Loading ...</div>;
   return (
     <div className="w-[450px] h-[600px] bg-secondary p-4 flex flex-col space-y-4 overflow-auto">
-      {notifications.map((notification, i) => {
-        if (i <= 3) return <NotificationDDItem notification={notification} />;
-        else return <></>;
-      })}
+      {notifications && notifications.length > 0 ? (
+        notifications.map((notification, i) => {
+          if (i <= 3)
+            return (
+              <NotificationDDItem
+                key={notification._id}
+                notification={notification}
+              />
+            );
+          else return null;
+        })
+      ) : (
+        <div className="text-2xl text-center my-20 text-black">No new notifications.</div>
+      )}
       <Link
         to="/notifications"
         className="flex justify-center text-black"
@@ -61,10 +103,9 @@ const NotificationDDItem = ({ notification }) => {
         <h1 className="col-start-2 col-end-5 mx-auto text-xl">
           {notification.title}
         </h1>
-        <p className="ml-auto">X</p>
       </section>
       <section>
-        <p>{firstSentence}</p>
+        <p>{firstSentence + "."}</p>
       </section>
       <p className="flex justify-end">{timeAgo(notification.timeCreated)}</p>
     </div>
