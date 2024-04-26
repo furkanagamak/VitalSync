@@ -47,9 +47,12 @@ const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
 
     socket?.on("procedure complete - refresh", handleNewNotification);
     socket?.on("new chat message - refresh", handleNewNotification);
+    socket?.on("new process - refresh", handleNewNotification);
 
     return () => {
       socket?.off("procedure complete - refresh", handleNewNotification);
+      socket?.off("new chat message - refresh", handleNewNotification);
+      socket?.off("new process - refresh", handleNewNotification);
     };
   }, [user?.id, socket]);
 

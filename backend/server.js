@@ -2121,6 +2121,8 @@ app.post("/processInstances", async (req, res) => {
       currentProcedure: null,
     });
 
+    const allUserIds = new Set(); // To store unique user IDs
+
     // Create section and procedure instances
     for (const section of req.body.fetchedSections) {
       const sectionInstance = new SectionInstance({
@@ -2153,6 +2155,11 @@ app.post("/processInstances", async (req, res) => {
         });
         await procedureInstance.save();
         sectionInstance.procedureInstances.push(procedureInstance._id);
+
+        // Collect unique user IDs
+        procedure.roles.forEach(role => {
+          allUserIds.add(role.account);
+        });
         if (!processInstance.currentProcedure) {
           processInstance.currentProcedure = procedureInstance._id;
         }
@@ -2200,6 +2207,33 @@ app.post("/processInstances", async (req, res) => {
     }
 
     await processInstance.save();
+
+
+    console.log(allUserIds);
+
+    // Send notifications to all unique users
+    const notificationDetails = {
+      type: 'action',
+      title: 'New Assigned Process',
+      text: 'You have been added to a new process ' + processInstance.processName + ' and process ID ' + processInstance.processID + '. Please check your assigned processes for more details.',
+      timeCreated: new Date()
+    };
+
+    allUserIds.forEach(async userId => {
+      const notification = new Notification({
+        userId,
+        ...notificationDetails
+      });
+      await notification.save();
+
+      // Update user's notification box
+      await Account.updateOne({ _id: userId }, {
+        $push: { notificationBox: notification._id }
+      });
+    });
+
+    io.sockets.emit("new process - refresh");
+
     res.status(201).send(processInstance);
   } catch (error) {
     res
