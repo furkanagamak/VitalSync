@@ -148,6 +148,38 @@ io.on("connection", async (socket) => {
     await newMessage.save();
     await process.save();
 
+    // Find all unique users associated with this process (excluding the message sender)
+    const procedureInstances = await ProcedureInstance.find({ processID: processID });
+    const usersSet = new Set();
+    for (let procedure of procedureInstances) {
+      for (let roleAssignment of procedure.rolesAssignedPeople) {
+        for (let account of roleAssignment.accounts) {
+          const accountId = account.toString();  // Convert ObjectId to string
+          if (accountId !== userId.toString()) { // Compare strings and exclude the sender
+            usersSet.add(accountId);
+          }
+        }
+      }
+    }
+
+    // Create and send a notification to each user
+    usersSet.forEach(async (accountId) => {
+      const notification = new Notification({
+        userId: accountId,
+        type: 'Chat Message',
+        title: 'Chat Message',
+        text: `${messageUser.firstName} ${messageUser.lastName} has sent a new message in the process ${process.processName} with the process ID ${processID}.`,
+        timeCreated: new Date(),
+      });
+      await notification.save();
+
+      const account = await Account.findById(accountId);
+      if (account) {
+        account.notificationBox.push(notification._id);
+        await account.save();
+      }
+    });
+
     io.to(processID).emit("new chat message - refresh");
   });
 
