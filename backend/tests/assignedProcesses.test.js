@@ -79,8 +79,8 @@ const testPatient = new Patient({
       phone: "555-333-4444",
     },
   ],
-  knownConditions: ["Asthma", "Heart disease"],
-  allergies: ["Shellfish", "Pollen"],
+  knownConditions: "Asthma, Heart disease",
+  allergies: "Shellfish, Pollen",
 });
 
 const testAneRoomTemplate = new ResourceTemplate({
@@ -323,8 +323,8 @@ const testPatient2 = new Patient({
       phone: "555-789-0123",
     },
   ],
-  knownConditions: ["Diabetes", "Hypertension"],
-  allergies: ["Penicillin", "Bee stings"],
+  knownConditions: "Diabetes ,Hypertension",
+  allergies: "Penicillin, Bee stings",
 });
 
 const testLabRoomTemplate = new ResourceTemplate({
