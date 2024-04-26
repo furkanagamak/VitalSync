@@ -5,6 +5,7 @@ import axios from "axios";
 import { useAuth } from "../providers/authProvider.js";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
+import { useSocketContext } from "../providers/SocketProvider";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -12,6 +13,12 @@ axios.defaults.withCredentials = true;
 const ProcessDetails = () => {
   const { id } = useParams();
   const [process, setProcess] = useState(null);
+  const [refreshTick, setRefreshTick] = useState(false);
+  const { socket } = useSocketContext();
+
+  const triggerRefresh = () => {
+    setRefreshTick((refreshTick) => !refreshTick);
+  };
 
   useEffect(() => {
     const fetchProcessDetail = async () => {
@@ -25,7 +32,15 @@ const ProcessDetails = () => {
     };
 
     fetchProcessDetail();
-  }, [id]);
+  }, [id, refreshTick]);
+
+  // socket events
+  useEffect(() => {
+    if (!socket) return;
+    socket.on("procedure complete - refresh", () => {
+      triggerRefresh();
+    });
+  }, [socket]);
 
   if (!process) return <div>Loading ...</div>;
   return (
