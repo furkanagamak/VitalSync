@@ -88,9 +88,11 @@ const ProcessTable = () => {
     const fetchProcesses = async () => {
       try {
         const response = await axios.get('/processInstances');
-        setProcesses(response.data.map(process => ({
+        setProcesses(response.data.filter(process => 
+          process.procedures.every(proc => proc.completed) // Check if every procedure in a process is completed
+        ).map(process => ({
           id: process.processID,
-          patient: process.patientFullName,
+          patient: process.patientFullName, // Ensure these names match the response object's keys
           description: process.description,
           name: process.processName,
           procedures: process.procedures
