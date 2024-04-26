@@ -212,7 +212,7 @@ const Procedure = ({ procedure, currentProcedure }) => {
           <h1 className="underline">Equipment Used</h1>
           <ul className="list-disc capitalize">
             {procedure.assignedResources
-              .filter((resource) => resource.type === "equipment" || "Equipment")
+              .filter((resource) => resource.type === "equipment")
               .map((equipment) => (
                 <li key={equipment._id}>
                   {equipment.name} - {equipment.location}
@@ -224,7 +224,7 @@ const Procedure = ({ procedure, currentProcedure }) => {
           <h1 className="underline">Space used</h1>
           <ul className="list-disc">
             {procedure.assignedResources
-              .filter((resource) => resource.type === "spaces" || "Spaces")
+              .filter((resource) => resource.type === "spaces")
               .map((space) => (
                 <li key={space._id}>
                   {space.name} - {space.location}

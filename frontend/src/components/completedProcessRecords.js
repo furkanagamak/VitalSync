@@ -99,7 +99,7 @@ const ProcessTable = ({ searchText }) => {
           patient: process.patientFullName, 
           description: process.description,
           name: process.processName,
-          procedures: process.procedures
+          procedures: process.procedures.join(', ')
         })));
       } catch (error) {
         console.error('Failed to fetch processes:', error);
