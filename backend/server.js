@@ -1909,6 +1909,117 @@ app.get("/processInstances", async (req, res) => {
   }
 });
 
+app.post('/processInstances', async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { nanoid } = require('nanoid');
+      // Create patient
+      const patient = new Patient({
+          fullName: `${req.body.patientInformation.firstName} ${req.body.patientInformation.lastName}`,
+          street: req.body.patientInformation.street,
+          city: req.body.patientInformation.city,
+          state: req.body.patientInformation.state,
+          zip: req.body.patientInformation.zip,
+          dob: req.body.patientInformation.dob,
+          sex: req.body.patientInformation.sex,
+          phone: req.body.patientInformation.phone,
+          emergencyContacts: [
+              {
+                  name: req.body.patientInformation.emergencyContact1Name,
+                  relation: req.body.patientInformation.emergencyContact1Relation,
+                  phone: req.body.patientInformation.emergencyContact1Phone,
+              },
+              {
+                  name: req.body.patientInformation.emergencyContact2Name,
+                  relation: req.body.patientInformation.emergencyContact2Relation,
+                  phone: req.body.patientInformation.emergencyContact2Phone,
+              }
+          ],
+          knownConditions: req.body.patientInformation.knownConditions,
+          allergies: req.body.patientInformation.allergies,
+      });
+      await patient.save({ session });
+
+      // Create process instance
+      const processInstance = new ProcessInstance({
+          processID: nanoid(7), // id of length 7, can adjust later
+          processName: req.body.processTemplate.processName,
+          description: req.body.processTemplate.description,
+          patient: patient._id,
+          sectionInstances: [],
+          currentProcedure: null, 
+      });
+
+      // Create section and procedure instances
+      for (const section of req.body.fetchedSections) {
+          const sectionInstance = new SectionInstance({
+              name: section.sectionName,
+              description: section.description,
+              procedureInstances: [],
+              processID: processInstance.processID,
+          });
+
+          for (const procedure of section.procedureTemplates) {
+            const procedureInstance = new ProcedureInstance({
+                procedureName: procedure.procedureName,
+                description: procedure.description,
+                specialNotes: procedure.specialNotes,
+                requiredResources: procedure.requiredResources.map(resource => resource._id),
+                assignedResources: procedure.requiredResources.map(resource => resource.resourceInstance), 
+                rolesAssignedPeople: procedure.roles.map(role => ({
+                    role: role._id, 
+                    accounts: [role.account], 
+                })),
+                peopleMarkAsCompleted: [], 
+                timeStart: new Date(procedure.startTime),
+                timeEnd: new Date(procedure.endTime),
+                processID: processInstance.processID,
+                sectionID: sectionInstance._id,
+            });
+              await procedureInstance.save({ session });
+              sectionInstance.procedureInstances.push(procedureInstance._id);
+              if (!processInstance.currentProcedure) {
+                  processInstance.currentProcedure = procedureInstance._id;
+              }
+              //add unavailable time to accounts
+              await Promise.all(procedure.roles.map(async role => {
+                await Account.updateOne({ _id: role.account }, {
+                    $push: { 
+                        assignedProcedures: procedureInstance._id,
+                        unavailableTimes: { start: procedure.startTime, end: procedure.endTime }
+                    }
+                }, { session });
+            }));
+
+            //add unavailabletimes to resource instances
+            await Promise.all(procedure.requiredResources.map(async resource => {
+              if (resource.resourceInstance) {
+                  await ResourceInstance.updateOne({ _id: resource.resourceInstance }, {
+                      $push: { 
+                          unavailableTimes: { start: procedure.startTime, end: procedure.endTime }
+                      }
+                  }, { session });
+              }
+          }));
+          }
+
+          await sectionInstance.save({ session });
+          processInstance.sectionInstances.push(sectionInstance._id);
+      }
+
+      await processInstance.save({ session });
+      await session.commitTransaction();
+      session.endSession();
+      res.status(201).send(processInstance);
+  } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      res.status(500).send({ message: 'Failed to create process instance', error: error.toString() });
+  }
+});
+
+
 
 
 module.exports = {

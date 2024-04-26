@@ -165,6 +165,25 @@ export const ProcessCreationProvider = ({ children }) => {
     }));
   };
 
+  const createProcessInstance = async () => {
+    const processDetails = {
+      processTemplate: {
+        processName: processTemplate.processName,
+        description: processTemplate.description,
+      },
+      patientInformation,
+      fetchedSections
+    };
+  
+    try {
+      const { data } = await axios.post('/processInstances', processDetails);
+      console.log('Process instance created successfully:', data);
+    } catch (error) {
+      console.error('Failed to create process instance:', error);
+    }
+  }
+
+
   return (
     <ProcessCreationContext.Provider value={{
       assignStaffToRole,
@@ -177,7 +196,8 @@ export const ProcessCreationProvider = ({ children }) => {
       startTime,
       setStartTime,
       currentlyModifyingTemplate, setCurrentlyModifyingTemplate,
-   currentlyCreatingTemplate, setCurrentlyCreatingTemplate
+   currentlyCreatingTemplate, setCurrentlyCreatingTemplate,
+   createProcessInstance
     }}>
       {children}
     </ProcessCreationContext.Provider>

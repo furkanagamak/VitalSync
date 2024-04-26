@@ -9,12 +9,14 @@ const notify = () => toast.success("Process successfully created! Assigned staff
 
 const ProcessDetailsPreview = () => {
   const navigate = useNavigate();
-  const { fetchedSections, processTemplate, patientInformation } = useProcessCreation(); 
+  const { fetchedSections, processTemplate, patientInformation, createProcessInstance } = useProcessCreation(); 
   const [userData, setUserData] = useState({});
   const [resourceData, setResourceData] = useState({});
 
   useEffect(() => {
     console.log(fetchedSections);
+    console.log(processTemplate);
+    console.log(patientInformation);
     const fetchUserData = async () => {
       const userIds = fetchedSections.flatMap(section =>
         section.procedureTemplates.flatMap(template =>
@@ -58,9 +60,15 @@ const ProcessDetailsPreview = () => {
     navigate(-1);
   };
 
-  const handleConfirm = () => {
-    notify();
-    navigate("/processManagement/");
+  const handleConfirm = async () => {
+    try {
+      await createProcessInstance(); 
+      toast.success("Process successfully created!");
+      navigate("/processManagement/");  
+    } catch (error) {
+      toast.error("Failed to create the process. Please try again.");
+      console.error("Error creating process instance:", error);
+    }
   };
 
   if (!fetchedSections) return <div>Loading ...</div>;
