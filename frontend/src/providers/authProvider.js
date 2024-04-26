@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     fetchCheckLogin();
-  }, []);
+  }, [socket]);
 
   return (
     <AuthContext.Provider
