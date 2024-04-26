@@ -1579,14 +1579,17 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
     const assignedCount = procedure.rolesAssignedPeople.length;
     const completedCount = procedure.peopleMarkAsCompleted.length;
 
-    if (assignedCount === completedCount) {
-      const section = await SectionInstance.findOne({
-        procedureInstances: procedure._id,
-      });
-      const process = await ProcessInstance.findOne({
-        sectionInstances: section._id,
-      });
+    const section = await SectionInstance.findOne({
+      procedureInstances: procedure._id,
+    });
+    const process = await ProcessInstance.findOne({
+      sectionInstances: section._id,
+    });
 
+    // signals to frontend of the current procedure update
+    io.to(process.processID).emit("procedure complete - refresh");
+
+    if (assignedCount === completedCount) {
       const procedureIndex = section.procedureInstances.indexOf(procedure._id);
       let nextProcedureId = null;
 
@@ -1645,8 +1648,8 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
 
       let nextProcedureAssignedUserIds = [];
       if (nextProcedure) {
-        nextProcedure.rolesAssignedPeople.forEach(role => {
-          role.accounts.forEach(accountId => {
+        nextProcedure.rolesAssignedPeople.forEach((role) => {
+          role.accounts.forEach((accountId) => {
             nextProcedureAssignedUserIds.push(accountId);
           });
         });
@@ -1659,39 +1662,43 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
         notificationText = `A procedure ${procedure.procedureName} has been completed for the process ${process.processName} with the process ID ${process.processID} that you are a part of. There are no more procedures left in the process. The process is fully complete.`;
       }
 
-      await Promise.all(Array.from(userIds).map(async (userId) => {
-        const notification = new Notification({
-          userId: userId,
-          type: "check",
-          title: "Procedure Completion",
-          text: notificationText,
-          timeCreated: new Date(),
-        });
-      
-        await notification.save();
-      
-        // Push the notification to the user's notification box
-        return Account.findByIdAndUpdate(userId, {
-          $push: { notificationBox: notification._id },
-        });
-      }));
+      await Promise.all(
+        Array.from(userIds).map(async (userId) => {
+          const notification = new Notification({
+            userId: userId,
+            type: "check",
+            title: "Procedure Completion",
+            text: notificationText,
+            timeCreated: new Date(),
+          });
 
-      await Promise.all(nextProcedureAssignedUserIds.map(async (userId) => {
-        const notification = new Notification({
-          userId: userId,
-          type: "action",
-          title: "Your Turn",
-          text: `Your assigned procedure ${nextProcedure.procedureName} for the process ${process.processName} with the process ID ${process.processID} is the current procedure to be completed.`,
-          timeCreated: new Date()
-        });
+          await notification.save();
 
-        await notification.save();
+          // Push the notification to the user's notification box
+          return Account.findByIdAndUpdate(userId, {
+            $push: { notificationBox: notification._id },
+          });
+        })
+      );
 
-        // Push the notification to the user's notification box
-        return Account.findByIdAndUpdate(userId, {
-          $push: { notificationBox: notification._id }
-        });
-      }));
+      await Promise.all(
+        nextProcedureAssignedUserIds.map(async (userId) => {
+          const notification = new Notification({
+            userId: userId,
+            type: "action",
+            title: "Your Turn",
+            text: `Your assigned procedure ${nextProcedure.procedureName} for the process ${process.processName} with the process ID ${process.processID} is the current procedure to be completed.`,
+            timeCreated: new Date(),
+          });
+
+          await notification.save();
+
+          // Push the notification to the user's notification box
+          return Account.findByIdAndUpdate(userId, {
+            $push: { notificationBox: notification._id },
+          });
+        })
+      );
 
       // signals to frontend of the current procedure update
       const newCurrentProcedure = await ProcedureInstance.findOne({
