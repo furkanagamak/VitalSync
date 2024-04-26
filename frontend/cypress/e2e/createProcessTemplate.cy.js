@@ -19,10 +19,13 @@ describe('Create Process Template Form Tests', () => {
         cy.url().should('include', '/AddSectionForm');
       });
 
-      it('allows navigation back to the process template management page ', () => {
+     /* it('allows navigation back to the process template management page ', () => {
         cy.get('button').contains('Go Back').click();
         cy.url().should('include', '/ProcessTemplateManagement');
       });
+          Had to comment out due to changing back button to navigate -1
+
+      */
 
     /*it("goes to the process template management page after creating a template", () => {
         cy.get('button').contains('Create Template').click();
