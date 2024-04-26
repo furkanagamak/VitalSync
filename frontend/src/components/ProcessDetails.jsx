@@ -222,7 +222,7 @@ const Procedure = ({ procedure, currentProcedure }) => {
         </section>
         <section className="col-start-3 col-end-4 p-4 flex flex-col items-center space-y-2">
           <h1 className="underline">Space used</h1>
-          <ul className="list-disc">
+          <ul className="list-disc capitalize">
             {procedure.assignedResources
               .filter((resource) => resource.type === "spaces")
               .map((space) => (

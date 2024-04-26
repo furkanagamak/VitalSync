@@ -74,6 +74,10 @@ const AssignedProcesses = () => {
     socket.on("procedure complete - refresh", () => {
       triggerRefresh();
     });
+
+    socket.on("new process - refresh", () => {
+      triggerRefresh();
+    });
   }, [socket]);
 
   const handleNextPage = () => {
