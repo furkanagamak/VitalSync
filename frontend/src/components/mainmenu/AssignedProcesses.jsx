@@ -9,8 +9,8 @@ const AssignedProcesses = () => {
   const [assignedProcesses, setAssignedProcesses] = useState(null);
   const [displayingProcesses, setDisplayingProcesses] = useState(null);
   const [tablePage, setTablePage] = useState(0);
-  const [refreshTick, setRefreshTick] = useState(false);
   const { socket } = useSocketContext();
+  const [refreshTick, setRefreshTick] = useState(false);
 
   const triggerRefresh = () => {
     setRefreshTick((refreshTick) => !refreshTick);

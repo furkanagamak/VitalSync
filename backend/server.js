@@ -1578,14 +1578,17 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
     const assignedCount = procedure.rolesAssignedPeople.length;
     const completedCount = procedure.peopleMarkAsCompleted.length;
 
-    if (assignedCount === completedCount) {
-      const section = await SectionInstance.findOne({
-        procedureInstances: procedure._id,
-      });
-      const process = await ProcessInstance.findOne({
-        sectionInstances: section._id,
-      });
+    const section = await SectionInstance.findOne({
+      procedureInstances: procedure._id,
+    });
+    const process = await ProcessInstance.findOne({
+      sectionInstances: section._id,
+    });
 
+    // signals to frontend of the current procedure update
+    io.to(process.processID).emit("procedure complete - refresh");
+
+    if (assignedCount === completedCount) {
       const procedureIndex = section.procedureInstances.indexOf(procedure._id);
       let nextProcedureId = null;
 
@@ -1603,12 +1606,6 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
 
       process.currentProcedure = nextProcedureId;
       await process.save();
-
-      // signals to frontend of the current procedure update
-      const newCurrentProcedure = await ProcedureInstance.findOne({
-        _id: nextProcedureId,
-      });
-      io.to(process.processID).emit("procedure complete - refresh");
 
       res.send("Procedure marked as complete");
     } else {
