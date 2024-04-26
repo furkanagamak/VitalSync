@@ -70,6 +70,11 @@ jobs:
           cd frontend
           npx cypress run
 
+      - name: Add Process test data
+        run: |
+          cd backend
+          node createProcessTestDat.js
+
   deploy:
     needs: jest-cypress-run
     runs-on: ubuntu-latest
