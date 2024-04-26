@@ -197,6 +197,8 @@ const ProcedureForm = ({
     },
   });
 
+  
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProcedure({ ...procedure, [name]: value });

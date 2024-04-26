@@ -748,6 +748,17 @@ app.get("/user/:userId", async (req, res) => {
   }
 });
 
+app.get("/users/accountsByRole/:roleId", async (req, res) => {
+  try {
+    const { roleId } = req.params;
+    const accounts = await Account.find({ eligibleRoles: roleId }).populate('eligibleRoles');
+    res.json(accounts);
+  } catch (error) {
+    console.error("Error fetching accounts by role:", error);
+    res.status(500).json({ message: "Error fetching accounts", error: error.message });
+  }
+});
+
 app.put("/user/:userId", async (req, res) => {
   const { userId } = req.params;
   const updateData = req.body;
@@ -780,6 +791,30 @@ app.get("/users", async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching users", error: error.message });
+  }
+});
+
+app.get("users/accountsByRole/:roleId", async (req, res) => {
+  try {
+    const { roleId } = req.params;
+    const accounts = await Account.find({
+      eligibleRoles: { $in: [roleId] },
+      isTerminated: false,
+    }, {
+      firstName: 1,
+      lastName: 1,
+      position: 1,
+      unavailableTimes: 1,
+      assignedProcedures: 1
+    }).populate('eligibleRoles'); 
+
+    res.json(accounts);
+  } catch (error) {
+    console.error("Error fetching accounts by role:", error);
+    res.status(500).json({
+      message: "Error fetching accounts",
+      error: error.message
+    });
   }
 });
 
@@ -1069,6 +1104,18 @@ app.get("/resources", async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching resources", error: error.message });
+  }
+});
+
+app.get("/resources/byName/:name", async (req, res) => {
+  try {
+    const resourceInstances = await ResourceInstance.find({ 
+      name: req.params.name, 
+    });
+    res.json(resourceInstances);
+  } catch (error) {
+    console.error("Error fetching resource instances by name:", error);
+    res.status(500).json({ message: "Error fetching resource instances", error: error.message });
   }
 });
 
@@ -1862,6 +1909,111 @@ app.get("/processInstances", async (req, res) => {
   }
 });
 
+app.post('/processInstances', async (req, res) => {
+  try {
+    const { nanoid } = await import('nanoid');
+
+    // Create patient
+    const patient = new Patient({
+      fullName: `${req.body.patientInformation.firstName} ${req.body.patientInformation.lastName}`,
+      street: req.body.patientInformation.street,
+      city: req.body.patientInformation.city,
+      state: req.body.patientInformation.state,
+      zip: req.body.patientInformation.zip,
+      dob: req.body.patientInformation.dob,
+      sex: req.body.patientInformation.sex,
+      phone: req.body.patientInformation.phone,
+      emergencyContacts: [
+        {
+          name: req.body.patientInformation.emergencyContact1Name,
+          relation: req.body.patientInformation.emergencyContact1Relation,
+          phone: req.body.patientInformation.emergencyContact1Phone,
+        },
+        {
+          name: req.body.patientInformation.emergencyContact2Name,
+          relation: req.body.patientInformation.emergencyContact2Relation,
+          phone: req.body.patientInformation.emergencyContact2Phone,
+        }
+      ],
+      knownConditions: req.body.patientInformation.knownConditions,
+      allergies: req.body.patientInformation.allergies,
+    });
+    await patient.save();
+
+    // Create process instance
+    const processInstance = new ProcessInstance({
+      processID: nanoid(7), // id of length 7, can adjust later
+      processName: req.body.processTemplate.processName,
+      description: req.body.processTemplate.description,
+      patient: patient._id,
+      sectionInstances: [],
+      currentProcedure: null,
+    });
+
+    // Create section and procedure instances
+    for (const section of req.body.fetchedSections) {
+      const sectionInstance = new SectionInstance({
+        name: section.sectionName,
+        description: section.description,
+        procedureInstances: [],
+        processID: processInstance.processID,
+      });
+
+      for (const procedure of section.procedureTemplates) {
+        const procedureInstance = new ProcedureInstance({
+          procedureName: procedure.procedureName,
+          description: procedure.description,
+          specialNotes: procedure.specialNotes,
+          requiredResources: procedure.requiredResources.map(resource => resource._id),
+          assignedResources: procedure.requiredResources.map(resource => resource.resourceInstance),
+          rolesAssignedPeople: procedure.roles.map(role => ({
+            role: role._id,
+            accounts: [role.account],
+          })),
+          peopleMarkAsCompleted: [],
+          timeStart: new Date(procedure.startTime),
+          timeEnd: new Date(procedure.endTime),
+          processID: processInstance.processID,
+          sectionID: sectionInstance._id,
+        });
+        await procedureInstance.save();
+        sectionInstance.procedureInstances.push(procedureInstance._id);
+        if (!processInstance.currentProcedure) {
+          processInstance.currentProcedure = procedureInstance._id;
+        }
+
+        // Update account unavailable times
+        await Promise.all(procedure.roles.map(async role => {
+          await Account.updateOne({ _id: role.account }, {
+            $push: {
+              assignedProcedures: procedureInstance._id,
+              unavailableTimes: { start: procedure.startTime, end: procedure.endTime }
+            }
+          });
+        }));
+
+        // Update resource unavailable times
+        await Promise.all(procedure.requiredResources.map(async resource => {
+          if (resource.resourceInstance) {
+            await ResourceInstance.updateOne({ _id: resource.resourceInstance }, {
+              $push: {
+                unavailableTimes: { start: procedure.startTime, end: procedure.endTime }
+              }
+            });
+          }
+        }));
+      }
+
+      await sectionInstance.save();
+      processInstance.sectionInstances.push(sectionInstance._id);
+    }
+
+    await processInstance.save();
+    res.status(201).send(processInstance);
+  } catch (error) {
+    res.status(500).send({ message: 'Failed to create process instance', error: error.toString() });
+  }
+});
 
 
 module.exports = {

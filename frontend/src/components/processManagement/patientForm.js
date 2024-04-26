@@ -1,209 +1,313 @@
-import React from 'react';
+import React, { useState, useEffect } from "react";
 import { FaArrowLeft, FaCheck } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useProcessCreation } from '../../providers/ProcessCreationProvider';
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import {
+  TextField,
+  Button,
+  Paper,
+  Grid,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Typography,
+  Box
+} from "@mui/material";
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers'
+import PhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/style.css'
 
 
-function PatientInformationForm({ onBack, onProceed }) {
+const states = [
+  "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", 
+  "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+];
+
+
+function PatientInformationForm() {
+  const { setPatientInformation } = useProcessCreation();
+  const [patientInfo, setPatientInfo] = useState({
+    firstName: '',
+    lastName: '',
+    street: '',
+    city: '',
+    state: '',
+    zip: '',
+    dob: '',
+    sex: '',
+    phone: '',
+    emergencyContact1Name: '',
+    emergencyContact1Relation: '',
+    emergencyContact1Phone: '',
+    emergencyContact2Name: '',
+    emergencyContact2Relation: '',
+    emergencyContact2Phone: '',
+    knownConditions: '',
+    allergies: '',
+    insuranceProvider: '',
+    insuranceGroup: '',
+    insurancePolicy: ''
+  });
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    onProceed();
+    handleProceed();
   };
 
   const navigate = useNavigate();
 
   const handleGoBack = () => {
-    navigate("/processManagement/newProcess/processTemplates");
+    navigate(-1);
   };
 
   const handleProceed = () => {
-    navigate("/processManagement/newProcess/pendingStaffAssignments");
+    setPatientInformation(patientInfo);
+    navigate("/processManagement/newProcess/startTime");
   };
 
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+  
+    if (['zip', 'insuranceGroup', 'insurancePolicy'].includes(name)) {
+      if (!/^\d*$/.test(value)) {
+        return;
+      }
+    }
+  
+    if (['phone', 'emergencyContact1Phone', 'emergencyContact2Phone'].includes(name)) {
+      if (!/^(\d{0,3}-?)?(\d{0,3}-?)?\d{0,4}$/.test(value) && value !== '') {
+        return;
+      }
+    }
+  
+    setPatientInfo(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhoneChange = (value, field) => {
+    setPatientInfo(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+  
+  const theme = createTheme({
+    typography: {
+      fontSize: 14,
+      button: {
+        textTransform: "none",
+      },
+    },
+    palette: {
+      primary: {
+        main: "#8E0000",
+      },
+    },
+    components: {
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#8E0000",
+            },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#8E0000",
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#8E0000",
+            },
+            backgroundColor: "white",
+          },
+          input: {
+            "&.MuiOutlinedInput-inputMultiline": {
+              backgroundColor: "white",
+            },
+          },
+        },
+      },
+      MuiSelect: {
+        styleOverrides: {
+          iconOutlined: {
+            color: "#8E0000",
+          },
+          select: {
+            color: "#8E0000",
+          },
+        },
+      },
+      MuiSvgIcon: {
+        styleOverrides: {
+          root: {
+            color: "#8E0000",
+          },
+        },
+      },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: {
+            color: "#8E0000",
+          },
+        },
+      },
+    },
+  });
+
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-6">
-      <button
-          className=" hover:bg-red-900 border-black border-2 flex items-center justify-center bg-primary text-white rounded-full px-5 py-2 text-xl shadow"
-          style={{ maxWidth: '30%' }}
-          onClick={handleGoBack}
-        >
-          <FaArrowLeft className="mr-3" />
-          Go Back
-        </button>
-        <h2 className="text-3xl font-bold text-red-600 mr-28">Patient Information</h2>
-        <div></div> 
-      </div>
-
-      <div className="border-2 border-red-600 rounded p-4">
+    <ThemeProvider theme={theme}>
+      <div className="p-8">
+        <div className="flex justify-between items-center mb-6"> 
+          <button className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center" onClick={handleGoBack}>
+                <FaArrowLeft className="mr-2" />
+                Go Back
+            </button>
+          <Typography variant="h4" component="h2" color="primary.main" fontWeight="bold">
+            Patient Information
+          </Typography>
+          <div></div>
+        </div>
+        
+        <Paper style={{ padding: "20px", marginBottom: "20px" }} elevation={4}>
         <p className="text-sm italic text-gray-600 mb-4">All fields are required.</p>
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
-          <div className="flex flex-col">
-            <label className="mb-2 text-xl">Full Name</label>
-            <input 
-              id="fullName"
-              type="text"
-              className="col-span-2 md:col-span-1 border border-red-600 p-2" 
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="mb-2 text-xl">Address</label>
-            <input 
-              id="address"
-              type="text"
-              className="col-span-2 md:col-span-1 border border-red-600 p-2" 
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="mb-2 text-xl">City</label>
-            <input 
-              id="city"
-              type="text"
-              className="col-span-2 md:col-span-1 border border-red-600 p-2" 
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="mb-2 text-xl">State</label>
-            <select className="border border-red-600 p-2 relative">
-            {/* State options */}
-            <FaCheck className="absolute right-2 top-2 pointer-events-none" />
-          </select>
-          </div>
-          
-          <div className="flex flex-col">
-            <label className="mb-2 text-xl">ZIP</label>
-            <input 
-              id="ZIP"
-              type="text"
-              className="col-span-2 md:col-span-1 border border-red-600 p-2" 
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="mb-2 text-xl">Date of Birth</label>
-            <input 
-              id="city"
-              type="text"
-              className="col-span-2 md:col-span-1 border border-red-600 p-2" 
-              placeholder='MM-DD-YYYY'
-            />
-          </div>
-
-          <div className="space-y-4 my-10">
-              <div className="flex flex-col">
-                <label className="mb-2 text-xl">Emergency Contact 1 Name</label>
-                <input 
-                  id="em1"
-                  type="text"
-                  className="border border-red-600 p-2" 
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <label className="mb-2 text-xl">Relation</label>
-                <input 
-                  id="em1r"
-                  type="text"
-                  className="border border-red-600 p-2" 
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <label className="mb-2 text-xl">Phone #</label>
-                <input 
-                  id="em1p"
-                  type="text"
-                  className="border border-red-600 p-2" 
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4 my-10">
-              <div className="flex flex-col">
-                <label className="mb-2 text-xl">Emergency Contact 2 Name</label>
-                <input 
-                  id="em2"
-                  type="text"
-                  className="border border-red-600 p-2" 
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <label className="mb-2 text-xl">Relation</label>
-                <input 
-                  id="em2r"
-                  type="text"
-                  className="border border-red-600 p-2" 
-                />
-              </div>
-
-              <div className="flex flex-col">
-                <label className="mb-2 text-xl">Phone #</label>
-                <input 
-                  id="em2p"
-                  type="text"
-                  className="border border-red-600 p-2" 
-                />
-              </div>
-            </div>
-
-          <div className="flex flex-col">
-            <label className="mb-2 text-xl">Insurance Carrier</label>
-            <input 
-              id="insuranceCarrier"
-              type="text"
-              className="col-span-2 md:col-span-1 border border-red-600 p-2" 
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="mb-2 text-xl">Group #</label>
-            <input 
-              id="group"
-              type="text"
-              className="col-span-2 md:col-span-1 border border-red-600 p-2" 
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="mb-2 text-xl">Policy #</label>
-            <input 
-              id="policy"
-              type="text"
-              className="col-span-2 md:col-span-1 border border-red-600 p-2" 
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="mb-2 text-xl">Known Conditions</label>
-            <input 
-              id="conditions"
-              type="text"
-              className="col-span-2 md:col-span-1 border border-red-600 p-2" 
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="mb-5 text-xl">Allergies</label>
-            <input 
-              id="allergies"
-              type="text"
-              className="col-span-2 md:col-span-1 border border-red-600 p-2" 
-            />
-          </div>
-
-          <button 
-            type="submit" 
-            onClick = {handleProceed}
-            className="border-black border-2 mt-10 mb-5 px-12 text-3xl col-span-2 md:col-span-2 justify-self-center bg-green-500 hover:bg-green-700 text-white p-3 rounded-full w-full md:w-auto"
-          >
-          Proceed
-        </button>
-        </form>
+        <form onSubmit={handleSubmit}>
+        <Grid container spacing={2}>
+            <Grid item xs={12} md={6}>
+              <Box mb={2}>
+                <TextField label="First Name" variant="outlined" name="firstName" value={patientInfo.firstName} onChange={handleChange} fullWidth required />
+              </Box>
+              <Box mb={2}>
+                <TextField label="Last Name" variant="outlined" name="lastName" value={patientInfo.lastName} onChange={handleChange} fullWidth required />
+              </Box>
+              <Box mb={2}>
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                      label="Date of Birth"
+                      value={patientInfo.dob}
+                      onChange={(newValue) => setPatientInfo(prev => ({ ...prev, dob: newValue }))}
+                      renderInput={(params) => <TextField {...params} fullWidth required />}
+                    />
+                  </LocalizationProvider>
+                  </Box>
+              <Box mb={2}>
+                <TextField label="Sex" variant="outlined" name="sex" value={patientInfo.sex} onChange={handleChange} fullWidth required />
+              </Box>
+              <Box mb={2}>
+              <Typography variant="h6" >Phone #</Typography>
+              <PhoneInput
+              country={'us'}
+              value={patientInfo.phone}
+              onChange={(phone ) => handlePhoneChange(phone , 'phone')}
+              />
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box mb={2}>
+                <TextField label="Street Address" variant="outlined" name="street" value={patientInfo.street} onChange={handleChange} fullWidth required />
+              </Box>
+              <Box mb={2}>
+                <TextField label="City" variant="outlined" name="city" value={patientInfo.city} onChange={handleChange} fullWidth required />
+              </Box>
+              <Box mb={2}>
+                  <FormControl variant="outlined" fullWidth required>
+                    <InputLabel htmlFor="state-select">State</InputLabel>
+                    <Select
+                      labelId="state-select"
+                      label="State"
+                      variant="outlined"
+                      name="state"
+                      value={patientInfo.state}
+                      onChange={handleChange}
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            maxHeight: 200,
+                          },
+                        },
+                      }}
+                    >
+                      {states.map((state) => (
+                        <MenuItem key={state} value={state}>
+                          {state}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+              <Box mb={2}>
+                <TextField label="ZIP" variant="outlined" name="zip" value={patientInfo.zip} onChange={handleChange} fullWidth required />
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6">Emergency Contact 1</Typography>
+              <Box mb={2} mt={1}>
+                <TextField label="Name" variant="outlined" name="emergencyContact1Name" value={patientInfo.emergencyContact1Name} onChange={handleChange}  fullWidth required />
+              </Box>
+              <Box mb={2}>
+                <TextField label="Relation" variant="outlined" name="emergencyContact1Relation" value={patientInfo.emergencyContact1Relation} onChange={handleChange} fullWidth required />
+              </Box>
+              <Box mb={2}>
+              <Typography variant="h6" >Phone #</Typography>
+              <PhoneInput
+              country={'us'}
+              onChange={(phone ) => handlePhoneChange(phone , 'emergencyContact1Phone')}/>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6">Emergency Contact 2</Typography>
+              <Box mb={2} mt={1}>
+                <TextField label="Name" variant="outlined" name="emergencyContact2Name" value={patientInfo.emergencyContact2Name} onChange={handleChange} fullWidth required />
+              </Box>
+              <Box mb={2}>
+                <TextField label="Relation" variant="outlined" name="emergencyContact2Relation" value={patientInfo.emergencyContact2Relation} onChange={handleChange} fullWidth required />
+              </Box>
+              <Box mb={2}>
+              <Typography variant="h6" >Phone #</Typography>
+              <PhoneInput
+              country={'us'}
+              onChange={(phone ) => handlePhoneChange(phone , 'emergencyContact2Phone')}/>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6">Insurance Information</Typography>
+              <Box mb={2} mt={1}>
+                <TextField label="Insurance Provider" variant="outlined" name="insuranceProvider" value={patientInfo.insuranceProvider} onChange={handleChange} fullWidth required />
+              </Box>
+              <Box mb={2}> <TextField label="Group #" variant="outlined" name="insuranceGroup" value={patientInfo.insuranceGroup} onChange={handleChange} fullWidth required />
+              </Box>
+              <Box mb={2}><TextField label="Policy #" variant="outlined" name="insurancePolicy" value={patientInfo.insurancePolicy} onChange={handleChange} fullWidth required />
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+            <Typography variant="h6">Health Information</Typography>
+              <Box mb={2} mt={1}>
+                <TextField multiline
+                  rows={2}
+                label="Known Conditions" variant="outlined" name="knownConditions" value={patientInfo.knownConditions} onChange={handleChange} fullWidth  required/>
+              </Box>
+              <Box mb={2}>
+                <TextField multiline
+                  rows={2}
+                label="Allergies" variant="outlined" name="allergies" onChange={handleChange} value={patientInfo.allergies} fullWidth required/>
+              </Box>
+            </Grid>
+            <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
+              <button
+                type="submit"
+                className="bg-highlightGreen text-white mx-auto text-2xl py-4 px-16 rounded-3xl mt-10 mb-5"
+              >
+                Proceed
+              </button>
+            </Grid>
+          </Grid>
+          </form>
+        </Paper>
       </div>
-    </div>
+    </ThemeProvider>
   );
 }
 

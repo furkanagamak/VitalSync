@@ -8,6 +8,7 @@ const patientSchema = new mongoose.Schema({
   zip: { type: Number, required: true },
   dob: { type: Date, required: true },
   sex: { type: String, required: true },
+  phone: { type: String, required: true },
   emergencyContacts: [
     {
       name: { type: String, required: true },
@@ -15,8 +16,8 @@ const patientSchema = new mongoose.Schema({
       phone: { type: String, required: true },
     },
   ],
-  knownConditions: [String],
-  allergies: [String],
+  knownConditions: {type: String},
+  allergies: {type: String},
 });
 
 module.exports = mongoose.model("Patient", patientSchema);
