@@ -1684,32 +1684,144 @@ app.get("/boardProcess/:id", async (req, res) => {
   return res.status(200).json(data);
 });
 
+app.get("/users/:userId/notifications", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).send("Invalid User ID");
+    }
+
+    const user = await Account.findById(userId).populate({
+      path: "notificationBox",
+      populate: {
+        path: "userId",
+        model: "Account",
+      },
+      options: { sort: { timeCreated: -1 } },
+    });
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    res.json(user.notificationBox);
+  } catch (error) {
+    res.status(500).send("Server error");
+  }
+});
+
+app.get("/users/:userId/notifications", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).send("Invalid User ID");
+    }
+
+    const user = await Account.findById(userId).populate({
+      path: "notificationBox",
+      populate: {
+        path: "userId",
+        model: "Account",
+      },
+      options: { sort: { timeCreated: -1 } },
+    });
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    res.json(user.notificationBox);
+  } catch (error) {
+    res.status(500).send("Server error");
+  }
+});
+
+
 app.get("/processInstances", async (req, res) => {
   try {
     const processInstances = await ProcessInstance.find({})
       .populate({
         path: 'patient',
-        select: 'fullName' // Select only the fullName field from the populated patient document
+        select: 'fullName' // Fetch patient full name
       })
       .populate({
-        path: 'sectionInstances', // Populate the section instances
+        path: 'sectionInstances',
         populate: {
-          path: 'procedureInstances', // Further populate the procedure instances within each section
-          model: 'ProcedureInstance', // Make sure this is the correct model name
-          select: 'procedureName' // Select only the procedure name
+          path: 'procedureInstances',
+          model: 'ProcedureInstance',
+          populate: [
+            { path: "requiredResources", model: "ResourceTemplate" },
+            { path: "assignedResources", model: "ResourceInstance" },
+            {
+              path: "rolesAssignedPeople",
+              populate: {
+                path: "role",
+                model: "Role",
+              },
+            },
+            {
+              path: "rolesAssignedPeople",
+              populate: {
+                path: "accounts",
+                model: "Account",
+              },
+            },
+            {
+              path: "peopleMarkAsCompleted",
+              populate: {
+                path: "role",
+                model: "Role",
+              },
+            },
+            {
+              path: "peopleMarkAsCompleted",
+              populate: {
+                path: "accounts",
+                model: "Account",
+              },
+            },
+          ],
+          select: 'procedureName timeStart timeEnd' // Customize this select based on the data needed
         }
-      })
-      .select('processID processName description patient sectionInstances'); // Including sectionInstances in the select for population
+      });
 
-    const transformedInstances = processInstances.map(pi => ({
-      processID: pi.processID,
-      processName: pi.processName,
-      description: pi.description,
-      patientFullName: pi.patient ? pi.patient.fullName : 'No patient', // Check if patient is populated
-      procedures: pi.sectionInstances.flatMap(section => 
-        section.procedureInstances.map(proc => proc.procedureName) // Extracting procedure names
-      )
-    }));
+    const transformedInstances = processInstances.map(pi => {
+      let totalProcedures = 0;
+      let completedProcedures = 0;
+      const procedureDetails = pi.sectionInstances.flatMap(section => {
+        let allCompleted = true;
+        const procedures = section.procedureInstances.map(proc => {
+          totalProcedures++;
+          const assignedCount = proc.rolesAssignedPeople.length;
+          const completedCount = proc.peopleMarkAsCompleted.length;
+          const isCompleted = assignedCount > 0 && completedCount === assignedCount;
+          if (!isCompleted || assignedCount === 0) {
+            allCompleted = false;
+          }
+          if (isCompleted) {
+            completedProcedures++;
+          }
+          return {
+            name: proc.procedureName,
+            startTime: proc.timeStart,
+            endTime: proc.timeEnd,
+            completed: isCompleted
+          };
+        });
+        section.isCompleted = allCompleted; // You may decide to include this in your response if needed
+        return procedures;
+      });
+
+      return {
+        processID: pi.processID,
+        processName: pi.processName,
+        description: pi.description,
+        patientFullName: pi.patient ? pi.patient.fullName : 'No patient',
+        procedures: procedureDetails,
+        totalProcedures: totalProcedures,
+        completedProcedures: completedProcedures
+      };
+    });
 
     res.json(transformedInstances);
   } catch (error) {
@@ -1717,6 +1829,7 @@ app.get("/processInstances", async (req, res) => {
     res.status(500).send('Internal server error');
   }
 });
+
 
 module.exports = {
   server,
