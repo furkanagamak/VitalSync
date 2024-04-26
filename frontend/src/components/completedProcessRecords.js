@@ -105,21 +105,20 @@ const ProcessTable = ({ searchText }) => {
         console.error('Failed to fetch processes:', error);
       }
     };
-  
+
     fetchProcesses();
   }, []);
 
   const filteredProcesses = useMemo(() => {
-    return processes.filter(process => {
-      const searchTerm = searchText.toLowerCase();
-      (process.patientFullName && process.patientFullName.toLowerCase().includes(searchText.toLowerCase())) ||
-      (process.description && process.description.toLowerCase().includes(searchText.toLowerCase())) ||
-      (process.processName && process.processName.toLowerCase().includes(searchText.toLowerCase()))
-    });
+    return processes.filter(process =>
+      process.patient.toLowerCase().includes(searchText) ||
+      process.description.toLowerCase().includes(searchText) ||
+      process.name.toLowerCase().includes(searchText)
+    );
   }, [processes, searchText]);
 
 
-  const data = useMemo(() => processes, [processes]);
+  const data = useMemo(() => filteredProcesses, [filteredProcesses]);
   
 
   const columns = React.useMemo(
