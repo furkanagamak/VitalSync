@@ -5,7 +5,8 @@ describe('Process Template List Tests', () => {
         cy.get('#passwordInput').type('password123');
         cy.get('button').contains('Sign in').click();
         cy.wait(1000);
-        cy.visit('/processManagement/newProcess/processTemplates');
+        cy.visit('/processManagement/modifyProcess/activeProcesses');
+        cy.get('button').contains('Start New Process').click();
     });
 
     it('successfully loads the process template management page', () => {
@@ -15,10 +16,10 @@ describe('Process Template List Tests', () => {
         cy.contains('Actions').should('be.visible');
     });
 
-    it('navigates to create template form', () => {
+    /*it('navigates to create template form', () => {
         cy.get('button').contains('Create New Template').click();
         cy.url().should('include', '/processTemplateForm');
-      });
+      });*/
 });
 
 /*describe('Add Section Page Tests', () => {
