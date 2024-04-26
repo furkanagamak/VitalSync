@@ -9,6 +9,8 @@ const ProcessInstance = require("./models/processInstance.js");
 const Patient = require("./models/patient.js");
 const Account = require("./models/account.js");
 const bcrypt = require("bcrypt");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const testProcessID = "AB12CD34";
 const testPwd = bcrypt.hashSync("123", 10);
@@ -150,8 +152,8 @@ const testProcedureInstance1 = new ProcedureInstance({
     },
   ],
   assignedResources: [testTherRoom._id],
-  timeStart: new Date("2024-04-26T10:00:00"),
-  timeEnd: new Date("2024-04-26T10:30:00"),
+  timeStart: new Date("2024-04-26T17:00:00"),
+  timeEnd: new Date("2024-04-26T17:30:00"),
   processID: testProcessID,
   sectionID: testSectionInstancePre._id,
 });
@@ -181,8 +183,8 @@ const testProcedureInstance2 = new ProcedureInstance({
     },
   ],
   assignedResources: [testUltraRoom._id],
-  timeStart: new Date("2024-04-26T11:00:00"),
-  timeEnd: new Date("2024-04-26T11:30:00"),
+  timeStart: new Date("2024-04-26T18:00:00"),
+  timeEnd: new Date("2024-04-26T18:30:00"),
   processID: testProcessID,
   sectionID: testSectionInstancePre._id,
 });
@@ -215,8 +217,8 @@ const testProcedureInstance3 = new ProcedureInstance({
     },
   ],
   assignedResources: [testAneRoom._id],
-  timeStart: new Date("2024-04-26T12:00:00"),
-  timeEnd: new Date("2024-04-26T12:30:00"),
+  timeStart: new Date("2024-04-26T19:00:00"),
+  timeEnd: new Date("2024-04-26T19:30:00"),
   processID: testProcessID,
   sectionID: testSectionInstanceIntra._id,
 });
@@ -236,8 +238,8 @@ const testProcedureInstance4 = new ProcedureInstance({
   ],
   peopleMarkAsCompleted: [],
   assignedResources: [testSurRoom._id],
-  timeStart: new Date("2024-04-26T13:00:00"),
-  timeEnd: new Date("2024-04-26T13:30:00"),
+  timeStart: new Date("2024-04-26T20:00:00"),
+  timeEnd: new Date("2024-04-26T20:30:00"),
   processID: testProcessID,
   sectionID: testSectionInstanceIntra._id,
 });
@@ -265,8 +267,8 @@ const testProcedureInstance5 = new ProcedureInstance({
   ],
   peopleMarkAsCompleted: [],
   assignedResources: [testTherRoom._id],
-  timeStart: new Date("2024-04-26T14:00:00"),
-  timeEnd: new Date("2024-04-26T14:30:00"),
+  timeStart: new Date("2024-04-26T21:00:00"),
+  timeEnd: new Date("2024-04-26T21:30:00"),
   processID: testProcessID,
   sectionID: testSectionInstancePost._id,
 });
@@ -420,7 +422,7 @@ const clearTestData = async () => {
   await ResourceInstance.deleteOne({
     uniqueIdentifier: testUltraRoom.uniqueIdentifier,
   });
-  await ResourceTemplate.deleteOne({ name: testUltraRoomTemplate.name });
+  //   await ResourceTemplate.deleteOne({ name: testUltraRoomTemplate.name });
   await ResourceTemplate.deleteOne({ name: testTherRoomTemplate.name });
 };
 
@@ -436,7 +438,7 @@ const addTestData = async () => {
   await testSurRoom.save();
   await testTherRoomTemplate.save();
   await testTherRoom.save();
-  await testUltraRoomTemplate.save();
+  // await testUltraRoomTemplate.save();
   await testUltraRoom.save();
   await testSectionInstancePre.save();
   await testSectionInstanceIntra.save();
@@ -459,7 +461,7 @@ const addTestData = async () => {
 async function addInstances() {
   try {
     // Connect to MongoDB
-    await mongoose.connect("mongodb://127.0.0.1:27017/test", {
+    await mongoose.connect(process.env.DEPLOYED_MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
