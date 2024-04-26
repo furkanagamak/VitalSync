@@ -44,9 +44,13 @@ const NotificationBox = () => {
     };
 
     socket?.on("procedure complete - refresh", handleNewNotification);
+    socket?.on("new chat message - refresh", handleNewNotification);
+    socket?.on("new process - refresh", handleNewNotification);
 
     return () => {
       socket?.off("procedure complete - refresh", handleNewNotification);
+      socket?.off("new chat message - refresh", handleNewNotification);
+      socket?.off("new process - refresh", handleNewNotification);
     };
   }, [user?.id, socket]);
 
@@ -81,7 +85,7 @@ const NotificationBoxItem = ({ notification }) => {
     CurrIcon = <IoMedkitOutline className="text-yellow-500 w-12 h-12" />;
   } else if (notification.type === "check") {
     CurrIcon = <FaRegCircleCheck className="text-green-500 w-12 h-12" />;
-  } else if (notification.type === "info") {
+  } else if (notification.type === "Chat Message") {
     CurrIcon = <CiCircleInfo className="text-blue-500 w-12 h-12" />;
   } else if (notification.type === "alert") {
     CurrIcon = <FiAlertTriangle className="text-red-500 w-8 h-12" />;

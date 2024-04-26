@@ -148,6 +148,38 @@ io.on("connection", async (socket) => {
     await newMessage.save();
     await process.save();
 
+    // Find all unique users associated with this process (excluding the message sender)
+    const procedureInstances = await ProcedureInstance.find({ processID: processID });
+    const usersSet = new Set();
+    for (let procedure of procedureInstances) {
+      for (let roleAssignment of procedure.rolesAssignedPeople) {
+        for (let account of roleAssignment.accounts) {
+          const accountId = account.toString();  // Convert ObjectId to string
+          if (accountId !== userId.toString()) { // Compare strings and exclude the sender
+            usersSet.add(accountId);
+          }
+        }
+      }
+    }
+
+    // Create and send a notification to each user
+    usersSet.forEach(async (accountId) => {
+      const notification = new Notification({
+        userId: accountId,
+        type: 'Chat Message',
+        title: 'Chat Message',
+        text: `${messageUser.firstName} ${messageUser.lastName} has sent a new message in the process ${process.processName} with the process ID ${processID}.`,
+        timeCreated: new Date(),
+      });
+      await notification.save();
+
+      const account = await Account.findById(accountId);
+      if (account) {
+        account.notificationBox.push(notification._id);
+        await account.save();
+      }
+    });
+
     io.to(processID).emit("new chat message - refresh");
   });
 
@@ -1889,8 +1921,93 @@ app.get("/users/:userId/notifications", async (req, res) => {
   }
 });
 
+
+app.get("/processInstancesActive", async (req, res) => {
+  try {
+    const processInstances = await ProcessInstance.find({})
+      .populate({
+        path: 'patient',
+        select: 'fullName'
+      })
+      .populate({
+        path: 'sectionInstances',
+        populate: {
+          path: 'procedureInstances',
+          model: 'ProcedureInstance',
+          populate: [
+            { path: "requiredResources", model: "ResourceTemplate" },
+            { path: "assignedResources", model: "ResourceInstance" },
+            { path: "rolesAssignedPeople", populate: { path: "role", model: "Role" }},
+            { path: "rolesAssignedPeople", populate: { path: "accounts", model: "Account" }},
+            { path: "peopleMarkAsCompleted", populate: { path: "role", model: "Role" }},
+            { path: "peopleMarkAsCompleted", populate: { path: "accounts", model: "Account" }}
+          ],
+          select: 'procedureName timeStart timeEnd'
+        }
+      })
+      .populate({
+        path: 'currentProcedure',
+        select: 'procedureName'  // Select only the necessary fields
+      });
+
+    const allInstances = processInstances.map(pi => {
+      let totalProcedures = 0;
+      let completedProcedures = 0;
+      let nextProcedure = null;
+      let foundCurrent = false;
+
+      for (const section of pi.sectionInstances) {
+        for (let i = 0; i < section.procedureInstances.length; i++) {
+          const proc = section.procedureInstances[i];
+          totalProcedures++;
+          const assignedCount = proc.rolesAssignedPeople.length;
+          const completedCount = proc.peopleMarkAsCompleted.length;
+          if (assignedCount > 0 && completedCount === assignedCount) {
+            completedProcedures++;
+          }
+          // Determine the next procedure after the current one
+          if (foundCurrent) {
+            nextProcedure = proc;
+            break;
+          }
+          if (pi.currentProcedure && proc._id.equals(pi.currentProcedure._id)) {
+            foundCurrent = true;
+            // Check if there's another procedure in the same section
+            if (i + 1 < section.procedureInstances.length) {
+              nextProcedure = section.procedureInstances[i + 1];
+              break;
+            }
+          }
+        }
+        if (nextProcedure) break;  // Break outer loop if next procedure is found
+      }
+
+      return {
+        objectID: pi._id,
+        processID: pi.processID,
+        processName: pi.processName,
+        description: pi.description,
+        patientFullName: pi.patient ? pi.patient.fullName : 'No patient',
+        procedures: pi.sectionInstances.flatMap(section => section.procedureInstances.map(proc => proc.procedureName)),
+        totalProcedures: totalProcedures,
+        completedProcedures: completedProcedures,
+        currentProcedure: pi.currentProcedure ? pi.currentProcedure.procedureName : 'Not Set',
+        nextProcedure: nextProcedure ? nextProcedure.procedureName : 'None'
+      };
+    });
+
+    res.json(allInstances);
+  } catch (error) {
+    console.error('Error fetching process instances:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+
 app.get("/chatMessages/:pid", messagesController.getChatMessagesByProcess);
+
 app.get("/processInstances", async (req, res) => {
+  //NOTE this is for records and filters for complete processes
   try {
     const processInstances = await ProcessInstance.find({})
       .populate({
@@ -2003,6 +2120,8 @@ app.post("/processInstances", async (req, res) => {
       currentProcedure: null,
     });
 
+    const allUserIds = new Set(); // To store unique user IDs
+
     // Create section and procedure instances
     for (const section of req.body.fetchedSections) {
       const sectionInstance = new SectionInstance({
@@ -2035,6 +2154,11 @@ app.post("/processInstances", async (req, res) => {
         });
         await procedureInstance.save();
         sectionInstance.procedureInstances.push(procedureInstance._id);
+
+        // Collect unique user IDs
+        procedure.roles.forEach(role => {
+          allUserIds.add(role.account);
+        });
         if (!processInstance.currentProcedure) {
           processInstance.currentProcedure = procedureInstance._id;
         }
@@ -2082,6 +2206,33 @@ app.post("/processInstances", async (req, res) => {
     }
 
     await processInstance.save();
+
+
+    console.log(allUserIds);
+
+    // Send notifications to all unique users
+    const notificationDetails = {
+      type: 'action',
+      title: 'New Assigned Process',
+      text: 'You have been added to a new process ' + processInstance.processName + ' and process ID ' + processInstance.processID + '. Please check your assigned processes for more details.',
+      timeCreated: new Date()
+    };
+
+    allUserIds.forEach(async userId => {
+      const notification = new Notification({
+        userId,
+        ...notificationDetails
+      });
+      await notification.save();
+
+      // Update user's notification box
+      await Account.updateOne({ _id: userId }, {
+        $push: { notificationBox: notification._id }
+      });
+    });
+
+    io.sockets.emit("new process - refresh");
+
     res.status(201).send(processInstance);
   } catch (error) {
     res
