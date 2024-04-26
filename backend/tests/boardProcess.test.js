@@ -460,7 +460,7 @@ const addTestData = async () => {
   await testProcess2.save();
 };
 
-describe("POST /resources for creating resources", () => {
+describe("GET /boardProcesses", () => {
   // Dummy account credentials
   const dummyStaffEmail = "staff@example.com";
   const dummyStaffPassword = "staffPassword123";

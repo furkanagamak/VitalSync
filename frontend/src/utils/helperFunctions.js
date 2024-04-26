@@ -68,3 +68,25 @@ export function calculateTimeUntilDate(targetDate) {
     return `in ${minutes} minutes`;
   }
 }
+
+export function UTCToEastern(utcDateString) {
+  const utcDate = new Date(utcDateString);
+
+  // Extract date components
+  const year = utcDate.getUTCFullYear();
+  const month = utcDate.getUTCMonth();
+  const day = utcDate.getUTCDate();
+  const hours = utcDate.getUTCHours();
+  const minutes = utcDate.getUTCMinutes();
+  const seconds = utcDate.getUTCSeconds();
+
+  // Create a new date object with the components in Eastern Time
+  const easternDate = new Date(
+    Date.UTC(year, month, day, hours, minutes, seconds)
+  );
+  const easternTimeString = easternDate.toLocaleString("en-US", {
+    timeZone: "America/New_York",
+  });
+
+  return easternTimeString;
+}

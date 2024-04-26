@@ -36,6 +36,7 @@ const ProcedureInstance = require("./models/procedureInstance.js");
 const Patient = require("./models/patient.js");
 const Notification = require("./models/notification.js");
 dotenv.config();
+const Message = require("./models/message.js");
 
 const bucketName = process.env.BUCKET_NAME;
 const bucketRegion = process.env.BUCKET_REGION;
@@ -46,6 +47,7 @@ const s3 = new S3Client({
 });
 
 const resourceController = require("./controllers/ResourceController.js");
+const messagesController = require("./controllers/MessagesController.js");
 
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -125,6 +127,28 @@ io.on("connection", async (socket) => {
       socket.join(process.processID);
       console.log(`socket ${socket.id} joined room: ${process.processID}`);
     });
+  });
+
+  socket.on("chatMessage", async (userId, text, processID) => {
+    // checks for valid userId and processID
+    const messageUser = await Account.findOne({ _id: userId });
+    if (!messageUser)
+      throw new Error(`User ${UserId} sending message does not exists`);
+    const process = await ProcessInstance.findOne({ processID: processID });
+    if (!process) throw new Error(`Process ${processID} does not exists`);
+
+    // creates new message and add them to message history
+    const newMessage = await Message({
+      userId: messageUser._id,
+      text: text,
+      timeCreated: new Date(),
+    });
+    process.messageHistory.push(newMessage._id);
+
+    await newMessage.save();
+    await process.save();
+
+    io.to(processID).emit("new chat message - refresh");
   });
 
   socket.on("test", () => {
@@ -1805,6 +1829,8 @@ app.get("/users/:userId/notifications", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+app.get("/chatMessages/:pid", messagesController.getChatMessagesByProcess);
 
 module.exports = {
   server,

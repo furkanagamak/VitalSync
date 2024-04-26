@@ -15,6 +15,7 @@ const ProcessDetails = () => {
   const [process, setProcess] = useState(null);
   const [refreshTick, setRefreshTick] = useState(false);
   const { socket } = useSocketContext();
+  const { user } = useAuth();
 
   const triggerRefresh = () => {
     setRefreshTick((refreshTick) => !refreshTick);
@@ -42,7 +43,7 @@ const ProcessDetails = () => {
     });
   }, [socket]);
 
-  if (!process) return <div>Loading ...</div>;
+  if (!process || !user) return <div>Loading ...</div>;
   return (
     <div className="w-11/12 mx-auto">
       <section className="flex justify-between text-primary text-3xl my-4">
@@ -84,7 +85,7 @@ const ProcessDetails = () => {
             </div>
           </section>
           <section className="md:w-1/2">
-            <ProcessChat />
+            <ProcessChat id={id} />
           </section>
         </section>
         <section className="space-y-4">
