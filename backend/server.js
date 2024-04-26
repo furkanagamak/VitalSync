@@ -34,6 +34,7 @@ const ProcessInstance = require("./models/processInstance.js");
 const SectionInstance = require("./models/sectionInstance.js");
 const ProcedureInstance = require("./models/procedureInstance.js");
 const Patient = require("./models/patient.js");
+const Notification = require("./models/notification.js");
 dotenv.config();
 
 const bucketName = process.env.BUCKET_NAME;
