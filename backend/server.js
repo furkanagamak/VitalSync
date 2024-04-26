@@ -1853,7 +1853,89 @@ app.get("/users/:userId/notifications", async (req, res) => {
   }
 });
 
+app.get("/processInstancesActive", async (req, res) => {
+  try {
+    const processInstances = await ProcessInstance.find({})
+      .populate({
+        path: 'patient',
+        select: 'fullName'
+      })
+      .populate({
+        path: 'sectionInstances',
+        populate: {
+          path: 'procedureInstances',
+          model: 'ProcedureInstance',
+          populate: [
+            { path: "requiredResources", model: "ResourceTemplate" },
+            { path: "assignedResources", model: "ResourceInstance" },
+            { path: "rolesAssignedPeople", populate: { path: "role", model: "Role" }},
+            { path: "rolesAssignedPeople", populate: { path: "accounts", model: "Account" }},
+            { path: "peopleMarkAsCompleted", populate: { path: "role", model: "Role" }},
+            { path: "peopleMarkAsCompleted", populate: { path: "accounts", model: "Account" }}
+          ],
+          select: 'procedureName timeStart timeEnd'
+        }
+      })
+      .populate({
+        path: 'currentProcedure',
+        select: 'procedureName'  // Select only the necessary fields
+      });
+
+    const allInstances = processInstances.map(pi => {
+      let totalProcedures = 0;
+      let completedProcedures = 0;
+      let nextProcedure = null;
+      let foundCurrent = false;
+
+      for (const section of pi.sectionInstances) {
+        for (let i = 0; i < section.procedureInstances.length; i++) {
+          const proc = section.procedureInstances[i];
+          totalProcedures++;
+          const assignedCount = proc.rolesAssignedPeople.length;
+          const completedCount = proc.peopleMarkAsCompleted.length;
+          if (assignedCount > 0 && completedCount === assignedCount) {
+            completedProcedures++;
+          }
+          // Determine the next procedure after the current one
+          if (foundCurrent) {
+            nextProcedure = proc;
+            break;
+          }
+          if (pi.currentProcedure && proc._id.equals(pi.currentProcedure._id)) {
+            foundCurrent = true;
+            // Check if there's another procedure in the same section
+            if (i + 1 < section.procedureInstances.length) {
+              nextProcedure = section.procedureInstances[i + 1];
+              break;
+            }
+          }
+        }
+        if (nextProcedure) break;  // Break outer loop if next procedure is found
+      }
+
+      return {
+        objectID: pi._id,
+        processID: pi.processID,
+        processName: pi.processName,
+        description: pi.description,
+        patientFullName: pi.patient ? pi.patient.fullName : 'No patient',
+        procedures: pi.sectionInstances.flatMap(section => section.procedureInstances.map(proc => proc.procedureName)),
+        totalProcedures: totalProcedures,
+        completedProcedures: completedProcedures,
+        currentProcedure: pi.currentProcedure ? pi.currentProcedure.procedureName : 'Not Set',
+        nextProcedure: nextProcedure ? nextProcedure.procedureName : 'None'
+      };
+    });
+
+    res.json(allInstances);
+  } catch (error) {
+    console.error('Error fetching process instances:', error);
+    res.status(500).send('Internal server error');
+  }
+});
+
 app.get("/processInstances", async (req, res) => {
+  //NOTE this is for records and filters for complete processes
   try {
     const processInstances = await ProcessInstance.find({})
       .populate({
