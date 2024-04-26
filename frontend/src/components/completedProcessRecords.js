@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect,useState, useMemo } from "react";
 import { useTable, useSortBy, usePagination } from "react-table";
 import { TbLayoutGridAdd } from "react-icons/tb";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 const notify = () => toast.success("Process Template Deleted!");
 
@@ -81,66 +82,31 @@ const CreateTemplateButton = () => {
 };
 
 const ProcessTable = () => {
-  const data = React.useMemo(
-    () => [
-      {
-        patient: "Abigail Hobbs",
-        id: "13941",
-        name: "Appendectomy",
-        description:
-          "The standard process for performing an appendectomy, which is the surgical removal of the appendix.",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Appendix Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        patient: "Bradley Johnson",
-        id: "12482",
-        name: "Cholecystectomy",
-        description:
-          "The standard process for performing a cholecystectomy, which is the surgical removal of the gallbladder.",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Gallbladder Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        patient: "John Doe",
-        id: "19321",
-        name: "Hysterectomy",
-        description:
-          "The standard process for performing a hysterectomy, which is the surgical removal of the uterus.",
-        sections: "Preoperative, Intraoperative, Postoperative",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Uterus Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        patient: "Ashton Smith",
-        id: "15234",
-        name: "Laminectomy",
-        description:
-          "The standard process for performing a laminectomy, which is the surgical removal of the lamina.",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Lamina Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        patient: "John Proctor",
-        id: "14837",
-        name: "Mastectomy",
-        description:
-          "The standard process for performing a mastectomy, which is the surgical removal of the breast.",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Breast Removal, Pain Management, Postoperative Monitoring",
-      },
-      {
-        patient: "Ana Wiseman",
-        id: "10093",
-        name: "Nephrectomy",
-        description:
-          "The standard process for performing a nephrectomy, which is the surgical removal of the kidney.",
-        procedures:
-          "Fasting, IV Access, General Anesthesia, Kidney Removal, Pain Management, Postoperative Monitoring",
-      },
-    ],
-    []
-  );
+  const [processes, setProcesses] = useState([]);
+
+  useEffect(() => {
+    const fetchProcesses = async () => {
+      try {
+        const response = await axios.get('/processInstances');
+        setProcesses(response.data.filter(process => 
+          process.procedures.every(proc => proc.completed) // Check if every procedure in a process is completed
+        ).map(process => ({
+          id: process.processID,
+          patient: process.patientFullName, // Ensure these names match the response object's keys
+          description: process.description,
+          name: process.processName,
+          procedures: process.procedures
+        })));
+      } catch (error) {
+        console.error('Failed to fetch processes:', error);
+      }
+    };
+
+    fetchProcesses();
+  }, []);
+
+
+  const data = useMemo(() => processes, [processes]);
 
   const columns = React.useMemo(
     () => [
@@ -173,9 +139,8 @@ const ProcessTable = () => {
         Header: "Actions",
         Cell: ({ row }) => {
           const navigate = useNavigate();
-
           const handleEditClick = () => {
-            navigate("/recordProcess");
+            navigate(`/boardProcess/${row.values.id}`);
           };
 
           return (

@@ -1831,6 +1831,101 @@ app.get("/users/:userId/notifications", async (req, res) => {
 });
 
 app.get("/chatMessages/:pid", messagesController.getChatMessagesByProcess);
+app.get("/processInstances", async (req, res) => {
+  try {
+    const processInstances = await ProcessInstance.find({})
+      .populate({
+        path: "patient",
+        select: "fullName", // Fetch patient full name
+      })
+      .populate({
+        path: "sectionInstances",
+        populate: {
+          path: "procedureInstances",
+          model: "ProcedureInstance",
+          populate: [
+            { path: "requiredResources", model: "ResourceTemplate" },
+            { path: "assignedResources", model: "ResourceInstance" },
+            {
+              path: "rolesAssignedPeople",
+              populate: {
+                path: "role",
+                model: "Role",
+              },
+            },
+            {
+              path: "rolesAssignedPeople",
+              populate: {
+                path: "accounts",
+                model: "Account",
+              },
+            },
+            {
+              path: "peopleMarkAsCompleted",
+              populate: {
+                path: "role",
+                model: "Role",
+              },
+            },
+            {
+              path: "peopleMarkAsCompleted",
+              populate: {
+                path: "accounts",
+                model: "Account",
+              },
+            },
+          ],
+          select: "procedureName timeStart timeEnd", // Customize this select based on the data needed
+        },
+      });
+
+    const transformedInstances = processInstances.map((pi) => {
+      let totalProcedures = 0;
+      let completedProcedures = 0;
+      const procedureDetails = pi.sectionInstances.flatMap((section) => {
+        let allCompleted = true;
+        const procedures = section.procedureInstances.map((proc) => {
+          totalProcedures++;
+          const assignedCount = proc.rolesAssignedPeople.length;
+          const completedCount = proc.peopleMarkAsCompleted.length;
+          const isCompleted =
+            assignedCount > 0 && completedCount === assignedCount;
+          if (!isCompleted || assignedCount === 0) {
+            allCompleted = false;
+          }
+          if (isCompleted) {
+            completedProcedures++;
+          }
+          return {
+            name: proc.procedureName,
+            startTime: proc.timeStart,
+            endTime: proc.timeEnd,
+            completed: isCompleted,
+          };
+        });
+        section.isCompleted = allCompleted; // You may decide to include this in your response if needed
+        return procedures;
+      });
+
+      return {
+        processID: pi.processID,
+        processName: pi.processName,
+        description: pi.description,
+        patientFullName: pi.patient ? pi.patient.fullName : "No patient",
+        procedures: pi.sectionInstances.flatMap((section) =>
+          section.procedureInstances.map((proc) => proc.procedureName)
+        ),
+        totalProcedures: totalProcedures,
+        completedProcedures: completedProcedures,
+      };
+    });
+
+    res.json(transformedInstances);
+  } catch (error) {
+    console.error("Error fetching process instances:", error);
+    res.status(500).send("Internal server error");
+  }
+});
 
 module.exports = {
   server,
