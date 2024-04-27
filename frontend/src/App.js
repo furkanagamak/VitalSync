@@ -19,7 +19,7 @@ import ContainedProcedureTemplateList from "./components/processManagement/conta
 import ContainedCreateProcedureTemplateForm from "./components/processManagement/containedNewProcedure.js";
 import CreateProcessForm from "./components/processManagement/containedProcessForm.js";
 import ContainedProcessModify from "./components/processManagement/containedProcessModify.js";
-import ProcessTable from "./components/processManagement/processTable.js";
+//import ProcessTable from "./components/processManagement/processTable.js";
 
 //Starting new processes
 import PatientInformationForm from "./components/processManagement/patientForm.js";
@@ -30,6 +30,8 @@ import PendingNewStaff from "./components/processManagement/createProcessPending
 import CreateReviewStaffAssignments from "./components/processManagement/createProcessReviewStaff.js";
 import CreateReviewResourceAssignments from "./components/processManagement/createProcessReviewResources.js";
 import ProcessDetailsPreview from "./components/processManagement/previewProcess.js";
+import ProcessStartTime from "./components/processManagement/processStartTime.js"
+
 
 //Modifying process instances
 import ActiveProcessesList from "./components/processManagement/activeProcessesList.js";
@@ -67,6 +69,9 @@ import ModifySectionForm from "./components/modifySection.js";
 
 import { AuthProvider } from "./providers/authProvider.js";
 import { SocketContextProvider } from "./providers/SocketProvider";
+import { ProcessCreationProvider } from "./providers/ProcessCreationProvider";
+
+
 
 const notify = () => toast("Here is your toast.");
 
@@ -77,6 +82,7 @@ function App() {
       <SocketContextProvider>
         <BrowserRouter>
           <AuthProvider>
+          <ProcessCreationProvider>
             <Routes>
               <Route path="/" element={<Login />} />
               <Route path="/RecoveryPage" element={<RecoveryPage />} />
@@ -95,108 +101,40 @@ function App() {
               <Route path="/processDetails/:id" element={<ProcessDetails />} />
 
               <Route
-                path="/processManagement"
-                element={<ProcessManagementContainer />}
+              path="/processManagement"
+              element={<ProcessManagementContainer />}
               >
-                <Route
-                  index
-                  element={
-                    <Navigate replace to="modifyProcess/activeProcesses" />
-                  }
-                />
-                <Route
-                  path="modifyProcess/landing"
-                  element={<ModifyProcessLanding />}
-                />
-                <Route
-                  path="modifyProcess/addSection"
-                  element={<ContainedNewSection />}
-                />
-                <Route
-                  path="modifyProcess/addProcedure"
-                  element={<ContainedProcedureTemplateList />}
-                />
-                <Route
-                  path="modifyProcess/modifyProcedure"
-                  element={<ContainedCreateProcedureTemplateForm />}
-                />
-                <Route
-                  path="modifyProcess/staffAssignments"
-                  element={<ModifyStaffAssignments />}
-                />
-                <Route
-                  path="modifyProcess/resourceAssignments"
-                  element={<ModifyResourceAssignments />}
-                />
-                <Route
-                  path="modifyProcess/pendingStaffAssignments"
-                  element={<PendingStaffModify />}
-                />
-                <Route
-                  path="modifyProcess/pendingResourceAssignments"
-                  element={<PendingResourceModify />}
-                />
-                <Route
-                  path="modifyProcess/reviewStaffAssignments"
-                  element={<ReviewStaffAssignments />}
-                />
-                <Route
-                  path="modifyProcess/reviewResourceAssignments"
-                  element={<ReviewResourceAssignments />}
-                />
-                <Route
-                  path="modifyProcess/activeProcesses"
-                  element={<ActiveProcessesList />}
-                />
-                <Route
-                  path="newProcess/processTemplates"
-                  element={<ProcessTable />}
-                />
-                <Route
-                  path="newProcess/processTemplateForm"
-                  element={<CreateProcessForm />}
-                />
-                <Route
-                  path="newProcess/processTemplateModifyForm"
-                  element={<ContainedProcessModify />}
-                />
-                <Route
-                  path="newProcess/addSection"
-                  element={<ContainedNewSection />}
-                />
-                <Route
-                  path="newProcess/patientForm"
-                  element={<PatientInformationForm />}
-                />
-                <Route
-                  path="newProcess/staffAssignments"
-                  element={<CreateStaffAssignments />}
-                />
-                <Route
-                  path="newProcess/resourceAssignments"
-                  element={<CreateResourceAssignments />}
-                />
-                <Route
-                  path="newProcess/pendingStaffAssignments"
-                  element={<PendingNewStaff />}
-                />
-                <Route
-                  path="newProcess/pendingResourceAssignments"
-                  element={<PendingNewResources />}
-                />
-                <Route
-                  path="newProcess/reviewStaffAssignments"
-                  element={<CreateReviewStaffAssignments />}
-                />
-                <Route
-                  path="newProcess/reviewResourceAssignments"
-                  element={<CreateReviewResourceAssignments />}
-                />
-                <Route
-                  path="newProcess/preview"
-                  element={<ProcessDetailsPreview />}
-                />
-              </Route>
+              <Route
+                index
+                element={
+                  <Navigate replace to="modifyProcess/activeProcesses" />
+                }
+              />
+              <Route path="modifyProcess/landing" element={<ModifyProcessLanding />}/>
+              <Route path="modifyProcess/addSection" element={<ContainedNewSection />}/>
+              <Route path="modifyProcess/addProcedure" element={<ContainedProcedureTemplateList />}/>
+              <Route path="modifyProcess/modifyProcedure" element={<ContainedCreateProcedureTemplateForm />}/>
+              <Route path="modifyProcess/staffAssignments" element={<ModifyStaffAssignments />} />
+              <Route path="modifyProcess/resourceAssignments"  element={<ModifyResourceAssignments />} />
+              <Route path="modifyProcess/pendingStaffAssignments" element={<PendingStaffModify />} />
+              <Route path="modifyProcess/pendingResourceAssignments" element={<PendingResourceModify />} />
+              <Route path="modifyProcess/reviewStaffAssignments" element={<ReviewStaffAssignments />}/>
+              <Route path="modifyProcess/reviewResourceAssignments" element={<ReviewResourceAssignments />}/>
+              <Route path="modifyProcess/activeProcesses" element={<ActiveProcessesList />}/>
+              <Route path="newProcess/processTemplates" element={<ProcessTemplateManagement />}/>
+              <Route path="newProcess/processTemplateForm" element={<CreateProcessForm />} />
+              <Route path="newProcess/processTemplateModifyForm" element={<ContainedProcessModify />}/>
+              <Route path="newProcess/addSection" element={<ContainedNewSection />} />
+              <Route path="newProcess/patientForm" element={<PatientInformationForm />}/>
+              <Route path="newProcess/startTime" element={<ProcessStartTime />}/>
+              <Route path="newProcess/staffAssignments" element={<CreateStaffAssignments />}/>
+              <Route path="newProcess/resourceAssignments" element={<CreateResourceAssignments />}/>              
+              <Route path="newProcess/pendingStaffAssignments" element={<PendingNewStaff />}/>
+              <Route path="newProcess/pendingResourceAssignments" element={<PendingNewResources />}/>
+              <Route path="newProcess/reviewStaffAssignments" element={<CreateReviewStaffAssignments />}/>
+              <Route path="newProcess/reviewResourceAssignments" element={<CreateReviewResourceAssignments />}/>
+              <Route path="newProcess/preview" element={<ProcessDetailsPreview />}/>
+            </Route>
 
               <Route
                 path="/recordLookup"
@@ -235,6 +173,7 @@ function App() {
                 element={<ModifySectionForm />}
               />
             </Routes>
+          </ProcessCreationProvider>
           </AuthProvider>
         </BrowserRouter>
       </SocketContextProvider>

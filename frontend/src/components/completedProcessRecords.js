@@ -153,7 +153,7 @@ const ProcessTable = ({ searchText }) => {
         Cell: ({ row }) => {
           const navigate = useNavigate();
           const handleEditClick = () => {
-            navigate(`/boardProcess/${row.values.id}`);
+            navigate(`/processDetails/${row.values.id}`);
           };
 
           return (

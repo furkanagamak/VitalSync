@@ -46,9 +46,13 @@ const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
     };
 
     socket?.on("procedure complete - refresh", handleNewNotification);
+    socket?.on("new chat message - refresh", handleNewNotification);
+    socket?.on("new process - refresh", handleNewNotification);
 
     return () => {
       socket?.off("procedure complete - refresh", handleNewNotification);
+      socket?.off("new chat message - refresh", handleNewNotification);
+      socket?.off("new process - refresh", handleNewNotification);
     };
   }, [user?.id, socket]);
 
@@ -62,12 +66,15 @@ const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
               <NotificationDDItem
                 key={notification._id}
                 notification={notification}
+                closeDropDown={closeDropDown}
               />
             );
           else return null;
         })
       ) : (
-        <div className="text-2xl text-center my-20 text-black">No new notifications.</div>
+        <div className="text-2xl text-center my-20 text-black">
+          No new notifications.
+        </div>
       )}
       <Link
         to="/notifications"
@@ -81,7 +88,7 @@ const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
   );
 };
 
-const NotificationDDItem = ({ notification }) => {
+const NotificationDDItem = ({ notification, closeDropDown }) => {
   let CurrIcon = null;
 
   // Determine which icon component to use based on the notification type
@@ -89,26 +96,29 @@ const NotificationDDItem = ({ notification }) => {
     CurrIcon = <IoMedkitOutline className="text-yellow-500 w-8 h-8 m-auto" />;
   } else if (notification.type === "check") {
     CurrIcon = <FaRegCircleCheck className="text-green-500 w-8 h-8 m-auto" />;
-  } else if (notification.type === "info") {
+  } else if (notification.type === "Chat Message") {
     CurrIcon = <CiCircleInfo className="text-blue-500 w-8 h-8 m-auto" />;
   } else if (notification.type === "alert") {
     CurrIcon = <FiAlertTriangle className="text-red-500 w-8 h-8 m-auto" />;
   }
   const firstSentence = notification.text.split(".")[0];
+  const processId = notification.processID;
 
   return (
-    <div className="bg-primary text-white p-4 space-y-4">
-      <section className="grid grid-cols-5">
-        {CurrIcon}
-        <h1 className="col-start-2 col-end-5 mx-auto text-xl">
-          {notification.title}
-        </h1>
-      </section>
-      <section>
-        <p>{firstSentence + "."}</p>
-      </section>
-      <p className="flex justify-end">{timeAgo(notification.timeCreated)}</p>
-    </div>
+    <Link to={`/processDetails/${processId}`} onClick={closeDropDown} className="no-underline">
+      <div className="bg-primary text-white p-4 space-y-4">
+        <section className="grid grid-cols-5">
+          {CurrIcon}
+          <h1 className="col-start-2 col-end-5 mx-auto text-xl">
+            {notification.title}
+          </h1>
+        </section>
+        <section>
+          <p>{firstSentence + "."}</p>
+        </section>
+        <p className="flex justify-end">{timeAgo(notification.timeCreated)}</p>
+      </div>
+    </Link>
   );
 };
 

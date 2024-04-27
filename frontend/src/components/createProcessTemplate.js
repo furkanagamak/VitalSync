@@ -23,6 +23,8 @@ import toast, { Toaster } from "react-hot-toast";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from 'axios';
 import { debounce } from 'lodash';
+import { useProcessCreation } from '../providers/ProcessCreationProvider';
+
 
 
 
@@ -53,7 +55,7 @@ const GoBackButton = () => {
   const navigate = useNavigate();
 
   const handleGoBackClick = () => {
-    navigate("/ProcessTemplateManagement");
+    navigate(-1);
   };
 
   return (
@@ -534,8 +536,9 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
 };
 
 const CreateProcessTemplateForm = () => {
-
   const navigate = useNavigate();
+  const location = useLocation();
+
 
   const [process, setProcess] = useState({
     name: "",
@@ -543,6 +546,18 @@ const CreateProcessTemplateForm = () => {
     sections: []
   });
   const [sections, setSections] = useState([]);
+  const [incomingUrl, setIncomingUrl] = useState("");
+
+  const { updateProcessTemplate, currentlyCreatingTemplate, setCurrentlyCreatingTemplate } = useProcessCreation();
+
+  useEffect(() => {
+    if (location.state && location.state.incomingUrl) {
+      console.log(location.state.incomingUrl);
+
+      setIncomingUrl(location.state.incomingUrl);
+      setCurrentlyCreatingTemplate(true);
+    }
+  }, [location.state]);
 
   const handleSaveState = () => {
     const stateToSave = { process, sections };
@@ -587,7 +602,11 @@ const CreateProcessTemplateForm = () => {
           procedureTemplates: section.procedureTemplates.map(p => p._id || p) 
       }))
   };
-
+    if(currentlyCreatingTemplate){
+      updateProcessTemplate(procData);
+      navigate("/processManagement/newProcess/patientForm");
+    }
+    else{
     try {
       const response = await axios.post("/processTemplates", procData);
       console.log("Template Created:", response.data);
@@ -604,6 +623,7 @@ const CreateProcessTemplateForm = () => {
       toast.error(
         "Failed to create process template"
       );
+    }
     }
   };
 

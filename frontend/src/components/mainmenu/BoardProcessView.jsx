@@ -80,7 +80,7 @@ const BoardProcessView = () => {
           currentProcedure={process.currentProcedure}
         />
       )}
-      {boardProcessPage === "chat" && <BoardProcessChat />}
+      {boardProcessPage === "chat" && <BoardProcessChat id={id} />}
     </div>
   );
 };
@@ -244,10 +244,10 @@ const Procedure = ({ procedure, currUser, currentProcedure }) => {
   );
 };
 
-const BoardProcessChat = () => {
+const BoardProcessChat = ({ id }) => {
   return (
     <div className="p-8 w-3/4 mx-auto" id="boardProcessChat">
-      <ProcessChat />
+      <ProcessChat id={id} />
     </div>
   );
 };

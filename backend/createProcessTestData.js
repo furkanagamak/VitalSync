@@ -1,20 +1,16 @@
-const {
-  server: app,
-  initializePredefinedAccounts,
-  removePredefinedAccounts,
-} = require("../server.js");
-const request = require("supertest");
-const fs = require("fs");
 const mongoose = require("mongoose");
-const Role = require("../models/role.js");
-const ResourceInstance = require("../models/resourceInstance.js");
-const ResourceTemplate = require("../models/resourceTemplate.js");
-const ProcedureInstance = require("../models/procedureInstance.js");
-const SectionInstance = require("../models/sectionInstance.js");
-const ProcessInstance = require("../models/processInstance.js");
-const Patient = require("../models/patient.js");
-const Account = require("../models/account.js");
+
+const Role = require("./models/role.js");
+const ResourceInstance = require("./models/resourceInstance.js");
+const ResourceTemplate = require("./models/resourceTemplate.js");
+const ProcedureInstance = require("./models/procedureInstance.js");
+const SectionInstance = require("./models/sectionInstance.js");
+const ProcessInstance = require("./models/processInstance.js");
+const Patient = require("./models/patient.js");
+const Account = require("./models/account.js");
 const bcrypt = require("bcrypt");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const testProcessID = "AB12CD34";
 const testPwd = bcrypt.hashSync("123", 10);
@@ -67,7 +63,7 @@ const testPatient = new Patient({
   zip: 54321,
   dob: new Date("1985-05-15"),
   sex: "Female",
-  phone: "155-121-2322",
+  phone: "444-323-3456",
   emergencyContacts: [
     {
       name: "Bob Johnson",
@@ -80,7 +76,7 @@ const testPatient = new Patient({
       phone: "555-333-4444",
     },
   ],
-  knownConditions: "Asthma , Heart disease",
+  knownConditions: "Asthma, Heart disease",
   allergies: "Shellfish, Pollen",
 });
 
@@ -156,8 +152,8 @@ const testProcedureInstance1 = new ProcedureInstance({
     },
   ],
   assignedResources: [testTherRoom._id],
-  timeStart: new Date("2024-04-26T10:00:00"),
-  timeEnd: new Date("2024-04-26T10:30:00"),
+  timeStart: new Date("2024-04-26T17:00:00"),
+  timeEnd: new Date("2024-04-26T17:30:00"),
   processID: testProcessID,
   sectionID: testSectionInstancePre._id,
 });
@@ -187,8 +183,8 @@ const testProcedureInstance2 = new ProcedureInstance({
     },
   ],
   assignedResources: [testUltraRoom._id],
-  timeStart: new Date("2024-04-26T11:00:00"),
-  timeEnd: new Date("2024-04-26T11:30:00"),
+  timeStart: new Date("2024-04-26T18:00:00"),
+  timeEnd: new Date("2024-04-26T18:30:00"),
   processID: testProcessID,
   sectionID: testSectionInstancePre._id,
 });
@@ -221,8 +217,8 @@ const testProcedureInstance3 = new ProcedureInstance({
     },
   ],
   assignedResources: [testAneRoom._id],
-  timeStart: new Date("2024-04-26T12:00:00"),
-  timeEnd: new Date("2024-04-26T12:30:00"),
+  timeStart: new Date("2024-04-26T19:00:00"),
+  timeEnd: new Date("2024-04-26T19:30:00"),
   processID: testProcessID,
   sectionID: testSectionInstanceIntra._id,
 });
@@ -242,8 +238,8 @@ const testProcedureInstance4 = new ProcedureInstance({
   ],
   peopleMarkAsCompleted: [],
   assignedResources: [testSurRoom._id],
-  timeStart: new Date("2024-04-26T13:00:00"),
-  timeEnd: new Date("2024-04-26T13:30:00"),
+  timeStart: new Date("2024-04-26T20:00:00"),
+  timeEnd: new Date("2024-04-26T20:30:00"),
   processID: testProcessID,
   sectionID: testSectionInstanceIntra._id,
 });
@@ -271,8 +267,8 @@ const testProcedureInstance5 = new ProcedureInstance({
   ],
   peopleMarkAsCompleted: [],
   assignedResources: [testTherRoom._id],
-  timeStart: new Date("2024-04-26T14:00:00"),
-  timeEnd: new Date("2024-04-26T14:30:00"),
+  timeStart: new Date("2024-04-26T21:00:00"),
+  timeEnd: new Date("2024-04-26T21:30:00"),
   processID: testProcessID,
   sectionID: testSectionInstancePost._id,
 });
@@ -312,7 +308,7 @@ const testPatient2 = new Patient({
   zip: 12345,
   dob: new Date("1978-10-20"),
   sex: "Male",
-  phone: "585-134-4267",
+  phone: "434-313-3441",
   emergencyContacts: [
     {
       name: "Jane Smith",
@@ -325,7 +321,7 @@ const testPatient2 = new Patient({
       phone: "555-789-0123",
     },
   ],
-  knownConditions: "Diabetes, Hypertension",
+  knownConditions: "Diabetes ,Hypertension",
   allergies: "Penicillin, Bee stings",
 });
 
@@ -426,7 +422,7 @@ const clearTestData = async () => {
   await ResourceInstance.deleteOne({
     uniqueIdentifier: testUltraRoom.uniqueIdentifier,
   });
-  await ResourceTemplate.deleteOne({ name: testUltraRoomTemplate.name });
+  //   await ResourceTemplate.deleteOne({ name: testUltraRoomTemplate.name });
   await ResourceTemplate.deleteOne({ name: testTherRoomTemplate.name });
 };
 
@@ -442,7 +438,7 @@ const addTestData = async () => {
   await testSurRoom.save();
   await testTherRoomTemplate.save();
   await testTherRoom.save();
-  await testUltraRoomTemplate.save();
+  // await testUltraRoomTemplate.save();
   await testUltraRoom.save();
   await testSectionInstancePre.save();
   await testSectionInstanceIntra.save();
@@ -462,109 +458,21 @@ const addTestData = async () => {
   await testProcess2.save();
 };
 
-describe("GET /boardProcesses", () => {
-  // Dummy account credentials
-  const dummyStaffEmail = "staff@example.com";
-  const dummyStaffPassword = "staffPassword123";
-  const dummyAdminEmail = "hospitaladmin@example.com";
-  const dummyAdminPassword = "hospitalAdminPassword123";
-  let server;
-  let uids;
-
-  // create dummy accounts
-  beforeAll(async () => {
-    server = app.listen(5001);
-    uids = await initializePredefinedAccounts();
-
-    // comment this function call and the same function call in afterAll to persist the test data
-    await clearTestData();
-
-    await addTestData();
-  });
-
-  it("unauthorized requests should be rejected", async () => {
-    // not signing in and attempt to create resource
-    const unauthorizedRes = await request(app).get(`/assignedProcesses`);
-    expect(unauthorizedRes.status).toEqual(401);
-    expect(unauthorizedRes.text).toEqual("User not logged in");
-  });
-
-  it("View test board process 1", async () => {
-    const loginRes = await request(app).post(`/login`).withCredentials().send({
-      email: "johndoe@gmail.com",
-      password: "123",
+async function addInstances() {
+  try {
+    // Connect to MongoDB
+    await mongoose.connect(process.env.DEPLOYED_MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     });
-    const accountId = loginRes.headers["set-cookie"][0]
-      .split(";")[0]
-      .split("=")[1];
-    const testBoardProcess1Res = await request(app)
-      .get(`/boardProcess/${testProcessID}`)
-      .set("Cookie", [`accountId=${accountId}`])
-      .withCredentials();
-    expect(testBoardProcess1Res.status).toEqual(200);
+    console.log("Connected to MongoDB");
+    await addTestData();
+  } catch (error) {
+    console.error("Error:", error);
+  } finally {
+    // Disconnect from MongoDB after operations are done
+    mongoose.disconnect();
+  }
+}
 
-    delete testBoardProcess1Res.body.currentProcedure;
-    const expectedData = {
-      processID: testProcessID,
-      processName: "Radical Prostatectomy",
-      patientName: "Alice Johnson",
-      proceduresLeft: [
-        {
-          _id: testProcedureInstance3._id.toString(),
-          procedureName: "Anesthesia Shot",
-          timeStart: new Date("2024-04-26T12:00:00").toISOString(),
-          location: "Room 102",
-          specialInstructions: "",
-          description:
-            "An anesthesia shot should be given to the patient before surgery",
-          peopleAssigned: [
-            testNurse._id.toString(),
-            testPhysician._id.toString(),
-          ],
-          peopleCompleted: [testPhysician._id.toString()],
-        },
-        {
-          _id: testProcedureInstance4._id.toString(),
-          procedureName: "Prostate Removal",
-          timeStart: new Date("2024-04-26T13:00:00").toISOString(),
-          location: "Room 222",
-          specialInstructions: "",
-          description: "Surgery to remove the prostate from the patient",
-          peopleAssigned: [
-            testNurse._id.toString(),
-            testPhysician._id.toString(),
-          ],
-          peopleCompleted: [],
-        },
-        {
-          _id: testProcedureInstance5._id.toString(),
-          procedureName: "Post Operation Follow-up",
-          timeStart: new Date("2024-04-26T14:00:00").toISOString(),
-          location: "Room 105",
-          specialInstructions: "",
-          description:
-            "Information is given to the patient and the patient's family on what they should do and should not do for a speedy recovery.",
-          peopleAssigned: [
-            testNurse._id.toString(),
-            testPhysician._id.toString(),
-          ],
-          peopleCompleted: [],
-        },
-      ],
-    };
-    console.log("Got data:");
-    console.log(testBoardProcess1Res.body);
-    expect(testBoardProcess1Res.body).toEqual(expectedData);
-  });
-
-  // remove dummy accounts
-  afterAll(async () => {
-    await removePredefinedAccounts();
-
-    // comment this function call and the same function call in beforeAll to persist the test data
-    await clearTestData();
-
-    await server.close();
-    await mongoose.disconnect();
-  });
-});
+addInstances();

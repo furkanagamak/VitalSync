@@ -10,6 +10,7 @@ import { timeAgo } from "../../utils/helperFunctions";
 import { useAuth } from "../../providers/authProvider";
 import { useSocketContext } from "../../providers/SocketProvider";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -44,9 +45,13 @@ const NotificationBox = () => {
     };
 
     socket?.on("procedure complete - refresh", handleNewNotification);
+    socket?.on("new chat message - refresh", handleNewNotification);
+    socket?.on("new process - refresh", handleNewNotification);
 
     return () => {
       socket?.off("procedure complete - refresh", handleNewNotification);
+      socket?.off("new chat message - refresh", handleNewNotification);
+      socket?.off("new process - refresh", handleNewNotification);
     };
   }, [user?.id, socket]);
 
@@ -81,28 +86,32 @@ const NotificationBoxItem = ({ notification }) => {
     CurrIcon = <IoMedkitOutline className="text-yellow-500 w-12 h-12" />;
   } else if (notification.type === "check") {
     CurrIcon = <FaRegCircleCheck className="text-green-500 w-12 h-12" />;
-  } else if (notification.type === "info") {
+  } else if (notification.type === "Chat Message") {
     CurrIcon = <CiCircleInfo className="text-blue-500 w-12 h-12" />;
   } else if (notification.type === "alert") {
     CurrIcon = <FiAlertTriangle className="text-red-500 w-8 h-12" />;
   }
 
+  const processId = notification.processID;
+
   return (
-    <div>
-      <div className="bg-primary text-white space-y-4 flex flex-col md:grid grid-cols-10">
-        <section className="flex flex-col items-center space-y-8 col-start-1 col-end-3 md:border-r-4 p-4 text-center relative">
-          <p className="mr-auto absolute top-2 left-2"></p>
-          {CurrIcon}
-          <h1 className="text-2xl">{notification.title}</h1>
-        </section>
-        <section className="col-start-3 col-end-11 p-4 text-xl">
-          <p>{notification.text}</p>
-        </section>
+    <Link to={`/processDetails/${processId}`} className="no-underline">
+      <div>
+        <div className="bg-primary text-white space-y-4 flex flex-col md:grid grid-cols-10">
+          <section className="flex flex-col items-center space-y-8 col-start-1 col-end-3 md:border-r-4 p-4 text-center relative">
+            <p className="mr-auto absolute top-2 left-2"></p>
+            {CurrIcon}
+            <h1 className="text-2xl">{notification.title}</h1>
+          </section>
+          <section className="col-start-3 col-end-11 p-4 text-xl">
+            <p>{notification.text}</p>
+          </section>
+        </div>
+        <p className="flex justify-end text-xl">
+          {timeAgo(notification.timeCreated)}
+        </p>
       </div>
-      <p className="flex justify-end text-xl">
-        {timeAgo(notification.timeCreated)}
-      </p>
-    </div>
+    </Link>
   );
 };
 

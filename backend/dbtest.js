@@ -59,6 +59,7 @@ async function addInstances() {
       state: "CA",
       zip: 12345,
       dob: new Date("1990-01-01"),
+      phone: "1234567890",
       sex: "female",
       emergencyContacts: [
         {
@@ -67,8 +68,8 @@ async function addInstances() {
           phone: "9876543210",
         },
       ],
-      knownConditions: ["Hypertension", "Diabetes"],
-      allergies: ["Peanuts", "Penicillin"],
+      knownConditions: "Hypertension, Diabetes",
+      allergies: "Peanuts, Penicillin",
     };
     const newPatient = new Patient(patientData);
 
