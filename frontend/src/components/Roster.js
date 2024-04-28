@@ -5,30 +5,60 @@ import axios from "axios";
 // Table component 
 function Table({ rows, onRowClick }) {
   return (
-    <table className="w-full">
-      <thead>
-        <tr style={{ backgroundColor: "#8E0000", color: "white" }}>
-          <th className="px-4 py-2">Name</th>
-          <th className="px-4 py-2">Department</th>
-          <th className="px-4 py-2">Position</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row, index) => (
-          <tr
-            key={index} // Ideally, use a unique ID from the database if available
-            onClick={() => onRowClick(row)}
-            style={{ backgroundColor: index % 2 === 0 ? "#F5F5DC" : "transparent" }}
-          >
-            <td className="px-4 py-2 h-12" style={{ textAlign: 'center', verticalAlign: 'middle' }}>{row[0]}</td> 
-            <td className="px-4 py-2 h-12" style={{ textAlign: 'center', verticalAlign: 'middle' }}>{row[1]}</td> 
-            <td className="px-4 py-2 h-12" style={{ textAlign: 'center', verticalAlign: 'middle' }}>{row[2]}</td>
+    <div style={{
+      margin: "auto",
+      overflowX: "auto",
+      display: "flex",
+      justifyContent: "center",
+    }}>
+      <table className="w-full" style={{
+        width: "100%",
+        height: "100%",
+        tableLayout: "fixed",
+        borderCollapse: "separate",
+        borderSpacing: "0 1px",
+        fontSize: "1.32rem",
+        textAlign: "center",
+      }}>
+        <thead>
+          <tr style={{ color: "#8E0000" }}>
+            <th className="px-4 py-2" style={{
+              borderBottom: "1px solid #8E0000",
+              padding: "10px",
+              backgroundColor: "rgb(245, 245, 220)"
+            }}>Name</th>
+            <th className="px-4 py-2" style={{
+              borderBottom: "1px solid #8E0000",
+              padding: "10px"
+            }}>Department</th>
+            <th className="px-4 py-2" style={{
+              borderBottom: "1px solid #8E0000",
+              padding: "10px",
+              backgroundColor: "rgb(245, 245, 220)"
+            }}>Position</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.length > 0 ? (
+            rows.map((row, index) => (
+              <tr key={index} onClick={() => onRowClick(row)}>
+                <td className="px-4 py-2" style={{ verticalAlign: 'middle', backgroundColor: "#F5F5DC", textAlign: 'center', borderBottom: "1px solid #8E0000" }}>{row[0]}</td>
+                <td className="px-4 py-2" style={{ verticalAlign: 'middle', textAlign: 'center', borderBottom: "1px solid #8E0000" }}>{row[1]}</td>
+                <td className="px-4 py-2" style={{ verticalAlign: 'middle', backgroundColor: "#F5F5DC", textAlign: 'center', borderBottom: "1px solid #8E0000" }}>{row[2]}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="3" style={{ textAlign: 'center', padding: '20px' }}>No results found</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 }
+
+
 
 const ROWS_PER_PAGE = 10;
 
@@ -85,7 +115,11 @@ function MyComponent() {
   };
 
   return (
+    
     <div className="flex flex-col justify-center items-center h-screen">
+      <h1 className="text-4xl text-[#8E0000] text-center underline font-bold">
+        Roster
+      </h1>
       <div style={{ width: "90%" }} className="w-full flex justify-end items-center">
         <select
           className="px-3 py-2 border rounded mr-2"
