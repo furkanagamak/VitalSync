@@ -361,28 +361,31 @@ const ProcessTable = ({ filter , fromLocation}) => {
             ))}
           </thead>
           <tbody {...getTableBodyProps()}>
-            {page.map((row) => {
-              prepareRow(row);
-              return (
-                <tr {...row.getRowProps()}>
-                  {row.cells.map((cell) => {
-                    return (
-                      <td
-                        {...cell.getCellProps()}
-                        style={{
-                          ...cell.column.style,
-                          borderBottom: "1px solid #8E0000",
-                          padding: "10px",
-                          verticalAlign: "middle",
-                        }}
-                      >
+            {page.length > 0 ? (
+              page.map(row => {
+                prepareRow(row);
+                return (
+                  <tr {...row.getRowProps()}>
+                    {row.cells.map(cell => (
+                      <td {...cell.getCellProps()} style={{
+                        ...cell.column.style,
+                        borderBottom: "1px solid #8E0000",
+                        padding: "10px",
+                        verticalAlign: "middle",
+                      }}>
                         {cell.render("Cell")}
                       </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
+                    ))}
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={columns.length} style={{ textAlign: 'center', padding: '20px' }}>
+                  No results found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

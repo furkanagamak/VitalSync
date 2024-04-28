@@ -170,6 +170,7 @@ io.on("connection", async (socket) => {
         title: 'Chat Message',
         text: `${messageUser.firstName} ${messageUser.lastName} has sent a new message in the process ${process.processName} with the process ID ${processID}.`,
         timeCreated: new Date(),
+        processID: processID,
       });
       await notification.save();
 
@@ -1785,6 +1786,7 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
             title: "Procedure Completion",
             text: notificationText,
             timeCreated: new Date(),
+            processID: process.processID,
           });
 
           await notification.save();
@@ -1804,6 +1806,7 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
             title: "Your Turn",
             text: `Your assigned procedure ${nextProcedure.procedureName} for the process ${process.processName} with the process ID ${process.processID} is the current procedure to be completed.`,
             timeCreated: new Date(),
+            processID: process.processID,
           });
 
           await notification.save();
@@ -2216,7 +2219,8 @@ app.post("/processInstances", async (req, res) => {
       type: 'action',
       title: 'New Assigned Process',
       text: 'You have been added to a new process ' + processInstance.processName + ' and process ID ' + processInstance.processID + '. Please check your assigned processes for more details.',
-      timeCreated: new Date()
+      timeCreated: new Date(),
+      processID: processInstance.processID,
     };
 
     allUserIds.forEach(async userId => {

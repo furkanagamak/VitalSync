@@ -120,10 +120,16 @@ export function ActiveProcessesList() {
     <ThemeProvider theme={theme}>
       <SearchBar onChange={setSearchInput} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-10 py-5">
-        {currentItems.map((process, index) => (
-          <ProcessCell key={index} process={process} onModifyClick={handleModifyClick} onViewClick={handleViewClick}/>
-        ))}
-      </div>
+  {currentItems.length > 0 ? (
+    currentItems.map((process, index) => (
+      <ProcessCell key={index} process={process} onModifyClick={handleModifyClick} onViewClick={handleViewClick} />
+    ))
+  ) : (
+    <div className="col-span-full text-center text-xl text-primary">
+      No results found
+    </div>
+  )}
+</div>
       <Stack spacing={2} alignItems="center" className="py-5">
         <Pagination 
           color="primary"

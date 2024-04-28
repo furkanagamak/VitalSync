@@ -307,28 +307,35 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
             ))}
           </thead>
           <tbody {...getTableBodyProps()}>
-            {page.map((row) => {
-              prepareRow(row);
-              return (
-                <tr
-                  {...row.getRowProps()}
-                  className="border-b-2 border-[#aa0000]"
+            {page.length > 0 ? (
+              page.map((row) => {
+                prepareRow(row);
+                return (
+                  <tr {...row.getRowProps()} className="border-b-2 border-[#aa0000]">
+                    {row.cells.map((cell, i) => {
+                      return (
+                        <td
+                          {...cell.getCellProps()}
+                          className={`py-6 px-4 ${i % 2 === 0 ? "bg-secondary" : ""}`}
+                        >
+                          {cell.render("Cell")}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td
+                  colSpan={columns.length} 
+                  className="text-center py-6" 
+                  style={{ borderBottom: 'none' }} 
                 >
-                  {row.cells.map((cell, i) => {
-                    return (
-                      <td
-                        {...cell.getCellProps()}
-                        className={`py-6 px-4 ${
-                          i % 2 === 0 ? "bg-secondary" : ""
-                        }`}
-                      >
-                        {cell.render("Cell")}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
+                  No results found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
         <div className="w-full mx-auto flex justify-center space-x-4 mt-4 mb-16 relative">

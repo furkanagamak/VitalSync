@@ -378,29 +378,45 @@ const ProcedureTable = ({ filter }) => {
             ))}
           </thead>
           <tbody {...getTableBodyProps()}>
-            {page.map((row) => {
-              prepareRow(row);
-              return (
-                <tr {...row.getRowProps()}>
-                  {row.cells.map((cell) => {
-                    return (
-                      <td
-                        {...cell.getCellProps()}
-                        style={{
-                          ...cell.column.style,
-                          borderBottom: "1px solid #8E0000",
-                          padding: "10px",
-                          verticalAlign: "middle",
-                        }}
-                      >
-                        {cell.render("Cell")}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
+  {page.length > 0 ? (
+    page.map((row) => {
+      prepareRow(row);
+      return (
+        <tr {...row.getRowProps()}>
+          {row.cells.map((cell) => {
+            return (
+              <td
+                {...cell.getCellProps()}
+                style={{
+                  ...cell.column.style,
+                  borderBottom: "1px solid #8E0000",
+                  padding: "10px",
+                  verticalAlign: "middle",
+                }}
+              >
+                {cell.render("Cell")}
+              </td>
+            );
+          })}
+        </tr>
+      );
+    })
+  ) : (
+    <tr>
+      <td
+        colSpan={columns.length} // Assumed number of columns, should be adjusted to your actual column count
+        style={{
+          textAlign: 'center',
+          padding: '20px',
+          borderBottom: "none"  // Removing border from the "No results" row
+        }}
+      >
+        No results found
+      </td>
+    </tr>
+  )}
+</tbody>
+
         </table>
       </div>
       <div

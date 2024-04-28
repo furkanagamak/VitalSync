@@ -8,7 +8,7 @@ import axios from 'axios';
 
 const notify = () => toast.success("Process Template Deleted!");
 
-const SearchBar = ({ searchText, onSearchChange}) => {
+const SearchBar = ({onSearchChange}) => {
   const [inputValue, setInputValue] = useState("");
 
   const handleClearInput = () => {
@@ -16,9 +16,20 @@ const SearchBar = ({ searchText, onSearchChange}) => {
     onSearchChange(""); 
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault(); 
+    onSearchChange(inputValue);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch(e);
+    }
+  };
+
   return (
-    <div className="w-1/5 inline-flex items-center rounded-full text-xl border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative">
-      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#8E0000] mr-4">
+    <form onSubmit={handleSearch} className="w-1/5 inline-flex items-center rounded-full text-xl border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative">
+      <button type="submit" className="flex items-center justify-center w-10 h-10 rounded-full bg-[#8E0000] mr-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-6 w-6 text-white"
@@ -33,21 +44,20 @@ const SearchBar = ({ searchText, onSearchChange}) => {
             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
           />
         </svg>
-      </div>
+      </button>
       <input
         type="search"
         placeholder="Search for process records"
         className="bg-transparent border-none outline-none placeholder-[#8E0000] text-[#8E0000] pl-2"
         style={{ minWidth: "275px" }}
         value={inputValue}
-        onChange={(e) => {
-          setInputValue(e.target.value.toLowerCase());
-          onSearchChange(e.target.value.toLowerCase());
-        }}
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyDown={handleKeyDown}
       />
       {inputValue && (
         <button
           onClick={handleClearInput}
+          type="button"
           className="absolute right-4 text-[#8E0000]"
           style={{ outline: "none" }}
         >
@@ -65,7 +75,7 @@ const SearchBar = ({ searchText, onSearchChange}) => {
           </svg>
         </button>
       )}
-    </div>
+    </form>
   );
 };
 
@@ -299,28 +309,28 @@ const ProcessTable = ({ searchText }) => {
             ))}
           </thead>
           <tbody {...getTableBodyProps()}>
-            {page.map((row) => {
-              prepareRow(row);
-              return (
-                <tr {...row.getRowProps()}>
-                  {row.cells.map((cell) => {
-                    return (
-                      <td
-                        {...cell.getCellProps()}
-                        style={{
-                          ...cell.column.style,
-                          borderBottom: "1px solid #8E0000",
-                          padding: "10px",
-                          verticalAlign: "middle",
-                        }}
-                      >
-                        {cell.render("Cell")}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
+            {page.length > 0 ? (
+              page.map(row => {
+                prepareRow(row);
+                return (
+                  <tr {...row.getRowProps()}>
+                    {row.cells.map(cell => {
+                      return (
+                        <td {...cell.getCellProps()} style={{ ...cell.column.style, borderBottom: "1px solid #8E0000", padding: "10px", verticalAlign: "middle" }}>
+                          {cell.render("Cell")}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={columns.length} style={{ textAlign: 'center', padding: '10px' }}>
+                  No results found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
