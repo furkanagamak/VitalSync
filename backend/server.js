@@ -133,7 +133,7 @@ io.on("connection", async (socket) => {
     // checks for valid userId and processID
     const messageUser = await Account.findOne({ _id: userId });
     if (!messageUser)
-      throw new Error(`User ${UserId} sending message does not exists`);
+      throw new Error(`User ${userId} sending message does not exists`);
     const process = await ProcessInstance.findOne({ processID: processID });
     if (!process) throw new Error(`Process ${processID} does not exists`);
 
