@@ -3,7 +3,6 @@ import {
   BrowserRouter,
   Routes,
   Route,
-  Outlet,
   Navigate,
 } from "react-router-dom";
 import Navbar from "./components/navbar.jsx";
@@ -66,6 +65,8 @@ import AddSectionForm from "./components/createSection.js";
 import ModifyProcedureTemplateForm from "./components/processManagement/modifyProcedureTemplate.js";
 import ModifyProcessTemplateForm from "./components/modifyProcessTemplate.js";
 import ModifySectionForm from "./components/modifySection.js";
+import NotFoundPage from "./components/NotFoundPage.js";
+
 
 import { AuthProvider } from "./providers/authProvider.js";
 import { SocketContextProvider } from "./providers/SocketProvider";
@@ -171,6 +172,10 @@ function App() {
               <Route
                 path="/ModifySectionForm"
                 element={<ModifySectionForm />}
+              />
+              <Route
+                path="*"
+                element={<NotFoundPage />}
               />
             </Routes>
           </ProcessCreationProvider>

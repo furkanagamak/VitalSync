@@ -33,12 +33,14 @@ axios.defaults.withCredentials = true;
 
 const notify = () => toast.success("Process Template Created!");
 
-const CreateTemplateButton = ({ onCreate }) => {
+const CreateTemplateButton = ({ onCreate, instanceCreation }) => {
   const navigate = useNavigate();
 
   const handleCreateClick = async () => {
     await onCreate();
   };
+
+  const buttonText = instanceCreation ? "Use Template" : "Save Template";
 
   return (
     <button
@@ -46,7 +48,7 @@ const CreateTemplateButton = ({ onCreate }) => {
       className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
     >
       <TbLayoutGridAdd className="mr-2 size-10" />
-      Save Template
+      {buttonText}
     </button>
   );
 };
@@ -644,7 +646,7 @@ const CreateProcessTemplateForm = () => {
           <GoBackButton />
         </div>
         <div style={{ position: "absolute", right: "2rem" }}>
-          <CreateTemplateButton onCreate={createTemplate} />
+          <CreateTemplateButton onCreate={createTemplate} instanceCreation={currentlyCreatingTemplate}/>
         </div>
         <h1
           style={{

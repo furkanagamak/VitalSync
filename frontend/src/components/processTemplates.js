@@ -76,14 +76,15 @@ const CreateTemplateButton = ({fromLocation} ) => {
     navigate("/CreateProcessTemplateForm");}
   };
 
+  const buttonText = fromLocation ? "Create Instance From New Template" : "Create New Template";
+
   return (
     <button
       className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
       onClick={handleClick}
     >
       <TbLayoutGridAdd className="mr-2 size-10" />
-      Create New Template
-    </button>
+      {buttonText}    </button>
   );
 };
 
@@ -427,11 +428,11 @@ const ProcessTemplateManagement = () => {
   const [incomingUrl, setIncomingUrl] = useState("");
 
   useEffect(() => {
-    console.log(location.state);
-    if (location.state && location.state.incomingUrl) {
-      setIncomingUrl(location.state.incomingUrl);
+    console.log(location.pathname);
+    if (location.pathname.includes("/processManagement/newProcess/processTemplates")) {
+      setIncomingUrl(location.pathname);
     }
-  }, [location.state]);
+  }, [location]);
 
 
   return (
