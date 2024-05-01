@@ -32,7 +32,7 @@ const states = [
 
 
 function PatientInformationForm() {
-  const { setPatientInformation } = useProcessCreation();
+  const { patientInformation, setPatientInformation } = useProcessCreation();
   const [patientInfo, setPatientInfo] = useState({
     firstName: '',
     lastName: '',
@@ -60,6 +60,12 @@ function PatientInformationForm() {
     event.preventDefault();
     handleProceed();
   };
+
+  useEffect(() => {
+    if (patientInformation && Object.keys(patientInformation).length > 0) {
+      setPatientInfo(patientInformation);
+    }
+  }, []);
 
   const navigate = useNavigate();
 

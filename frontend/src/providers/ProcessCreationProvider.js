@@ -1,5 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from "axios";
+import { useLocation } from 'react-router-dom';
+
 
 const ProcessCreationContext  = createContext(null);
 
@@ -7,14 +9,22 @@ export const useProcessCreation  = () => useContext(ProcessCreationContext);
 
 
 export const ProcessCreationProvider = ({ children }) => {
-    const [processTemplate, setProcessTemplate] = useState({
-      processName: '',
+  const location = useLocation();
+
+
+  const initialState = (key, defaultValue) => {
+    const stored = sessionStorage.getItem(key);
+    return stored ? JSON.parse(stored) : defaultValue;
+};
+
+const [processTemplate, setProcessTemplate] = useState(() => initialState('processTemplate', {
+  processName: '',
       description: '',
       sections: []
-    });
+    }));
 
-    const [patientInformation, setPatientInformation] = useState({
-    firstName: '',
+    const [patientInformation, setPatientInformation] = useState(() => initialState('patientInformation', {
+      firstName: '',
     lastName: '',
     street: '',
     city: '',
@@ -34,10 +44,56 @@ export const ProcessCreationProvider = ({ children }) => {
     insuranceProvider: '',
     insuranceGroup: '',
     insurancePolicy: ''
-    });
+  }));
 
-    const [fetchedSections, setFetchedSections] = useState([]);
-    const [startTime, setStartTime] = useState('');
+  const saveToSessionStorage = (key, value) => {
+    sessionStorage.setItem(key, JSON.stringify(value));
+};
+
+const clearSessionStorage = () => {
+  sessionStorage.removeItem('processTemplate');
+  sessionStorage.removeItem('patientInformation');
+  sessionStorage.removeItem('fetchedSections');
+  sessionStorage.removeItem('startTime');
+};
+
+useEffect(() => {
+  if (!location.pathname.includes('/processManagement/newProcess/')) {
+      clearSessionStorage();
+      setProcessTemplate({
+        processName: '',
+        description: '',
+        sections: []
+      });
+      setPatientInformation({
+        firstName: '',
+        lastName: '',
+        street: '',
+        city: '',
+        state: '',
+        zip: '',
+        dob: '',
+        sex: '',
+        phone: '',
+        emergencyContact1Name: '',
+        emergencyContact1Relation: '',
+        emergencyContact1Phone: '',
+        emergencyContact2Name: '',
+        emergencyContact2Relation: '',
+        emergencyContact2Phone: '',
+        knownConditions: '',
+        allergies: '',
+        insuranceProvider: '',
+        insuranceGroup: '',
+        insurancePolicy: ''
+      });
+      setFetchedSections([]);
+      setStartTime('');
+  }
+}, [location.pathname]);
+
+    const [fetchedSections, setFetchedSections] = useState(() => initialState('fetchedSections', []));
+    const [startTime, setStartTime] = useState(() => initialState('startTime', ''));
 
     const [currentlyModifyingTemplate, setCurrentlyModifyingTemplate] = useState(false)
     const [currentlyCreatingTemplate, setCurrentlyCreatingTemplate] = useState(false)
@@ -49,6 +105,23 @@ export const ProcessCreationProvider = ({ children }) => {
         ...data
       }));
     };
+
+    //Session storage hooks
+    useEffect(() => {
+      saveToSessionStorage('processTemplate', processTemplate);
+  }, [processTemplate]);
+
+  useEffect(() => {
+      saveToSessionStorage('patientInformation', patientInformation);
+  }, [patientInformation]);
+
+  useEffect(() => {
+      saveToSessionStorage('fetchedSections', fetchedSections);
+  }, [fetchedSections]);
+
+  useEffect(() => {
+      saveToSessionStorage('startTime', startTime);
+  }, [startTime]);
 
 
     useEffect(() => {
