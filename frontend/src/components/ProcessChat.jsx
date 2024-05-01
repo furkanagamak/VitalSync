@@ -47,6 +47,10 @@ const ProcessChat = ({ id }) => {
       }
     };
     fetchCheckCompletedProcess();
+
+    socket.on("procedure complete - refresh", () => {
+      fetchCheckCompletedProcess();
+    });
   }, []);
 
   // fetch messages
