@@ -913,24 +913,30 @@ app.put("/user/:userId", async (req, res) => {
   }
 });
 
-app.post('/compare-passwords', async (req, res) => {
+app.post("/compare-passwords", async (req, res) => {
   const { userId, newPassword } = req.body;
 
   try {
     const user = await Account.findById(userId);
     if (!user) {
-      return res.status(404).send({ message: 'User not found.' });
+      return res.status(404).send({ message: "User not found." });
     }
 
     const isSamePassword = await bcrypt.compare(newPassword, user.password);
     if (isSamePassword) {
-      res.send({ isSame: true, message: "New password must be different from the old password." });
+      res.send({
+        isSame: true,
+        message: "New password must be different from the old password.",
+      });
     } else {
-      res.send({ isSame: false, message: "Passwords are different, you can proceed." });
+      res.send({
+        isSame: false,
+        message: "Passwords are different, you can proceed.",
+      });
     }
   } catch (error) {
     console.error("Error comparing passwords:", error);
-    res.status(500).send({ message: 'Failed to compare passwords.' });
+    res.status(500).send({ message: "Failed to compare passwords." });
   }
 });
 
@@ -2368,18 +2374,24 @@ app.put("/updateRoles/:userId", async (req, res) => {
   }
 });
 
-app.get('/positions', async (req, res) => {
+app.get("/positions", async (req, res) => {
   try {
-    const positions = await Account.find().distinct('position');
+    // Fetch only positions from accounts where isTerminated is false
+    const positions = await Account.find({ isTerminated: false }).distinct(
+      "position"
+    );
     res.json(positions);
   } catch (error) {
     res.status(500).send("Error fetching positions from the database.");
   }
 });
 
-app.get('/departments', async (req, res) => {
+app.get("/departments", async (req, res) => {
   try {
-    const departments = await Account.find().distinct('department');
+    // Fetch only departments from accounts where isTerminated is false
+    const departments = await Account.find({ isTerminated: false }).distinct(
+      "department"
+    );
     res.json(departments);
   } catch (error) {
     res.status(500).send("Error fetching departments from the database.");
