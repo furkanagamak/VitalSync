@@ -907,6 +907,27 @@ app.put("/user/:userId", async (req, res) => {
   }
 });
 
+app.post('/compare-passwords', async (req, res) => {
+  const { userId, newPassword } = req.body;
+
+  try {
+    const user = await Account.findById(userId);
+    if (!user) {
+      return res.status(404).send({ message: 'User not found.' });
+    }
+
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      res.send({ isSame: true, message: "New password must be different from the old password." });
+    } else {
+      res.send({ isSame: false, message: "Passwords are different, you can proceed." });
+    }
+  } catch (error) {
+    console.error("Error comparing passwords:", error);
+    res.status(500).send({ message: 'Failed to compare passwords.' });
+  }
+});
+
 app.post("/verify-password", async (req, res) => {
   const { userId, password } = req.body;
   try {

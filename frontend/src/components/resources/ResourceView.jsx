@@ -114,35 +114,37 @@ const ResourceView = ({ resources, setResources, navToEditResource }) => {
 const Searchbar = ({ setTextFilter }) => {
   const [searchText, setSearchText] = useState("");
 
-  const handleSearch = () => {
-    setTextFilter(searchText);
-  };
-
-  const handleKeyPress = (event) => {
-    if (event.key === "Enter") {
-      handleSearch();
-    }
+  const handleSearch = (newSearchText) => {
+    setTextFilter(newSearchText); 
   };
 
   return (
-    <div className="relative w-1/2 h-12 ">
+    <div className="relative w-1/2 h-12">
       <input
         type="text"
         placeholder="Search for the resource here ..."
         className="border rounded-full h-12 py-2 pl-4 pr-12 w-full bg-secondary"
         value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        onKeyPress={handleKeyPress}
+        onChange={(e) => {
+          setSearchText(e.target.value);
+          handleSearch(e.target.value); 
+        }}
+        onKeyPress={(event) => {
+          if (event.key === "Enter") {
+            handleSearch(searchText);
+          }
+        }}
       />
       <button
         className="absolute right-0 top-0 bottom-0 h-12 rounded-r-md pr-4"
-        onClick={handleSearch}
+        onClick={() => handleSearch(searchText)}
       >
         <AiOutlineSearch className="text-highlightRed h-8 w-8" />
       </button>
     </div>
   );
 };
+
 
 const CreateNewButton = () => {
   return (

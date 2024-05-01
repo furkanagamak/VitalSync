@@ -41,7 +41,7 @@ function Table({ rows, onRowClick }) {
         <tbody>
           {rows.length > 0 ? (
             rows.map((row, index) => (
-              <tr key={index} onClick={() => onRowClick(row)}>
+              <tr key={index} onClick={() => onRowClick(row)} style={{ cursor: 'pointer' }}>
                 <td className="px-4 py-2" style={{ verticalAlign: 'middle', backgroundColor: "#F5F5DC", textAlign: 'center', borderBottom: "1px solid #8E0000" }}>{row[0]}</td>
                 <td className="px-4 py-2" style={{ verticalAlign: 'middle', textAlign: 'center', borderBottom: "1px solid #8E0000" }}>{row[1]}</td>
                 <td className="px-4 py-2" style={{ verticalAlign: 'middle', backgroundColor: "#F5F5DC", textAlign: 'center', borderBottom: "1px solid #8E0000" }}>{row[2]}</td>

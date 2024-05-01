@@ -149,6 +149,13 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+ 
+  console.log("1" + user.userId);
+
+
+  const isValidPassword = (Password) => {
+    return Password.length >= 6 && !Password.includes(user.email);
+  };
 
   const handlePasswordChange = (e) => {
     setNewPassword(e.target.value);
@@ -160,11 +167,32 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
 
   const handleSubmit = async () => {
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
+      toast.error("Passwords do not match");
       return;
     }
 
-    console.log(user.userId);
+    if (!isValidPassword(newPassword)) {
+      toast.error("Please enter a valid password.");
+      return;
+    }
+
+    try {
+      const compareResponse = await axios.post('/compare-passwords', {
+        userId: user.userId,
+        newPassword: newPassword
+      });
+      if (compareResponse.data.isSame) {
+        toast.error(compareResponse.data.message);
+        return; 
+        toast.success(compareResponse.data.message);
+      }
+    } catch (error) {
+      toast.error('Error comparing passwords: ' + (error.response?.data?.message || 'Unknown error'));
+      return; 
+    }
+
+
+    
 
     try {
       const response = await axios.post("/reset-password", {
@@ -174,7 +202,7 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
 
       if (response.status === 200) {
         onClose();
-        toast("Password has been successfully reset.");
+        toast.success("Password has been successfully reset.");
       } else {
         toast("Failed to reset password.");
       }
@@ -194,7 +222,7 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
             onChange={handlePasswordChange}
             className="mt-2 p-2 border rounded w-full"
             placeholder="New password"
-            style={{ maxWidth: "200px", fontSize: "0.875rem" }} // 14px
+            style={{ maxWidth: "200px", fontSize: "0.875rem" }}
           />
           <input
             type="password"
@@ -209,26 +237,36 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
         <div className="flex justify-evenly mt-3">
           <button
             type="button"
-            onClick={handleSubmit}
-            className="px-4 py-1 bg-red-800 text-white rounded-lg border border-solid border-neutral-600 text-xs mb-5"
-          >
-            Reset Password
-          </button>
-          <button
-            type="button"
             onClick={onClose}
-            className="px-4 py-1 bg-zinc-300 text-black rounded-lg border border-solid border-neutral-600 text-xs mb-5"
+            className="px-4 py-1 bg-zinc-300 text-black rounded-lg border border-solid border-neutral-600 text-xs mb-3"
           >
             Close
           </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="px-4 py-1 bg-red-800 text-white rounded-lg border border-solid border-neutral-600 text-xs mb-3"
+          >
+            Reset Password
+          </button>
         </div>
+        <p className="text-xs text-center mb-2">
+          The new password must be at least 6 characters long and must not include your email address.
+        </p>
       </div>
     </div>
   );
+  
 }
 
 function ConfirmResetPasswordModal({ user, onClose, onConfirm }) {
   const [currentPassword, setCurrentPassword] = useState("");
+
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      handleSubmit();
+    }
+  };
 
   const handlePasswordChange = (event) => {
     setCurrentPassword(event.target.value);
@@ -239,6 +277,8 @@ function ConfirmResetPasswordModal({ user, onClose, onConfirm }) {
       toast.error("Please enter your current password.");
       return;
     }
+
+
 
     if (!user || !user.userId) {
       toast.error("User information is not available.");
@@ -275,6 +315,7 @@ function ConfirmResetPasswordModal({ user, onClose, onConfirm }) {
             placeholder="Enter Current Password"
             value={currentPassword}
             onChange={handlePasswordChange}
+            onKeyPress={handleKeyPress}
             className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
             style={{ fontSize: "12px" }}
           />
@@ -283,13 +324,13 @@ function ConfirmResetPasswordModal({ user, onClose, onConfirm }) {
               onClick={onClose}
               className="flex-1 justify-center px-5 py-3.5 bg-white rounded-lg border border-solid border-neutral-600 text-neutral-600"
             >
-              No
+              Cancel
             </button>
             <button
               onClick={handleSubmit}
               className="flex-1 justify-center px-5 py-3.5 bg-red-800 rounded-lg text-white"
             >
-              Yes
+              Confirm
             </button>
           </div>
         </div>
@@ -747,12 +788,14 @@ function ProfileDetails({ user }) {
             <h1 className="mb-2 text-5xl text-red-800 max-md:text-4xl text-left">
               {name}
             </h1>
-            <p className="mb-2 text-3xl text-black text-left">{designation}</p>
-            <p className="mb-2 text-3xl text-left text-black max-md:max-w-full">
-              {specialty}
+            <p className="mb-2 text-3xl text-black text-left">
+              <span className="text-red-800">Degree: </span>{designation}
             </p>
             <p className="mb-2 text-3xl text-left text-black max-md:max-w-full">
-              {department}
+              <span className="text-red-800">Position: </span>{specialty}
+            </p>
+            <p className="mb-2 text-3xl text-left text-black max-md:max-w-full">
+              <span className="text-red-800">Department: </span>{department}
             </p>
           </>
         )}
@@ -1286,6 +1329,7 @@ function MyComponent() {
             onClose={handleCloseTerminationModal}
             onTerminate={handleTerminationConfirmation}
             userId={id}
+            user={user}
             fullName={`${user.firstName} ${user.lastName}`} // Safe access since we check if user exists
           />
         )}
