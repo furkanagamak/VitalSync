@@ -211,8 +211,6 @@ function App() {
                   element={<CompletedProcessRecords />}
                 />
 
-                <Route path="/recordProcess" element={<CompletedProcess />} />
-
                 <Route
                   path="/ProcedureTemplateManagement"
                   element={<ProcedureTemplateManagement />}
