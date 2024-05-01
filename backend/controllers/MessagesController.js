@@ -7,6 +7,9 @@ const {
   GetObjectCommand,
   DeleteObjectCommand,
 } = require("@aws-sdk/client-s3");
+const bucketName = process.env.BUCKET_NAME;
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const s3 = new S3Client({ region: process.env.BUCKET_REGION });
 
 const getUserProfileImgUrl = async (uid) => {
   const user = await Account.findOne({ _id: uid });

@@ -133,7 +133,7 @@ io.on("connection", async (socket) => {
     // checks for valid userId and processID
     const messageUser = await Account.findOne({ _id: userId });
     if (!messageUser)
-      throw new Error(`User ${UserId} sending message does not exists`);
+      throw new Error(`User ${userId} sending message does not exists`);
     const process = await ProcessInstance.findOne({ processID: processID });
     if (!process) throw new Error(`Process ${processID} does not exists`);
 
@@ -379,6 +379,7 @@ app.post("/createAccount", async (req, res) => {
                 <td>${password}</td>
               </tr>
             </table>
+            <p>Visit our website to log in with your new account: <a href="https://www.vitalsync.top/" target="_blank">VitalSync</a></p>
             <p>If you have any questions, feel free to contact our support team.</p>
             <p>Thank you for choosing VitalSync!</p>
             <p>Best Regards,</p>
@@ -542,6 +543,7 @@ app.post("/forgotPassword", async (req, res) => {
           <p>You have requested to reset your password. Use the following OTP code to proceed:</p>
           <h3>${otpCode}</h3>
           <p>Please note that this code will expire in 15 minutes.</p>
+          <p>Visit our website for more information: <a href="https://www.vitalsync.top/" target="_blank">VitalSync</a></p>
           <p>If you did not request a password reset, please ignore this email or contact our support team.</p>
           <p>Best Regards,</p>
           <p>The VitalSync Team</p>
