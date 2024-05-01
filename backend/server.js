@@ -2251,6 +2251,67 @@ app.post("/processInstances", async (req, res) => {
   }
 });
 
+app.get('/users/:userId/eligibleRoles', async (req, res) => {
+  try {
+      const userId = req.params.userId;
+      
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+          return res.status(400).send('Invalid user ID format');
+      }
+
+      const account = await Account.findById(userId)
+          .populate('eligibleRoles')
+          .exec();
+
+      if (!account) {
+          return res.status(404).send('User not found');
+      }
+
+      res.json(account.eligibleRoles);
+  } catch (error) {
+      res.status(500).send('Server error: ' + error.message);
+  }
+});
+
+app.get('/roles', async (req, res) => {
+  try {
+    const roles = await Role.find({});
+    res.status(200).json(roles);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.put('/updateRoles/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const { roles } = req.body;  // Expect an array of role IDs
+
+  if (!roles) {
+    return res.status(400).send('Roles array is required.');
+  }
+
+  try {
+    // Ensure all provided role IDs are valid MongoDB Object IDs
+    if (!roles.every(roleId => mongoose.Types.ObjectId.isValid(roleId))) {
+      return res.status(400).send('Invalid role ID provided.');
+    }
+
+    const updatedAccount = await Account.findByIdAndUpdate(
+      userId,
+      { $set: { eligibleRoles: roles } },
+      { new: true, runValidators: true }
+    ).populate('eligibleRoles'); 
+
+    if (!updatedAccount) {
+      return res.status(404).send('User not found.');
+    }
+
+    res.status(200).json(updatedAccount);
+  } catch (error) {
+    res.status(500).send(`Error updating user roles: ${error.message}`);
+  }
+});
+
 module.exports = {
   server,
   initializePredefinedAccounts,
