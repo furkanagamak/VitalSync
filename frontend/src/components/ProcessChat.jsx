@@ -9,6 +9,7 @@ const ProcessChat = ({ id }) => {
   const [messages, setMessages] = useState(null);
   const [messageInput, setMessageInput] = useState("");
   const [refreshTick, setRefreshTick] = useState(false);
+  const [processCompleted, setProcessCompleted] = useState(null);
   const messagesContainerRef = useRef(null);
   const { socket } = useSocketContext();
   const { user } = useAuth();
@@ -33,6 +34,22 @@ const ProcessChat = ({ id }) => {
     }
   }, [messages]);
 
+  // check if process is completed
+  useEffect(() => {
+    const fetchCheckCompletedProcess = async () => {
+      const res = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/processCompleted/${id}`
+      );
+      if (res.ok) {
+        setProcessCompleted(await res.json());
+      } else {
+        toast.error(await res.text());
+      }
+    };
+    fetchCheckCompletedProcess();
+  }, []);
+
+  // fetch messages
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -109,21 +126,26 @@ const ProcessChat = ({ id }) => {
           />
         ))}
       </div>
-      <form className="flex items-center" onSubmit={sendMessage}>
-        <input
-          type="text"
-          placeholder="Type your message..."
-          className="flex-grow p-2 rounded-l-md border border-gray-300 focus:outline-none"
-          value={messageInput}
-          onChange={(e) => setMessageInput(e.target.value)}
-        />
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded-r-md"
-          type="submit"
-        >
-          Send
-        </button>
-      </form>
+      {!processCompleted && (
+        <form className="flex items-center" onSubmit={sendMessage}>
+          <input
+            type="text"
+            placeholder="Type your message..."
+            className="flex-grow p-2 rounded-l-md border border-gray-300 focus:outline-none"
+            value={messageInput}
+            onChange={(e) => setMessageInput(e.target.value)}
+          />
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-r-md"
+            type="submit"
+          >
+            Send
+          </button>
+        </form>
+      )}
+      {processCompleted && (
+        <div className="text-center">This process is completed</div>
+      )}
     </div>
   );
 };
