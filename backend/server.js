@@ -129,6 +129,34 @@ io.on("connection", async (socket) => {
     });
   });
 
+  socket.on("join process chat room", async (processID) => {
+    // check process instance existence
+    const processInstance = await ProcessInstance.findOne({
+      processID: processID,
+    });
+    if (!processInstance)
+      return console.log(
+        `user ${socket._uid} attempted to join a room ${processID} that does not exists`
+      );
+
+    socket.join(`chat-${processID}`);
+    console.log(`socket: ${socket.id} has joined chat room: ${processID}`);
+  });
+
+  socket.on("leave process chat room", async (processID) => {
+    // check process instance existence
+    const processInstance = await ProcessInstance.findOne({
+      processID: processID,
+    });
+    if (!processInstance)
+      return console.log(
+        `user ${socket._uid} attempted to leave a room ${processID} that does not exists`
+      );
+
+    socket.leave(`chat-${processID}`);
+    console.log(`socket: ${socket.id} has left chat room: ${processID}`);
+  });
+
   socket.on("chatMessage", async (userId, text, processID) => {
     // checks for valid userId and processID
     const messageUser = await Account.findOne({ _id: userId });
@@ -187,7 +215,8 @@ io.on("connection", async (socket) => {
       }
     });
 
-    io.to(processID).emit("new chat message - refresh");
+    io.to(`chat-${processID}`).emit("new chat message - refresh");
+    io.to(processID).emit("notification refresh");
   });
 
   socket.on("test", () => {

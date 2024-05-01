@@ -4,6 +4,7 @@ import { useSocketContext } from "../providers/SocketProvider";
 import { useAuth } from "../providers/authProvider.js";
 import { UTCToEastern } from "../utils/helperFunctions.js";
 import toast from "react-hot-toast";
+import io from "socket.io-client";
 
 const ProcessChat = ({ id }) => {
   const [messages, setMessages] = useState(null);
@@ -12,6 +13,7 @@ const ProcessChat = ({ id }) => {
   const [processCompleted, setProcessCompleted] = useState(null);
   const messagesContainerRef = useRef(null);
   const { socket } = useSocketContext();
+  const [chatSocket, setChatSocket] = useState(null);
   const { user } = useAuth();
 
   const triggerRefresh = () => {
@@ -22,9 +24,31 @@ const ProcessChat = ({ id }) => {
     e.preventDefault();
     const trimmedMsg = messageInput.trim();
     if (trimmedMsg === "") return;
-    socket.emit("chatMessage", user.id, trimmedMsg, id);
+    chatSocket.emit("chatMessage", user.id, trimmedMsg, id);
     setMessageInput("");
   };
+
+  // initial chatSocket setup
+  useEffect(() => {
+    const newSocket = io(process.env.REACT_APP_API_BASE_URL);
+
+    // mounting setup
+    newSocket.on("connect", () => {
+      console.log("Connected to server");
+      setChatSocket(newSocket);
+      newSocket.emit("join process chat room", id);
+    });
+
+    newSocket.on("new chat message - refresh", () => {
+      triggerRefresh();
+    });
+
+    // unmount callback function
+    return () => {
+      newSocket.emit("leave process chat room", id);
+      newSocket.disconnect();
+    };
+  }, []);
 
   // Scroll to the bottom when messages change
   useEffect(() => {
@@ -48,10 +72,11 @@ const ProcessChat = ({ id }) => {
     };
     fetchCheckCompletedProcess();
 
-    socket.on("procedure complete - refresh", () => {
-      fetchCheckCompletedProcess();
-    });
-  }, []);
+    if (socket)
+      socket.on("procedure complete - refresh", () => {
+        fetchCheckCompletedProcess();
+      });
+  }, [socket]);
 
   // fetch messages
   useEffect(() => {
@@ -84,14 +109,6 @@ const ProcessChat = ({ id }) => {
     };
     fetchMessages();
   }, [refreshTick]);
-
-  // socket events
-  useEffect(() => {
-    if (!socket) return;
-    socket.on("new chat message - refresh", () => {
-      triggerRefresh();
-    });
-  }, [socket]);
 
   if (!user || !socket || !messages) return <div>Loading ...</div>;
 
