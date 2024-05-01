@@ -76,7 +76,7 @@ const CreateTemplateButton = ({fromLocation} ) => {
     navigate("/CreateProcessTemplateForm");}
   };
 
-  const buttonText = fromLocation ? "Create Instance From New Template" : "Create New Template";
+  const buttonText = fromLocation ? "Create Instance from New Template" : "Create New Template";
 
   return (
     <button
