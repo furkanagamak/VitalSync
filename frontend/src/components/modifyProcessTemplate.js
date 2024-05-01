@@ -258,10 +258,10 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
   }, 1); //1 second millisecond delay to avoid rapid re-update of section state on location change. Need to solve underlying issue
   
   useEffect(() => {
-    if (location.state?.newSection) {
+    if (location.state?.newSection && !location.state?.fromPatient) {
       updateSections(location.state.newSection);
     }
-  }, [location.state?.newSection]);
+  }, [location.state?.newSection, location.state?.fromPatient]);
 
 
   const moveSection = (index, direction) => {

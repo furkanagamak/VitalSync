@@ -64,7 +64,7 @@ function PatientInformationForm() {
   const navigate = useNavigate();
 
   const handleGoBack = () => {
-    navigate(-1);
+    navigate(-1, { state: { fromPatient: '/patientForm' } });
   };
 
   const handleProceed = () => {
