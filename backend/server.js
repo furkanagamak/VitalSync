@@ -2333,6 +2333,24 @@ app.put('/updateRoles/:userId', async (req, res) => {
   }
 });
 
+app.get('/positions', async (req, res) => {
+  try {
+    const positions = await Account.find().distinct('position');
+    res.json(positions);
+  } catch (error) {
+    res.status(500).send("Error fetching positions from the database.");
+  }
+});
+
+app.get('/departments', async (req, res) => {
+  try {
+    const departments = await Account.find().distinct('department');
+    res.json(departments);
+  } catch (error) {
+    res.status(500).send("Error fetching departments from the database.");
+  }
+});
+
 module.exports = {
   server,
   initializePredefinedAccounts,
