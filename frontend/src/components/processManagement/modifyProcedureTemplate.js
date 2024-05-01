@@ -254,6 +254,12 @@ const ProcedureForm = ({
       return;
     }
 
+    const spaceResourceExists = resources.some(resource => resource.type === "spaces");
+    if (newResource.type === "spaces" && spaceResourceExists) {
+      toast.error("You can only select one space resource.");
+      return;
+    }
+
     for (let i = 0; i < resources.length; i++) {
       if (resources[i].name === newResource.name) {
         toast.error("Resource already exists in selected resources.");
