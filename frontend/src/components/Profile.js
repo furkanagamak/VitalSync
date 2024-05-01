@@ -192,8 +192,6 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
     }
 
 
-    
-
     try {
       const response = await axios.post("/reset-password", {
         userId: user.userId,
@@ -230,7 +228,7 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
             onChange={handleConfirmPasswordChange}
             className="mt-2 p-2 border rounded w-full"
             placeholder="Confirm new password"
-            style={{ maxWidth: "200px", fontSize: "0.875rem" }} // 14px
+            style={{ maxWidth: "200px", fontSize: "0.875rem" }}
           />
           {error && <p className="text-xs text-red-500">{error}</p>}
         </div>
@@ -340,20 +338,23 @@ function ConfirmResetPasswordModal({ user, onClose, onConfirm }) {
 }
 
 function AccountTerminationModal({
+
   user,
   onClose,
   onTerminate,
   userId,
   fullName,
+  email
 }) {
   console.log("UserId before request:", userId);
   console.log("UserId before request:", fullName);
-  const [inputName, setInputName] = useState("");
+  console.log("email:", email);
+  const [inputEmail, setInputEmail] = useState("");
 
-  const handleNameChange = (e) => setInputName(e.target.value);
+  const handleNameChange = (e) => setInputEmail(e.target.value);
 
   const handleSubmit = async () => {
-    if (inputName.trim().toLowerCase() === fullName.toLowerCase()) {
+    if (inputEmail.trim().toLowerCase() === email.toLowerCase()) {
       try {
         const response = await axios.put(`/user/${userId}`, {
           isTerminated: true,
@@ -371,7 +372,7 @@ function AccountTerminationModal({
         onTerminate(false);
       }
     } else {
-      toast.error("Name does not match.");
+      toast.error("email does not match.");
       onTerminate(false);
     }
   };
@@ -382,11 +383,11 @@ function AccountTerminationModal({
         <div className="flex flex-col items-center px-7 pt-3.5 pb-7 w-full bg-lime-50 rounded-lg border border-red-800 border-solid shadow">
           <div className="self-stretch text-base leading-6 text-center text-black">
             Are you sure you want to terminate this account? If yes, write the
-            full name of the person of the account to be terminated.
+            email of the person of the account to be terminated.
           </div>
           <input
             type="text"
-            value={inputName}
+            value={inputEmail}
             onChange={handleNameChange}
             className="shrink-0 mt-8 bg-white border border-black border-solid h-[25px] w-[241px]"
           />
@@ -688,7 +689,7 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
                 onChange={() => handleRoleChange(role._id)}
                 className="mr-2"
               />
-              <label className="text-lg capitalize">{role.name}</label>
+              <label className="text-lg">{role.name}</label>
             </div>
           ))}
         </div>
@@ -1302,7 +1303,7 @@ function MyComponent() {
       {id && authUser && authUser.id !== id && (
         <button
           onClick={handleTerminateAccount}
-          className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-highlightRed rounded-lg border border-solid border-neutral-600"
+          className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-primary rounded-lg border border-solid border-neutral-600"
         >
           Terminate Account
         </button>
@@ -1331,6 +1332,7 @@ function MyComponent() {
             userId={id}
             user={user}
             fullName={`${user.firstName} ${user.lastName}`} // Safe access since we check if user exists
+            email={user.email}
           />
         )}
       </div>
