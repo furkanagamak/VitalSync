@@ -689,7 +689,7 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
                 onChange={() => handleRoleChange(role._id)}
                 className="mr-2"
               />
-              <label className="text-lg">{role.name}</label>
+              <label className="text-lg capitalize">{role.name}</label>
             </div>
           ))}
         </div>
