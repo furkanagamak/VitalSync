@@ -11,7 +11,7 @@ describe('Process Template List Tests', () => {
 
     it('successfully loads the process template management page', () => {
         cy.contains('Create from Existing or New Template').should('be.visible');
-        cy.contains('Create New Template').should('be.visible');
+        cy.contains('Create Instance from New Template').should('be.visible');
         cy.contains('Name').should('be.visible');
         cy.contains('Actions').should('be.visible');
     });
