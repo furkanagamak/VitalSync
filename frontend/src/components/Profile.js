@@ -17,6 +17,9 @@ import "react-calendar/dist/Calendar.css";
 import "./Calendar.css";
 import { FormControlLabel, Checkbox } from "@mui/material";
 
+axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
+axios.defaults.withCredentials = true;
+
 const notify = () => toast.success("Profile successfully updated.");
 const notifyErr = () => toast.error("There was an error updating the profile.");
 
@@ -575,6 +578,99 @@ function ContactInfo({ user }) {
   );
 }
 
+const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
+  const [availableRoles, setAvailableRoles] = useState([]);
+  const [selectedRoles, setSelectedRoles] = useState([]);
+
+  // Fetch all roles
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const result = await axios.get('/roles');
+        setAvailableRoles(result.data);
+      } catch (error) {
+        toast.error("Failed to fetch roles: " + error.message);
+      }
+    };
+    fetchRoles();
+  }, []);
+
+  // Fetch user's current roles
+  useEffect(() => {
+    const fetchUserRoles = async () => {
+      try {
+        const result = await axios.get(`/users/${userId}/eligibleRoles`);
+        setSelectedRoles(result.data.map(role => role._id));
+      } catch (error) {
+        toast.error("Failed to fetch user roles: " + error.message);
+      }
+    };
+    if (userId) {
+      fetchUserRoles();
+    }
+  }, [userId]);
+
+  // Handle role selection changes
+  const handleRoleChange = (roleId) => {
+    setSelectedRoles(prev => {
+      if (prev.includes(roleId)) {
+        return prev.filter(id => id !== roleId);
+      } else {
+        return [...prev, roleId];
+      }
+    });
+  };
+
+  // Save the updated roles
+  const saveRoles = async () => {
+    try {
+      await axios.put(`/updateRoles/${userId}`, { roles: selectedRoles });
+      toast.success("Roles updated successfully.");
+      onRequestClose();  // Close the modal
+    } catch (error) {
+      toast.error("Failed to update roles: " + error.message);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+      <div className="bg-[#f5f5dc] p-8 rounded-md border-2 border-primary shadow-lg">
+        <h2 className="text-xl font-semibold mb-4 text-center">Edit Eligible Roles</h2>
+        <div className="custom-scrollbar space-y-2 overflow-auto max-h-64">
+          {availableRoles.map(role => (
+            <div key={role._id} className="flex items-center justify-start">
+              <input
+                type="checkbox"
+                checked={selectedRoles.includes(role._id)}
+                onChange={() => handleRoleChange(role._id)}
+                className="mr-2"
+              />
+              <label className="text-lg">{role.name}</label>
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-center space-x-4 mt-4">
+          <button
+            onClick={onRequestClose}
+            className="px-4 py-2 rounded-md hover:underline text-black"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={saveRoles}
+            className="bg-primary text-white px-4 py-2 rounded-md hover:bg-red-600"
+          >
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 function ProfileDetails({ user }) {
   const [editMode, setEditMode] = useState(false);
   const [name, setName] = useState(
@@ -583,6 +679,7 @@ function ProfileDetails({ user }) {
   const [designation, setDesignation] = useState(user ? user.degree : "");
   const [specialty, setSpecialty] = useState(user ? user.position : "");
   const [department, setDepartment] = useState(user ? user.department : "");
+  const [isRolesModalOpen, setIsRolesModalOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -666,6 +763,17 @@ function ProfileDetails({ user }) {
       >
         {editMode ? "Save Changes" : "Edit Profile"}
       </button>
+      <button
+        className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
+        onClick={() => setIsRolesModalOpen(true)}
+      >
+        Edit Eligible Roles
+      </button>
+      <EditRolesModal
+        isOpen={isRolesModalOpen}
+        onRequestClose={() => setIsRolesModalOpen(false)}
+        userId={user?.userId}
+      />
     </div>
   );
 }

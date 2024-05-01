@@ -28,7 +28,7 @@ const SearchBar = ({onSearchChange}) => {
   };
 
   return (
-    <form onSubmit={handleSearch} className="w-1/5 inline-flex items-center rounded-full text-xl border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative">
+    <form onSubmit={handleSearch} className="inline-flex items-center rounded-full text-xl border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative">
       <button type="submit" className="flex items-center justify-center w-10 h-10 rounded-full bg-[#8E0000] mr-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
