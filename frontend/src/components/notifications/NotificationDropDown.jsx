@@ -48,11 +48,13 @@ const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
     socket?.on("procedure complete - refresh", handleNewNotification);
     socket?.on("new chat message - refresh", handleNewNotification);
     socket?.on("new process - refresh", handleNewNotification);
+    socket?.on("notification refresh", handleNewNotification);
 
     return () => {
       socket?.off("procedure complete - refresh", handleNewNotification);
       socket?.off("new chat message - refresh", handleNewNotification);
       socket?.off("new process - refresh", handleNewNotification);
+      socket?.off("notification refresh", handleNewNotification);
     };
   }, [user?.id, socket]);
 
@@ -105,7 +107,11 @@ const NotificationDDItem = ({ notification, closeDropDown }) => {
   const processId = notification.processID;
 
   return (
-    <Link to={`/processDetails/${processId}`} onClick={closeDropDown} className="no-underline">
+    <Link
+      to={`/processDetails/${processId}`}
+      onClick={closeDropDown}
+      className="no-underline"
+    >
       <div className="bg-primary text-white p-4 space-y-4">
         <section className="grid grid-cols-5">
           {CurrIcon}
