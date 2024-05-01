@@ -60,7 +60,7 @@ export function ResourceDropdownContent({ requiredResource, eligibleResources, a
 
 
 export function CreateResourcesAssignments({ sectionId, procedureId, procedureName, requiredResources, onClose, onProceed,
-  assignedResourcesGlobal, setAssignedResourcesGlobal, startTime, endTime }) {
+  startTime, endTime }) {
   const [openResources, setOpenResources] = useState(new Set());
   const [eligibleResources, setEligibleResources] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -77,9 +77,6 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
         ));
         const initialResources = responses.reduce((acc, res, index) => {
           acc[requiredResources[index].uniqueId] = res.data.filter(resourceInstance => {
-            // Check if the resource is not already assigned globally
-            if (assignedResourcesGlobal.has(resourceInstance._id)) return false;
-            
             // Check if resource is available during the required time
             const unavailableDuringProcedure = resourceInstance.unavailableTimes.some(time => {
               const start = moment(time.start);
@@ -100,10 +97,9 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
       setIsLoading(false);
     };
     fetchEligibleResources();
-  }, [requiredResources, assignedResourcesGlobal, startTime, endTime]);
+  }, [requiredResources, startTime, endTime]);
 
   const assignResource = (resourceUniqueId, resourceInstance) => {
-    setAssignedResourcesGlobal(prev => new Set([...prev, resourceInstance._id]));
     const updatedResources = {...eligibleResources};
     updatedResources[resourceUniqueId] = updatedResources[resourceUniqueId].filter(r => r._id !== resourceInstance._id);
     setEligibleResources(updatedResources);
@@ -111,8 +107,16 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
   };
 
   const toggleResource = (uniqueId) => {
-    setOpenResources(prev => new Set(prev.has(uniqueId) ? prev.delete(uniqueId) : prev.add(uniqueId)));
-  };
+    setOpenResources(prev => {
+        const newOpenResources = new Set(prev); 
+        if (prev.has(uniqueId)) {
+            newOpenResources.delete(uniqueId);
+        } else {
+            newOpenResources.add(uniqueId);
+        }
+        return newOpenResources;
+    });
+};
 
   const handleSave = () => {
     const allAssigned = requiredResources.every(resource => assignedResources[resource.uniqueId]);
@@ -135,6 +139,15 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
 
+  const autoAssignResources = () => {
+    requiredResources.forEach(requiredResource => {
+      const resourceEligibleInstances = eligibleResources[requiredResource.uniqueId];
+      if (resourceEligibleInstances && resourceEligibleInstances.length > 0 && !assignedResources[requiredResource.uniqueId]) {
+        assignResource(requiredResource.uniqueId, resourceEligibleInstances[0]);  
+      }
+    });
+  };
+
   if (isLoading) return <div>Loading...</div>;
 
   return (
@@ -142,6 +155,9 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
       <div className="flex justify-between items-center p-5">
         <button className="ml-5 hover:bg-red-900 border-black border-2 flex items-center justify-center bg-primary text-white rounded-full px-5 py-2 text-xl shadow" onClick={onClose}>
           <FaArrowLeft className="mr-3" /> Go Back
+        </button>
+        <button className="bg-blue-500 text-white text-xl py-2 px-4 rounded-full" onClick={autoAssignResources}>
+          Auto-Assign All
         </button>
         <button className="mr-10 mt-5 hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-7 py-3 text-3xl" onClick={handleSave}>
           Save
@@ -203,12 +219,11 @@ function NavButtons({ onBack, onProceed }) {
 
 export function PendingNewResources() {
   const { fetchedSections } = useProcessCreation();
-  const [openSections, setOpenSections] = useState(new Set(fetchedSections.map(section => section.name)));
+  const [openSections, setOpenSections] = useState(new Set(fetchedSections.map(section => section.sectionName)));
   const navigate = useNavigate();
   const [viewAlternateComponent, setViewAlternateComponent] = useState(false);
   const [selectedProcedure, setSelectedProcedure] = useState(null);
   const [selectedSectionId, setSelectedSectionId] = useState(null);
-  const [assignedResourcesGlobal, setAssignedResourcesGlobal] = useState(new Set());
   const [assignmentCompletion, setAssignmentCompletion] = useState({});
 
   useEffect(() => {
@@ -256,8 +271,6 @@ export function PendingNewResources() {
       requiredResources={selectedProcedure.requiredResources}  
       onClose={handleClose} 
       onProceed={handleClose} 
-      assignedResourcesGlobal={assignedResourcesGlobal}
-      setAssignedResourcesGlobal={setAssignedResourcesGlobal}
       startTime={selectedProcedure.startTime} 
       endTime={selectedProcedure.endTime} />;
   }

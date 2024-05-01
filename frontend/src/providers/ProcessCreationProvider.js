@@ -139,11 +139,15 @@ useEffect(() => {
       }
   };
 
+  const generateRandomId = () => {
+    return Math.random().toString(36).substring(2, 6);  
+  };
+
   const expandItemsByQuantity = (items, itemType) => {
     return items.reduce((acc, item, index) => {
       const expandedItems = Array(item.quantity).fill().map((_, idx) => ({
         ...item[itemType],
-        uniqueId: `${item[itemType]._id}-${idx}`, 
+        uniqueId: `${item[itemType]._id}-${generateRandomId()}`, 
         ...(itemType === 'role' ? { account: null } : { resourceInstance: null })
       }));
       return [...acc, ...expandedItems];

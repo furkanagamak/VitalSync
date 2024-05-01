@@ -58,7 +58,7 @@ export function RoleDropdownContent({ role, eligibleStaff, assignStaff, assigned
 }
 
 export function CreateStaffAssignments({ sectionId, procedureId, procedureName, roles, onClose, onProceed,
-  assignedStaffGlobal, setAssignedStaffGlobal,startTime, endTime}) {
+  startTime, endTime}) {
   const [openRoles, setOpenRoles] = useState(new Set());
   const [eligibleStaff, setEligibleStaff] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -78,7 +78,7 @@ export function CreateStaffAssignments({ sectionId, procedureId, procedureName, 
         const responses = await Promise.all(roleIds.map(id => axios.get(`/users/accountsByRole/${id}`)));
         const initialStaff = responses.reduce((acc, res, index) => {
           acc[roles[index].uniqueId] = res.data.filter(staff => {
-            if (staff.isTerminated || assignedStaffGlobal.has(staff._id)) return false;
+            if (staff.isTerminated) return false;
             
             // Exclude staff already assigned to any role in this procedure
             const assignedInProcedure = Object.values(assignedStaff).some(assigned => assigned._id === staff._id);
@@ -124,10 +124,9 @@ export function CreateStaffAssignments({ sectionId, procedureId, procedureName, 
       setIsLoading(false);
     };
     fetchEligibleStaff();
-  }, [roles, assignedStaffGlobal, startTime, endTime]);
+  }, [roles, startTime, endTime]);
 
   const assignStaff = (roleId, staff) => {
-    setAssignedStaffGlobal(prev => new Set([...prev, staff._id])); // Add to global assigned list
 
     const updatedStaff = Object.keys(eligibleStaff).reduce((acc, key) => {
       acc[key] = eligibleStaff[key].filter(s => s._id !== staff._id);
@@ -171,26 +170,39 @@ export function CreateStaffAssignments({ sectionId, procedureId, procedureName, 
 
   if (isLoading) return <div>Loading...</div>;
 
+  const autoAssignStaff = () => {
+    roles.forEach(role => {
+      const roleEligibleStaff = eligibleStaff[role.uniqueId];
+      if (roleEligibleStaff && roleEligibleStaff.length > 0 && !assignedStaff[role.uniqueId]) {
+        assignStaff(role.uniqueId, roleEligibleStaff[0]);  
+      }
+    });
+  };
+
 
   return (
     <div className="bg-secondary min-h-screen">
      <div className="flex justify-between items-center p-5">
         <button
-          className="ml-5 hover:bg-red-900 border-black border-2 flex items-center justify-center bg-primary text-white rounded-full px-5 py-2 text-xl shadow"
+          className="ml-5 bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center"
           style={{ maxWidth: '30%' }}
           onClick={onClose}
         >
           <FaArrowLeft className="mr-3" />
           Go Back
         </button>
-
+        <button className="bg-blue-500 text-white text-xl py-2 px-4 rounded-full" onClick={autoAssignStaff}>
+          Auto-Assign All
+        </button>
         <button
-          className="mr-10 mt-5 hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-7 py-3 text-3xl"
+
+          className="mr-10 mt-5 bg-highlightGreen text-white text-2xl py-4 px-16 rounded-3xl"
           style={{ maxWidth: '30%' }}
           onClick={handleSave}
         >
           Save
         </button>
+        
       </div>
 
       <div className="container mx-auto p-8">
@@ -204,7 +216,7 @@ export function CreateStaffAssignments({ sectionId, procedureId, procedureName, 
               <div className="flex justify-between items-center">
                 <div className="text-3xl font-bold flex items-center">
                   <span>{capitalizeFirstLetter(role.name)}</span>
-                  {role.account ? (
+                  {assignedStaff[role.uniqueId] ? (
                     <FaCheck className="text-green-500 ml-4 text-4xl" />
                   ) : (
                     <FaRegCalendarTimes className="text-highlightRed ml-4 text-4xl" />
@@ -232,7 +244,7 @@ export function CreateStaffAssignments({ sectionId, procedureId, procedureName, 
   );
 }
 
-function NavButtons({ onBack, onProceed }) {
+function NavButtons({ onBack, onProceed, allAssigned }) {
 
     return (
         <div className="flex justify-between items-center mb-5">
@@ -250,14 +262,16 @@ function NavButtons({ onBack, onProceed }) {
 
 export function PendingNewStaff() {
   const { fetchedSections } = useProcessCreation(); 
-  const [openSections, setOpenSections] = useState(new Set(fetchedSections.map(section => section.name)));
+  const [openSections, setOpenSections] = useState(() => new Set(fetchedSections.map(section => section.name)));
   const navigate = useNavigate();
   const [viewAlternateComponent, setViewAlternateComponent] = useState(false);  //change name
   const [selectedProcedure, setSelectedProcedure] = useState(null);
   const [selectedSectionId, setSelectedSectionId] = useState(null);  // Add state to track selected section ID
-  const [assignedStaffGlobal, setAssignedStaffGlobal] = useState(new Set()); // Store assigned staff IDs globally
   const [assignmentCompletion, setAssignmentCompletion] = useState({});
 
+  useEffect(() => {
+    setOpenSections(new Set(fetchedSections.map(section => section.sectionName)));
+  }, [fetchedSections]);
 
 
   const toggleSection = (sectionName) => {
@@ -275,6 +289,10 @@ export function PendingNewStaff() {
   };
 
   const handleProceed = () => {
+    if(!checkIfAllProceduresAssigned()){
+      toast.error("Please complete assignments in all procedures before proceeding.");
+      return;
+    }
     navigate("/processManagement/newProcess/reviewStaffAssignments");
   };
 
@@ -307,13 +325,23 @@ export function PendingNewStaff() {
     return <CreateStaffAssignments 
     sectionId={selectedSectionId} procedureId={selectedProcedure._id} 
     procedureName={selectedProcedure.procedureName} roles={selectedProcedure.roles}  
-    onClose={handleClose} onProceed={handleClose} assignedStaffGlobal={assignedStaffGlobal}
-    setAssignedStaffGlobal={setAssignedStaffGlobal} startTime={selectedProcedure.startTime} endTime={selectedProcedure.endTime}/>;
+    onClose={handleClose} onProceed={handleClose} 
+    startTime={selectedProcedure.startTime} endTime={selectedProcedure.endTime}/>;
   }
+
+  const checkIfAllProceduresAssigned = () => {
+    return !fetchedSections.some(section => 
+      section.procedureTemplates.some(procedure => 
+        !isFullyAssigned(procedure._id)
+      )
+    );
+  };
+
+  const allProceduresAssigned = checkIfAllProceduresAssigned();
 
   return (
     <div className="container mx-auto p-8">
-      <NavButtons onBack={handleGoBack} onProceed={handleProceed} />
+      <NavButtons onBack={handleGoBack} onProceed={handleProceed} allAssigned={allProceduresAssigned}/>
       <div className="bg-secondary border-red-600 border-2 rounded-md p-4">
         <p className="text-left text-lg italic mb-7">
           Assign necessary staff to all procedures:
