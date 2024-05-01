@@ -1926,6 +1926,7 @@ app.get("/users/:userId/notifications", async (req, res) => {
   }
 });
 
+app.get("/chatMessages/:pid", messagesController.getChatMessagesByProcess);
 
 app.get("/processInstancesActive", async (req, res) => {
   try {
