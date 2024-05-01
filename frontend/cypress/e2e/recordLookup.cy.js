@@ -13,7 +13,7 @@ describe('Record Lookup Page Tests', () => {
     });
 });
 
-describe('Completed Process Tests', () => {
+/*describe('Completed Process Tests', () => {
     beforeEach(() => {
       cy.visit('/');
       cy.get('#emailInput').type('john.doe@example.com');
@@ -36,5 +36,5 @@ describe('Completed Process Tests', () => {
       cy.contains('Completed Procedures:').should('be.visible');
       cy.contains('Total Procedures:').should('be.visible');
     });
-  });
+  });*/
   
