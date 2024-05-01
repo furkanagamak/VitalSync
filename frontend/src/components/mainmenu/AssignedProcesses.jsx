@@ -97,7 +97,11 @@ const AssignedProcesses = () => {
         <h1 className="text-primary underline text-3xl font-bold text-center">
           My Process Dashboard
         </h1>
-        <p className="text-center text-xl mt-4">Hello, {user.firstName} {user.lastName}, you have {assignedProcesses?.length || "no"} assigned processes.</p>
+        <p className="text-center text-xl mt-4">
+          Hello, {user.firstName} {user.lastName}, you have{" "}
+          {assignedProcesses?.length || "no"}{" "}
+          {assignedProcesses?.length === 1 ? "process" : "processes"} assigned.
+        </p>
         <div className="space-y-8 mb-4 mt-8">
           {displayingProcesses.map((process) => (
             <Process
