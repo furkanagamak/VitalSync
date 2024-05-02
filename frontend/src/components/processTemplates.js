@@ -190,6 +190,7 @@ const ProcessTable = ({ filter , fromLocation}) => {
                   cursor: "pointer",
                   marginRight: "10px",
                 }}
+                title="Edit"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -211,6 +212,7 @@ const ProcessTable = ({ filter , fromLocation}) => {
                   padding: "0",
                   cursor: "pointer",
                 }}
+                title="Delete"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
