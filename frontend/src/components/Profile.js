@@ -848,11 +848,11 @@ function ProfileSection({ user, authUser, id }) {
           className="px-8 py-7 max-md:px-5 max-md:max-w-full"
           style={{ backgroundColor: "#F5F5DC" }}
         >
-          <div className="flex flex-row gap-5 max-md:flex-col max-md:gap-0 w-full">
-            <div className="flex-1 min-w-0">
+          <div className="flex flex-col xl:flex-row gap-5 w-full">
+            <div className="flex-1">
               <ProfileDetails user={user} authUser={authUser} id={id} />
             </div>
-            <div className="flex-2 min-w-0 pr-10">
+            <div className="flex-2">
               <ContactInfo user={user} authUser={authUser} id={id} />
             </div>
           </div>
@@ -1343,7 +1343,7 @@ function MyComponent() {
           </button>
         )}
       <div className="self-stretch mt-2 max-md:max-w-full">
-        <div className="flex gap-5 max-md:flex-col max-md:gap-0">
+        <div className="flex gap-5 flex-col xl:flex-row max-md:gap-0">
           <div className="flex flex-col w-[24%] max-md:ml-0 max-md:w-full">
             <ProfileImage
               authUser={authUser}

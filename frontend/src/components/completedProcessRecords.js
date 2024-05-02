@@ -236,6 +236,8 @@ const ProcessTable = ({ searchText }) => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
+                        wordBreak: 'break-word',  // Allow words to be broken
+                        whiteSpace: 'normal',
                       }}
                     >
                       {column.render("Header")}

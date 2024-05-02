@@ -185,7 +185,7 @@ function MyComponent() {
         className="w-full flex justify-end items-center"
       >
         <select
-          className="px-3 py-2 border rounded mr-2"
+          className="px-3 py-2 border rounded mr-2 w-full sm:w-64"
           value={filterValue}
           onChange={(e) => setFilterValue(e.target.value)}
         >

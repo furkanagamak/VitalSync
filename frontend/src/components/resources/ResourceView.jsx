@@ -99,16 +99,23 @@ const ResourceView = ({ resources, setResources, navToEditResource }) => {
         <Searchbar setTextFilter={setTextFilter} />
         <CreateNewButton />
       </section>
-      <section className="flex">
-        <Filters tabFilter={tabFilter} setTabFilter={setTabFilter} />
-        <Table
-          resources={displayingResources}
-          navToEditResource={navToEditResource}
-          removeResourceById={removeResourceById}
-        />
+      <section className="flex flex-col xl:flex-row w-full">
+        <div className="flex justify-center">
+          <Filters tabFilter={tabFilter} setTabFilter={setTabFilter} />
+        </div>
+        <div className="flex-1">
+          <Table
+            resources={displayingResources}
+            navToEditResource={navToEditResource}
+            removeResourceById={removeResourceById}
+          />
+        </div>
       </section>
     </div>
   );
+  
+  
+  
 };
 
 const Searchbar = ({ setTextFilter }) => {
@@ -184,7 +191,6 @@ const Filters = ({ tabFilter, setTabFilter }) => {
 };
 
 const Table = ({ resources, navToEditResource, removeResourceById }) => {
-  // define all columns and their accessors
   const columns = useMemo(
     () => [
       {
@@ -247,13 +253,11 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
     usePagination
   );
 
-  // delete modal necessities
+  // Modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [resourceToDelete, setResourceToDelete] = useState(null);
 
-  // actions for delete modal
   const handleDelete = () => {
-    // Perform deletion logic here
     console.log("Deleting resource:", resourceToDelete);
     removeResourceById(resourceToDelete.uniqueIdentifier);
     setShowDeleteModal(false);
@@ -274,8 +278,8 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
           onCancel={handleCancel}
         />
       )}
-      <div className="w-full mx-12">
-        <table {...getTableProps()} className="w-full">
+      <div className="w-full overflow-x-auto">
+        <table {...getTableProps()} className="w-full min-w-xs table-auto">
           <thead>
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
@@ -285,6 +289,11 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
                     className={`border-b-2 border-[#aa0000] py-2 px-4 text-left text-highlightRed ${
                       i % 2 === 0 ? "bg-secondary" : ""
                     }`}
+                    style={{
+                      wordBreak: 'break-word',  // Allow words to be broken
+                      whiteSpace: 'normal',
+                      minWidth: column.minWidth,
+                    }}
                   >
                     <div className="flex text-center">
                       {column.render("Header")}
@@ -312,22 +321,15 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
               page.map((row) => {
                 prepareRow(row);
                 return (
-                  <tr
-                    {...row.getRowProps()}
-                    className="border-b-2 border-[#aa0000]"
-                  >
-                    {row.cells.map((cell, i) => {
-                      return (
-                        <td
-                          {...cell.getCellProps()}
-                          className={`py-6 px-4 ${
-                            i % 2 === 0 ? "bg-secondary" : ""
-                          }`}
-                        >
-                          {cell.render("Cell")}
-                        </td>
-                      );
-                    })}
+                  <tr {...row.getRowProps()} className="border-b-2 border-[#aa0000]">
+                    {row.cells.map((cell, i) => (
+                      <td
+                        {...cell.getCellProps()}
+                        className={`py-6 px-4 ${i % 2 === 0 ? "bg-secondary" : ""}`}
+                      >
+                        {cell.render("Cell")}
+                      </td>
+                    ))}
                   </tr>
                 );
               })
@@ -336,7 +338,9 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
                 <td
                   colSpan={columns.length}
                   className="text-center py-6"
-                  style={{ borderBottom: "none" }}
+                  style={{ borderBottom: 'none',
+                  wordBreak: 'break-word',  // Allow words to be broken
+                  whiteSpace: 'normal', }}
                 >
                   No results found
                 </td>
@@ -376,5 +380,6 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
     </>
   );
 };
+
 
 export default ResourceView;

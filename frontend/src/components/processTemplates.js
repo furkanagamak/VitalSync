@@ -373,6 +373,8 @@ const ProcessTable = ({ filter , fromLocation}) => {
                         borderBottom: "1px solid #8E0000",
                         padding: "10px",
                         verticalAlign: "middle",
+                        wordBreak: 'break-word',  // Allow words to be broken
+                        whiteSpace: 'normal'
                       }}>
                         {cell.render("Cell")}
                       </td>
@@ -437,24 +439,31 @@ const ProcessTemplateManagement = () => {
 
   return (
     <div className="flex flex-col items-center space-y-4 relative">
+      <div className="w-full flex justify-center items-center text-center">
+        <div className="flex-1 sm:flex-none">
           {incomingUrl ? (
-              <h1 className="text-4xl text-[#8E0000] text-center underline font-bold mt-5">
-            Create from Existing or New Template            </h1>
-            ) : (
-              <h1 className="text-4xl text-[#8E0000] text-center underline font-bold mt-5">
-                  Process Template Management
-              </h1>
-            )}
-
-      <div className="absolute right-8">
-        <CreateTemplateButton fromLocation={incomingUrl}/>
+            <h1 className="text-4xl text-[#8E0000] underline font-bold mt-5">
+              Create from Existing or New Template
+            </h1>
+          ) : (
+            <h1 className="text-4xl text-[#8E0000] underline font-bold mt-5">
+              Process Template Management
+            </h1>
+          )}
+        </div>
+        <div className="flex-none hidden xl:block absolute right-8 mt-4">
+          <CreateTemplateButton fromLocation={incomingUrl} />
+        </div>
       </div>
-      <SearchBar inputValue={searchInput} setInputValue={setSearchInput} fromLocation={incomingUrl}/>
+      <div className="block xl:hidden mt-4">
+        <CreateTemplateButton fromLocation={incomingUrl} />
+      </div>
+      <SearchBar inputValue={searchInput} setInputValue={setSearchInput} fromLocation={incomingUrl} />
       <div>
-        <ProcessTable filter={searchInput} fromLocation={incomingUrl}/>
+        <ProcessTable filter={searchInput} fromLocation={incomingUrl} />
       </div>
     </div>
-  );
+  );  
 };
 
 export default ProcessTemplateManagement;

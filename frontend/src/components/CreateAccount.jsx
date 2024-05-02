@@ -333,7 +333,7 @@ const Form1 = ({
   rolesList,
 }) => {
   return (
-    <div className="py-8 px-4">
+    <div className="py-8 px-4 mx-auto" >
       <section className="flex justify-center items-center relative py-4">
         <button
           onClick={navToTypeSelection}
