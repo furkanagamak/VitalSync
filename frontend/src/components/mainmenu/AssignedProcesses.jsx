@@ -90,7 +90,7 @@ const AssignedProcesses = () => {
     setTablePage((prevPage) => Math.max(prevPage - 1, 0));
   };
 
-  if (!displayingProcesses) return <div>Loading ...</div>;
+  if (!displayingProcesses || !user) return <div>Loading ...</div>;
   return (
     <div className="w-11/12 mx-auto">
       <div className="bg-secondary mt-4 p-8 rounded-xl">
@@ -116,7 +116,10 @@ const AssignedProcesses = () => {
         <span className="absolute left-0">
           Page{" "}
           <strong>
-            {tablePage + 1} of {Math.ceil(assignedProcesses.length / 3)}
+            {tablePage + 1} of{" "}
+            {assignedProcesses.length === 0
+              ? 1
+              : Math.ceil(assignedProcesses.length / 3)}
           </strong>
         </span>
         <div></div>
