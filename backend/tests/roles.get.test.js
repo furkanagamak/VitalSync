@@ -75,6 +75,11 @@ describe("GET /roles for creating resources", () => {
     const responseData = roleRes.body;
     const expectedData = [
       {
+        name: "Name",
+        description: "Description",
+        uniqueIdentifier: "UniqueIdentifier",
+      },
+      {
         name: "physician",
         description: "",
         uniqueIdentifier: "physician",
@@ -88,11 +93,6 @@ describe("GET /roles for creating resources", () => {
         name: "surgeon",
         description: "",
         uniqueIdentifier: "surgeon",
-      },
-      {
-        name: "Name",
-        description: "Description",
-        uniqueIdentifier: "UniqueIdentifier",
       },
       {
         name: "my test role 1",
