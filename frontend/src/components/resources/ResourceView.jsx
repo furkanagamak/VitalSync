@@ -115,7 +115,7 @@ const Searchbar = ({ setTextFilter }) => {
   const [searchText, setSearchText] = useState("");
 
   const handleSearch = (newSearchText) => {
-    setTextFilter(newSearchText); 
+    setTextFilter(newSearchText);
   };
 
   return (
@@ -127,7 +127,7 @@ const Searchbar = ({ setTextFilter }) => {
         value={searchText}
         onChange={(e) => {
           setSearchText(e.target.value);
-          handleSearch(e.target.value); 
+          handleSearch(e.target.value);
         }}
         onKeyPress={(event) => {
           if (event.key === "Enter") {
@@ -144,7 +144,6 @@ const Searchbar = ({ setTextFilter }) => {
     </div>
   );
 };
-
 
 const CreateNewButton = () => {
   return (
@@ -313,12 +312,17 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
               page.map((row) => {
                 prepareRow(row);
                 return (
-                  <tr {...row.getRowProps()} className="border-b-2 border-[#aa0000]">
+                  <tr
+                    {...row.getRowProps()}
+                    className="border-b-2 border-[#aa0000]"
+                  >
                     {row.cells.map((cell, i) => {
                       return (
                         <td
                           {...cell.getCellProps()}
-                          className={`py-6 px-4 ${i % 2 === 0 ? "bg-secondary" : ""}`}
+                          className={`py-6 px-4 ${
+                            i % 2 === 0 ? "bg-secondary" : ""
+                          }`}
                         >
                           {cell.render("Cell")}
                         </td>
@@ -330,9 +334,9 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
             ) : (
               <tr>
                 <td
-                  colSpan={columns.length} 
-                  className="text-center py-6" 
-                  style={{ borderBottom: 'none' }} 
+                  colSpan={columns.length}
+                  className="text-center py-6"
+                  style={{ borderBottom: "none" }}
                 >
                   No results found
                 </td>
@@ -344,7 +348,8 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
           <span className="absolute left-0">
             Page{" "}
             <strong>
-              {pageIndex + 1} of {pageOptions.length}
+              {pageIndex + 1} of{" "}
+              {pageOptions.length === 0 ? 1 : Math.ceil(pageOptions.length / 3)}
             </strong>
           </span>
           <div></div>

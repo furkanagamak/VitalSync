@@ -668,7 +668,7 @@ describe("GET /assignedProcesses", () => {
     await removePredefinedAccounts();
 
     // comment this function call and the same function call in beforeAll to persist the test data
-    // await clearTestData();
+    await clearTestData();
 
     await server.close();
     await mongoose.disconnect();

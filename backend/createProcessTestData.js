@@ -467,6 +467,7 @@ async function addInstances() {
     });
     console.log("Connected to MongoDB");
     await addTestData();
+    // await clearTestData();
   } catch (error) {
     console.error("Error:", error);
   } finally {
