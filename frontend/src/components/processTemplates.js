@@ -173,7 +173,7 @@ const ProcessTable = ({ filter , fromLocation}) => {
         Header: "Actions",
         Cell: ({ row }) => {
           return (
-            <div
+            <div className="flex justify-evenly flex-col md:flex-row"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -311,6 +311,7 @@ const ProcessTable = ({ filter , fromLocation}) => {
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
                   <th
+                  className={`text-base xl:text-xl border-b px-2 py-1 min-w-[${column.minWidth}px] text-red-800 border-red-800`}
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     style={{
                       ...column.style,
@@ -320,7 +321,8 @@ const ProcessTable = ({ filter , fromLocation}) => {
                       minWidth: column.minWidth,
                     }}
                   >
-                    <div
+                    <div 
+                      className="flex text-center flex-col xl:flex-row"
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -328,7 +330,8 @@ const ProcessTable = ({ filter , fromLocation}) => {
                       }}
                     >
                       {column.render("Header")}
-                      <span style={{ marginLeft: "3px", textAlign: "center" }}>
+                      <span 
+                      style={{ marginLeft: "3px", textAlign: "center" }}>
                         {column.isSorted ? (
                           column.isSortedDesc ? (
                             <svg
@@ -370,12 +373,13 @@ const ProcessTable = ({ filter , fromLocation}) => {
                 return (
                   <tr {...row.getRowProps()}>
                     {row.cells.map(cell => (
-                      <td {...cell.getCellProps()} style={{
+                      <td {...cell.getCellProps()} 
+                      className={`text-sm md:text-xl border-b border-red-800 py-2 px-4 align-middle whitespace-normal ${cell.column.className || ''}`}
+                        style={{
                         ...cell.column.style,
                         borderBottom: "1px solid #8E0000",
                         padding: "10px",
                         verticalAlign: "middle",
-                        wordBreak: 'break-word',  // Allow words to be broken
                         whiteSpace: 'normal'
                       }}>
                         {cell.render("Cell")}

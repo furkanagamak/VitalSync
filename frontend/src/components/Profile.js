@@ -762,7 +762,7 @@ function ProfileDetails({ user, authUser, id }) {
   };
 
   return (
-    <div className="flex flex-col grow gap-4 border-r border-black max-md:flex-wrap max-md:mt-10">
+    <div className="flex flex-col grow gap-4 lg:border-r border-black max-md:flex-wrap max-md:mt-10">
       <div className="flex flex-col grow shrink-0 self-start basis-0 w-full max-md:max-w-full">
         {editMode ? (
           <>

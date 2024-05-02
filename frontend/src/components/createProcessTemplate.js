@@ -298,7 +298,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
       {
         Header: "Actions",
         Cell: ({ row }) => (
-          <div
+          <div className="flex-col lg:flex-row"
             style={{
               display: "flex",
               alignItems: "center",
@@ -458,7 +458,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
               {headerGroups.map((headerGroup) => (
                 <tr {...headerGroup.getHeaderGroupProps()}>
                   {headerGroup.headers.map((column) => (
-                    <th
+                    <th className="text-base lg:text-lg"
                       {...column.getHeaderProps()}
                       style={{
                         ...column.style,
@@ -489,7 +489,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
                   <tr {...row.getRowProps()}>
                     {row.cells.map((cell) => {
                       return (
-                        <td
+                        <td className="text-sm lg:text-lg"
                           {...cell.getCellProps()}
                           style={{
                             ...cell.column.style,
@@ -632,46 +632,34 @@ const CreateProcessTemplateForm = () => {
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          marginTop: "1.2rem",
-          marginBottom: "2rem",
-        }}
-      >
-        <div style={{ position: "absolute", left: "2rem" }}>
-          <GoBackButton />
-        </div>
-        <div style={{ position: "absolute", right: "2rem" }}>
-          <CreateTemplateButton onCreate={createTemplate} instanceCreation={currentlyCreatingTemplate}/>
-        </div>
-        <h1
-          style={{
-            fontSize: "2.25rem",
-            lineHeight: "2.5rem",
-            textAlign: "center",
-            textDecoration: "underline",
-            color: "#8E0000",
-          }}
-        >
+      <div className="relative mt-6 mb-8 flex flex-col lg:flex-row items-center justify-center">
+        <h1 className="text-4xl leading-10 text-center underline text-red-800">
           Create New Process Template
         </h1>
+        <div className="flex flex-row mt-4 lg:mt-0 lg:flex-row-reverse lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 justify-between w-full px-4 lg:px-0">
+          <div>
+            <GoBackButton />
+          </div>
+          <div>
+            <CreateTemplateButton onCreate={createTemplate} instanceCreation={currentlyCreatingTemplate}/>
+          </div>
+        </div>
       </div>
       <ProcessForm 
-      process={process}
-      setProcess={setProcess}
-      createTemplate={createTemplate}/>
+        process={process}
+        setProcess={setProcess}
+        createTemplate={createTemplate}
+      />
       <SectionTable 
-      handleSessionUpdate={updateSessionStorage}
-      sections={sections}
-      setSections={setSections}
-      process={process}
-      setProcess={setProcess}/>
+        handleSessionUpdate={updateSessionStorage}
+        sections={sections}
+        setSections={setSections}
+        process={process}
+        setProcess={setProcess}
+      />
     </div>
   );
+  
 };
 
 export default CreateProcessTemplateForm;
