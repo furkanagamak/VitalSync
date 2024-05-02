@@ -185,7 +185,15 @@ const MessageItem = ({ message, currUser, isSuccessive, isLast }) => {
           {isLast && <div className="">{message.timeCreated}</div>}
         </section>
         <div className="w-10 h-10 mt-2">
-          {!isSuccessive && <img src={profileImg} className="w-10 h-10" />}
+          {!isSuccessive && (
+            <div className="h-10 w-10 overflow-hidden rounded">
+              <img
+                src={profileImg}
+                alt="Profile"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          )}
         </div>
       </div>
     );
@@ -193,7 +201,15 @@ const MessageItem = ({ message, currUser, isSuccessive, isLast }) => {
     return (
       <div className="flex space-x-4">
         <div className="w-10 h-10 mt-2">
-          {!isSuccessive && <img src={profileImg} className="w-10 h-10" />}
+          {!isSuccessive && (
+            <div className="h-10 w-10 overflow-hidden rounded">
+              <img
+                src={profileImg}
+                alt="Profile"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          )}
         </div>
         <section>
           {!isSuccessive && <h1 className="text-sm">{message.userName}</h1>}
