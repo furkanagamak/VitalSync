@@ -114,29 +114,30 @@ const ResourceView = ({ resources, setResources, navToEditResource }) => {
 const Searchbar = ({ setTextFilter }) => {
   const [searchText, setSearchText] = useState("");
 
-  const handleSearch = () => {
-    setTextFilter(searchText);
-  };
-
-  const handleKeyPress = (event) => {
-    if (event.key === "Enter") {
-      handleSearch();
-    }
+  const handleSearch = (newSearchText) => {
+    setTextFilter(newSearchText);
   };
 
   return (
-    <div className="relative w-1/2 h-12 ">
+    <div className="relative w-1/2 h-12">
       <input
         type="text"
         placeholder="Search for the resource here ..."
         className="border rounded-full h-12 py-2 pl-4 pr-12 w-full bg-secondary"
         value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        onKeyPress={handleKeyPress}
+        onChange={(e) => {
+          setSearchText(e.target.value);
+          handleSearch(e.target.value);
+        }}
+        onKeyPress={(event) => {
+          if (event.key === "Enter") {
+            handleSearch(searchText);
+          }
+        }}
       />
       <button
         className="absolute right-0 top-0 bottom-0 h-12 rounded-r-md pr-4"
-        onClick={handleSearch}
+        onClick={() => handleSearch(searchText)}
       >
         <AiOutlineSearch className="text-highlightRed h-8 w-8" />
       </button>
@@ -311,12 +312,17 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
               page.map((row) => {
                 prepareRow(row);
                 return (
-                  <tr {...row.getRowProps()} className="border-b-2 border-[#aa0000]">
+                  <tr
+                    {...row.getRowProps()}
+                    className="border-b-2 border-[#aa0000]"
+                  >
                     {row.cells.map((cell, i) => {
                       return (
                         <td
                           {...cell.getCellProps()}
-                          className={`py-6 px-4 ${i % 2 === 0 ? "bg-secondary" : ""}`}
+                          className={`py-6 px-4 ${
+                            i % 2 === 0 ? "bg-secondary" : ""
+                          }`}
                         >
                           {cell.render("Cell")}
                         </td>
@@ -328,9 +334,9 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
             ) : (
               <tr>
                 <td
-                  colSpan={columns.length} 
-                  className="text-center py-6" 
-                  style={{ borderBottom: 'none' }} 
+                  colSpan={columns.length}
+                  className="text-center py-6"
+                  style={{ borderBottom: "none" }}
                 >
                   No results found
                 </td>
@@ -342,7 +348,8 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
           <span className="absolute left-0">
             Page{" "}
             <strong>
-              {pageIndex + 1} of {pageOptions.length}
+              {pageIndex + 1} of{" "}
+              {pageOptions.length === 0 ? 1 : Math.ceil(pageOptions.length / 3)}
             </strong>
           </span>
           <div></div>

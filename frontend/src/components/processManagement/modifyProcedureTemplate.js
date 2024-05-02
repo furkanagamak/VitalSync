@@ -254,7 +254,9 @@ const ProcedureForm = ({
       return;
     }
 
-    const spaceResourceExists = resources.some(resource => resource.type === "spaces");
+    const spaceResourceExists = resources.some(
+      (resource) => resource.type === "spaces"
+    );
     if (newResource.type === "spaces") {
       if (spaceResourceExists) {
         toast.error("You can only select one space resource.");
@@ -358,6 +360,7 @@ const ProcedureForm = ({
           value={procedure.name}
           onChange={handleInputChange}
           margin="normal"
+          id="name"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
         />
@@ -370,6 +373,7 @@ const ProcedureForm = ({
           value={procedure.description}
           onChange={handleInputChange}
           margin="normal"
+          id="description"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
         />
@@ -380,6 +384,7 @@ const ProcedureForm = ({
           value={procedure.estimatedTime}
           onChange={handleInputChange}
           margin="normal"
+          id="estimatedTime"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{
             style: { color: "#8E0000" },
@@ -406,6 +411,7 @@ const ProcedureForm = ({
           value={procedure.specialInstructions}
           onChange={handleInputChange}
           margin="normal"
+          id="specialInstructions"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
         />
@@ -423,6 +429,7 @@ const ProcedureForm = ({
                 Resource Type
               </InputLabel>
               <Select
+                id="selectType"
                 labelId="resourcetype"
                 label="Resource Type"
                 value={newResource.type}
@@ -442,6 +449,7 @@ const ProcedureForm = ({
                 Resource Name
               </InputLabel>
               <Select
+                id="selectName"
                 labelId="resourcename"
                 label="Resource Name"
                 value={newResource.name}
@@ -547,6 +555,7 @@ const ProcedureForm = ({
                         style={{ color: "#8E0000" }}
                         edge="end"
                         aria-label="delete"
+                        id="deleteResource"
                         onClick={() => deleteResource(index)}
                       >
                         <DeleteIcon />
@@ -570,6 +579,7 @@ const ProcedureForm = ({
                 Role Name
               </InputLabel>
               <Select
+                id="selectRole"
                 labelId="rolename"
                 className="capitalize"
                 label="Role Name"

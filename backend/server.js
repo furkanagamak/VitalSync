@@ -129,6 +129,34 @@ io.on("connection", async (socket) => {
     });
   });
 
+  socket.on("join process chat room", async (processID) => {
+    // check process instance existence
+    const processInstance = await ProcessInstance.findOne({
+      processID: processID,
+    });
+    if (!processInstance)
+      return console.log(
+        `user ${socket._uid} attempted to join a room ${processID} that does not exists`
+      );
+
+    socket.join(`chat-${processID}`);
+    console.log(`socket: ${socket.id} has joined chat room: ${processID}`);
+  });
+
+  socket.on("leave process chat room", async (processID) => {
+    // check process instance existence
+    const processInstance = await ProcessInstance.findOne({
+      processID: processID,
+    });
+    if (!processInstance)
+      return console.log(
+        `user ${socket._uid} attempted to leave a room ${processID} that does not exists`
+      );
+
+    socket.leave(`chat-${processID}`);
+    console.log(`socket: ${socket.id} has left chat room: ${processID}`);
+  });
+
   socket.on("chatMessage", async (userId, text, processID) => {
     // checks for valid userId and processID
     const messageUser = await Account.findOne({ _id: userId });
@@ -136,7 +164,10 @@ io.on("connection", async (socket) => {
       throw new Error(`User ${userId} sending message does not exists`);
     const process = await ProcessInstance.findOne({ processID: processID });
     if (!process) throw new Error(`Process ${processID} does not exists`);
-
+    if (process.currentProcedure === null)
+      throw new Error(
+        `User ${messageUser._id} attempted to chat in an completed process`
+      );
     // creates new message and add them to message history
     const newMessage = await Message({
       userId: messageUser._id,
@@ -149,13 +180,16 @@ io.on("connection", async (socket) => {
     await process.save();
 
     // Find all unique users associated with this process (excluding the message sender)
-    const procedureInstances = await ProcedureInstance.find({ processID: processID });
+    const procedureInstances = await ProcedureInstance.find({
+      processID: processID,
+    });
     const usersSet = new Set();
     for (let procedure of procedureInstances) {
       for (let roleAssignment of procedure.rolesAssignedPeople) {
         for (let account of roleAssignment.accounts) {
-          const accountId = account.toString();  // Convert ObjectId to string
-          if (accountId !== userId.toString()) { // Compare strings and exclude the sender
+          const accountId = account.toString(); // Convert ObjectId to string
+          if (accountId !== userId.toString()) {
+            // Compare strings and exclude the sender
             usersSet.add(accountId);
           }
         }
@@ -166,8 +200,8 @@ io.on("connection", async (socket) => {
     usersSet.forEach(async (accountId) => {
       const notification = new Notification({
         userId: accountId,
-        type: 'Chat Message',
-        title: 'Chat Message',
+        type: "Chat Message",
+        title: "Chat Message",
         text: `${messageUser.firstName} ${messageUser.lastName} has sent a new message in the process ${process.processName} with the process ID ${processID}.`,
         timeCreated: new Date(),
         processID: processID,
@@ -181,7 +215,8 @@ io.on("connection", async (socket) => {
       }
     });
 
-    io.to(processID).emit("new chat message - refresh");
+    io.to(`chat-${processID}`).emit("new chat message - refresh");
+    io.to(processID).emit("notification refresh");
   });
 
   socket.on("test", () => {
@@ -907,6 +942,33 @@ app.put("/user/:userId", async (req, res) => {
   }
 });
 
+app.post("/compare-passwords", async (req, res) => {
+  const { userId, newPassword } = req.body;
+
+  try {
+    const user = await Account.findById(userId);
+    if (!user) {
+      return res.status(404).send({ message: "User not found." });
+    }
+
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      res.send({
+        isSame: true,
+        message: "New password must be different from the old password.",
+      });
+    } else {
+      res.send({
+        isSame: false,
+        message: "Passwords are different, you can proceed.",
+      });
+    }
+  } catch (error) {
+    console.error("Error comparing passwords:", error);
+    res.status(500).send({ message: "Failed to compare passwords." });
+  }
+});
+
 app.post("/verify-password", async (req, res) => {
   const { userId, password } = req.body;
   try {
@@ -1181,12 +1243,10 @@ app.get("/resources/byName/:name", async (req, res) => {
     res.json(resourceInstances);
   } catch (error) {
     console.error("Error fetching resource instances by name:", error);
-    res
-      .status(500)
-      .json({
-        message: "Error fetching resource instances",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error fetching resource instances",
+      error: error.message,
+    });
   }
 });
 
@@ -1925,38 +1985,49 @@ app.get("/users/:userId/notifications", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
 app.get("/chatMessages/:pid", messagesController.getChatMessagesByProcess);
 
 app.get("/processInstancesActive", async (req, res) => {
   try {
     const processInstances = await ProcessInstance.find({})
       .populate({
-        path: 'patient',
-        select: 'fullName'
+        path: "patient",
+        select: "fullName",
       })
       .populate({
-        path: 'sectionInstances',
+        path: "sectionInstances",
         populate: {
-          path: 'procedureInstances',
-          model: 'ProcedureInstance',
+          path: "procedureInstances",
+          model: "ProcedureInstance",
           populate: [
             { path: "requiredResources", model: "ResourceTemplate" },
             { path: "assignedResources", model: "ResourceInstance" },
-            { path: "rolesAssignedPeople", populate: { path: "role", model: "Role" }},
-            { path: "rolesAssignedPeople", populate: { path: "accounts", model: "Account" }},
-            { path: "peopleMarkAsCompleted", populate: { path: "role", model: "Role" }},
-            { path: "peopleMarkAsCompleted", populate: { path: "accounts", model: "Account" }}
+            {
+              path: "rolesAssignedPeople",
+              populate: { path: "role", model: "Role" },
+            },
+            {
+              path: "rolesAssignedPeople",
+              populate: { path: "accounts", model: "Account" },
+            },
+            {
+              path: "peopleMarkAsCompleted",
+              populate: { path: "role", model: "Role" },
+            },
+            {
+              path: "peopleMarkAsCompleted",
+              populate: { path: "accounts", model: "Account" },
+            },
           ],
-          select: 'procedureName timeStart timeEnd'
-        }
+          select: "procedureName timeStart timeEnd",
+        },
       })
       .populate({
-        path: 'currentProcedure',
-        select: 'procedureName'  // Select only the necessary fields
+        path: "currentProcedure",
+        select: "procedureName", // Select only the necessary fields
       });
 
-    const allInstances = processInstances.map(pi => {
+    const allInstances = processInstances.map((pi) => {
       let totalProcedures = 0;
       let completedProcedures = 0;
       let nextProcedure = null;
@@ -1985,7 +2056,7 @@ app.get("/processInstancesActive", async (req, res) => {
             }
           }
         }
-        if (nextProcedure) break;  // Break outer loop if next procedure is found
+        if (nextProcedure) break; // Break outer loop if next procedure is found
       }
 
       return {
@@ -1993,24 +2064,39 @@ app.get("/processInstancesActive", async (req, res) => {
         processID: pi.processID,
         processName: pi.processName,
         description: pi.description,
-        patientFullName: pi.patient ? pi.patient.fullName : 'No patient',
-        procedures: pi.sectionInstances.flatMap(section => section.procedureInstances.map(proc => proc.procedureName)),
+        patientFullName: pi.patient ? pi.patient.fullName : "No patient",
+        procedures: pi.sectionInstances.flatMap((section) =>
+          section.procedureInstances.map((proc) => proc.procedureName)
+        ),
         totalProcedures: totalProcedures,
         completedProcedures: completedProcedures,
-        currentProcedure: pi.currentProcedure ? pi.currentProcedure.procedureName : 'Not Set',
-        nextProcedure: nextProcedure ? nextProcedure.procedureName : 'None'
+        currentProcedure: pi.currentProcedure
+          ? pi.currentProcedure.procedureName
+          : "Not Set",
+        nextProcedure: nextProcedure ? nextProcedure.procedureName : "None",
       };
     });
 
     res.json(allInstances);
   } catch (error) {
-    console.error('Error fetching process instances:', error);
-    res.status(500).send('Internal server error');
+    console.error("Error fetching process instances:", error);
+    res.status(500).send("Internal server error");
   }
 });
 
-
 app.get("/chatMessages/:pid", messagesController.getChatMessagesByProcess);
+
+app.get("/processCompleted/:pid", async (req, res) => {
+  if (!req.params.pid) return res.status(400).send("No process id provided!");
+  const processInstance = await ProcessInstance.findOne({
+    processID: req.params.pid,
+  });
+  if (!processInstance)
+    return res.status(400).send("The provided process ID does not exists");
+
+  const isCompleted = processInstance.currentProcedure === null;
+  return res.status(200).send(isCompleted);
+});
 
 app.get("/processInstances", async (req, res) => {
   //NOTE this is for records and filters for complete processes
@@ -2165,7 +2251,7 @@ app.post("/processInstances", async (req, res) => {
         sectionInstance.procedureInstances.push(procedureInstance._id);
 
         // Collect unique user IDs
-        procedure.roles.forEach(role => {
+        procedure.roles.forEach((role) => {
           allUserIds.add(role.account);
         });
         if (!processInstance.currentProcedure) {
@@ -2216,67 +2302,72 @@ app.post("/processInstances", async (req, res) => {
 
     await processInstance.save();
 
-
     console.log(allUserIds);
 
     // Send notifications to all unique users
     const notificationDetails = {
-      type: 'action',
-      title: 'New Assigned Process',
-      text: 'You have been added to a new process ' + processInstance.processName + ' and process ID ' + processInstance.processID + '. Please check your assigned processes for more details.',
+      type: "action",
+      title: "New Assigned Process",
+      text:
+        "You have been added to a new process " +
+        processInstance.processName +
+        " and process ID " +
+        processInstance.processID +
+        ". Please check your assigned processes for more details.",
       timeCreated: new Date(),
       processID: processInstance.processID,
     };
 
-    allUserIds.forEach(async userId => {
+    allUserIds.forEach(async (userId) => {
       const notification = new Notification({
         userId,
-        ...notificationDetails
+        ...notificationDetails,
       });
       await notification.save();
 
       // Update user's notification box
-      await Account.updateOne({ _id: userId }, {
-        $push: { notificationBox: notification._id }
-      });
+      await Account.updateOne(
+        { _id: userId },
+        {
+          $push: { notificationBox: notification._id },
+        }
+      );
     });
 
     io.sockets.emit("new process - refresh");
 
     res.status(201).send(processInstance);
   } catch (error) {
-    res
-      .status(500)
-      .send({
-        message: "Failed to create process instance",
-        error: error.toString(),
-      });
+    res.status(500).send({
+      message: "Failed to create process instance",
+      error: error.toString(),
+    });
   }
 });
 
-app.get('/users/:userId/eligibleRoles', async (req, res) => {
+app.get("/users/:userId/eligibleRoles", async (req, res) => {
   try {
-      const userId = req.params.userId;
-      
-      if (!mongoose.Types.ObjectId.isValid(userId)) {
-          return res.status(400).send('Invalid user ID format');
-      }
+    const userId = req.params.userId;
 
-      const account = await Account.findById(userId)
-          .populate('eligibleRoles')
-          .exec();
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).send("Invalid user ID format");
+    }
 
-      if (!account) {
-          return res.status(404).send('User not found');
-      }
+    const account = await Account.findById(userId)
+      .populate("eligibleRoles")
+      .exec();
 
-      res.json(account.eligibleRoles);
+    if (!account) {
+      return res.status(404).send("User not found");
+    }
+
+    res.json(account.eligibleRoles);
   } catch (error) {
-      res.status(500).send('Server error: ' + error.message);
+    res.status(500).send("Server error: " + error.message);
   }
 });
 
-app.get('/roles', async (req, res) => {
+app.get("/roles", async (req, res) => {
   try {
     const roles = await Role.find({});
     res.status(200).json(roles);
@@ -2285,33 +2376,57 @@ app.get('/roles', async (req, res) => {
   }
 });
 
-app.put('/updateRoles/:userId', async (req, res) => {
+app.put("/updateRoles/:userId", async (req, res) => {
   const { userId } = req.params;
-  const { roles } = req.body;  // Expect an array of role IDs
+  const { roles } = req.body; // Expect an array of role IDs
 
   if (!roles) {
-    return res.status(400).send('Roles array is required.');
+    return res.status(400).send("Roles array is required.");
   }
 
   try {
     // Ensure all provided role IDs are valid MongoDB Object IDs
-    if (!roles.every(roleId => mongoose.Types.ObjectId.isValid(roleId))) {
-      return res.status(400).send('Invalid role ID provided.');
+    if (!roles.every((roleId) => mongoose.Types.ObjectId.isValid(roleId))) {
+      return res.status(400).send("Invalid role ID provided.");
     }
 
     const updatedAccount = await Account.findByIdAndUpdate(
       userId,
       { $set: { eligibleRoles: roles } },
       { new: true, runValidators: true }
-    ).populate('eligibleRoles'); 
+    ).populate("eligibleRoles");
 
     if (!updatedAccount) {
-      return res.status(404).send('User not found.');
+      return res.status(404).send("User not found.");
     }
 
     res.status(200).json(updatedAccount);
   } catch (error) {
     res.status(500).send(`Error updating user roles: ${error.message}`);
+  }
+});
+
+app.get("/positions", async (req, res) => {
+  try {
+    // Fetch only positions from accounts where isTerminated is false
+    const positions = await Account.find({ isTerminated: false }).distinct(
+      "position"
+    );
+    res.json(positions);
+  } catch (error) {
+    res.status(500).send("Error fetching positions from the database.");
+  }
+});
+
+app.get("/departments", async (req, res) => {
+  try {
+    // Fetch only departments from accounts where isTerminated is false
+    const departments = await Account.find({ isTerminated: false }).distinct(
+      "department"
+    );
+    res.json(departments);
+  } catch (error) {
+    res.status(500).send("Error fetching departments from the database.");
   }
 });
 

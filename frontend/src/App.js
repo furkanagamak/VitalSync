@@ -1,10 +1,5 @@
 import toast, { Toaster } from "react-hot-toast";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/navbar.jsx";
 import Login from "./components/Login.js";
 import RecoveryPage from "./components/RecoveryPage.js";
@@ -18,8 +13,7 @@ import PendingNewStaff from "./components/processManagement/createProcessPending
 import CreateReviewStaffAssignments from "./components/processManagement/createProcessReviewStaff.js";
 import CreateReviewResourceAssignments from "./components/processManagement/createProcessReviewResources.js";
 import ProcessDetailsPreview from "./components/processManagement/previewProcess.js";
-import ProcessStartTime from "./components/processManagement/processStartTime.js"
-
+import ProcessStartTime from "./components/processManagement/processStartTime.js";
 
 //Modifying process instances
 import ActiveProcessesList from "./components/processManagement/activeProcessesList.js";
@@ -56,13 +50,10 @@ import ModifyProcessTemplateForm from "./components/modifyProcessTemplate.js";
 import ModifySectionForm from "./components/modifySection.js";
 import NotFoundPage from "./components/NotFoundPage.js";
 
-
 import { AuthProvider } from "./providers/authProvider.js";
 import { SocketContextProvider } from "./providers/SocketProvider";
 import { ProcessCreationProvider } from "./providers/ProcessCreationProvider";
 import { ProcessModificationProvider } from "./providers/ProcessModificationProvider";
-
-
 
 const notify = () => toast("Here is your toast.");
 
@@ -123,10 +114,10 @@ function App() {
               <Route path="newProcess/preview" element={<ProcessDetailsPreview />}/>
             </Route>
 
-              <Route
-                path="/recordLookup"
-                element={<CompletedProcessRecords />}
-              />
+                <Route
+                  path="/recordLookup"
+                  element={<CompletedProcessRecords />}
+                />
 
               <Route path="/recordProcess" element={<CompletedProcess />} />
 

@@ -1,35 +1,19 @@
-import React, { useEffect,useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useTable, useSortBy, usePagination } from "react-table";
 import { TbLayoutGridAdd } from "react-icons/tb";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import axios from "axios";
 
 const notify = () => toast.success("Process Template Deleted!");
 
-const SearchBar = ({onSearchChange}) => {
-  const [inputValue, setInputValue] = useState("");
-
-  const handleClearInput = () => {
-    setInputValue("");
-    onSearchChange(""); 
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault(); 
-    onSearchChange(inputValue);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleSearch(e);
-    }
-  };
+const SearchBar = ({ inputValue, setInputValue }) => {
+  const handleClearInput = () => setInputValue("");
 
   return (
-    <form onSubmit={handleSearch} className="inline-flex items-center rounded-full text-xl border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative">
-      <button type="submit" className="flex items-center justify-center w-10 h-10 rounded-full bg-[#8E0000] mr-4">
+    <div className="inline-flex items-center rounded-full text-xl border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative">
+      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#8E0000]">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-6 w-6 text-white"
@@ -44,7 +28,7 @@ const SearchBar = ({onSearchChange}) => {
             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
           />
         </svg>
-      </button>
+      </div>
       <input
         type="search"
         placeholder="Search for process records"
@@ -52,12 +36,10 @@ const SearchBar = ({onSearchChange}) => {
         style={{ minWidth: "275px" }}
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
-        onKeyDown={handleKeyDown}
       />
       {inputValue && (
         <button
           onClick={handleClearInput}
-          type="button"
           className="absolute right-4 text-[#8E0000]"
           style={{ outline: "none" }}
         >
@@ -75,25 +57,7 @@ const SearchBar = ({onSearchChange}) => {
           </svg>
         </button>
       )}
-    </form>
-  );
-};
-
-const CreateTemplateButton = () => {
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    navigate("/CreateProcessTemplateForm");
-  };
-
-  return (
-    <button
-      className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
-      onClick={handleClick}
-    >
-      <TbLayoutGridAdd className="mr-2 size-10" />
-      Create Template
-    </button>
+    </div>
   );
 };
 
@@ -103,16 +67,18 @@ const ProcessTable = ({ searchText }) => {
   useEffect(() => {
     const fetchProcesses = async () => {
       try {
-        const response = await axios.get('/processInstances');
-        setProcesses(response.data.map(process => ({
-          id: process.processID,
-          patient: process.patientFullName, 
-          description: process.description,
-          name: process.processName,
-          procedures: process.procedures.join(', ')
-        })));
+        const response = await axios.get("/processInstances");
+        setProcesses(
+          response.data.map((process) => ({
+            id: process.processID,
+            patient: process.patientFullName,
+            description: process.description,
+            name: process.processName,
+            procedures: process.procedures.join(", "),
+          }))
+        );
       } catch (error) {
-        console.error('Failed to fetch processes:', error);
+        console.error("Failed to fetch processes:", error);
       }
     };
 
@@ -120,16 +86,17 @@ const ProcessTable = ({ searchText }) => {
   }, []);
 
   const filteredProcesses = useMemo(() => {
-    return processes.filter(process =>
-      process.patient.toLowerCase().includes(searchText) ||
-      process.description.toLowerCase().includes(searchText) ||
-      process.name.toLowerCase().includes(searchText)
+    return processes.filter(
+      (process) =>
+        process.id.toLowerCase().includes(searchText) ||
+        process.patient.toLowerCase().includes(searchText) ||
+        process.description.toLowerCase().includes(searchText) ||
+        process.name.toLowerCase().includes(searchText) ||
+        process.procedures.toLowerCase().includes(searchText)
     );
   }, [processes, searchText]);
 
-
   const data = useMemo(() => filteredProcesses, [filteredProcesses]);
-  
 
   const columns = React.useMemo(
     () => [
@@ -150,13 +117,11 @@ const ProcessTable = ({ searchText }) => {
       {
         Header: "Description",
         accessor: "description",
-
       },
       {
         Header: "Procedures",
         accessor: "procedures",
         style: { backgroundColor: "#F5F5DC" },
-
       },
       {
         Header: "Actions",
@@ -195,7 +160,6 @@ const ProcessTable = ({ searchText }) => {
                   <path d="M572.52 241.4C518.29 135.59 410.93 64 288 64S57.68 135.64 3.48 241.41a32.35 32.35 0 0 0 0 29.19C57.71 376.41 165.07 448 288 448s230.32-71.64 284.52-177.41a32.35 32.35 0 0 0 0-29.19zM288 400a144 144 0 1 1 144-144 143.93 143.93 0 0 1-144 144zm0-240a95.31 95.31 0 0 0-25.31 3.79 47.85 47.85 0 0 1-66.9 66.9A95.78 95.78 0 1 0 288 160z" />
                 </svg>
               </button>
-              
             </div>
           );
         },
@@ -206,9 +170,11 @@ const ProcessTable = ({ searchText }) => {
     []
   );
 
-  const tableInstance = useTable({ columns, data: filteredProcesses }, useSortBy, usePagination);
-
-  
+  const tableInstance = useTable(
+    { columns, data: filteredProcesses },
+    useSortBy,
+    usePagination
+  );
 
   const {
     getTableProps,
@@ -310,13 +276,21 @@ const ProcessTable = ({ searchText }) => {
           </thead>
           <tbody {...getTableBodyProps()}>
             {page.length > 0 ? (
-              page.map(row => {
+              page.map((row) => {
                 prepareRow(row);
                 return (
                   <tr {...row.getRowProps()}>
-                    {row.cells.map(cell => {
+                    {row.cells.map((cell) => {
                       return (
-                        <td {...cell.getCellProps()} style={{ ...cell.column.style, borderBottom: "1px solid #8E0000", padding: "10px", verticalAlign: "middle" }}>
+                        <td
+                          {...cell.getCellProps()}
+                          style={{
+                            ...cell.column.style,
+                            borderBottom: "1px solid #8E0000",
+                            padding: "10px",
+                            verticalAlign: "middle",
+                          }}
+                        >
                           {cell.render("Cell")}
                         </td>
                       );
@@ -326,7 +300,10 @@ const ProcessTable = ({ searchText }) => {
               })
             ) : (
               <tr>
-                <td colSpan={columns.length} style={{ textAlign: 'center', padding: '10px' }}>
+                <td
+                  colSpan={columns.length}
+                  style={{ textAlign: "center", padding: "10px" }}
+                >
                   No results found
                 </td>
               </tr>
@@ -366,17 +343,17 @@ const ProcessTable = ({ searchText }) => {
 };
 
 const ProcessTemplateManagement = () => {
-  const [searchText, setSearchText] = useState("");
+  const [searchInput, setSearchInput] = useState("");
 
   return (
     <div className="flex flex-col items-center space-y-4 relative">
       <h1 className="text-4xl text-[#8E0000] text-center underline font-bold mt-5">
-      Completed Process Records
+        Completed Process Records
       </h1>
 
-      <SearchBar searchText={searchText} onSearchChange={setSearchText}/>
+      <SearchBar inputValue={searchInput} setInputValue={setSearchInput} />
       <div>
-        <ProcessTable searchText={searchText}/>
+        <ProcessTable searchText={searchInput} />
       </div>
     </div>
   );

@@ -153,6 +153,12 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
+  console.log("1" + user.userId);
+
+  const isValidPassword = (Password) => {
+    return Password.length >= 6 && !Password.includes(user.email);
+  };
+
   const handlePasswordChange = (e) => {
     setNewPassword(e.target.value);
   };
@@ -163,11 +169,32 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
 
   const handleSubmit = async () => {
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
+      toast.error("Passwords do not match");
       return;
     }
 
-    console.log(user.userId);
+    if (!isValidPassword(newPassword)) {
+      toast.error("Please enter a valid password.");
+      return;
+    }
+
+    try {
+      const compareResponse = await axios.post("/compare-passwords", {
+        userId: user.userId,
+        newPassword: newPassword,
+      });
+      if (compareResponse.data.isSame) {
+        toast.error(compareResponse.data.message);
+        return;
+        toast.success(compareResponse.data.message);
+      }
+    } catch (error) {
+      toast.error(
+        "Error comparing passwords: " +
+          (error.response?.data?.message || "Unknown error")
+      );
+      return;
+    }
 
     try {
       const response = await axios.post("/reset-password", {
@@ -177,7 +204,7 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
 
       if (response.status === 200) {
         onClose();
-        toast("Password has been successfully reset.");
+        toast.success("Password has been successfully reset.");
       } else {
         toast("Failed to reset password.");
       }
@@ -197,7 +224,7 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
             onChange={handlePasswordChange}
             className="mt-2 p-2 border rounded w-full"
             placeholder="New password"
-            style={{ maxWidth: "200px", fontSize: "0.875rem" }} // 14px
+            style={{ maxWidth: "200px", fontSize: "0.875rem" }}
           />
           <input
             type="password"
@@ -205,26 +232,30 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
             onChange={handleConfirmPasswordChange}
             className="mt-2 p-2 border rounded w-full"
             placeholder="Confirm new password"
-            style={{ maxWidth: "200px", fontSize: "0.875rem" }} // 14px
+            style={{ maxWidth: "200px", fontSize: "0.875rem" }}
           />
           {error && <p className="text-xs text-red-500">{error}</p>}
         </div>
         <div className="flex justify-evenly mt-3">
           <button
             type="button"
-            onClick={handleSubmit}
-            className="px-4 py-1 bg-red-800 text-white rounded-lg border border-solid border-neutral-600 text-xs mb-5"
-          >
-            Reset Password
-          </button>
-          <button
-            type="button"
             onClick={onClose}
-            className="px-4 py-1 bg-zinc-300 text-black rounded-lg border border-solid border-neutral-600 text-xs mb-5"
+            className="px-4 py-1 bg-zinc-300 text-black rounded-lg border border-solid border-neutral-600 text-xs mb-3"
           >
             Close
           </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="px-4 py-1 bg-red-800 text-white rounded-lg border border-solid border-neutral-600 text-xs mb-3"
+          >
+            Reset Password
+          </button>
         </div>
+        <p className="text-xs text-center mb-2">
+          The new password must be at least 6 characters long and must not
+          include your email address.
+        </p>
       </div>
     </div>
   );
@@ -232,6 +263,12 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
 
 function ConfirmResetPasswordModal({ user, onClose, onConfirm }) {
   const [currentPassword, setCurrentPassword] = useState("");
+
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      handleSubmit();
+    }
+  };
 
   const handlePasswordChange = (event) => {
     setCurrentPassword(event.target.value);
@@ -278,6 +315,7 @@ function ConfirmResetPasswordModal({ user, onClose, onConfirm }) {
             placeholder="Enter Current Password"
             value={currentPassword}
             onChange={handlePasswordChange}
+            onKeyPress={handleKeyPress}
             className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
             style={{ fontSize: "12px" }}
           />
@@ -286,13 +324,13 @@ function ConfirmResetPasswordModal({ user, onClose, onConfirm }) {
               onClick={onClose}
               className="flex-1 justify-center px-5 py-3.5 bg-white rounded-lg border border-solid border-neutral-600 text-neutral-600"
             >
-              No
+              Cancel
             </button>
             <button
               onClick={handleSubmit}
               className="flex-1 justify-center px-5 py-3.5 bg-red-800 rounded-lg text-white"
             >
-              Yes
+              Confirm
             </button>
           </div>
         </div>
@@ -307,15 +345,17 @@ function AccountTerminationModal({
   onTerminate,
   userId,
   fullName,
+  email,
 }) {
   console.log("UserId before request:", userId);
   console.log("UserId before request:", fullName);
-  const [inputName, setInputName] = useState("");
+  console.log("email:", email);
+  const [inputEmail, setInputEmail] = useState("");
 
-  const handleNameChange = (e) => setInputName(e.target.value);
+  const handleNameChange = (e) => setInputEmail(e.target.value);
 
   const handleSubmit = async () => {
-    if (inputName.trim().toLowerCase() === fullName.toLowerCase()) {
+    if (inputEmail.trim().toLowerCase() === email.toLowerCase()) {
       try {
         const response = await axios.put(`/user/${userId}`, {
           isTerminated: true,
@@ -333,7 +373,7 @@ function AccountTerminationModal({
         onTerminate(false);
       }
     } else {
-      toast.error("Name does not match.");
+      toast.error("email does not match.");
       onTerminate(false);
     }
   };
@@ -344,11 +384,11 @@ function AccountTerminationModal({
         <div className="flex flex-col items-center px-7 pt-3.5 pb-7 w-full bg-lime-50 rounded-lg border border-red-800 border-solid shadow">
           <div className="self-stretch text-base leading-6 text-center text-black">
             Are you sure you want to terminate this account? If yes, write the
-            full name of the person of the account to be terminated.
+            email of the person of the account to be terminated.
           </div>
           <input
             type="text"
-            value={inputName}
+            value={inputEmail}
             onChange={handleNameChange}
             className="shrink-0 mt-8 bg-white border border-black border-solid h-[25px] w-[241px]"
           />
@@ -372,7 +412,7 @@ function AccountTerminationModal({
   );
 }
 
-function ProfileImage({ imgUrl, setImgUrl }) {
+function ProfileImage({ authUser, id, imgUrl, setImgUrl }) {
   const [showUploader, setShowUploader] = useState(false);
 
   return (
@@ -386,12 +426,16 @@ function ProfileImage({ imgUrl, setImgUrl }) {
           loading="lazy"
         />
       </div>
-      <div
-        className="justify-center self-center p-1 mt-3.5 rounded-lg border border-solid bg-primary text-white border-neutral-600 cursor-pointer"
-        onClick={() => setShowUploader(true)}
-      >
-        Change Profile Image
-      </div>
+      {id &&
+        authUser &&
+        (authUser.id === id || authUser.accountType === "admin") && (
+          <div
+            className="justify-center self-center p-1 mt-3.5 rounded-lg border border-solid bg-primary text-white border-neutral-600 cursor-pointer"
+            onClick={() => setShowUploader(true)}
+          >
+            Change Profile Image
+          </div>
+        )}
       {showUploader && (
         <ImageUploader
           onClose={() => setShowUploader(false)}
@@ -402,7 +446,7 @@ function ProfileImage({ imgUrl, setImgUrl }) {
   );
 }
 
-function ContactInfo({ user }) {
+function ContactInfo({ user, authUser, id }) {
   const [editMode, setEditMode] = useState(false);
   const [cellNo, setCellNo] = useState("");
   const [officeNo, setOfficeNo] = useState("");
@@ -572,13 +616,17 @@ function ContactInfo({ user }) {
         </>
       )}
       <div className="flex gap-5 justify-between items-start mt-24 text-sm font-medium text-neutral-600 max-md:pr-5 max-md:mt-10">
-        <button
-          onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
-          className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
-        >
-          {editMode ? "Save Changes" : "Edit Contact Info"}
-        </button>
-        {currentUser?.userId !== user?.userId && (
+        {id &&
+          authUser &&
+          (authUser.id === id || authUser.accountType === "admin") && (
+            <button
+              onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
+              className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
+            >
+              {editMode ? "Save Changes" : "Edit Contact Info"}
+            </button>
+          )}
+        {id && authUser && authUser.id === id && (
           <button
             onClick={handleResetPasswordClick}
             className="justify-center px-2 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
@@ -612,7 +660,7 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const result = await axios.get('/roles');
+        const result = await axios.get("/roles");
         setAvailableRoles(result.data);
       } catch (error) {
         toast.error("Failed to fetch roles: " + error.message);
@@ -626,7 +674,7 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
     const fetchUserRoles = async () => {
       try {
         const result = await axios.get(`/users/${userId}/eligibleRoles`);
-        setSelectedRoles(result.data.map(role => role._id));
+        setSelectedRoles(result.data.map((role) => role._id));
       } catch (error) {
         toast.error("Failed to fetch user roles: " + error.message);
       }
@@ -638,9 +686,9 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
 
   // Handle role selection changes
   const handleRoleChange = (roleId) => {
-    setSelectedRoles(prev => {
+    setSelectedRoles((prev) => {
       if (prev.includes(roleId)) {
-        return prev.filter(id => id !== roleId);
+        return prev.filter((id) => id !== roleId);
       } else {
         return [...prev, roleId];
       }
@@ -652,7 +700,7 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
     try {
       await axios.put(`/updateRoles/${userId}`, { roles: selectedRoles });
       toast.success("Roles updated successfully.");
-      onRequestClose();  // Close the modal
+      onRequestClose(); // Close the modal
     } catch (error) {
       toast.error("Failed to update roles: " + error.message);
     }
@@ -663,9 +711,11 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
       <div className="bg-[#f5f5dc] p-8 rounded-md border-2 border-primary shadow-lg">
-        <h2 className="text-xl font-semibold mb-4 text-center">Edit Eligible Roles</h2>
+        <h2 className="text-xl font-semibold mb-4 text-center">
+          Edit Eligible Roles
+        </h2>
         <div className="custom-scrollbar space-y-2 overflow-auto max-h-64">
-          {availableRoles.map(role => (
+          {availableRoles.map((role) => (
             <div key={role._id} className="flex items-center justify-start">
               <input
                 type="checkbox"
@@ -673,7 +723,7 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
                 onChange={() => handleRoleChange(role._id)}
                 className="mr-2"
               />
-              <label className="text-lg">{role.name}</label>
+              <label className="text-lg capitalize">{role.name}</label>
             </div>
           ))}
         </div>
@@ -696,8 +746,7 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
   );
 };
 
-
-function ProfileDetails({ user }) {
+function ProfileDetails({ user, authUser, id }) {
   const [editMode, setEditMode] = useState(false);
   const [name, setName] = useState(
     user ? `${user.firstName} ${user.lastName}` : ""
@@ -773,28 +822,41 @@ function ProfileDetails({ user }) {
             <h1 className="mb-2 text-5xl text-red-800 max-md:text-4xl text-left">
               {name}
             </h1>
-            <p className="mb-2 text-3xl text-black text-left">{designation}</p>
+            <p className="mb-2 text-3xl text-black text-left">
+              <span className="text-red-800">Degree: </span>
+              {designation}
+            </p>
             <p className="mb-2 text-3xl text-left text-black max-md:max-w-full">
+              <span className="text-red-800">Position: </span>
               {specialty}
             </p>
             <p className="mb-2 text-3xl text-left text-black max-md:max-w-full">
+              <span className="text-red-800">Department: </span>
               {department}
             </p>
           </>
         )}
       </div>
-      <button
-        onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
-        className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
-      >
-        {editMode ? "Save Changes" : "Edit Profile"}
-      </button>
-      <button
-        className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
-        onClick={() => setIsRolesModalOpen(true)}
-      >
-        Edit Eligible Roles
-      </button>
+      {id &&
+        authUser &&
+        (authUser.id === id || authUser.accountType === "admin") && (
+          <button
+            onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
+            className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
+          >
+            {editMode ? "Save Changes" : "Edit Profile"}
+          </button>
+        )}
+      {id &&
+        authUser &&
+        (authUser.id === id || authUser.accountType === "admin") && (
+          <button
+            className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
+            onClick={() => setIsRolesModalOpen(true)}
+          >
+            Edit Eligible Roles
+          </button>
+        )}
       <EditRolesModal
         isOpen={isRolesModalOpen}
         onRequestClose={() => setIsRolesModalOpen(false)}
@@ -804,7 +866,7 @@ function ProfileDetails({ user }) {
   );
 }
 
-function ProfileSection({ user }) {
+function ProfileSection({ user, authUser, id }) {
   return (
     <div className="flex flex-col ml-5 w-full max-md:ml-0 max-md:w-full">
       <div className="flex flex-col grow max-md:mt-6 max-md:max-w-full">
@@ -814,10 +876,10 @@ function ProfileSection({ user }) {
         >
           <div className="flex flex-row gap-5 max-md:flex-col max-md:gap-0 w-full">
             <div className="flex-1 min-w-0">
-              <ProfileDetails user={user} />
+              <ProfileDetails user={user} authUser={authUser} id={id} />
             </div>
             <div className="flex-2 min-w-0 pr-10">
-              <ContactInfo user={user} />
+              <ContactInfo user={user} authUser={authUser} id={id} />
             </div>
           </div>
         </div>
@@ -826,7 +888,7 @@ function ProfileSection({ user }) {
   );
 }
 
-function ScheduleCalendar({ user, onScheduleChange, preview }) {
+function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
   const today = new Date();
   const threeYearsLater = new Date(
     today.getFullYear() + 3,
@@ -923,14 +985,17 @@ function ScheduleCalendar({ user, onScheduleChange, preview }) {
 
   return (
     <div>
-      {!preview && (
-        <button
-          onClick={onScheduleChange}
-          className="mt-2 mb-5 justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
-        >
-          Edit Schedule
-        </button>
-      )}
+      {!preview &&
+        id &&
+        authUser &&
+        (authUser.id === id || authUser.accountType === "admin") && (
+          <button
+            onClick={onScheduleChange}
+            className="mt-2 mb-5 justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
+          >
+            Edit Schedule
+          </button>
+        )}
       <Calendar
         minDate={today}
         maxDate={threeYearsLater}
@@ -1283,6 +1348,8 @@ function MyComponent() {
         onRevertToProfile={handleRevertToProfile}
         user={user}
         setUser={setUser}
+        authUser={authUser}
+        id={id}
       />
     );
   }
@@ -1290,20 +1357,28 @@ function MyComponent() {
   // Default view rendering (profile view)
   return (
     <div className="flex flex-col items-center pt-10 pr-5 pb-8 pl-14 bg-white max-md:pl-5">
-      {id && authUser && authUser.id !== id && (
-        <button
-          onClick={handleTerminateAccount}
-          className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-highlightRed rounded-lg border border-solid border-neutral-600"
-        >
-          Terminate Account
-        </button>
-      )}
+      {id &&
+        authUser &&
+        authUser.id !== id &&
+        authUser.accountType === "admin" && (
+          <button
+            onClick={handleTerminateAccount}
+            className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-primary rounded-lg border border-solid border-neutral-600"
+          >
+            Terminate Account
+          </button>
+        )}
       <div className="self-stretch mt-2 max-md:max-w-full">
         <div className="flex gap-5 max-md:flex-col max-md:gap-0">
           <div className="flex flex-col w-[24%] max-md:ml-0 max-md:w-full">
-            <ProfileImage imgUrl={imgUrl} setImgUrl={setImgUrl} />
+            <ProfileImage
+              authUser={authUser}
+              id={id}
+              imgUrl={imgUrl}
+              setImgUrl={setImgUrl}
+            />
           </div>
-          <ProfileSection user={user} />
+          <ProfileSection user={user} authUser={authUser} id={id} />
         </div>
       </div>
       <div className="flex flex-col md:flex-row gap-5">
@@ -1312,6 +1387,8 @@ function MyComponent() {
             user={user}
             onScheduleChange={handleScheduleChange}
             preview={false}
+            authUser={authUser}
+            id={id}
           />
         </div>
 
@@ -1320,7 +1397,9 @@ function MyComponent() {
             onClose={handleCloseTerminationModal}
             onTerminate={handleTerminationConfirmation}
             userId={id}
+            user={user}
             fullName={`${user.firstName} ${user.lastName}`} // Safe access since we check if user exists
+            email={user.email}
           />
         )}
       </div>

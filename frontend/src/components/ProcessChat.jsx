@@ -4,13 +4,16 @@ import { useSocketContext } from "../providers/SocketProvider";
 import { useAuth } from "../providers/authProvider.js";
 import { UTCToEastern } from "../utils/helperFunctions.js";
 import toast from "react-hot-toast";
+import io from "socket.io-client";
 
 const ProcessChat = ({ id }) => {
   const [messages, setMessages] = useState(null);
   const [messageInput, setMessageInput] = useState("");
   const [refreshTick, setRefreshTick] = useState(false);
+  const [processCompleted, setProcessCompleted] = useState(null);
   const messagesContainerRef = useRef(null);
   const { socket } = useSocketContext();
+  const [chatSocket, setChatSocket] = useState(null);
   const { user } = useAuth();
 
   const triggerRefresh = () => {
@@ -21,9 +24,31 @@ const ProcessChat = ({ id }) => {
     e.preventDefault();
     const trimmedMsg = messageInput.trim();
     if (trimmedMsg === "") return;
-    socket.emit("chatMessage", user.id, trimmedMsg, id);
+    chatSocket.emit("chatMessage", user.id, trimmedMsg, id);
     setMessageInput("");
   };
+
+  // initial chatSocket setup
+  useEffect(() => {
+    const newSocket = io(process.env.REACT_APP_API_BASE_URL);
+
+    // mounting setup
+    newSocket.on("connect", () => {
+      console.log("Connected to server");
+      setChatSocket(newSocket);
+      newSocket.emit("join process chat room", id);
+    });
+
+    newSocket.on("new chat message - refresh", () => {
+      triggerRefresh();
+    });
+
+    // unmount callback function
+    return () => {
+      newSocket.emit("leave process chat room", id);
+      newSocket.disconnect();
+    };
+  }, []);
 
   // Scroll to the bottom when messages change
   useEffect(() => {
@@ -33,6 +58,27 @@ const ProcessChat = ({ id }) => {
     }
   }, [messages]);
 
+  // check if process is completed
+  useEffect(() => {
+    const fetchCheckCompletedProcess = async () => {
+      const res = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/processCompleted/${id}`
+      );
+      if (res.ok) {
+        setProcessCompleted(await res.json());
+      } else {
+        toast.error(await res.text());
+      }
+    };
+    fetchCheckCompletedProcess();
+
+    if (socket)
+      socket.on("procedure complete - refresh", () => {
+        fetchCheckCompletedProcess();
+      });
+  }, [socket]);
+
+  // fetch messages
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -63,14 +109,6 @@ const ProcessChat = ({ id }) => {
     };
     fetchMessages();
   }, [refreshTick]);
-
-  // socket events
-  useEffect(() => {
-    if (!socket) return;
-    socket.on("new chat message - refresh", () => {
-      triggerRefresh();
-    });
-  }, [socket]);
 
   if (!user || !socket || !messages) return <div>Loading ...</div>;
 
@@ -109,21 +147,26 @@ const ProcessChat = ({ id }) => {
           />
         ))}
       </div>
-      <form className="flex items-center" onSubmit={sendMessage}>
-        <input
-          type="text"
-          placeholder="Type your message..."
-          className="flex-grow p-2 rounded-l-md border border-gray-300 focus:outline-none"
-          value={messageInput}
-          onChange={(e) => setMessageInput(e.target.value)}
-        />
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded-r-md"
-          type="submit"
-        >
-          Send
-        </button>
-      </form>
+      {!processCompleted && (
+        <form className="flex items-center" onSubmit={sendMessage}>
+          <input
+            type="text"
+            placeholder="Type your message..."
+            className="flex-grow p-2 rounded-l-md border border-gray-300 focus:outline-none"
+            value={messageInput}
+            onChange={(e) => setMessageInput(e.target.value)}
+          />
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-r-md"
+            type="submit"
+          >
+            Send
+          </button>
+        </form>
+      )}
+      {processCompleted && (
+        <div className="text-center">This process is completed</div>
+      )}
     </div>
   );
 };
@@ -142,7 +185,15 @@ const MessageItem = ({ message, currUser, isSuccessive, isLast }) => {
           {isLast && <div className="">{message.timeCreated}</div>}
         </section>
         <div className="w-10 h-10 mt-2">
-          {!isSuccessive && <img src={profileImg} className="w-10 h-10" />}
+          {!isSuccessive && (
+            <div className="h-10 w-10 overflow-hidden rounded">
+              <img
+                src={profileImg}
+                alt="Profile"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          )}
         </div>
       </div>
     );
@@ -150,7 +201,15 @@ const MessageItem = ({ message, currUser, isSuccessive, isLast }) => {
     return (
       <div className="flex space-x-4">
         <div className="w-10 h-10 mt-2">
-          {!isSuccessive && <img src={profileImg} className="w-10 h-10" />}
+          {!isSuccessive && (
+            <div className="h-10 w-10 overflow-hidden rounded">
+              <img
+                src={profileImg}
+                alt="Profile"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          )}
         </div>
         <section>
           {!isSuccessive && <h1 className="text-sm">{message.userName}</h1>}

@@ -4,8 +4,10 @@ import { calculateTimeUntilDate } from "../../utils/helperFunctions";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useSocketContext } from "../../providers/SocketProvider";
+import { useAuth } from "../../providers/authProvider";
 
 const AssignedProcesses = () => {
+  const { user } = useAuth();
   const [assignedProcesses, setAssignedProcesses] = useState(null);
   const [displayingProcesses, setDisplayingProcesses] = useState(null);
   const [tablePage, setTablePage] = useState(0);
@@ -88,13 +90,18 @@ const AssignedProcesses = () => {
     setTablePage((prevPage) => Math.max(prevPage - 1, 0));
   };
 
-  if (!displayingProcesses) return <div>Loading ...</div>;
+  if (!displayingProcesses || !user) return <div>Loading ...</div>;
   return (
     <div className="w-11/12 mx-auto">
       <div className="bg-secondary mt-4 p-8 rounded-xl">
         <h1 className="text-primary underline text-3xl font-bold text-center">
           My Process Dashboard
         </h1>
+        <p className="text-center text-xl mt-4">
+          Hello, {user.firstName} {user.lastName}, you have{" "}
+          {assignedProcesses?.length || "no"}{" "}
+          {assignedProcesses?.length === 1 ? "process" : "processes"} assigned.
+        </p>
         <div className="space-y-8 mb-4 mt-8">
           {displayingProcesses.map((process) => (
             <Process
@@ -109,7 +116,10 @@ const AssignedProcesses = () => {
         <span className="absolute left-0">
           Page{" "}
           <strong>
-            {tablePage + 1} of {Math.ceil(assignedProcesses.length / 3)}
+            {tablePage + 1} of{" "}
+            {assignedProcesses.length === 0
+              ? 1
+              : Math.ceil(assignedProcesses.length / 3)}
           </strong>
         </span>
         <div></div>
