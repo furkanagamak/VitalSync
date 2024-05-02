@@ -6,84 +6,143 @@ const {
 const request = require("supertest");
 const fs = require("fs");
 const mongoose = require("mongoose");
-const ProcedureTemplate = require("../models/procedureTemplate.js");
+const ResourceTemplate = require("../models/resourceTemplate.js");
 
-const testProcedureTemplate1 = new ProcedureTemplate({
-  procedureName: "Test Procedure 1",
-  requiredResources: [],
-  roles: [],
-  estimatedTime: 60,
+const testResourceTemplate1 = new ResourceTemplate({
+  type: "equipment",
+  name: "test equipment 111",
+  description: "test equipment 111 description",
 });
 
-const testProcedureTemplate2 = new ProcedureTemplate({
-  procedureName: "Test Procedure 2",
-  requiredResources: [],
-  roles: [],
-  estimatedTime: 120,
+const testResourceTemplate2 = new ResourceTemplate({
+  type: "equipment",
+  name: "test equipment 222",
+  description: "test equipment 222 description",
 });
 
-const addProcedureData = async () => {
-  await testProcedureTemplate1.save();
-  await testProcedureTemplate2.save();
+const testResourceTemplate3 = new ResourceTemplate({
+  type: "equipment",
+  name: "test equipment 333",
+  description: "test equipment 333 description",
+});
+
+const testResourceTemplate4 = new ResourceTemplate({
+  type: "spaces",
+  name: "test spaces 444",
+  description: "test equipment 444 description",
+});
+
+const testResourceTemplate5 = new ResourceTemplate({
+  type: "equipment",
+  name: "test spaces 555",
+  description: "test equipment 555 description",
+});
+
+const testResourceTemplate6 = new ResourceTemplate({
+  type: "equipment",
+  name: "test spaces 666",
+  description: "test equipment 666 description",
+});
+
+const addData = async () => {
+  await testResourceTemplate1.save();
+  await testResourceTemplate2.save();
+  await testResourceTemplate3.save();
+  await testResourceTemplate4.save();
+  await testResourceTemplate5.save();
+  await testResourceTemplate6.save();
 };
 
-const deleteProcedureData = async () => {
-  await ProcedureTemplate.deleteOne({ _id: testProcedureTemplate1._id });
-  await ProcedureTemplate.deleteOne({ _id: testProcedureTemplate2._id });
+const deleteData = async () => {
+  await ResourceTemplate.deleteOne({ _id: testResourceTemplate1._id });
+  await ResourceTemplate.deleteOne({ _id: testResourceTemplate2._id });
+  await ResourceTemplate.deleteOne({ _id: testResourceTemplate3._id });
+  await ResourceTemplate.deleteOne({ _id: testResourceTemplate4._id });
+  await ResourceTemplate.deleteOne({ _id: testResourceTemplate5._id });
+  await ResourceTemplate.deleteOne({ _id: testResourceTemplate6._id });
 };
 
-describe("GET /procedureTemplates for editing procedures", () => {
+describe("GET /resourceTemplates for editing resources", () => {
   beforeAll(async () => {
     server = app.listen(5001);
     uids = await initializePredefinedAccounts();
-    await addProcedureData();
+    await addData();
   });
 
-  const checkProcedureEqual = (proc1, proc2) => {
-    if (proc1.procedureName !== proc2.procedureName) return false;
-    if (proc1.estimatedTime !== proc2.estimatedTime) return false;
-    if (proc1.description !== proc2.description) return false;
-    if (proc1.specialNotes !== proc2.specialNotes) return false;
+  const checkResTempEqual = (resTemp1, resTemp2) => {
+    if (resTemp1.type !== resTemp2.type) return false;
+    if (resTemp1.name !== resTemp2.name) return false;
+    if (resTemp1.description !== resTemp2.description) return false;
     return true;
   };
 
   it("expected data should be returned", async () => {
-    const procRes = await request(app).get(`/procedureTemplates`).send();
-    expect(procRes.status).toEqual(200);
+    // update existing role
+    const resTempRes = await request(app).get(`/resourceTemplates`).send();
+    expect(resTempRes.status).toEqual(200);
+
+    const existingResource1 = await ResourceTemplate.findOne({
+      name: "test room",
+    });
+    const existingResource2 = await ResourceTemplate.findOne({ name: "Name" });
+    if (!existingResource1 || !existingResource2)
+      throw new Error("Please run dbtest.js script first!");
 
     const expectedData = [
       {
-        procedureName: "ProcedureName",
-        estimatedTime: 60,
-        specialNotes: "SpecialNotes",
+        type: "spaces",
+        name: "test room",
+        description: "",
+      },
+      {
+        type: "Type",
+        name: "Name",
         description: "Description",
       },
       {
-        procedureName: "Test Procedure 1",
-        estimatedTime: 60,
-        specialNotes: "",
-        description: "",
+        type: "equipment",
+        name: "test equipment 111",
+        description: "test equipment 111 description",
       },
       {
-        procedureName: "Test Procedure 2",
-        estimatedTime: 120,
-        specialNotes: "",
-        description: "",
+        type: "equipment",
+        name: "test equipment 222",
+        description: "test equipment 222 description",
+      },
+      {
+        type: "equipment",
+        name: "test equipment 333",
+        description: "test equipment 333 description",
+      },
+      {
+        type: "spaces",
+        name: "test spaces 444",
+        description: "test equipment 444 description",
+      },
+      {
+        type: "equipment",
+        name: "test spaces 555",
+        description: "test equipment 555 description",
+      },
+      {
+        type: "equipment",
+        name: "test spaces 666",
+        description: "test equipment 666 description",
       },
     ];
 
-    const responseData = procRes.body;
+    const responseData = resTempRes.body;
     expect(responseData.length).toEqual(expectedData.length);
     for (let i = 0; i < expectedData.length; i++) {
-      const proc1 = responseData[i];
-      const proc2 = expectedData[i];
-      expect(checkProcedureEqual(proc1, proc2)).toBe(true);
+      const resTemp1 = responseData[i];
+      const resTemp2 = expectedData[i];
+      expect(checkResTempEqual(resTemp1, resTemp2)).toBe(true);
     }
   });
 
   afterAll(async () => {
     await removePredefinedAccounts();
-    await deleteProcedureData();
+    await deleteData();
     await server.close();
     await mongoose.disconnect();
   });

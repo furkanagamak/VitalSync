@@ -25,6 +25,15 @@ const testResourceInstance2 = new ResourceInstance({
   unavailableTimes: [],
 });
 
+const testResourceInstanceDNE = new ResourceInstance({
+  type: "DNE",
+  name: "DNE",
+  location: "DNE",
+  description: "DNE",
+  uniqueIdentifier: "DNE",
+  unavailableTimes: [],
+});
+
 const addResourceInstances = async () => {
   await testResourceInstance1.save();
   await testResourceInstance2.save();
@@ -42,16 +51,35 @@ describe("DELETE /resources/:id", () => {
     await addResourceInstances();
   });
 
-  it("Usual delete", async () => {
+  it("DELETE /resources/:id bad inputs", async () => {
+    const malformedIdRes = await request(app).delete(`/resources/123`).send();
+    console.log(malformedIdRes.body);
+    expect(malformedIdRes.status).toEqual(500);
+    expect(malformedIdRes.body.message).toEqual("Error deleting the resource");
+
+    const dneIdRes = await request(app)
+      .delete(`/resources/${testResourceInstanceDNE._id.toString()}`)
+      .send();
+    expect(dneIdRes.status).toEqual(404);
+    expect(dneIdRes.body.message).toEqual("Resource not found");
+  });
+
+  it("DELETE /resources/:id usual delete", async () => {
     const resInstRes1 = await request(app)
       .delete(`/resources/${testResourceInstance1._id.toString()}`)
       .send();
     expect(resInstRes1.status).toEqual(200);
+    expect(resInstRes1.body).toEqual({
+      message: "Resource deleted successfully",
+    });
 
     const resInstRes2 = await request(app)
       .delete(`/resources/${testResourceInstance2._id.toString()}`)
       .send();
     expect(resInstRes2.status).toEqual(200);
+    expect(resInstRes2.body).toEqual({
+      message: "Resource deleted successfully",
+    });
 
     const res1 = await ResourceInstance.findOne({
       name: testResourceInstance1.name,

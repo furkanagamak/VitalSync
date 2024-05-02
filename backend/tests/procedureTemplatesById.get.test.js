@@ -22,6 +22,13 @@ const testProcedureTemplate2 = new ProcedureTemplate({
   estimatedTime: 120,
 });
 
+const testProcedureTemplateNotAdded = new ProcedureTemplate({
+  procedureName: "Test Procedure NotAdded",
+  requiredResources: [],
+  roles: [],
+  estimatedTime: 120,
+});
+
 const addProcedureData = async () => {
   await testProcedureTemplate1.save();
   await testProcedureTemplate2.save();
@@ -47,7 +54,26 @@ describe("GET /procedureTemplates/:id for getting procedures by id", () => {
     return true;
   };
 
-  it("expected data should be returned", async () => {
+  it("GET /procedureTemplates/:id bad inputs", async () => {
+    const malformedIdRes = await request(app)
+      .get(`/procedureTemplates/123`)
+      .send();
+    console.log(malformedIdRes.body);
+    expect(malformedIdRes.status).toEqual(500);
+    expect(malformedIdRes.body.message).toEqual(
+      "Error fetching procedure template"
+    );
+
+    const dneIdRes = await request(app)
+      .get(
+        `/procedureTemplates/${testProcedureTemplateNotAdded._id.toString()}`
+      )
+      .send();
+    expect(dneIdRes.status).toEqual(404);
+    expect(dneIdRes.body.message).toEqual("Procedure template not found");
+  });
+
+  it("GET /procedureTemplates/:id usual get by id", async () => {
     const procRes1 = await request(app)
       .get(`/procedureTemplates/${testProcedureTemplate1._id.toString()}`)
       .send();
