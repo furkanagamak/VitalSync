@@ -16,6 +16,9 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./Calendar.css";
 import { FormControlLabel, Checkbox } from "@mui/material";
+import PhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/style.css'
+
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -421,7 +424,8 @@ function ContactInfo({ user }) {
   }, [user]);
 
   const validatePhoneNumber = (number) => {
-    return /^\d{3}-\d{3}-\d{4}$/.test(number);
+    const digitsOnly = number.replace(/\D/g, '');
+    return /^(\d{10}|\d{11})$/.test(digitsOnly);
   };
 
   const validateEmail = (email) => {
@@ -478,6 +482,13 @@ function ContactInfo({ user }) {
     setShowPasswordResetConfirmation(true);
   };
 
+  const handleOfficePhoneChange = (value) => {
+    setOfficeNo(value);
+  };
+  const handleCellPhoneChange = (value) => {
+    setCellNo(value);
+  };
+
   console.log("profile is", user?.userId);
 
   return (
@@ -485,18 +496,33 @@ function ContactInfo({ user }) {
       <h2 className="text-4xl text-left text-red-800">Contact Information</h2>
       {editMode ? (
         <>
-          <input
+        <div className="mt-2 mb-2">
+        <PhoneInput
+              country={'us'}
+              value={cellNo}
+              onChange={(phone ) => handleCellPhoneChange(phone)}
+              placeholder="Cell No"
+              disableDropdown={true}/></div>
+          {/*<input
             type="text"
             value={cellNo}
             onChange={(e) =>
               handleInputChange(setCellNo, e.target.value, validatePhoneNumber)
             }
             className="mt-6 text-left border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-          />
+          />*/}
           {errors.cellNo && (
             <div className="text-red-500 text-lg">{errors.cellNo}</div>
           )}
-          <input
+          
+          <PhoneInput
+              value={officeNo}
+              country={'us'}
+              onChange={(phone ) => handleOfficePhoneChange(phone)}
+              placeholder="Office No"
+              disableDropdown={true}/>
+
+          {/*<input
             type="text"
             value={officeNo}
             onChange={(e) =>
@@ -507,7 +533,7 @@ function ContactInfo({ user }) {
               )
             }
             className="mt-3 text-left border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-          />
+          />*/}
           {errors.officeNo && (
             <div className="text-red-500 text-lg">{errors.officeNo}</div>
           )}
@@ -929,7 +955,13 @@ function ScheduleCalendar({ user, onScheduleChange, preview }) {
   );
 }
 
-function ChangeAvailability({ user, onRevertToProfile, setUser }) {
+function ChangeAvailability({
+  user,
+  onRevertToProfile,
+  setUser,
+  authUser,
+  id,
+}) {
   const [dateRange, setDateRange] = useState([new Date(), new Date()]);
   const [status, setStatus] = useState("Work Hours");
   const [errors, setErrors] = useState({});
@@ -1155,6 +1187,8 @@ function ChangeAvailability({ user, onRevertToProfile, setUser }) {
                 user={{ ...user, usualHours: previewSchedule }}
                 onScheduleChange={() => {}}
                 preview={true}
+                authUser={authUser}
+                id={id}
               />
             </div>
           </div>

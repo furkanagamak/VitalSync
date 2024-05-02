@@ -299,11 +299,12 @@ export function ModifyProcessLanding() {
       onCancel={handleCancel}
     />
   )}
-  {procedureResourceAssignmentsView &&
-
-
-
-
+  {procedureResourceAssignmentsView &&(<ProcessDeleteModal
+    processName={processInstance ? processName : 'Loading process name...'}
+    patientName={editedPatient ? editedPatient.fullName : 'Loading patient data...'}
+      onDelete={handleDelete}
+      onCancel={handleCancel}
+    />)
   }
 
     <div className="flex flex-col gap-6 py-14">     {/*Header*/}
@@ -323,7 +324,6 @@ export function ModifyProcessLanding() {
                     <CiCirclePlus 
                       className="text-highlightGreen ml-2 mt-1 cursor-pointer" 
                       style={{ fontSize: '3.5rem' }} 
-                      onClick={handleAddSection} 
                     />
                   </div>
             </div>
@@ -485,7 +485,7 @@ export function ModifyProcessLanding() {
                         <button className="text-highlightGreen underline text-xl mr-10" onClick={() => handleModifyResourceAssignments(procedure)}>Resource Assignments</button>
                         <button className="text-highlightGreen underline text-xl mr-10" onClick={() => handleModifyStaffAssignments(procedure)}>Staff Assignments</button>
                         <span className="flex items-center">
-                          <button disable={true} onClick={handleModifyProcedure} className ="text-primary text-2xl ml-2">Modify</button>
+                          <button disable={true}  className ="text-primary text-2xl ml-2">Modify</button>
                           <MdOutlineOpenInNew className="text-primary ml-1 mr-6 text-3xl" />
                           <FaTrashAlt className="text-primary mx-2 text-3xl" />
                         </span>
