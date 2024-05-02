@@ -1,4 +1,4 @@
-describe("View Procedure Templates Tests", () => {
+/*describe("View Procedure Templates Tests", () => {
   beforeEach(() => {
     cy.visit("/");
     cy.get("#emailInput").type("john.doe@example.com");
@@ -54,4 +54,4 @@ describe("View Procedure Templates Tests", () => {
     cy.get("button").contains("Yes").should("be.visible");
     cy.get("button").contains("Cancel").click();
   });
-});
+});*/

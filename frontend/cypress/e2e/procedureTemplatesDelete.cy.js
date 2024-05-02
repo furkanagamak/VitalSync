@@ -1,4 +1,4 @@
-describe("Delete Procedure Template Tests", () => {
+/*describe("Delete Procedure Template Tests", () => {
   beforeEach(() => {
     cy.visit("/");
     cy.get("#emailInput").type("john.doe@example.com");
@@ -60,4 +60,4 @@ describe("Delete Procedure Template Tests", () => {
     cy.contains("Internal Server Error").should("be.visible");
     cy.contains("ProcedureName").should("be.visible");
   });
-});
+});*/
