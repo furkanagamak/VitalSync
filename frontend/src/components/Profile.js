@@ -913,10 +913,8 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
   };
 
   const getWorkingHoursForDay = (date, usualHours) => {
-    if (
-      !usualHours ||
-      (usualHours.start === "0:00" && usualHours.end === "0:00")
-    )
+    
+    if (usualHours.dayOff) {
       return ["Off"];
 
     const timeOffs = getTimeOffsForDay(date);
@@ -1070,11 +1068,15 @@ function ChangeAvailability({
   };
 
   const handleToggleDayOff = (day) => {
-    const updatedSchedule = weeklySchedule.map((schedule) =>
-      schedule.day === day
-        ? { ...schedule, start: "0:00", end: "0:00" }
-        : schedule
-    );
+    const updatedSchedule = weeklySchedule.map((schedule) => {
+      if (schedule.day === day) {
+        return {
+          ...schedule,
+          dayOff: !schedule.dayOff 
+        };
+      }
+      return schedule;
+    });
     setWeeklySchedule(updatedSchedule);
   };
 
@@ -1127,15 +1129,23 @@ function ChangeAvailability({
   };
 
   const handleSubmitWeeklySchedule = async () => {
+    const adjustedSchedule = weeklySchedule.map(schedule => {
+      if (schedule.dayOff) {
+        return { ...schedule, start: "0:00", end: "0:00" };  // Set times to "0:00" for days off
+      }
+      return { ...schedule, start: schedule.start, end: schedule.end };  // Keep times as is for normal days
+    });
+  
     const updateData = {
-      usualHours: weeklySchedule,
+      usualHours: adjustedSchedule,
     };
-
+  
     try {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
         toast.success("Weekly schedule updated successfully!");
-        setUser({ ...user, usualHours: weeklySchedule });
+        // Update local state to reflect the change, you might consider using adjustedSchedule here
+        setUser({ ...user, usualHours: adjustedSchedule });
         onRevertToProfile();
       } else {
         toast.error("Failed to update weekly schedule.");
@@ -1203,6 +1213,7 @@ function ChangeAvailability({
               <TextField
                 label="Start Time"
                 type="time"
+                disabled={schedule.dayOff}
                 value={schedule.start}
                 onChange={(e) =>
                   handleWeekdayHoursChange(
@@ -1210,12 +1221,14 @@ function ChangeAvailability({
                     "start",
                     e.target.value
                   )
+                  
                 }
                 InputLabelProps={{ shrink: true }}
               />
               <TextField
                 label="End Time"
                 type="time"
+                disabled={schedule.dayOff}
                 value={schedule.end}
                 onChange={(e) =>
                   handleWeekdayHoursChange(schedule.day, "end", e.target.value)
@@ -1226,10 +1239,8 @@ function ChangeAvailability({
                 control={
                   <Checkbox
                     className="ml-5"
-                    checked={
-                      schedule.start === "0:00" && schedule.end === "0:00"
-                    }
-                    onChange={() => handleToggleDayOff(schedule.day)}
+                    checked={schedule.dayOff}
+          onChange={() => handleToggleDayOff(schedule.day)}
                   />
                 }
                 label="Day Off"
