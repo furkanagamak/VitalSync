@@ -115,6 +115,9 @@ describe("GET /roles for creating resources", () => {
     for (let i = 0; i < expectedData.length; i++) {
       const role1 = responseData[i];
       const role2 = expectedData[i];
+      console.log("comparing roles:");
+      console.log(role1);
+      console.log(role2);
       expect(checkRoleEqual(role1, role2)).toBe(true);
     }
   });
