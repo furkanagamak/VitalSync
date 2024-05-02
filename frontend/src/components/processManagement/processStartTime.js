@@ -28,7 +28,7 @@ function ProcessStartTime() {
       selectedTime.getMinutes()
     );
     if (combinedDateTime < new Date()) {
-      toast.error("Cannot set a start time in the past.");
+      toast.error("Invalid Start Time.");
       return;
     }
     setStartTime(combinedDateTime.toISOString()); 

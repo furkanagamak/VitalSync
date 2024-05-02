@@ -65,7 +65,24 @@ export function CreateStaffAssignments({ sectionId, procedureId, procedureName, 
   const [assignedStaff, setAssignedStaff] = useState({});
   const { assignStaffToRole } = useProcessCreation();
 
+    console.log(sectionId, procedureId, procedureName, roles, startTime, endTime);
 
+    /*
+    Example params
+    
+    1714672621859 '6633c1336cb7a3ffe11298e0' 'ProcedureName'
+    [
+    {
+        "_id": "6633c1336cb7a3ffe11298ce",
+        "name": "Name",
+        "description": "Description",
+        "uniqueIdentifier": "UniqueIdentifier",
+        "__v": 0,
+        "uniqueId": "6633c1336cb7a3ffe11298ce-zlbl",
+        "account": null
+    }
+]
+'2024-05-03T02:57:00.000Z'*/
 
   useEffect(() => {
     if (!roles.length) return;

@@ -916,6 +916,12 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
     
     if (usualHours.dayOff) {
       return ["Off"];
+  }
+
+  // Continue with existing logic if it's not a day off
+  if (!usualHours || (usualHours.start === "0:00" && usualHours.end === "0:00")) {
+      return ["Off"];
+  }
 
     const timeOffs = getTimeOffsForDay(date);
     let segments = [];
