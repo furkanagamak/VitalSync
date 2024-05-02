@@ -2099,6 +2099,9 @@ app.post("/processInstances", async (req, res) => {
       dob: req.body.patientInformation.dob,
       sex: req.body.patientInformation.sex,
       phone: req.body.patientInformation.phone,
+      insuranceProvider: req.body.patientInformation.insuranceProvider,
+      insuranceGroup: req.body.patientInformation.insuranceGroup,
+      insurancePolicy: req.body.patientInformation.insurancePolicy,
       emergencyContacts: [
         {
           name: req.body.patientInformation.emergencyContact1Name,

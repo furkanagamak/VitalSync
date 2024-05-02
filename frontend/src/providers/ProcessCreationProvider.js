@@ -124,11 +124,6 @@ useEffect(() => {
   }, [startTime]);
 
 
-    useEffect(() => {
-      console.log(fetchedSections);
-
-    }, [fetchedSections]);
-
     const fetchProcedureTemplate = async (procedureTemplateId) => {
       try {
           const response = await axios.get(`/procedureTemplates/${procedureTemplateId}`);

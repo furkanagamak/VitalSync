@@ -640,7 +640,7 @@ const ModifyProcessTemplateForm = () => {
 
     if(currentlyModifyingTemplate){
       updateProcessTemplate(procData);
-      navigate("/processManagement/newProcess/patientForm");
+      navigate("/processManagement/newProcess/patientForm", { state: { from: '/processManagement/newProcess' } });
     }
     else{
     console.log(procData);

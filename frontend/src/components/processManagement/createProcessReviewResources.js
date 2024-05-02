@@ -77,7 +77,7 @@ export function CreateReviewResourceAssignments({ onBack, onProceed }) {
   };
 
   const handleProceed = () => {
-    navigate("/processManagement/newProcess/preview");
+    navigate("/processManagement/newProcess/preview", { state: { from: '/processManagement/newProcess/reviewResourceAssignments' } });
   };
 
   const getResourceDetailsByInstance = (resourceInstance) => {

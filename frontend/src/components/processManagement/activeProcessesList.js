@@ -35,9 +35,13 @@ function SearchBar({ onChange }) {
   );
 }
 
-function ProcessCell({ process, onModifyClick, onViewClick }) {
+function ProcessCell({ process, onModifyClick, onViewClick, pid }) {
   const handleViewClickID = () => {
     navigate(`/processDetails/${process.processID}`);
+  };
+
+  const handleModifyClickID = () => {
+    navigate(`/processManagement/modifyProcess/landing/${process.processID}`);
   };
 
   const navigate = useNavigate(); 
@@ -61,8 +65,8 @@ function ProcessCell({ process, onModifyClick, onViewClick }) {
       <div className="flex-[1] pl-4 flex justify-end items-start min-w-0">
         <div className="flex flex-col space-y-2">
           <button className="bg-green-500 hover:bg-green-600 rounded-full px-10 py-1 text-center" onClick={handleViewClickID}>View</button>
-          <button className="bg-red-500 hover:bg-red-600 rounded-full px-4 py-1 text-center"   disabled={true}
- onClick={onModifyClick}>Modify</button>
+          <button className="bg-red-500 hover:bg-red-600 rounded-full px-4 py-1 text-center"
+ onClick={handleModifyClickID}>Modify</button>
         </div>
       </div>
     </div>
@@ -104,8 +108,8 @@ export function ActiveProcessesList() {
       setPage(value);
   };
 
-  const handleModifyClick = () => {
-    navigate(`/processManagement/modifyProcess/landing`);
+  const handleModifyClick = (pid) => {
+    navigate(`/processManagement/modifyProcess/landing/${pid}`);
   };
 
   const handleViewClick = () => {
@@ -122,7 +126,7 @@ export function ActiveProcessesList() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-10 py-5">
   {currentItems.length > 0 ? (
     currentItems.map((process, index) => (
-      <ProcessCell key={index} process={process} onModifyClick={handleModifyClick} onViewClick={handleViewClick} />
+      <ProcessCell key={index} process={process} onModifyClick={handleModifyClick} onViewClick={handleViewClick} pid={process.processID}/>
     ))
   ) : (
     <div className="col-span-full text-center text-xl text-primary">

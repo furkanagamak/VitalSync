@@ -606,7 +606,7 @@ const CreateProcessTemplateForm = () => {
   };
     if(currentlyCreatingTemplate){
       updateProcessTemplate(procData);
-      navigate("/processManagement/newProcess/patientForm");
+      navigate("/processManagement/newProcess/patientForm", { state: { from: '/processManagement/newProcess' } });
     }
     else{
     try {
