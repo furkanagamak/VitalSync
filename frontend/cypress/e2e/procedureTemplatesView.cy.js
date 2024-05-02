@@ -12,6 +12,14 @@ describe("View Procedure Templates Tests", () => {
     cy.url().should("include", "/ProcedureTemplateManagement");
     cy.get("h1").contains("Procedure Template Management").should("be.visible");
     cy.get("button").contains("Create Template").should("be.visible");
+    cy.get('input[type="search"]').should("be.visible");
+    cy.contains("Name").should("be.visible");
+    cy.contains("Description").should("be.visible");
+    cy.contains("Resources").should("be.visible");
+    cy.contains("Roles").should("be.visible");
+    cy.contains("Estimated Time").should("be.visible");
+    cy.contains("Special Notes").should("be.visible");
+    cy.contains("Actions").should("be.visible");
   });
 
   it("can input and clear search term", () => {

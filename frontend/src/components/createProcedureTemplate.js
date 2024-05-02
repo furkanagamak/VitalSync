@@ -197,8 +197,6 @@ const ProcedureForm = ({
     },
   });
 
-  
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProcedure({ ...procedure, [name]: value });
@@ -228,7 +226,9 @@ const ProcedureForm = ({
       return;
     }
 
-    const spaceResourceExists = resources.some(resource => resource.type === "spaces");
+    const spaceResourceExists = resources.some(
+      (resource) => resource.type === "spaces"
+    );
     if (newResource.type === "spaces") {
       if (spaceResourceExists) {
         toast.error("You can only select one space resource.");
@@ -401,6 +401,7 @@ const ProcedureForm = ({
                 Resource Type
               </InputLabel>
               <Select
+                id="selectType"
                 labelId="resourcetype"
                 label="Resource Type"
                 className="capitalize"
@@ -421,6 +422,7 @@ const ProcedureForm = ({
                 Resource Name
               </InputLabel>
               <Select
+                id="selectName"
                 labelId="resourcename"
                 label="Resource Name"
                 value={newResource.name}
@@ -526,6 +528,7 @@ const ProcedureForm = ({
                         style={{ color: "#8E0000" }}
                         edge="end"
                         aria-label="delete"
+                        id="deleteResource"
                         onClick={() => deleteResource(index)}
                       >
                         <DeleteIcon />
@@ -549,6 +552,7 @@ const ProcedureForm = ({
                 Role Name
               </InputLabel>
               <Select
+                id="selectRole"
                 labelId="rolename"
                 className="capitalize"
                 label="Role Name"
