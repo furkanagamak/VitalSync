@@ -100,9 +100,10 @@ const ProcedureTable = ({ filter }) => {
   const [data, setData] = useState([]);
 
   function capitalizeWords(string) {
-    return string.split(' ')
-                 .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                 .join(' ');
+    return string
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
   }
 
   useEffect(() => {
@@ -115,19 +116,19 @@ const ProcedureTable = ({ filter }) => {
             name: template.procedureName,
             description: template.description || "",
             resources: template.requiredResources
-            .map((resource) => {
-              const name = resource.resource?.name;
-              return name ? capitalizeWords(name) : null;
-            })
-            .filter((name) => name)
-            .join(", "),
-          roles: template.roles
-            .map((role) => {
-              const name = role.role?.name;
-              return name ? capitalizeWords(name) : null;
-            })
-            .filter((name) => name)
-            .join(", "),
+              .map((resource) => {
+                const name = resource.resource?.name;
+                return name ? capitalizeWords(name) : null;
+              })
+              .filter((name) => name)
+              .join(", "),
+            roles: template.roles
+              .map((role) => {
+                const name = role.role?.name;
+                return name ? capitalizeWords(name) : null;
+              })
+              .filter((name) => name)
+              .join(", "),
             time: template.estimatedTime + " minutes",
             notes: template.specialNotes || "",
           }))
@@ -207,6 +208,7 @@ const ProcedureTable = ({ filter }) => {
                   cursor: "pointer",
                   marginRight: "10px",
                 }}
+                title="Edit"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -227,6 +229,7 @@ const ProcedureTable = ({ filter }) => {
                   padding: "0",
                   cursor: "pointer",
                 }}
+                title="Delete"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -378,45 +381,44 @@ const ProcedureTable = ({ filter }) => {
             ))}
           </thead>
           <tbody {...getTableBodyProps()}>
-  {page.length > 0 ? (
-    page.map((row) => {
-      prepareRow(row);
-      return (
-        <tr {...row.getRowProps()}>
-          {row.cells.map((cell) => {
-            return (
-              <td
-                {...cell.getCellProps()}
-                style={{
-                  ...cell.column.style,
-                  borderBottom: "1px solid #8E0000",
-                  padding: "10px",
-                  verticalAlign: "middle",
-                }}
-              >
-                {cell.render("Cell")}
-              </td>
-            );
-          })}
-        </tr>
-      );
-    })
-  ) : (
-    <tr>
-      <td
-        colSpan={columns.length} // Assumed number of columns, should be adjusted to your actual column count
-        style={{
-          textAlign: 'center',
-          padding: '20px',
-          borderBottom: "none"  // Removing border from the "No results" row
-        }}
-      >
-        No results found
-      </td>
-    </tr>
-  )}
-</tbody>
-
+            {page.length > 0 ? (
+              page.map((row) => {
+                prepareRow(row);
+                return (
+                  <tr {...row.getRowProps()}>
+                    {row.cells.map((cell) => {
+                      return (
+                        <td
+                          {...cell.getCellProps()}
+                          style={{
+                            ...cell.column.style,
+                            borderBottom: "1px solid #8E0000",
+                            padding: "10px",
+                            verticalAlign: "middle",
+                          }}
+                        >
+                          {cell.render("Cell")}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  style={{
+                    textAlign: "center",
+                    padding: "20px",
+                    borderBottom: "none",
+                  }}
+                >
+                  No results found
+                </td>
+              </tr>
+            )}
+          </tbody>
         </table>
       </div>
       <div
