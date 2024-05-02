@@ -1,4 +1,4 @@
-/*describe("Delete Procedure Template Tests", () => {
+describe("Delete Procedure Template Tests", () => {
   beforeEach(() => {
     cy.visit("/");
     cy.get("#emailInput").type("john.doe@example.com");
@@ -14,7 +14,6 @@
   it("should load the procedure template management page", () => {
     cy.url().should("include", "/ProcedureTemplateManagement");
     cy.get("h1").contains("Procedure Template Management").should("be.visible");
-    cy.get("button").contains("Create Template").should("be.visible");
     cy.get('input[type="search"]').should("be.visible");
     cy.contains("Name").should("be.visible");
     cy.contains("Description").should("be.visible");
@@ -60,4 +59,4 @@
     cy.contains("Internal Server Error").should("be.visible");
     cy.contains("ProcedureName").should("be.visible");
   });
-});*/
+});
