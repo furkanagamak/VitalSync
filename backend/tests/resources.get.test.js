@@ -25,6 +25,15 @@ const testResourceInstance2 = new ResourceInstance({
   unavailableTimes: [],
 });
 
+const testResourceInstanceDNE = new ResourceInstance({
+  type: "DNE",
+  name: "DNE",
+  location: "DNE",
+  description: "DNE",
+  uniqueIdentifier: "DNE",
+  unavailableTimes: [],
+});
+
 const addResourceInstances = async () => {
   await testResourceInstance1.save();
   await testResourceInstance2.save();
@@ -131,6 +140,19 @@ describe("GET /resources, /resources/byName/:name, /resources/:id", () => {
     expect(checkResourceInstanceEqual(responseData2, expectedData[1])).toBe(
       true
     );
+  });
+
+  it("GET /resources/:id bad inputs", async () => {
+    const malformedIdRes = await request(app).get(`/resources/123`).send();
+    console.log(malformedIdRes.body);
+    expect(malformedIdRes.status).toEqual(500);
+    expect(malformedIdRes.body.message).toEqual("Error fetching the resource");
+
+    const dneIdRes = await request(app)
+      .get(`/resources/${testResourceInstanceDNE._id.toString()}`)
+      .send();
+    expect(dneIdRes.status).toEqual(404);
+    expect(dneIdRes.body.message).toEqual("Resource not found");
   });
 
   it("GET /resources/:id", async () => {
