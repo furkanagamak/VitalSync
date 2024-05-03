@@ -68,7 +68,12 @@ describe("Process Details", () => {
       "A procedure Blood Test has been completed for the process Routine Checkup with the process ID TPID-12312312 that you are a part of."
     );
 
-    cy.get("#notificationsBoxBtn").click();
+    // clicking notifications in notification drop down should take you to process page
+    cy.contains("Procedure Completion").click();
+    cy.url().should("include", "/processDetails/TPID-12312312");
+
+    // notification box should have message as well
+    cy.visit("http://localhost:3000/notifications");
     cy.contains(
       "A procedure Blood Test has been completed for the process Routine Checkup with the process ID TPID-12312312 that you are a part of. There are no more procedures left in the process. The process is fully complete."
     );
