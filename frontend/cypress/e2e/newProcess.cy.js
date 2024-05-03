@@ -18,7 +18,26 @@ describe('Process Template List Tests', () => {
         cy.get('[name="lastName"]').type('Johnson');
         cy.get('button[aria-label="Choose date"]').click();
         cy.contains('button', '15').click();
-
+        cy.get('[name="sex"]').type('male');
+        cy.get('.phoneInput1').type('5162634416');
+        cy.get('[name="street"]').type('123 lane');
+        cy.get('[name="city"]').type('london');
+        cy.get('[name="state"]').then($select => {
+            $select.val('AL').trigger('change');
+          });
+          cy.get('[name="zip"]').type('11554');
+          cy.get('[name="emergencyContact1Name"]').type('Sarah Smith');
+        cy.get('[name="emergencyContact1Relation"]').type('Sister');
+        cy.get('.phoneInput2').type('9876543210'); 
+        cy.get('[name="emergencyContact2Name"]').type('Robert Brown');
+        cy.get('[name="emergencyContact2Relation"]').type('Friend');
+        cy.get('.phoneInput3').type('1234567890'); 
+        cy.get('[name="insuranceProvider"]').type('HealthCare Inc.');
+        cy.get('[name="insuranceGroup"]').type('HG6723');
+        cy.get('[name="insurancePolicy"]').type('P9876543');
+        cy.get('[name="knownConditions"]').type('Asthma, Diabetes');
+        cy.get('[name="allergies"]').type('Peanuts, Shellfish');
+        cy.get('button').contains('Proceed').click();
     });
 });
 

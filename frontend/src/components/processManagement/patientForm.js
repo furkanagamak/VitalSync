@@ -322,6 +322,7 @@ function PatientInformationForm() {
               country={'us'}
               value={patientInfo.phone}
               onChange={(phone ) => handlePhoneChange(phone , 'phone')}
+              className="phoneInput1"
               />
               </Box>
             </Grid>
@@ -374,6 +375,8 @@ function PatientInformationForm() {
               <Typography variant="h6" >Phone #</Typography>
               <PhoneInput
               country={'us'}
+              className="phoneInput2"
+
               onChange={(phone ) => handlePhoneChange(phone , 'emergencyContact1Phone')}/>
               </Box>
             </Grid>
@@ -389,6 +392,8 @@ function PatientInformationForm() {
               <Typography variant="h6" >Phone #</Typography>
               <PhoneInput
               country={'us'}
+              className="phoneInput3"
+
               onChange={(phone ) => handlePhoneChange(phone , 'emergencyContact2Phone')}/>
               </Box>
             </Grid>
