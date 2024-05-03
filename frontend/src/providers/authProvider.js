@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
           console.log("User is not logged in!");
           console.log(data);
           if (location.pathname !== "/RecoveryPage") {
-            navigate("/");
+            
           }
         }
       } else {

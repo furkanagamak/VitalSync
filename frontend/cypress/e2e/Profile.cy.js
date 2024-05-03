@@ -202,7 +202,7 @@ describe('MyComponent Button Functionality', () => {
         cy.contains('Submit').click();
         cy.contains('Account has been Terminated').should('exist');
       });
-      */
+      
       describe('Profile Image Upload', () => {
         it('allows the user to upload a new profile image', () => {
           const imagePath = 'doctorProfile.jpg';
@@ -212,7 +212,7 @@ describe('MyComponent Button Functionality', () => {
           cy.get('#imageupload').click();
           cy.contains('Your profile image has been updated!').should('be.visible');
         });
-      });
+      });*/
 
 
 

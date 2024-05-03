@@ -60,6 +60,7 @@ import { AuthProvider } from "./providers/authProvider.js";
 import { SocketContextProvider } from "./providers/SocketProvider";
 import { ProcessCreationProvider } from "./providers/ProcessCreationProvider";
 import { ProcessModificationProvider } from "./providers/ProcessModificationProvider";
+import NotFoundPageLogin from "./components/NotFoundPageLogin.js";
 
 const notify = () => toast("Here is your toast.");
 
@@ -84,6 +85,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Login />} />
                   <Route path="/RecoveryPage" element={<RecoveryPage />} />
+                  <Route path="*" element={<NotFoundPageLogin />} />
 
                   <Route element={<NavbarLayout />}>
                     <Route path="/Roster" element={<Roster />} />
