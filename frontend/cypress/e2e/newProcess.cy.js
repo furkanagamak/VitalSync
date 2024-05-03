@@ -11,6 +11,29 @@ describe('Process Template List Tests', () => {
 
     it('is able to create a new process', () => {
         cy.get('.modify-process-template-button').first().click();
+        cy.get("button").contains("Add Section").click();
+    cy.url().should("include", "/AddSectionForm");
+
+    cy.get("#name").type("Test Section");
+    cy.get("#name").should("have.value", "Test Section");
+    cy.get("#description").type("Test Section Description");
+    cy.get("#description").should("have.value", "Test Section Description");
+
+    cy.get("#procedure-name").type("Procedure");
+    cy.get(".MuiAutocomplete-popper").should("be.visible");
+    cy.contains("ProcedureName").click();
+    cy.contains("Add Procedure").click();
+    cy.get('button[title="Move Down"]').first().click();
+    cy.get('button[title="Move Up"]').first().click();
+    cy.get('button[title="Delete"]').first().click();
+
+    cy.get("#procedure-name").type("Procedure");
+    cy.get(".MuiAutocomplete-popper").should("be.visible");
+    cy.contains("ProcedureName").click();
+    cy.contains("Add Procedure").click();
+    cy.contains("Save Section").click();
+
+    cy.contains("Section Added!").should("be.visible");
         cy.get('button').contains('Use Template').click();
 
         cy.get('[name="firstName"]').type('James');
