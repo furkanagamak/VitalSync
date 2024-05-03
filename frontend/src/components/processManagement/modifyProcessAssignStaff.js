@@ -1,129 +1,51 @@
-import React, {useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo  } from "react";
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
-import { BiSolidDownArrow } from "react-icons/bi";
-import { FaArrowLeft } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { FaArrowLeft, FaCheck, FaRegCalendarTimes } from 'react-icons/fa';
+import { MdOutlineOpenInNew } from 'react-icons/md';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useProcessModificationContext } from '../../providers/ProcessModificationProvider';
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
+import moment from 'moment'; 
 
-const roles = [
-  { 
-    name: "Lead Surgeon",
-    staff: [
-      {
-        Name: 'Tom Stanley',
-        Title: 'Surgical Resident',
-        ID: 'SR-017',
-        Actions: 'Assign',
-      },
-      {
-        Name: 'Anna Hart',
-        Title: 'Surgical Resident',
-        ID: 'SR-031',
-        Actions: 'Assign',
-      },
-      {
-        Name: 'Haley Snyder',
-        Title: "Physician's Assistant",
-        ID: 'PA-004',
-        Actions: 'Assign',
-      },
-    ],
-    assigned: "Olivia Hunt"
-  },
-  { 
-    name: "Assistant Surgeon 1", 
-    staff: [
-      {
-        Name: 'Lucas Granger',
-        Title: 'Surgical Fellow',
-        ID: 'SF-112',
-        Actions: 'Assign',
-      },
-      {
-        Name: 'Emily Dawson',
-        Title: 'Surgical Fellow',
-        ID: 'SF-108',
-        Actions: 'Assign',
-      },
-    ],
-    assigned: "Michael Reed"
-  },
-  { 
-    name: "Assistant Surgeon 2", 
-    staff: [
-      {
-        Name: 'Sarah Linn',
-        Title: 'Surgical Fellow',
-        ID: 'SF-119',
-        Actions: 'Assign',
-      },
-    ],
-    assigned: "Gregory House"
-  },
-  { 
-    name: "Anesthesiologist", 
-    staff: [
-      {
-        Name: 'Nina Patel',
-        Title: 'Anesthesiology Resident',
-        ID: 'AR-007',
-        Actions: 'Assign',
-      },
-      {
-        Name: 'Omar Shafiq',
-        Title: 'Attending Anesthesiologist',
-        ID: 'AA-045',
-        Actions: 'Assign',
-      },
-    ],
-    assigned: "Alex Karev"
-  },
-  { 
-    name: "Operating Room Nurse", 
-    staff: [
-      {
-        Name: 'Jessica Wong',
-        Title: 'Registered Nurse',
-        ID: 'RN-621',
-        Actions: 'Assign',
-      },
-      {
-        Name: 'Carlos Ramirez',
-        Title: 'Registered Nurse',
-        ID: 'RN-634',
-        Actions: 'Assign',
-      },
-    ],
-    assigned: "Meredith Grey"
-  },
-];
 
-export function RoleDropdownContent({ role }) {
+
+
+export function RoleDropdownContent({ role, eligibleStaff, assignStaff, assignedStaff }) {
+
+  const handleAssign = (newStaff) => {
+    console.log(newStaff);
+    assignStaff(newStaff); 
+  };
+ 
+
   return (
-    <div className="flex mx-10 mb-5">
-      <div className="w-1/3 text-3xl mt-20">
+    <div className="flex mx-10 ">
+      <div className="flex flex-col w-2/5 text-3xl mt-5">
         <p>Currently Assigned:</p>
-        <p className="text-primary">{role.assigned}</p>
+        <p className="text-primary mb-2">{assignedStaff ? `${assignedStaff.firstName} ${assignedStaff.lastName}` : "Not assigned"}</p>
       </div>
-      <div className="w-3/4 lg:w-3/4 ml-5">
+      <div className="w-3/5 ml-5">
         <p className="text-highlightGreen text-2xl mb-3 mt-5">Available Qualified Staff:</p>
-        <div className="border-gray-400 border-2 rounded-lg p-3 overflow-y-auto" style={{ maxHeight: '12rem' }}> {/* 3 rows approximately 3rem each */}
+        <div className="border-gray-400 border-2 rounded-lg p-3 overflow-y-auto" style={{ maxHeight: '12rem' }}>
           <table className="w-full text-left">
             <thead className="border-b border-primary">
               <tr>
-                <th className="text-primary">Name <BiSolidDownArrow /></th>
-                <th className="text-primary">Title <BiSolidDownArrow /></th>
-                <th className="text-primary">ID <BiSolidDownArrow /></th>
-                <th className="text-primary">Actions</th>
+                <th className="text-primary text-2xl">Name</th>
+                <th className="text-primary text-2xl">Title</th>
+                <th className="text-primary text-2xl">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {role.staff.map((staff, index) => (
-                <tr key={index} className={`border-b border-black ${index === role.staff.length - 1 ? 'border-b-0' : ''}`}>
-                  <td className="py-2">{staff.Name}</td>
-                  <td>{staff.Title}</td>
-                  <td>{staff.ID}</td>
+              {eligibleStaff.map((staff, index) => (
+                <tr key={index} style={{ borderBottom: '1px solid black' }}>
+                <td className="py-2 text-2xl">{staff.firstName} {staff.lastName}</td>
+                  <td className="text-2xl">{staff.position}</td>
                   <td>
-                    <button className="bg-green-500 hover:bg-green-700 text-white border-black border-2 rounded-full px-3 py-1">
+                    <button 
+                      className="text-xl bg-green-500 hover:bg-green-700 text-white rounded-full px-3 py-1"
+                      onClick={() => handleAssign(staff)}
+                    >
                       Assign
                     </button>
                   </td>
@@ -137,81 +59,218 @@ export function RoleDropdownContent({ role }) {
   );
 }
 
-
-export function ModifyStaffAssignments() {
-  const navigate = useNavigate();
-
-  const handleGoBack = () => {
-    navigate("/processManagement/modifyProcess/landing");
-  };
-
-  const handleProceed = () => {
-    navigate("/processManagement/modifyProcess/reviewStaffAssignments");
-  };
+export function CreateStaffAssignments({ modifyProcedure, onClose }) {
+    const { updateStaffAssignments, getStaffAssignments } = useProcessModificationContext();
   const [openRoles, setOpenRoles] = useState(new Set());
+  const [eligibleStaff, setEligibleStaff] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [assignedStaff, setAssignedStaff] = useState({});
 
-  useEffect(() => {
-    const allRoles = new Set(roles.map(role => role.name));
-    setOpenRoles(allRoles);
-  }, []);
+useEffect(() => {
+  const rolesWithAssignments = modifyProcedure.rolesAssignedPeople.reduce((acc, roleAssigned) => {
+      acc[roleAssigned.role._id] = roleAssigned.accounts;
+      return acc;
+  }, {});
 
-  const toggleRole = (roleName) => {
-    const newOpenRoles = new Set(openRoles);
-    if (newOpenRoles.has(roleName)) {
-      newOpenRoles.delete(roleName);
-    } else {
-      newOpenRoles.add(roleName);
+  setAssignedStaff(rolesWithAssignments);
+  fetchEligibleStaff(modifyProcedure.rolesAssignedPeople, modifyProcedure.timeStart, modifyProcedure.timeEnd);
+}, [modifyProcedure]);
+
+
+  const fetchEligibleStaff = async (roles, startTime, endTime) => {
+    setIsLoading(true);
+    const roleIds = roles.map(roleAssigned => roleAssigned.role._id);
+
+    try {
+        const responses = await Promise.all(roleIds.map(id => axios.get(`/users/accountsByRole/${id}`, {
+            params: { startTime, endTime } 
+        })));
+
+        const procedureDate = moment(startTime);
+        const dayOfWeek = procedureDate.format('dddd');
+
+        const newEligibleStaff = roles.reduce((acc, roleAssigned, index) => {
+            acc[roleAssigned.role._id] = responses[index].data.filter(staff => {
+                if (staff.isTerminated) return false;
+                
+                // Exclude staff already assigned to any role in this procedure
+                const assignedInProcedure = roleAssigned.accounts.some(account => account._id === staff._id);
+                if (assignedInProcedure) return false;
+      
+                const userUsualHours = staff.usualHours.find(uh => uh.day === dayOfWeek);
+                if (!userUsualHours) return false;
+      
+                // Convert usual work hours to datetime on the procedure date
+                const workStart = moment(`${procedureDate.format('YYYY-MM-DD')}T${userUsualHours.start}`);
+                const workEnd = moment(`${procedureDate.format('YYYY-MM-DD')}T${userUsualHours.end}`);
+                if (workEnd.isBefore(workStart)) {
+                    // Adjust for overnight shift ending on the next day
+                    workEnd.add(1, 'days');
+                }
+      
+                const procStart = moment(startTime);
+                const procEnd = moment(endTime);
+                if (procEnd.isBefore(procStart)) {
+                    // Adjust for procedures ending on the next day
+                    procEnd.add(1, 'days');
+                }
+      
+                // Check if work hours fully encompass the procedure time
+                if (!workStart.isBefore(procStart) || !workEnd.isAfter(procEnd)) {
+                    console.log("Work hours didn't cover", staff.firstName, workStart.format(), procStart.format(), workEnd.format(), procEnd.format());
+                    return false;
+                }
+      
+                // Check for unavailable times overlapping with procedure time
+                return !staff.unavailableTimes.some(unavailable => {
+                    const unavailableStart = moment(unavailable.start);
+                    const unavailableEnd = moment(unavailable.end);
+                    return procStart.isBefore(unavailableEnd) && procEnd.isAfter(unavailableStart);
+                });
+            });
+            return acc;
+        }, {});
+
+        setEligibleStaff(newEligibleStaff);
+    } catch (error) {
+        console.error("Failed to fetch staff:", error);
+        toast.error("Failed to fetch staff: " + error.message);
     }
-    setOpenRoles(newOpenRoles);
+    setIsLoading(false);
+};
+
+
+const toggleRole = (uniqueId) => {
+  setOpenRoles(prevOpenRoles => {
+    const newOpenRoles = new Set(prevOpenRoles);
+    if (newOpenRoles.has(uniqueId)) {
+      newOpenRoles.delete(uniqueId);
+    } else {
+      newOpenRoles.add(uniqueId);
+    }
+    return newOpenRoles;
+  });
+};
+
+const assignStaff = (newRoleId, newStaff, oldStaff) => {
+  console.log("Assigning new staff, roleID:", newRoleId);
+  console.log("Assigning new staff, newStaff:", newStaff);
+  console.log("Assigning new staff, previous assignedStaff:", assignedStaff);
+
+  const updatedEligibleStaff = Object.keys(eligibleStaff).reduce((acc, key) => {
+    acc[key] = eligibleStaff[key].filter(s => s._id !== newStaff._id);
+
+    if (oldStaff && oldStaff._id && key === newRoleId) {
+      acc[key] = [...acc[key], oldStaff];
+    }
+    return acc;
+  }, {});
+  setEligibleStaff(updatedEligibleStaff);
+
+  setAssignedStaff(prev => ({
+    ...prev,
+    [newRoleId]: [newStaff] 
+  }));
+
+  // updateStaffAssignments(modifyProcedure.procedureId, newRoleId, newStaff._id);
+};
+
+useEffect(() => {
+  console.log("Updated Assigned Staff:", assignedStaff);
+}, [assignedStaff]);
+
+const handleSave = () => {
+
+
+  const allAssigned = roles.every(role => assignedStaff[role._id]);
+  console.log(roles);
+  console.log(assignedStaff);
+  if (!allAssigned) {
+      toast.error("Please assign staff to all roles before saving.");
+      return;
+  }
+  roles.forEach(role => {
+      const staffId = assignedStaff[role._id]._id;
+      updateStaffAssignments(modifyProcedure.procedureId, role._id, staffId);
+  });
+
+  onClose();
+};
+
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
   };
+
+  const roles = modifyProcedure.rolesAssignedPeople;
+  console.log("Roles", roles);
+
+
+  if (isLoading) return <div>Loading...</div>;
+
 
   return (
     <div className="bg-secondary min-h-screen">
      <div className="flex justify-between items-center p-5">
         <button
-          className="ml-5 hover:bg-red-900 border-black border-2 flex items-center justify-center bg-primary text-white rounded-full px-5 py-2 text-xl shadow"
+          className="ml-5 bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center"
           style={{ maxWidth: '30%' }}
-          onClick={handleGoBack}
+          onClick={onClose}
         >
           <FaArrowLeft className="mr-3" />
           Go Back
         </button>
 
         <button
-          className="mr-10 mt-5 hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-10 py-5 text-4xl"
+
+          className="mr-10 mt-5 bg-highlightGreen text-white text-2xl py-4 px-16 rounded-3xl"
           style={{ maxWidth: '30%' }}
-          onClick={handleProceed}
+          onClick={handleSave}
         >
-          Proceed
+          Save
         </button>
+        
       </div>
 
       <div className="container mx-auto p-8">
         <div className="pb-4 mb-4 border-b-2 border-black">
-          <h2 className="text-4xl font-bold">{"Radial Prostatectomy"}<span className="text-primary" > - Modify Staff Assignments</span></h2>
+          <h2 className="text-4xl font-bold">{modifyProcedure.procedureName}<span className="text-primary" > - Modify Staff Assignments</span></h2>
         </div>
 
         <div>
-          {roles.map((role) => (
-            <div key={role.name} className="py-10 border-b border-primary">
-              <div className="flex justify-between items-center">
-                <p className="text-3xl font-bold">{role.name}</p>
-                <button onClick={() => toggleRole(role.name)} className="flex items-center">
-                  {openRoles.has(role.name) ?  <BsChevronUp className='text-4xl' /> : <BsChevronDown className='text-4xl' />}
-                </button>
-              </div>
+          {roles.map(roleAssigned => {
+        const role = roleAssigned.role;
+        const uniqueId = role._id; 
+        const isAssigned = assignedStaff[uniqueId] && assignedStaff[uniqueId].length > 0;
 
-              {openRoles.has(role.name) && (
-                <div className=" mx-auto mt-16 mb-8 p-2 bg-white rounded-2xl shadow w-4/5">
-                 <RoleDropdownContent className="w-1/3" role={role}/>
-                </div>
-              )}
+        return (
+          <div key={uniqueId} className="py-10 border-b border-primary">
+            <div className="flex justify-between items-center">
+              <div className="text-3xl font-bold flex items-center">
+                <span>{capitalizeFirstLetter(role.name)}</span>
+               
+              </div>
+              <button onClick={() => toggleRole(uniqueId)}>
+                {openRoles.has(uniqueId) ? <BsChevronUp className='text-4xl' /> : <BsChevronDown className='text-4xl' />}
+              </button>
             </div>
-          ))}
+            {openRoles.has(uniqueId) && (
+              <div className="mx-auto mt-16 mb-8 p-2 bg-white rounded-2xl shadow w-4/5">
+                <RoleDropdownContent
+                  role={role}
+                  eligibleStaff={eligibleStaff[uniqueId] || []}
+                  assignStaff={(newStaff) => assignStaff(uniqueId, newStaff, assignedStaff[uniqueId] ? assignedStaff[uniqueId][0] : null)}
+                  assignedStaff={assignedStaff[uniqueId] && assignedStaff[uniqueId].length > 0 ? assignedStaff[uniqueId][0] : null}
+                  />
+              </div>
+            )}
+          </div>
+        );
+      })}
         </div>
       </div>
     </div>
   );
 }
 
-export default ModifyStaffAssignments;
+
+export default CreateStaffAssignments;

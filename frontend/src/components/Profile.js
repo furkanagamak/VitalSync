@@ -16,6 +16,9 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./Calendar.css";
 import { FormControlLabel, Checkbox } from "@mui/material";
+import PhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/style.css'
+
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -471,7 +474,8 @@ function ContactInfo({ user, authUser, id }) {
   }, [user]);
 
   const validatePhoneNumber = (number) => {
-    return /^\d{3}-\d{3}-\d{4}$/.test(number);
+    const digitsOnly = number.replace(/\D/g, '');
+    return /^(\d{10}|\d{11})$/.test(digitsOnly);
   };
 
   const validateEmail = (email) => {
@@ -528,6 +532,13 @@ function ContactInfo({ user, authUser, id }) {
     setShowPasswordResetConfirmation(true);
   };
 
+  const handleOfficePhoneChange = (value) => {
+    setOfficeNo(value);
+  };
+  const handleCellPhoneChange = (value) => {
+    setCellNo(value);
+  };
+
   console.log("profile is", user?.userId);
 
   return (
@@ -535,20 +546,33 @@ function ContactInfo({ user, authUser, id }) {
       <h2 className="text-4xl text-left text-red-800">Contact Information</h2>
       {editMode ? (
         <>
-          <input
-            id="cellNo"
+        <div className="mt-2 mb-2">
+        <PhoneInput
+              country={'us'}
+              value={cellNo}
+              onChange={(phone ) => handleCellPhoneChange(phone)}
+              placeholder="Cell No"
+              disableDropdown={true}/></div>
+          {/*<input
             type="text"
             value={cellNo}
             onChange={(e) =>
               handleInputChange(setCellNo, e.target.value, validatePhoneNumber)
             }
             className="mt-6 text-left border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-          />
+          />*/}
           {errors.cellNo && (
             <div className="text-red-500 text-lg">{errors.cellNo}</div>
           )}
-          <input
-            id="officeNo"
+          
+          <PhoneInput
+              value={officeNo}
+              country={'us'}
+              onChange={(phone ) => handleOfficePhoneChange(phone)}
+              placeholder="Office No"
+              disableDropdown={true}/>
+
+          {/*<input
             type="text"
             value={officeNo}
             onChange={(e) =>
@@ -559,7 +583,7 @@ function ContactInfo({ user, authUser, id }) {
               )
             }
             className="mt-3 text-left border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-          />
+          />*/}
           {errors.officeNo && (
             <div className="text-red-500 text-lg">{errors.officeNo}</div>
           )}
@@ -909,11 +933,15 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
   };
 
   const getWorkingHoursForDay = (date, usualHours) => {
-    if (
-      !usualHours ||
-      (usualHours.start === "0:00" && usualHours.end === "0:00")
-    )
+    
+    if (usualHours.dayOff) {
       return ["Off"];
+  }
+
+  // Continue with existing logic if it's not a day off
+  if (!usualHours || (usualHours.start === "0:00" && usualHours.end === "0:00")) {
+      return ["Off"];
+  }
 
     const timeOffs = getTimeOffsForDay(date);
     let segments = [];
@@ -1066,11 +1094,15 @@ function ChangeAvailability({
   };
 
   const handleToggleDayOff = (day) => {
-    const updatedSchedule = weeklySchedule.map((schedule) =>
-      schedule.day === day
-        ? { ...schedule, start: "0:00", end: "0:00" }
-        : schedule
-    );
+    const updatedSchedule = weeklySchedule.map((schedule) => {
+      if (schedule.day === day) {
+        return {
+          ...schedule,
+          dayOff: !schedule.dayOff 
+        };
+      }
+      return schedule;
+    });
     setWeeklySchedule(updatedSchedule);
   };
 
@@ -1123,15 +1155,23 @@ function ChangeAvailability({
   };
 
   const handleSubmitWeeklySchedule = async () => {
+    const adjustedSchedule = weeklySchedule.map(schedule => {
+      if (schedule.dayOff) {
+        return { ...schedule, start: "0:00", end: "0:00" };  // Set times to "0:00" for days off
+      }
+      return { ...schedule, start: schedule.start, end: schedule.end };  // Keep times as is for normal days
+    });
+  
     const updateData = {
-      usualHours: weeklySchedule,
+      usualHours: adjustedSchedule,
     };
-
+  
     try {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
         toast.success("Weekly schedule updated successfully!");
-        setUser({ ...user, usualHours: weeklySchedule });
+        // Update local state to reflect the change, you might consider using adjustedSchedule here
+        setUser({ ...user, usualHours: adjustedSchedule });
         onRevertToProfile();
       } else {
         toast.error("Failed to update weekly schedule.");
@@ -1199,6 +1239,7 @@ function ChangeAvailability({
               <TextField
                 label="Start Time"
                 type="time"
+                disabled={schedule.dayOff}
                 value={schedule.start}
                 onChange={(e) =>
                   handleWeekdayHoursChange(
@@ -1206,12 +1247,14 @@ function ChangeAvailability({
                     "start",
                     e.target.value
                   )
+                  
                 }
                 InputLabelProps={{ shrink: true }}
               />
               <TextField
                 label="End Time"
                 type="time"
+                disabled={schedule.dayOff}
                 value={schedule.end}
                 onChange={(e) =>
                   handleWeekdayHoursChange(schedule.day, "end", e.target.value)
@@ -1222,10 +1265,8 @@ function ChangeAvailability({
                 control={
                   <Checkbox
                     className="ml-5"
-                    checked={
-                      schedule.start === "0:00" && schedule.end === "0:00"
-                    }
-                    onChange={() => handleToggleDayOff(schedule.day)}
+                    checked={schedule.dayOff}
+          onChange={() => handleToggleDayOff(schedule.day)}
                   />
                 }
                 label="Day Off"

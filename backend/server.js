@@ -2183,6 +2183,9 @@ app.post("/processInstances", async (req, res) => {
       dob: req.body.patientInformation.dob,
       sex: req.body.patientInformation.sex,
       phone: req.body.patientInformation.phone,
+      insuranceProvider: req.body.patientInformation.insuranceProvider,
+      insuranceGroup: req.body.patientInformation.insuranceGroup,
+      insurancePolicy: req.body.patientInformation.insurancePolicy,
       emergencyContacts: [
         {
           name: req.body.patientInformation.emergencyContact1Name,
@@ -2339,6 +2342,45 @@ app.post("/processInstances", async (req, res) => {
     });
   }
 });
+
+app.put('/processInstances/:id', async (req, res) => {
+  const { id } = req.params;
+  const { processName, description, patient, sections } = req.body;
+  
+  try {
+      const processInstance = await ProcessInstance.findById(id);
+      if (!processInstance) {
+          return res.status(404).send({ message: "Process instance not found." });
+      }
+
+      if (processName) processInstance.processName = processName;
+      if (description) processInstance.description = description;
+
+      if (patient && patient._id) {
+          await Patient.findByIdAndUpdate(patient._id, patient, { new: true });
+      }
+
+      if (sections && sections.length > 0) {
+        processInstance.sectionInstances = processInstance.sectionInstances.map(section => {
+          const sectionUpdate = sections.find(s => s._id.toString() === section._id.toString());
+          if (sectionUpdate) {
+              return { ...section._doc, ...sectionUpdate };
+          }
+          return section;
+        });
+      }
+
+      // Save the updated process instance
+      await processInstance.save();
+      res.send(processInstance);
+  } catch (error) {
+      res.status(500).send({
+          message: "Failed to update the process instance",
+          error: error.toString(),
+      });
+  }
+});
+
 
 app.get("/users/:userId/eligibleRoles", async (req, res) => {
   try {

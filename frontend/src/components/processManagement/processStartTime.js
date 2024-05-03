@@ -6,6 +6,8 @@ import { FaArrowLeft, FaCheck } from 'react-icons/fa';
 import { TextField, Button, Paper, Typography } from "@mui/material";
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
+import toast from 'react-hot-toast';
+
 
 function ProcessStartTime() {
   const { setStartTime } = useProcessCreation();
@@ -25,8 +27,25 @@ function ProcessStartTime() {
       selectedTime.getHours(),
       selectedTime.getMinutes()
     );
+    if (combinedDateTime < new Date()) {
+      toast.error("Invalid Start Time.");
+      return;
+    }
     setStartTime(combinedDateTime.toISOString()); 
     navigate("/processManagement/newProcess/pendingStaffAssignments");
+  };
+
+  const disablePastTime = (timeValue, timeType) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const selected = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+    if (timeType === 'hours' && selected.getTime() === today.getTime()) {
+      return timeValue < now.getHours();
+    }
+    if (timeType === 'minutes' && selected.getHours() === now.getHours()) {
+      return timeValue < now.getMinutes();
+    }
+    return false;
   };
 
   return (
@@ -54,6 +73,7 @@ function ProcessStartTime() {
                 label="Select Date"
                 value={selectedDate}
                 onChange={setSelectedDate}
+                minDate={new Date()}
                 renderInput={(params) => <TextField {...params} fullWidth required />}
               />
             </div>
@@ -62,6 +82,7 @@ function ProcessStartTime() {
                 label="Select Time"
                 value={selectedTime}
                 onChange={setSelectedTime}
+                shouldDisableTime={disablePastTime}
                 renderInput={(params) => <TextField {...params} fullWidth required />}
               />
             </div>

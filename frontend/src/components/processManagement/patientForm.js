@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaArrowLeft, FaCheck } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useProcessCreation } from '../../providers/ProcessCreationProvider';
+import { useProcessModificationContext } from '../../providers/ProcessModificationProvider';
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import {
   TextField,
@@ -25,6 +26,7 @@ import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 
 
+
 const states = [
   "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", 
   "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
@@ -33,6 +35,12 @@ const states = [
 
 function PatientInformationForm() {
   const { patientInformation, setPatientInformation } = useProcessCreation();
+  const { processInstance, editedPatient, updateProcessPatient } = useProcessModificationContext();
+  const location = useLocation();
+  const shouldRedirect = !location.state;
+
+
+
   const [patientInfo, setPatientInfo] = useState({
     firstName: '',
     lastName: '',
@@ -61,19 +69,125 @@ function PatientInformationForm() {
     handleProceed();
   };
 
-  useEffect(() => {
-    if (patientInformation && Object.keys(patientInformation).length > 0) {
-      setPatientInfo(patientInformation);
-    }
-  }, []);
+  const transformAndSetPatient = (editedPatient) => {
+    const {
+      _id, fullName, street, city, state, zip, dob, sex, phone, 
+      emergencyContacts, knownConditions, allergies
+    } = editedPatient;
+  
+    const names = fullName.split(' ');
+    const firstName = names[0];
+    const lastName = names.slice(1).join(' ');
+  
+    const emergencyContact1 = emergencyContacts[0] || {};
+    const emergencyContact2 = emergencyContacts[1] || {};
+  
+    const transformedPatient = {
+      firstName: firstName || '',
+      lastName: lastName || '',
+      street: street || '',
+      city: city || '',
+      state: state || '',
+      zip: zip || '',
+      dob: dob || '',
+      sex: sex || '',
+      phone: phone || '',
+      emergencyContact1Name: emergencyContact1.name || '',
+      emergencyContact1Relation: emergencyContact1.relation || '',
+      emergencyContact1Phone: emergencyContact1.phone || '',
+      emergencyContact2Name: emergencyContact2.name || '',
+      emergencyContact2Relation: emergencyContact2.relation || '',
+      emergencyContact2Phone: emergencyContact2.phone || '',
+      knownConditions: knownConditions || '',
+      allergies: allergies || '',
+      insuranceProvider: '', 
+      insuranceGroup: '', 
+      insurancePolicy: ''
+    };
+  
+    return transformedPatient;
+  };
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (shouldRedirect) {
+      // Redirect the user procedurally, not declaratively
+      navigate("/processManagement/modifyProcess/activeProcesses", { replace: true });
+    }
+  }, [navigate, shouldRedirect]);
+
+  useEffect(() => {
+    if (shouldRedirect) {
+    return;
+    }
+    console.log(editedPatient);
+    if(location.pathname.includes("modify")){
+      if(Object.keys(editedPatient).length > 0){
+        console.log("setting patient");
+        const transformedPatient = transformAndSetPatient(editedPatient);
+        setPatientInfo(transformedPatient);      }
+      else if(Object.keys(processInstance.patient).length > 0){
+        setPatientInfo(processInstance.patient);
+      }
+    }
+    else{
+    if (patientInformation && Object.keys(patientInformation).length > 0) {
+      setPatientInfo(patientInformation);
+    }}
+  }, []);
 
   const handleGoBack = () => {
     navigate(-1, { state: { fromPatient: '/patientForm' } });
   };
 
+  const restructurePatientInfoForContext = (patientInfo) => {
+    const {
+        firstName,
+        lastName,
+        street,
+        city,
+        state,
+        zip,
+        dob,
+        sex,
+        phone,
+        emergencyContact1Name,
+        emergencyContact1Relation,
+        emergencyContact1Phone,
+        emergencyContact2Name,
+        emergencyContact2Relation,
+        emergencyContact2Phone,
+        knownConditions,
+        allergies
+    } = patientInfo;
+
+    return {
+        fullName: `${firstName} ${lastName}`,
+        street,
+        city,
+        state,
+        zip,
+        dob,
+        sex,
+        phone,
+        emergencyContacts: [
+            { name: emergencyContact1Name, relation: emergencyContact1Relation, phone: emergencyContact1Phone },
+            { name: emergencyContact2Name, relation: emergencyContact2Relation, phone: emergencyContact2Phone }
+        ],
+        knownConditions,
+        allergies
+    };
+};
+
+
   const handleProceed = () => {
+    if(location.pathname.includes("modify")){
+      const transformedPatient = restructurePatientInfoForContext(patientInfo);
+      console.log("saving patient");
+      updateProcessPatient(transformedPatient);
+      navigate(-1);
+    }
     setPatientInformation(patientInfo);
     navigate("/processManagement/newProcess/startTime");
   };

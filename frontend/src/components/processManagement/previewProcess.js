@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FaArrowLeft } from "react-icons/fa";
 import toast, { Toaster } from "react-hot-toast";
 import axios from 'axios';
@@ -12,11 +12,18 @@ const ProcessDetailsPreview = () => {
   const { fetchedSections, processTemplate, patientInformation, createProcessInstance } = useProcessCreation(); 
   const [userData, setUserData] = useState({});
   const [resourceData, setResourceData] = useState({});
+  const location = useLocation(); 
+
 
   useEffect(() => {
     console.log(fetchedSections);
     console.log(processTemplate);
     console.log(patientInformation);
+
+    if (!location.state || location.state.from !== '/processManagement/newProcess/reviewResourceAssignments') {
+      navigate("/processManagement/newProcess/processTemplates");
+    }
+
     const fetchUserData = async () => {
       const userIds = fetchedSections.flatMap(section =>
         section.procedureTemplates.flatMap(template =>
@@ -50,7 +57,7 @@ const ProcessDetailsPreview = () => {
 
     fetchUserData();
     fetchResourceData();
-  }, [fetchedSections]);
+  }, [fetchedSections, location, navigate]);
 
   const calculateTotalProcedures = (sections) => {
     return sections.reduce((total, section) => total + section.procedureTemplates.length, 0);
@@ -63,15 +70,13 @@ const ProcessDetailsPreview = () => {
   const handleConfirm = async () => {
     try {
       await createProcessInstance(); 
-      toast.success("Process successfully created!");
-      navigate("/processManagement/");  
+      toast.success("Process successfully created! Assigned staff have been notified.");      navigate("/processManagement/");  
     } catch (error) {
       toast.error("Failed to create the process. Please try again.");
       console.error("Error creating process instance:", error);
     }
   };
 
-  if (!fetchedSections) return <div>Loading ...</div>;
   return (
     <div className="w-11/12 mx-auto mt-10">
       <section className="flex justify-between text-primary text-3xl my-4">
