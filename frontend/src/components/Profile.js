@@ -1251,7 +1251,7 @@ function MyComponent() {
   const [terminationConfirmed, setTerminationConfirmed] = useState(false);
   const [incorrectName, setIncorrectName] = useState(false);
   const [view, setView] = useState("profile"); // 'profile' or 'changeAvailability'
-  const [imgUrl, setImgUrl] = useState("/profileicon.png");
+  const [imgUrl, setImgUrl] = useState("/user.png");
   const { id } = useParams();
   const [user, setUser] = useState(null); // State to hold the user data
   const { user: authUser } = useAuth();
