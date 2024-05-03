@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo  } from "react";
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
 import { FaArrowLeft, FaCheck, FaRegCalendarTimes } from 'react-icons/fa';
 import { MdOutlineOpenInNew } from 'react-icons/md';
-import { useNavigate } from 'react-router-dom';
-import { useProcessModification } from '../../providers/ProcessCreationProvider';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useProcessModificationContext } from '../../providers/ProcessModificationProvider';
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import moment from 'moment'; 
@@ -60,7 +60,7 @@ export function RoleDropdownContent({ role, eligibleStaff, assignStaff, assigned
 //export function CreateStaffAssignments({ sectionId, procedureId, procedureName, roles, onClose, onProceed,
   //startTime, endTime}) {
 
-    export function CreateStaffAssignments({ modifyProcedure, onClose}) {
+    export default function CreateStaffAssignments({ modifyProcedure, onClose}) {
     
       const procedureId=modifyProcedure._id;
       const procedureName=modifyProcedure.procedureName;
