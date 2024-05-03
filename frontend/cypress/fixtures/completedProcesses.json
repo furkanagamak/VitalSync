@@ -1,0 +1,30 @@
+[
+  {
+    "processID": "001",
+    "patientFullName": "John Doe",
+    "description": "Routine check-up",
+    "processName": "Annual Physical Exam",
+    "procedures": ["Blood Test", "X-ray"]
+  },
+  {
+    "processID": "002",
+    "patientFullName": "Jane Smith",
+    "description": "Consultation for symptoms of flu",
+    "processName": "General Consultation",
+    "procedures": ["Consultation", "Prescription"]
+  },
+  {
+    "processID": "003",
+    "patientFullName": "Alice Johnson",
+    "description": "Follow-up after surgery",
+    "processName": "Post-Operative Follow-Up",
+    "procedures": ["Wound Check", "Medication Review"]
+  },
+  {
+    "processID": "004",
+    "patientFullName": "Bob Brown",
+    "description": "Consultation for symptoms of flu",
+    "processName": "General Consultation",
+    "procedures": ["Consultation", "Prescription"]
+  }
+]
