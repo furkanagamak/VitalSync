@@ -121,7 +121,11 @@ const ResourceEdit = ({ navToViewResource, resource, changeResourceById }) => {
     <ThemeProvider theme={theme}>
       <div className="py-8 px-4">
         <section className="flex justify-center items-center relative py-4">
-          <button onClick={navToViewResource} className="absolute left-4">
+          <button
+            onClick={navToViewResource}
+            className="absolute left-4"
+            id="navBackToViewResourceBtn"
+          >
             <FaArrowLeft className="h-6 w-6" />
           </button>
           <h1 className="text-primary text-3xl font-semibold">Edit Resource</h1>
@@ -141,6 +145,7 @@ const ResourceEdit = ({ navToViewResource, resource, changeResourceById }) => {
                 inputProps={{ style: { color: "#8E0000" } }}
                 className="shadow rounded w-full py-2 px-3"
                 disabled={typeIsRole}
+                id="editResourceNameElem"
               />
             </div>
             <div className="ml-8 w-1/2">
@@ -174,6 +179,7 @@ const ResourceEdit = ({ navToViewResource, resource, changeResourceById }) => {
                 inputProps={{ style: { color: "#8E0000" } }}
                 className="shadow rounded w-full py-2 px-3"
                 disabled={typeIsRole}
+                id="editResourceLocationElem"
               />
             )}
           </div>
@@ -188,12 +194,14 @@ const ResourceEdit = ({ navToViewResource, resource, changeResourceById }) => {
               InputLabelProps={{ style: { color: "#8E0000" } }}
               inputProps={{ style: { color: "#8E0000" } }}
               className="shadow rounded w-full py-2 px-3"
+              id="editResourceDescripElem"
             />
           </div>
           <div className="mt-6 flex">
             <button
               type="submit"
               className="bg-highlightGreen text-white py-2 px-4 rounded-md ml-auto"
+              id="editResourceSubmitBtn"
             >
               Submit
             </button>

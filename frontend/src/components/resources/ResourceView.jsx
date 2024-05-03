@@ -224,6 +224,7 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
             <FaPen
               onClick={() => navToEditResource(row.original)}
               className="cursor-pointer text-primary my-2 xl:my-0"
+              id={`editResource-${row.original.uniqueIdentifier}`}
             />
             <FaTrashAlt
               onClick={() => {
@@ -231,6 +232,7 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
                 setResourceToDelete(row.original);
               }}
               className="cursor-pointer text-primary"
+              id={`deleteResource-${row.original.uniqueIdentifier}`}
             />
           </div>
         ),

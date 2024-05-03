@@ -118,6 +118,127 @@ describe("Resource view and create tests", () => {
     });
   });
 
+  // Resource modify tests
+  describe("Resource modify", () => {
+    beforeEach(() => {
+      cy.visit("/");
+      cy.get("#emailInput").type("john.doe@example.com");
+      cy.get("#passwordInput").type("password123");
+      cy.get("button").contains("Sign in").click();
+      cy.wait(1000);
+      cy.visit("http://localhost:3000/resources");
+    });
+
+    it("loading and navigation", () => {
+      cy.get(`#editResource-TR-102`).click();
+
+      // header
+      cy.contains("Edit Resource");
+      cy.get("#navBackToViewResourceBtn").click();
+      cy.get(`#editResource-TR-102`).click();
+
+      // fields are prefilled with corresponding values
+      cy.get("#editResourceNameElem").should("have.value", "test room");
+      cy.get("#editResourceLocationElem").should("have.value", "TRoom 102");
+      cy.get("#editResourceDescripElem").should("have.value", "");
+    });
+
+    it("updating valid fields", () => {
+      cy.get(`#editResource-TR-102`).click();
+
+      // update location field
+      cy.get("#editResourceLocationElem").clear().type("TRoom 105C");
+      cy.get("#editResourceDescripElem").type(
+        "Description for edited resource!"
+      );
+
+      // submit
+      cy.get("#editResourceSubmitBtn").click();
+      cy.contains("The resource has been updated!");
+
+      // home view should be updated
+      cy.get('input[placeholder="Search for the resource here ..."]').type(
+        "TR-102"
+      );
+      cy.contains("Description for edited resource!");
+    });
+
+    it("updating invalid fields", () => {
+      cy.get(`#editResource-TR-102`).click();
+
+      // update location field
+      cy.get("#editResourceLocationElem").clear().type("TRoom 105C");
+      cy.get("#editResourceDescripElem").clear();
+
+      // submit
+      cy.get("#editResourceSubmitBtn").click();
+      cy.contains(
+        "For non-roles resources, a location and description must be defined!"
+      );
+    });
+  });
+
+  // Resource delete tests
+  describe("Resource delete", () => {
+    beforeEach(() => {
+      cy.visit("/");
+      cy.get("#emailInput").type("john.doe@example.com");
+      cy.get("#passwordInput").type("password123");
+      cy.get("button").contains("Sign in").click();
+      cy.wait(1000);
+      cy.visit("http://localhost:3000/resources");
+    });
+
+    it("load and navigating", () => {
+      cy.get("#deleteResource-TR-102").click();
+
+      // modal display
+      cy.contains("Are you sure you want to delete:");
+      cy.contains("test room");
+      cy.contains("Unique ID: TR-102");
+      cy.contains("Yes");
+      cy.contains("Cancel").click();
+
+      // exit modal
+      cy.contains("Are you sure you want to delete:").should("not.exist");
+    });
+
+    it("attempt to remove resources or roles that is in action should fail", () => {
+      // attempts to delete in action resource
+      cy.get("#deleteResource-TR-102").click();
+      cy.contains("Yes").click();
+      cy.contains(
+        "The resource you are trying to delete is assigned to one or more procedure templates!"
+      );
+      cy.contains("Cancel").click();
+
+      // attempts to delete assigned roles
+      cy.get('input[placeholder="Search for the resource here ..."]').type(
+        "test_physician"
+      );
+      cy.get("#deleteResource-test_physician").click();
+      cy.contains("Yes").click();
+      cy.contains(
+        "The role you are trying to delete is assigned to one or more accounts!"
+      );
+    });
+
+    it("removing resources and role that is not in action should succeed", () => {
+      // remove resource
+      cy.get("#deleteResource-AR-102").click();
+      cy.contains("Yes").click();
+      cy.contains("The resource has been delete!");
+
+      // remove role
+      cy.get('input[placeholder="Search for the resource here ..."]').type(
+        "physician"
+      );
+      cy.get("#deleteResource-physician").click();
+      cy.contains("Yes").click();
+      cy.contains("The role has been delete!");
+    });
+  });
+
   // Resource Create Tests
   describe("Resource Create Tests", () => {
     beforeEach(() => {
