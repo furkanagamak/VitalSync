@@ -84,7 +84,8 @@ export function ModifyProcessLanding() {
 
   const { processID } = useParams();
   const { processInstance, fetchProcessInstance, isLoading, error, updateProcessDescription
-  , updateProcessName, editedPatient, updateSectionDescription, updateSectionName,getStaffAssignments,staffAssignments } = useProcessModificationContext();
+  , updateProcessName, editedPatient, saveAllChanges,
+  updateSectionDescription, updateSectionName,getStaffAssignments,staffAssignments } = useProcessModificationContext();
 
     
 
@@ -162,10 +163,12 @@ export function ModifyProcessLanding() {
     navigate("/processManagement/modifyProcess/activeProcesses");
   };
 
-  const handleSaveChanges = () => {
-    notify();
-    navigate("/processManagement/modifyProcess/activeProcesses");
-  };
+  const handleSaveChanges = async () => {
+    await saveAllChanges();  
+toast.success("Process successfully modified!"); 
+   navigate("/processManagement/modifyProcess/activeProcesses");
+};
+
 
 
 
@@ -544,11 +547,11 @@ export function ModifyProcessLanding() {
         ))}       
       </div>
       <div className="flex justify-evenly items-center mt-10 p-4 w-2/5 mx-auto">
-      <button 
+      {/*<button 
           className="flex items-center justify-center bg-highlightRed text-white rounded-3xl px-7 py-5 text-3xl" 
           onClick={() => setShowDeleteModal(true)}> 
           Delete Process
-        </button>
+      </button>*/}
         <button 
           className="flex items-center justify-center bg-highlightGreen text-white rounded-3xl px-7 py-5 text-3xl" 
           onClick={handleSaveChanges}>

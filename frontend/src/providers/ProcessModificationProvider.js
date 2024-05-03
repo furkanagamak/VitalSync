@@ -117,6 +117,8 @@ export const ProcessModificationProvider = ({ children }) => {
     }, []);
 
     const updateSectionName = useCallback((sectionId, newName) => {
+        console.log(processInstance);
+        console.log(editedPatient);
         setProcessInstance(prev => {
             const updatedSections = prev.sectionInstances.map(section => {
                 if (section._id === sectionId) {
@@ -164,11 +166,38 @@ export const ProcessModificationProvider = ({ children }) => {
             const { processInstance, editedPatient } = JSON.parse(storedData);
             setProcessInstance(processInstance);
             setEditedPatient(editedPatient);
+
              }
     }, []);
 
     
-
+    const saveAllChanges = useCallback(async () => {
+        if (!processInstance || !editedPatient) {
+            console.error("No process instance or patient data available to save.");
+            return;
+        }
+    
+        const updateData = {
+            processName: processInstance.processName,
+            description: processInstance.description,
+            patient: {
+                _id: editedPatient._id,
+                ...editedPatient,
+            },
+            sections: processInstance.sectionInstances.map(section => ({
+                _id: section._id,
+                name: section.name,
+                description: section.description,
+            })),
+        };
+    
+        try {
+            const response = await axios.put(`/processInstances/${processInstance._id}`, updateData);
+            console.log("Updated process instance:", response.data);
+        } catch (error) {
+            console.error("Failed to update process instance:", error);
+        }
+    }, [processInstance, editedPatient]);
 
     return (
         <ProcessModificationContext.Provider value={{
@@ -184,7 +213,8 @@ export const ProcessModificationProvider = ({ children }) => {
             updateSectionName,
             updateStaffAssignments,
             getStaffAssignments,
-            staffAssignments
+            staffAssignments,
+            saveAllChanges
         }}>
             {children}
         </ProcessModificationContext.Provider>

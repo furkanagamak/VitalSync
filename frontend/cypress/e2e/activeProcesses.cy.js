@@ -21,8 +21,8 @@ describe('Active Processes List Tests', () => {
         cy.url().should('include', '/processDetails');
       });
 
-    /*it("goes to modify process landing page after clicking modify", () => {
+    it("goes to modify process landing page after clicking modify", () => {
         cy.get('button').contains('Modify').click();
         cy.url().should('include', '/landing');
-    });*/
+    });
 });

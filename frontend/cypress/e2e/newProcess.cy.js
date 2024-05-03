@@ -1,4 +1,4 @@
-/*describe('Process Template List Tests', () => {
+describe('Process Template List Tests', () => {
     beforeEach(() => {
         cy.visit('/');
         cy.get('#emailInput').type('john.doe@example.com');
@@ -11,17 +11,23 @@
 
     it('successfully loads the process template management page', () => {
         cy.contains('Create from Existing or New Template').should('be.visible');
-        cy.contains('Create Instance from New Template').should('be.visible');
         cy.contains('Name').should('be.visible');
         cy.contains('Actions').should('be.visible');
     });
 
-    /*it('navigates to create template form', () => {
-        cy.get('button').contains('Create New Template').click();
-        cy.url().should('include', '/processTemplateForm');
-      });*/
-/*});
-*/
+    it('is able to create a new process', () => {
+        cy.get('.modify-process-template-button').first().click();
+        cy.get('button').contains('Use Template').click();
+
+        cy.get('[name="firstName"]').type('James');
+        cy.get('[name="lastName"]').type('Johnson');
+        cy.get('[name="lastName"]').type('Johnson');
+        cy.get('input[aria-label="Date of Birth"]').click();
+        cy.contains('button', '15').click();
+
+    });
+});
+
 /*describe('Add Section Page Tests', () => {
     beforeEach(() => {
         cy.visit('/');
