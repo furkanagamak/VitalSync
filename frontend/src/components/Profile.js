@@ -461,6 +461,21 @@ function ContactInfo({ user, authUser, id }) {
     useState(false);
   const { currentUser } = useAuth();
 
+  const formatPhoneNumber = (input) => {
+    // Strip all non-digits and limit input to 10 digits
+    const digits = input.replace(/\D/g, "").slice(0, 10);
+
+    // Format the digits with dashes
+    const match = digits.match(/^(\d{1,3})(\d{1,3})?(\d{1,4})?$/);
+    if (!match) return "";
+
+    // Construct the phone number string based on the captured groups
+    const part1 = match[1];
+    const part2 = match[2] ? `-${match[2]}` : "";
+    const part3 = match[3] ? `-${match[3]}` : "";
+    return `${part1}${part2}${part3}`;
+  };
+
   useEffect(() => {
     if (user) {
       setCellNo(user.phoneNumber || "");
@@ -507,6 +522,7 @@ function ContactInfo({ user, authUser, id }) {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       notify();
       setEditMode(false);
+      setErrors({}); // Clear any previous errors
     } catch (error) {
       console.error("Failed to update profile:", error);
       notifyErr();
@@ -514,9 +530,14 @@ function ContactInfo({ user, authUser, id }) {
   };
 
   const handleInputChange = (setterFunction, value, validatorFunction) => {
-    setterFunction(value);
+    const formattedValue =
+      setterFunction === setCellNo || setterFunction === setOfficeNo
+        ? formatPhoneNumber(value)
+        : value;
+
+    setterFunction(formattedValue);
     // Clear the corresponding error if the new value is valid
-    if (validatorFunction(value)) {
+    if (validatorFunction(formattedValue)) {
       setErrors((prev) => ({ ...prev, [setterFunction.name]: undefined }));
     }
   };
