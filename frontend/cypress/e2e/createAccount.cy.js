@@ -7,25 +7,26 @@ describe("Create Account Page", () => {
     cy.wait(1000);
     cy.visit("http://localhost:3000/createAccount");
   });
-  // it("loading", () => {
-  //   cy.contains("Staff");
-  //   cy.contains("Admin");
-  // });
 
-  // it("back to admin actions", () => {
-  //   cy.get("#selectAccTypeBackBtn").click();
-  //   cy.url().should("include", "/adminActions");
-  // });
+  it("loading", () => {
+    cy.contains("Staff");
+    cy.contains("Admin");
+  });
 
-  // it("select staff", () => {
-  //   cy.get("#selectStaffBtn").click();
-  //   cy.contains("Staff");
-  // });
+  it("back to admin actions", () => {
+    cy.get("#selectAccTypeBackBtn").click();
+    cy.url().should("include", "/adminActions");
+  });
 
-  // it("select admin", () => {
-  //   cy.get("#selectAdminBtn").click();
-  //   cy.contains("Admin");
-  // });
+  it("select staff", () => {
+    cy.get("#selectStaffBtn").click();
+    cy.contains("Staff");
+  });
+
+  it("select admin", () => {
+    cy.get("#selectAdminBtn").click();
+    cy.contains("Admin");
+  });
 
   it("Form insertion flow", () => {
     cy.get("#selectAdminBtn").click();
