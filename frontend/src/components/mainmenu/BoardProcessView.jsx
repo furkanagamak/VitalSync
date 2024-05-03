@@ -151,7 +151,9 @@ const BoardProcessProcedures = ({ procedures, currUser, currentProcedure }) => {
       <section className="text-2xl mb-4">
         <h1 className="flex">
           Procedures to complete:{" "}
-          <p className="ml-2 text-primary">{procedures.length}</p>
+          <p className="ml-2 text-primary" id="proceduresLeftText">
+            {procedures.length}
+          </p>
         </h1>
       </section>
       <section className="flex flex-col space-y-8">
