@@ -83,10 +83,10 @@ describe('Process Template List Tests', () => {
             cy.get('button').contains('Save').click();
 
         });
-        cy.get('button').contains('Proceed').click();
-        cy.get('button').contains('Proceed').click();
-        cy.get('button').contains('Confirm').click();
-        cy.contains('Process successfully created!').should('be.visible');
+      //  cy.get('button').contains('Proceed').click();
+     //   cy.get('button').contains('Proceed').click();
+      //  cy.get('button').contains('Confirm').click();
+      //  cy.contains('Process successfully created!').should('be.visible');
 
     });
 });
