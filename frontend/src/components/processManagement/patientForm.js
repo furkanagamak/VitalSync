@@ -337,6 +337,7 @@ function PatientInformationForm() {
                   <FormControl variant="outlined" fullWidth required>
                     <InputLabel htmlFor="state-select">State</InputLabel>
                     <Select
+                      id="state-selection"
                       labelId="state-select"
                       label="State"
                       variant="outlined"

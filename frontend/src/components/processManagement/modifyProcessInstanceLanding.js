@@ -371,11 +371,15 @@ toast.success("Process successfully modified!");
               <>
                 <input
                   type="text"
+                  id="editProcessNameField"
+
                   value={processName}
                   onChange={handleProcessNameChange} 
                   className="text-primary mr-3 px-2 py-1 rounded w-3/5"
                 />
                 <button
+                                  id="editProcessNameSave"
+
                   className="bg-primary text-white px-3 py-1 rounded hover:bg-primary-dark"
                   onClick={handleProcessNameSave}
                 >
@@ -387,6 +391,7 @@ toast.success("Process successfully modified!");
               <>
                 <span className="text-primary font-bold mr-3 mb-3">{processName}</span>
                 <button
+                  id="editProcessName"
                   className="text-primary mb-2"
                   onClick={handleProcessNameEditClick}
                 >
