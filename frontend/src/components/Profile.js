@@ -681,6 +681,7 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
     try {
       await axios.put(`/updateRoles/${userId}`, { roles: selectedRoles });
       toast.success("Roles updated successfully.");
+      setInitialSelectedRoles(selectedRoles); // Update initial state
       onRequestClose(); // Close the modal
     } catch (error) {
       toast.error("Failed to update roles: " + error.message);
