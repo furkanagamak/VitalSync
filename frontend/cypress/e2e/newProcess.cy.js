@@ -66,6 +66,11 @@ describe('Process Template List Tests', () => {
 
         cy.get('button[aria-label*="Choose date"]').click();
         cy.contains('button', '28').click();  
+        cy.get('button[aria-label*="Choose time"]').click();
+        cy.get('li[aria-label*="9 hours"]').click();
+        cy.get('li[aria-label*="AM"]').click();
+        cy.contains('button', 'OK').click();
+
         cy.get('button').contains('Proceed').click();
 
         cy.get('button').contains('Assignments Required').each(($btn, index, $list) => {
@@ -83,10 +88,10 @@ describe('Process Template List Tests', () => {
             cy.get('button').contains('Save').click();
 
         });
-      //  cy.get('button').contains('Proceed').click();
-     //   cy.get('button').contains('Proceed').click();
-      //  cy.get('button').contains('Confirm').click();
-      //  cy.contains('Process successfully created!').should('be.visible');
+        cy.get('button').contains('Proceed').click();
+        cy.get('button').contains('Proceed').click();
+        cy.get('button').contains('Confirm').click();
+        cy.contains('Process successfully created!').should('be.visible');
 
     });
 });
