@@ -112,6 +112,7 @@ function ImageUploader({ onClose, setImgUrl }) {
             Cancel
           </button>
           <button
+            id="imageupload"
             className="flex-1 cursor-pointer bg-red-800 text-white text-center py-1.5 rounded-lg"
             onClick={handleSubmit}
           >
@@ -216,6 +217,7 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
         <div className="px-12 py-4 text-center text-black">
           <p className="text-sm leading-5">Enter your new password:</p>
           <input
+            id="newPassword"
             type="password"
             value={newPassword}
             onChange={handlePasswordChange}
@@ -224,6 +226,7 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
             style={{ maxWidth: "200px", fontSize: "0.875rem" }}
           />
           <input
+            id="ConfirmNewPassword"
             type="password"
             value={confirmPassword}
             onChange={handleConfirmPasswordChange}
@@ -242,6 +245,7 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
             Close
           </button>
           <button
+            id="resetConfirm"
             type="button"
             onClick={handleSubmit}
             className="px-4 py-1 bg-red-800 text-white rounded-lg border border-solid border-neutral-600 text-xs mb-3"
@@ -301,13 +305,14 @@ function ConfirmResetPasswordModal({ user, onClose, onConfirm }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center ConfirmResetPasswordModal">
       <div className="flex flex-col justify-center max-w-[364px] bg-lime-50 rounded-lg border border-red-800 border-solid shadow">
         <div className="text-base leading-6 text-center text-black px-16 py-6">
           To reset the Password enter your current Password
         </div>
         <div className="flex flex-col gap-3 px-5 pb-5 mt-3">
           <input
+            id="currentPassword"
             type="password"
             placeholder="Enter Current Password"
             value={currentPassword}
@@ -384,6 +389,7 @@ function AccountTerminationModal({
             email of the person of the account to be terminated.
           </div>
           <input
+            id="terminateConfirm"
             type="text"
             value={inputEmail}
             onChange={handleNameChange}
@@ -530,6 +536,7 @@ function ContactInfo({ user, authUser, id }) {
       {editMode ? (
         <>
           <input
+            id="cellNo"
             type="text"
             value={cellNo}
             onChange={(e) =>
@@ -541,6 +548,7 @@ function ContactInfo({ user, authUser, id }) {
             <div className="text-red-500 text-lg">{errors.cellNo}</div>
           )}
           <input
+            id="officeNo"
             type="text"
             value={officeNo}
             onChange={(e) =>
@@ -556,6 +564,7 @@ function ContactInfo({ user, authUser, id }) {
             <div className="text-red-500 text-lg">{errors.officeNo}</div>
           )}
           <input
+            id="email"
             type="email"
             value={email}
             onChange={(e) =>
@@ -567,6 +576,7 @@ function ContactInfo({ user, authUser, id }) {
             <div className="text-red-500 text-lg">{errors.email}</div>
           )}
           <input
+            id="office"
             type="text"
             value={office}
             onChange={(e) => setOffice(e.target.value)}
@@ -775,24 +785,28 @@ function ProfileDetails({ user, authUser, id }) {
         {editMode ? (
           <>
             <input
+              id="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="mb-2 text-5xl text-red-800 max-md:text-4xl text-left border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
             />
             <input
+              id="designation"
               type="text"
               value={designation}
               onChange={(e) => setDesignation(e.target.value)}
               className="mb-2 text-3xl text-black text-left border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
             />
             <input
+              id="specialty"
               type="text"
               value={specialty}
               onChange={(e) => setSpecialty(e.target.value)}
               className="mb-2 text-3xl text-left text-black max-md:max-w-full border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
             />
             <input
+              id="department"
               type="text"
               value={department}
               onChange={(e) => setDepartment(e.target.value)}

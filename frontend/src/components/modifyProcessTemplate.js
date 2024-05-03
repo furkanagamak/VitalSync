@@ -671,7 +671,7 @@ const ModifyProcessTemplateForm = () => {
         <h1 className="text-4xl leading-10 text-center underline text-red-800">
           Modify Process Template
         </h1>
-        <div className="flex flex-row mt-4 lg:mt-0 lg:flex-row-reverse lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 justify-between w-full px-4 lg:px-0">
+        <div className="flex flex-row mt-4 lg:mt-0 lg:flex-row lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 justify-between w-full px-4">
           <div >
             <GoBackButton />
           </div>
