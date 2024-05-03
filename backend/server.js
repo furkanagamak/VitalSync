@@ -2084,8 +2084,6 @@ app.get("/processInstancesActive", async (req, res) => {
   }
 });
 
-app.get("/chatMessages/:pid", messagesController.getChatMessagesByProcess);
-
 app.get("/processCompleted/:pid", async (req, res) => {
   if (!req.params.pid) return res.status(400).send("No process id provided!");
   const processInstance = await ProcessInstance.findOne({
