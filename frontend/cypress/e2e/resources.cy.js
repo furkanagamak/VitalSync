@@ -2,7 +2,7 @@ describe("Resource view and create tests", () => {
   //Resource View and Interaction Tests
   describe("Resource View and Interaction Tests", () => {
     beforeEach(() => {
-      cy.visit("/login");
+      cy.visit("/");
       cy.get("#emailInput").type("john.doe@example.com");
       cy.get("#passwordInput").type("password123");
       cy.get("button").contains("Sign in").click();
