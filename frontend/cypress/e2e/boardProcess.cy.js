@@ -75,13 +75,21 @@ describe("Board Process", () => {
       "A procedure Anesthesia Shot has been completed for the process Radical Prostatectomy with the process ID AB12CD34 that you are a part of."
     );
 
+    // clicking notifications in notification drop down should take you to process page
+    cy.contains("Your Turn").click();
+    cy.url().should("include", "/processDetails/AB12CD34");
+
     // notification box should have expected contents
-    cy.get("#notificationsBoxBtn").click();
+    cy.visit("http://localhost:3000/notifications");
     cy.contains(
       "Your assigned procedure Prostate Removal for the process Radical Prostatectomy with the process ID AB12CD34 is the current procedure to be completed."
     );
     cy.contains(
       "A procedure Anesthesia Shot has been completed for the process Radical Prostatectomy with the process ID AB12CD34 that you are a part of. The next procedure is Prostate Removal. There are 2 procedures left until the process is fully complete."
     );
+
+    // clicking notifications in notifcation box should take you to associating process page
+    cy.contains("Your Turn").click();
+    cy.url().should("include", "/processDetails/AB12CD34");
   });
 });

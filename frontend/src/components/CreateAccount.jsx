@@ -253,7 +253,6 @@ const CreateAccount = ({ navToAdminActions }) => {
           formData={formData}
           accType={accType}
           handleChange={handleChange}
-          handleSubmit={handleSubmit}
           navToTypeSelection={navToTypeSelection}
           navToForm2={navToForm2}
           rolesList={rolesList}
@@ -327,13 +326,12 @@ const Form1 = ({
   formData,
   accType,
   handleChange,
-  handleSubmit,
   navToTypeSelection,
   navToForm2,
   rolesList,
 }) => {
   return (
-    <div className="py-8 px-4 mx-auto" >
+    <div className="py-8 px-4 mx-auto">
       <section className="flex justify-center items-center relative py-4">
         <button
           onClick={navToTypeSelection}
@@ -347,10 +345,7 @@ const Form1 = ({
           <p>All fields with * are required</p>
         </div>
       </section>
-      <form
-        className="mx-auto max-w-lg bg-[#f5f5dc] py-4 px-8 space-y-8"
-        onSubmit={handleSubmit}
-      >
+      <div className="mx-auto max-w-lg bg-[#f5f5dc] py-4 px-8 space-y-8">
         <div className="flex">
           <div className="w-3/4 mt-auto">
             <TextField
@@ -458,7 +453,7 @@ const Form1 = ({
             </button>
           </div>
         </div>
-      </form>
+      </div>
     </div>
   );
 };
