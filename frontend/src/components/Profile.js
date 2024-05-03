@@ -629,6 +629,7 @@ function ContactInfo({ user, authUser, id }) {
 const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
   const [availableRoles, setAvailableRoles] = useState([]);
   const [selectedRoles, setSelectedRoles] = useState([]);
+  const [initialSelectedRoles, setInitialSelectedRoles] = useState([]);
 
   // Fetch all roles
   useEffect(() => {
@@ -649,6 +650,7 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
       try {
         const result = await axios.get(`/users/${userId}/eligibleRoles`);
         setSelectedRoles(result.data.map((role) => role._id));
+        setInitialSelectedRoles(result.data.map((role) => role._id));
       } catch (error) {
         toast.error("Failed to fetch user roles: " + error.message);
       }
@@ -667,6 +669,11 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
         return [...prev, roleId];
       }
     });
+  };
+
+  const handleClose = () => {
+    setSelectedRoles(initialSelectedRoles); // Reset to initial state
+    onRequestClose(); // Close the modal
   };
 
   // Save the updated roles
@@ -703,7 +710,7 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
         </div>
         <div className="flex justify-center space-x-4 mt-4">
           <button
-            onClick={onRequestClose}
+            onClick={handleClose}
             className="px-4 py-2 rounded-md hover:underline text-black"
           >
             Cancel

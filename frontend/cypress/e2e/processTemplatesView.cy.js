@@ -17,6 +17,7 @@ describe("View Process Templates Tests", () => {
     cy.contains("Sections").should("be.visible");
     cy.contains("Procedures").should("be.visible");
     cy.contains("Actions").should("be.visible");
+    cy.contains("Create New Template").should("exist");
   });
 
   it("can input and clear search term", () => {
@@ -29,7 +30,7 @@ describe("View Process Templates Tests", () => {
   });
 
   it("should navigate to create process template form", () => {
-    cy.get("button").contains("Create New Template").click({force: true});
+    cy.get("button").contains("Create New Template").click({ force: true });
     cy.url().should("include", "/CreateProcessTemplateForm");
     cy.contains("Create New Process Template").should("be.visible");
     cy.get("button").contains("Save Template").should("be.visible");

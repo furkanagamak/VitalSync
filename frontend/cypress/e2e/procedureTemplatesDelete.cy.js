@@ -22,6 +22,7 @@ describe("Delete Procedure Template Tests", () => {
     cy.contains("Estimated Time").should("be.visible");
     cy.contains("Special Notes").should("be.visible");
     cy.contains("Actions").should("be.visible");
+    cy.contains("Create Template").should("exist");
   });
 
   it("should open the delete confirmation modal when delete button is clicked", () => {

@@ -219,6 +219,7 @@ const SectionForm = ({ onModifyProcedure, section, setSection }) => {
           margin="normal"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
+          id="name"
         />
         <TextField
           fullWidth
@@ -231,6 +232,7 @@ const SectionForm = ({ onModifyProcedure, section, setSection }) => {
           margin="normal"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
+          id="description"
         />
 
         <Grid container spacing={3} alignItems="center">
@@ -355,6 +357,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
                 cursor: "pointer",
                 marginRight: "10px",
               }}
+              title="Move Up"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -380,6 +383,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
                 cursor: "pointer",
                 marginRight: "10px",
               }}
+              title="Move Down"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -404,6 +408,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
                 padding: "0",
                 cursor: "pointer",
               }}
+              title="Delete"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
