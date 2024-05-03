@@ -19,6 +19,7 @@ describe("View Procedure Templates Tests", () => {
     cy.contains("Estimated Time").should("be.visible");
     cy.contains("Special Notes").should("be.visible");
     cy.contains("Actions").should("be.visible");
+    cy.contains("Create Template").should("exist");
   });
 
   it("can input and clear search term", () => {

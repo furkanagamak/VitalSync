@@ -52,6 +52,26 @@ async function addInstances() {
     accountData.password = hashedPassword;
     const newAccount = new Account(accountData);
 
+    const dummyAccount = {
+      firstName: "James",
+      lastName: "test",
+      password: "password123",
+      email: "dummy@example.com",
+      accountType: "system admin",
+      position: "Doctor",
+      department: "Cardiology",
+      degree: "MD",
+      phoneNumber: "111-111-1111",
+      officePhoneNumber: "111-111-1111",
+      officeLocation: "Room 102",
+      eligibleRoles: [newRole._id],
+      assignedProcedures: [],
+    };
+    const salt1 = await bcrypt.genSalt(10);
+    const hashedPassword1 = await bcrypt.hash(dummyAccount.password, salt);
+    dummyAccount.password = hashedPassword;
+    const newAccount1 = new Account(dummyAccount);
+
     const patientData = {
       fullName: "Alice Smith",
       street: "123 Main St",
@@ -192,6 +212,8 @@ async function addInstances() {
     console.log("Role saved:", savedRole);
     const savedAccount = await newAccount.save();
     console.log("Account saved:", savedAccount);
+    const savedAccount1 = await newAccount1.save();
+    console.log("Account saved:", savedAccount1);
     const savedPatient = await newPatient.save();
     console.log("Patient saved:", savedPatient);
     const savedResourceInstance = await newResourceInstance.save();

@@ -189,6 +189,7 @@ const ProcessForm = ({ process, setProcess, createTemplate }) => {
           margin="normal"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
+          id="name"
         />
         <TextField
           fullWidth
@@ -201,6 +202,7 @@ const ProcessForm = ({ process, setProcess, createTemplate }) => {
           margin="normal"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
+          id="description"
         />
       </div>
     </ThemeProvider>
@@ -330,6 +332,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
                 cursor: "pointer",
                 marginRight: "10px",
               }}
+              title="Move Up"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -355,6 +358,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
                 cursor: "pointer",
                 marginRight: "10px",
               }}
+              title="Move Down"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -379,6 +383,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
                 cursor: "pointer",
                 marginRight: "10px",
               }}
+              title="Edit"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -400,6 +405,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
                 padding: "0",
                 cursor: "pointer",
               }}
+              title="Delete"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -665,7 +671,7 @@ const ModifyProcessTemplateForm = () => {
         <h1 className="text-4xl leading-10 text-center underline text-red-800">
           Modify Process Template
         </h1>
-        <div className="flex flex-row mt-4 lg:mt-0 lg:flex-row-reverse lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 justify-between w-full px-4 lg:px-0">
+        <div className="flex flex-row mt-4 lg:mt-0 lg:flex-row lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 justify-between w-full px-4">
           <div >
             <GoBackButton />
           </div>

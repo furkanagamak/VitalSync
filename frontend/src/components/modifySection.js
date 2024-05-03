@@ -219,6 +219,7 @@ const SectionForm = ({ onModifyProcedure, section, setSection }) => {
           margin="normal"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
+          id="name"
         />
         <TextField
           fullWidth
@@ -231,6 +232,7 @@ const SectionForm = ({ onModifyProcedure, section, setSection }) => {
           margin="normal"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
+          id="description"
         />
 
         <Grid container spacing={3} alignItems="center">
@@ -343,7 +345,8 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
       {
         Header: "Actions",
         Cell: ({ row }) => (
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div className="flex-col lg:flex-row"
+            style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
             <button
             onClick={() => onMoveProcedure(row.index, "up")}
               className="moveUpProc"
@@ -354,6 +357,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
                 cursor: "pointer",
                 marginRight: "10px",
               }}
+              title="Move Up"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -379,6 +383,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
                 cursor: "pointer",
                 marginRight: "10px",
               }}
+              title="Move Down"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -403,6 +408,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
                 padding: "0",
                 cursor: "pointer",
               }}
+              title="Delete"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -480,7 +486,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
               {headerGroups.map((headerGroup) => (
                 <tr {...headerGroup.getHeaderGroupProps()}>
                   {headerGroup.headers.map((column) => (
-                    <th
+                    <th className="text-xxs lg:text-lg py-1"
                       {...column.getHeaderProps()}
                       style={{
                         ...column.style,
@@ -511,13 +517,15 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
                   <tr {...row.getRowProps()}>
                     {row.cells.map((cell) => {
                       return (
-                        <td
+                        <td className="text-xxs lg:text-lg"
                           {...cell.getCellProps()}
                           style={{
                             ...cell.column.style,
                             borderBottom: "1px solid #8E0000",
                             padding: "10px",
                             verticalAlign: "middle",
+                            wordBreak: 'break-word',
+                            whiteSpace: 'normal',
                           }}
                         >
                           {cell.render("Cell")}
@@ -604,35 +612,20 @@ const ModifySectionForm = () => {
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          marginTop: "1.2rem",
-          marginBottom: "2rem",
-        }}
-      >
-        <div style={{ position: "absolute", left: "2rem" }}>
-          <GoBackButton />
-        </div>
-        <div style={{ position: "absolute", right: "2rem" }}>
-          <ModifySectionButton 
-                  onModifySection={onModifySection}
-                  sectionDetails={section}/>
-        </div>
-        <h1
-          style={{
-            fontSize: "2.25rem",
-            lineHeight: "2.5rem",
-            textAlign: "center",
-            textDecoration: "underline",
-            color: "#8E0000",
-          }}
-        >
+      <div className="relative mt-6 mb-8 flex flex-col lg:flex-row items-center justify-center">
+        <h1 className="text-4xl leading-10 text-center underline text-red-800">
           Modify Section
         </h1>
+        <div className="flex flex-row mt-4 lg:mt-0 lg:flex-row lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 justify-between w-full px-4">
+          <div>
+            <GoBackButton />
+          </div>
+          <div>
+            <ModifySectionButton 
+                    onModifySection={onModifySection}
+                    sectionDetails={section}/>
+          </div>
+        </div>
       </div>
       <SectionForm onAddProcedure={addProcedure} section={section} setSection={setSection} />
       <SectionTable procedures={section.procedureTemplates} onMoveProcedure={moveProcedure} onDeleteProcedure={deleteProcedure} />
