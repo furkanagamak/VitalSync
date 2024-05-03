@@ -11,6 +11,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import ProcessDeleteModal from "./processDeleteModal";
 import { useProcessModificationContext } from '../../providers/ProcessModificationProvider';
+import CreateStaffAssignments from './modifyProcessAssignStaff';
 
 
 const notify = () => toast.success("Process successfully deleted! Affected staff have been notified.");
@@ -178,6 +179,9 @@ export function ModifyProcessLanding() {
   const handleModifyStaffAssignments = (procedure) => {
     setProcedureResourceAssignmentsView(procedure);
   };
+  const handleCloseModifyStaffAssignments = () => {
+    setProcedureResourceAssignmentsView('');
+  }
 
 /*
   const handleModifyProcedure = () => {
@@ -275,8 +279,7 @@ export function ModifyProcessLanding() {
   
   const handleSectionNameSave = (sectionId) => {
     const newName = sectionNames[sectionId].name;
-    // Call the context function or API to update the section name in the backend
-    updateSectionName(sectionId, newName); // Implement this function based on your context or API
+    updateSectionName(sectionId, newName); 
     setSectionNames(prev => ({
       ...prev,
       [sectionId]: { ...prev[sectionId], editing: false }
@@ -288,7 +291,11 @@ export function ModifyProcessLanding() {
     return <div>Loading...</div>;
   }
 
-  if (currentView === 'modifyProcess') {
+  else if (procedureResourceAssignmentsView) {
+    return  < CreateStaffAssignments  onClose={handleCloseModifyStaffAssignments} modifyProcedure={procedureResourceAssignmentsView}/> ;
+  }
+
+  else if (currentView === 'modifyProcess') {
 
   return (
   <>{showDeleteModal && (
@@ -299,33 +306,24 @@ export function ModifyProcessLanding() {
       onCancel={handleCancel}
     />
   )}
-  {procedureResourceAssignmentsView &&(<ProcessDeleteModal
-    processName={processInstance ? processName : 'Loading process name...'}
-    patientName={editedPatient ? editedPatient.fullName : 'Loading patient data...'}
-      onDelete={handleDelete}
-      onCancel={handleCancel}
-    />)
-  }
-
     <div className="flex flex-col gap-6 py-14">     {/*Header*/}
     
         <div className="flex justify-between items-start text-4xl">
             {/* Left Section- Go Back button and Add Section */}
             <div className="flex flex-col gap-4 w-1/4">
                 <button 
-                    className="flex items-center justify-center bg-primary text-white rounded-full px-6 py-4 mb-12 mt-5 ml-12 text-3xl border-black border-2"
-                    style={{ paddingLeft: '20px', maxWidth: '50%' }}
+                    className="w-2/5 ml-10 bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center"
                     onClick={handleGoBack}
                 >   
-                    <FaArrowLeft className="mr-12" />Go Back
+                    <FaArrowLeft className="mr-3" />Go Back
                 </button>
-                <div className="flex items-center ml-12">
+                {/*<div className="flex items-center ml-12">
                     <h1 className="text-black text-3.5xl font-bold">Add Section</h1>
                     <CiCirclePlus 
                       className="text-highlightGreen ml-2 mt-1 cursor-pointer" 
                       style={{ fontSize: '3.5rem' }} 
                     />
-                  </div>
+</div>*/}
             </div>
 
         {/* Middle Section- Process, Patient, ProcessID labels*/}
@@ -430,7 +428,7 @@ export function ModifyProcessLanding() {
                 <button id="openSection" onClick={() => toggleSection(section.name)} className="flex items-center">
                   {openSections.has(section.name) ? <BsChevronUp className="text-4xl cursor-pointer" /> : <BsChevronDown className="text-4xl cursor-pointer" />}
                 </button>
-                <FaTrashAlt className="text-3xl ml-10 text-primary" />
+                {/*<FaTrashAlt className="text-3xl ml-10 text-primary" />*/}
               </div>
             </div>
 
@@ -457,20 +455,7 @@ export function ModifyProcessLanding() {
                         )}
                     </div>
                   
-                  <div className="flex flex-col mt-4">
-                    <button className="bg-highlightGreen text-white rounded-full px-5 py-2 text-xl flex items-center  mt-5"
-                    onClick={handleReviewResourceAssignments} >
-                      <MdOutlineOpenInNew className="mr-2" />
-                      <span className="mx-auto">
-                      Review Resource Assignments</span>
-                    </button>
-                    <button className="bg-highlightGreen text-white rounded-full px-5 py-2 text-xl flex items-center mt-5 mb-5 "
-                    onClick={handleReviewStaffAssignments} >
-                      <MdOutlineOpenInNew className="mr-2" />
-                      <span className="mx-auto">
-                      Review Staff Assignments</span>
-                    </button>
-                  </div>
+                  
                   </div>
                 {/* Middle Section Content */}
                 {section.procedureInstances && (
@@ -479,15 +464,22 @@ export function ModifyProcessLanding() {
                     {section.procedureInstances.map((procedure, index) => (
                       <div 
                         key={index} 
-                        className={`flex items-center justify-between ${index < section.procedureInstances.length - 1 ? "border-b border-black" : ""}`}>
+                        className={`flex items-center justify-between border-b-2 border-black}`}>
                         {/* REORDERING <HiMiniArrowsUpDown className=" text-primary text-3xl" />*/}
-                        <span className="flex-1 text-2xl pl-2 font-bold py-4 mr-10">{procedure.procedureName}</span>
-                        <button className="text-highlightGreen underline text-xl mr-10" onClick={() => handleModifyResourceAssignments(procedure)}>Resource Assignments</button>
-                        <button className="text-highlightGreen underline text-xl mr-10" onClick={() => handleModifyStaffAssignments(procedure)}>Staff Assignments</button>
+                        <span className="flex-1 text-3xl pl-2 font-bold py-4 mr-10">{procedure.procedureName}</span>
+                        <button className="flex items-center text-highlightGreen underline text-xl mr-10" onClick={() => handleModifyStaffAssignments(procedure)}>
+  <span>Staff Assignments</span>
+  <BsPencilFill className="ml-2" />
+</button>                        
+
+<button className="flex items-center text-highlightGreen underline text-xl mr-10" onClick={() => handleModifyResourceAssignments(procedure)}>
+  <span>Resource Assignments</span>
+  <BsPencilFill className="ml-2" />
+</button>
                         <span className="flex items-center">
-                          <button disable={true}  className ="text-primary text-2xl ml-2">Modify</button>
+                          {/*<button disable={true}  className ="text-primary text-2xl ml-2">Modify</button>
                           <MdOutlineOpenInNew className="text-primary ml-1 mr-6 text-3xl" />
-                          <FaTrashAlt className="text-primary mx-2 text-3xl" />
+                    <FaTrashAlt className="text-primary mx-2 text-3xl" />*/}
                         </span>
                       </div>
                     ))}
@@ -495,8 +487,22 @@ export function ModifyProcessLanding() {
                 )}
 
                 {/* Right Section Content */}
-                <div className="w-1/5 ml-auto">
-                  <ProcedureDropdown />
+                <div className="w-1/4  mr-10">
+                <div className="flex flex-col mt-4">
+                    <button className="bg-highlightGreen text-white rounded-full px-5 py-2 text-xl flex items-center  mt-5"
+                    onClick={handleReviewResourceAssignments} >
+                      <MdOutlineOpenInNew className="mr-2" />
+                      <span className="mx-auto">
+                      Review Resource Assignments </span>
+                    </button>
+                    <button className="bg-highlightGreen text-white rounded-full px-5 py-2 text-xl flex items-center mt-5 mb-5 "
+                    onClick={handleReviewStaffAssignments} >
+                      <MdOutlineOpenInNew className="mr-2" />
+                      <span className="mx-auto">
+                      Review Staff Assignments</span>
+                    </button>
+                  </div>
+                  {/*<ProcedureDropdown />*/}
                 </div>
               </div>
             )}
@@ -505,12 +511,12 @@ export function ModifyProcessLanding() {
       </div>
       <div className="flex justify-evenly items-center mt-10 p-4 w-2/5 mx-auto">
       <button 
-          className="bg-red-600 hover:bg-highlightRed text-white text-3xl py-3 px-5 rounded-full border-black border-2" 
+          className="flex items-center justify-center bg-highlightRed text-white rounded-3xl px-7 py-5 text-3xl" 
           onClick={() => setShowDeleteModal(true)}> 
           Delete Process
         </button>
         <button 
-          className="bg-highlightGreen hover:bg-green-600 text-white text-3xl py-3 px-5 rounded-full border-black border-2" 
+          className="flex items-center justify-center bg-highlightGreen text-white rounded-3xl px-7 py-5 text-3xl" 
           onClick={handleSaveChanges}>
           Save Changes
     </button>

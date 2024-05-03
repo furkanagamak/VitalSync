@@ -153,13 +153,18 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
   return (
     <div className="bg-secondary min-h-screen">
       <div className="flex justify-between items-center p-5">
-        <button className="ml-5 hover:bg-red-900 border-black border-2 flex items-center justify-center bg-primary text-white rounded-full px-5 py-2 text-xl shadow" onClick={onClose}>
+        <button className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center" onClick={onClose}>
           <FaArrowLeft className="mr-3" /> Go Back
         </button>
         <button className="bg-blue-500 text-white text-xl py-2 px-4 rounded-full" onClick={autoAssignResources}>
           Auto-Assign All
         </button>
-        <button className="mr-10 mt-5 hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-7 py-3 text-3xl" onClick={handleSave}>
+        <button
+
+          className="mr-5 mt-5 bg-highlightGreen text-white text-2xl py-4 px-16 rounded-3xl"
+          style={{ maxWidth: '30%' }}
+          onClick={handleSave}
+        >
           Save
         </button>
       </div>

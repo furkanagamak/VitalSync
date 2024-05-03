@@ -9,6 +9,7 @@ export const ProcessModificationProvider = ({ children }) => {
     const [processInstance, setProcessInstance] = useState(null);
     const [editedPatient, setEditedPatient] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [staffAssignments, setStaffAssignments] = useState({}); 
     const [error, setError] = useState(null);
     const location = useLocation();
 
@@ -46,6 +47,28 @@ export const ProcessModificationProvider = ({ children }) => {
     const updateProcessPatient = useCallback((patient) => {
         setEditedPatient(patient);
     }, []);
+
+    const updateStaffAssignments = useCallback((procedureId, roleId, staffId) => {
+        setStaffAssignments(prev => ({
+            ...prev,
+            [procedureId]: {
+                ...prev[procedureId],
+                [roleId]: staffId
+            }
+        }));
+    }, []);
+
+    const getStaffAssignments = useCallback((procedureId) => {
+        return staffAssignments[procedureId] || {};
+    }, [staffAssignments]);
+
+    /*
+
+    const saveAllChanges = useCallback(() => {
+        console.log("Saving all changes to backend or main state.");
+    }, [staffAssignments, processInstance, editedPatient]);
+
+    */
 
 
     const updateSectionDescription = useCallback((sectionName, newDescription) => {
@@ -120,6 +143,8 @@ export const ProcessModificationProvider = ({ children }) => {
             updateProcessPatient,
             updateSectionDescription,
             updateSectionName,
+            updateStaffAssignments,
+            getStaffAssignments,
         }}>
             {children}
         </ProcessModificationContext.Provider>
