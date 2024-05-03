@@ -346,10 +346,11 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
       {
         Header: "Actions",
         Cell: ({ row }) => (
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div className="flex-col lg:flex-row "
+            style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
             <button
             onClick={() => onMoveProcedure(row.index, "up")}
-              className="moveUpProc"
+              className="moveUpProc "
               style={{
                 background: "none",
                 border: "none",
@@ -357,13 +358,11 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
                 cursor: "pointer",
                 marginRight: "10px",
               }}
-            >
+            > 
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
                 fill="#8E0000"
-                class="bi bi-arrow-up"
+                className="w-4 h-4 sm:w-8 sm:h-8"  
                 viewBox="0 0 16 16"
               >
                 <path
@@ -385,10 +384,8 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
                 fill="#8E0000"
-                class="bi bi-arrow-down"
+                className="w-4 h-4 sm:w-8 sm:h-8"  
                 viewBox="0 0 16 16"
               >
                 <path
@@ -409,10 +406,8 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
                 fill="#8E0000"
-                className="bi bi-trash3"
+                className="w-4 h-4 sm:w-8 sm:h-8" 
                 viewBox="0 0 16 16"
               >
                 <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5" />
@@ -483,13 +478,12 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
               {headerGroups.map((headerGroup) => (
                 <tr {...headerGroup.getHeaderGroupProps()}>
                   {headerGroup.headers.map((column) => (
-                    <th
+                    <th className="text-xxs lg:text-lg py-1"
                       {...column.getHeaderProps()}
                       style={{
                         ...column.style,
                         color: "#8E0000",
                         borderBottom: "1px solid #8E0000",
-                        padding: "10px",
                         minWidth: column.minWidth,
                       }}
                     >
@@ -514,13 +508,14 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
                   <tr {...row.getRowProps()}>
                     {row.cells.map((cell) => {
                       return (
-                        <td
+                        <td className="text-xxs lg:text-lg"
                           {...cell.getCellProps()}
                           style={{
                             ...cell.column.style,
                             borderBottom: "1px solid #8E0000",
-                            padding: "10px",
                             verticalAlign: "middle",
+                            wordBreak: 'break-word',  // Allow words to be broken
+                            whiteSpace: 'normal',
                           }}
                         >
                           {cell.render("Cell")}
@@ -601,36 +596,21 @@ const AddSectionForm = () => {
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          marginTop: "1.2rem",
-          marginBottom: "2rem",
-        }}
-      >
-        <div style={{ position: "absolute", left: "2rem" }}>
-          <GoBackButton />
-        </div>
-        <div style={{ position: "absolute", right: "2rem" }}>
-        <AddSectionButton
-        onAddSection={onAddSection}
-        sectionDetails={section}  
-      />
-        </div>
-        <h1
-          style={{
-            fontSize: "2.25rem",
-            lineHeight: "2.5rem",
-            textAlign: "center",
-            textDecoration: "underline",
-            color: "#8E0000",
-          }}
-        >
+      <div className="relative mt-6 mb-8 flex flex-col lg:flex-row items-center justify-center">
+        <h1 className="text-4xl leading-10 text-center underline text-red-800">
           Add New Section
         </h1>
+        <div className="flex flex-row mt-4 lg:mt-0 lg:flex-row-reverse lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 justify-between w-full px-4 lg:px-0">
+          <div>
+            <GoBackButton />
+          </div>
+          <div>
+          <AddSectionButton
+          onAddSection={onAddSection}
+          sectionDetails={section}  
+          />
+          </div>
+        </div>
       </div>
       <SectionForm onAddProcedure={addProcedure} section={section} setSection={setSection} />
       <SectionTable procedures={section.procedureTemplates} onMoveProcedure={moveProcedure} onDeleteProcedure={deleteProcedure} />

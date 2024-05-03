@@ -95,9 +95,9 @@ const ResourceView = ({ resources, setResources, navToEditResource }) => {
   return (
     <div>
       <section className="flex flex-col md:flex-row items-center space-y-4 mt-8 mb-4 w-full">
-        <div className="w-1/4 text-center text-primary text-3xl font-semibold">
-          Resources
-        </div>
+      <div className="sm:w-1/4 inline-block md:text-center text-primary text-3xl font-semibold">
+        Resources
+      </div>
         <Searchbar setTextFilter={setTextFilter} />
         <CreateNewButton />
       </section>
@@ -297,7 +297,7 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
                       minWidth: column.minWidth,
                     }}
                   >
-                    <div className="flex text-center flex-col xl:flex-row ">
+                    <div className="flex text-center flex-col xl:flex-row">
                       {column.render("Header")}
                       {column.id !== "actions" && (
                         <span className="flex items-center">

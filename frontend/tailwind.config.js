@@ -9,6 +9,9 @@ module.exports = {
         highlightRed: "#aa0000",
         highlightGreen: "#009020",
       },
+      fontSize: {
+        'xxs': '0.65rem'  // Example size, you can adjust as needed
+      }
     },
   },
   plugins: [],
