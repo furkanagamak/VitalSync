@@ -33,7 +33,7 @@ describe("Create Account Page", () => {
     cy.get("#selectAdminBtn").click();
     cy.contains("Admin");
   });
-
+  //
   // it("Form insertion flow", () => {
   //   cy.visit("http://localhost:3000/createAccount");
 
