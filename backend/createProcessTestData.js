@@ -422,7 +422,10 @@ const clearTestData = async () => {
   await ResourceInstance.deleteOne({
     uniqueIdentifier: testUltraRoom.uniqueIdentifier,
   });
-  //   await ResourceTemplate.deleteOne({ name: testUltraRoomTemplate.name });
+
+  // comment this out for deployed
+  await ResourceTemplate.deleteOne({ name: testUltraRoomTemplate.name });
+
   await ResourceTemplate.deleteOne({ name: testTherRoomTemplate.name });
 };
 
@@ -438,7 +441,10 @@ const addTestData = async () => {
   await testSurRoom.save();
   await testTherRoomTemplate.save();
   await testTherRoom.save();
-  // await testUltraRoomTemplate.save();
+
+  // comment this out for deployed
+  await testUltraRoomTemplate.save();
+
   await testUltraRoom.save();
   await testSectionInstancePre.save();
   await testSectionInstanceIntra.save();
@@ -461,13 +467,13 @@ const addTestData = async () => {
 async function addInstances() {
   try {
     // Connect to MongoDB
-    await mongoose.connect(process.env.DEPLOYED_MONGO_URI, {
+    await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
     console.log("Connected to MongoDB");
+    await clearTestData();
     await addTestData();
-    // await clearTestData();
   } catch (error) {
     console.error("Error:", error);
   } finally {

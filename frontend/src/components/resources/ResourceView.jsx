@@ -85,7 +85,8 @@ const ResourceView = ({ resources, setResources, navToEditResource }) => {
               resource.name.toLowerCase().includes(searchText) ||
               resource.description.toLowerCase().includes(searchText) ||
               (resource.location &&
-                resource.location.toLowerCase().includes(searchText))
+                resource.location.toLowerCase().includes(searchText)) ||
+              resource.uniqueIdentifier.toLowerCase().includes(searchText)
             );
           });
     setDisplayingResources(filteredResources);
@@ -95,9 +96,9 @@ const ResourceView = ({ resources, setResources, navToEditResource }) => {
   return (
     <div>
       <section className="flex flex-col md:flex-row items-center space-y-4 mt-8 mb-4 w-full">
-      <div className="sm:w-1/4 inline-block md:text-center text-primary text-3xl font-semibold">
-        Resources
-      </div>
+        <div className="sm:w-1/4 inline-block md:text-center text-primary text-3xl font-semibold">
+          Resources
+        </div>
         <Searchbar setTextFilter={setTextFilter} />
         <CreateNewButton />
       </section>
@@ -115,9 +116,6 @@ const ResourceView = ({ resources, setResources, navToEditResource }) => {
       </section>
     </div>
   );
-  
-  
-  
 };
 
 const Searchbar = ({ setTextFilter }) => {
@@ -130,6 +128,7 @@ const Searchbar = ({ setTextFilter }) => {
   return (
     <div className="relative w-1/2 h-12">
       <input
+        id="resourceSearchInpElem"
         type="text"
         placeholder="Search for the resource here ..."
         className="border rounded-full h-12 py-2 pl-4 pr-12 w-full bg-secondary text-sm md:text-base"
@@ -166,14 +165,16 @@ const CreateNewButton = () => {
       </button>
     </Link>
   );
-  
 };
 
 const Filters = ({ tabFilter, setTabFilter }) => {
   const allFilters = ["All", "Equipments", "Spaces", "Personnel"];
 
   return (
-    <div className="flex xl:flex-col items-center bg-secondary h-fit mx-4 py-4 px-2 mb-4 xl:mb-0">
+    <div
+      className="flex xl:flex-col items-center bg-secondary h-fit mx-4 py-4 px-2 mb-4 xl:mb-0"
+      id="filterContainerElem"
+    >
       {allFilters.map((filter) => (
         <button
           key={filter}
@@ -223,6 +224,7 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
             <FaPen
               onClick={() => navToEditResource(row.original)}
               className="cursor-pointer text-primary my-2 xl:my-0"
+              id={`editResource-${row.original.uniqueIdentifier}`}
             />
             <FaTrashAlt
               onClick={() => {
@@ -230,6 +232,7 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
                 setResourceToDelete(row.original);
               }}
               className="cursor-pointer text-primary"
+              id={`deleteResource-${row.original.uniqueIdentifier}`}
             />
           </div>
         ),
@@ -293,7 +296,7 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
                       i % 2 === 0 ? "bg-secondary" : ""
                     }`}
                     style={{
-                      whiteSpace: 'normal',
+                      whiteSpace: "normal",
                       minWidth: column.minWidth,
                     }}
                   >
@@ -323,11 +326,16 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
               page.map((row) => {
                 prepareRow(row);
                 return (
-                  <tr {...row.getRowProps()} className="border-b-2 border-[#aa0000]">
+                  <tr
+                    {...row.getRowProps()}
+                    className="border-b-2 border-[#aa0000]"
+                  >
                     {row.cells.map((cell, i) => (
                       <td
                         {...cell.getCellProps()}
-                        className={`py-6 px-4 ${i % 2 === 0 ? "bg-secondary" : ""}`}
+                        className={`py-6 px-4 ${
+                          i % 2 === 0 ? "bg-secondary" : ""
+                        }`}
                       >
                         {cell.render("Cell")}
                       </td>
@@ -340,9 +348,11 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
                 <td
                   colSpan={columns.length}
                   className="text-center py-6"
-                  style={{ borderBottom: 'none',
-                  wordBreak: 'break-word',  
-                  whiteSpace: 'normal', }}
+                  style={{
+                    borderBottom: "none",
+                    wordBreak: "break-word",
+                    whiteSpace: "normal",
+                  }}
                 >
                   No results found
                 </td>
@@ -355,13 +365,14 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
             Page{" "}
             <strong>
               {pageIndex + 1} of{" "}
-              {pageOptions.length === 0 ? 1 : Math.ceil(pageOptions.length / 3)}
+              {pageOptions.length === 0 ? 1 : pageOptions.length}
             </strong>
           </span>
           <div></div>
           <button
             onClick={previousPage}
             disabled={!canPreviousPage}
+            id="resourceTablePrevBtn"
             className={`${
               canPreviousPage ? "bg-secondary" : "bg-gray-300"
             } border-2 border-primary p-2 rounded-full`}
@@ -371,6 +382,7 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
           <button
             onClick={nextPage}
             disabled={!canNextPage}
+            id="resourceTableNextBtn"
             className={`${
               canNextPage ? "bg-secondary" : "bg-gray-300"
             }  border-2 border-primary py-2 px-4 rounded-full`}
@@ -382,6 +394,5 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
     </>
   );
 };
-
 
 export default ResourceView;

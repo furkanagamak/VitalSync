@@ -777,33 +777,18 @@ const ModifyProcedureTemplateForm = () => {
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          marginTop: "1.2rem",
-          marginBottom: "2rem",
-        }}
-      >
-        <div style={{ position: "absolute", left: "2rem" }}>
-          <GoBackButton />
-        </div>
-        <div style={{ position: "absolute", right: "2rem" }}>
-          <ModifyTemplateButton onModify={modifyTemplate} />
-        </div>
-        <h1
-          style={{
-            fontSize: "2.25rem",
-            lineHeight: "2.5rem",
-            textAlign: "center",
-            textDecoration: "underline",
-            color: "#8E0000",
-          }}
-        >
+      <div className="relative mt-6 mb-8 flex flex-col lg:flex-row items-center justify-center">
+        <h1 className="text-4xl leading-10 text-center underline text-red-800">
           Modify Procedure Template
         </h1>
+        <div className="flex flex-row mt-4 lg:mt-0 lg:flex-row lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 justify-between w-full px-4">
+        <div>
+          <GoBackButton />
+        </div>
+        <div>
+          <ModifyTemplateButton onModify={modifyTemplate} />
+        </div>
+        </div>
       </div>
       <ProcedureForm
         procedure={procedure}

@@ -55,17 +55,19 @@ const ProcessDetails = () => {
           <section className="text-primary text-2xl space-y-6 w-1/2">
             <div className="flex space-x-2">
               <h1 className="underline underline-offset-4">Process:</h1>
-              <p>{process.processName}</p>
+              <p id="processDetailNameElem">{process.processName}</p>
             </div>
             <div className="flex space-x-2">
               <h1 className="underline underline-offset-4">Patient:</h1>
-              <p>{process.patient.fullName}</p>
+              <p id="processDetailPatientNameElem">
+                {process.patient.fullName}
+              </p>
             </div>
             <div className="flex space-x-2">
               <h1 className="underline underline-offset-4">
                 Current Procedure:
               </h1>
-              <p>
+              <p id="processDetailCurrProcedElem">
                 {process.currentProcedure
                   ? process.currentProcedure.procedureName
                   : "All procedures are completed."}
@@ -75,13 +77,15 @@ const ProcessDetails = () => {
               <h1 className="underline underline-offset-4">
                 Completed Procedures:
               </h1>
-              <p>{process.completedProcedures}</p>
+              <p id="processDetailCompProceElem">
+                {process.completedProcedures}
+              </p>
             </div>
             <div className="flex space-x-2">
               <h1 className="underline underline-offset-4">
                 Total Procedures:
               </h1>
-              <p>{process.totalProcedures}</p>
+              <p id="processDetailTotalProceElem">{process.totalProcedures}</p>
             </div>
           </section>
           <section className="md:w-1/2">
@@ -115,11 +119,13 @@ const Section = ({ section, currentProcedure }) => {
           <h1 className="text-2xl capitalize">{section.name}</h1>
           <p className="text-gray-500">{section.description}</p>
         </div>
-        {section.isCompleted ? (
-          <p className="text-highlightGreen">COMPLETED</p>
-        ) : (
-          <p className="text-highlightRed">INCOMPLETE</p>
-        )}
+        <p>
+          {section.isCompleted ? (
+            <p className="text-highlightGreen">COMPLETED</p>
+          ) : (
+            <p className="text-highlightRed">INCOMPLETE</p>
+          )}
+        </p>
       </div>
       <div className="space-y-4">
         {section.procedureInstances.map((procedure) => (
@@ -209,7 +215,7 @@ const Procedure = ({ procedure, currentProcedure }) => {
           </ul>
         </section>
         <section className="col-start-2 col-end-3 p-4 border-b-2 md:border-r-2 md:border-b-0 flex flex-col items-center space-y-2">
-          <h1 className="underline">Equipment Used</h1>
+          <h1 className="underline">Equipment used:</h1>
           <ul className="list-disc capitalize">
             {procedure.assignedResources
               .filter((resource) => resource.type === "equipment")
@@ -221,7 +227,7 @@ const Procedure = ({ procedure, currentProcedure }) => {
           </ul>
         </section>
         <section className="col-start-3 col-end-4 p-4 flex flex-col items-center space-y-2">
-          <h1 className="underline">Space used</h1>
+          <h1 className="underline">Space used:</h1>
           <ul className="list-disc capitalize">
             {procedure.assignedResources
               .filter((resource) => resource.type === "spaces")
