@@ -58,7 +58,7 @@ const Tabs = ({ userType }) => {
   const navigateToAdminActions = () => navigate("/adminActions");
   return (
     <div className="border-x-2 border-white text-2xl hidden md:flex text-center">
-      <section className="border-r-2 px-8 flex pb-2">
+      <section className="border-r-2 px-8 flex pb-2 rosterNav">
         <button className="my-auto" onClick={navigateToRoster}>
           Roster
         </button>
@@ -185,8 +185,8 @@ const Menu = ({ userType }) => {
         <IoMenu className="w-12 h-12 text-white" />
       </button>
       {isOpen && (
-        <div className="md:hidden absolute right-0 top-20 bg-primary text-2xl text-center z-10 flex flex-col">
-          <button onClick={navigateToRoster} className="border-b-2 p-2">
+        <div className="md:hidden absolute right-0 top-20 bg-primary text-2xl text-center z-10 flex flex-col ">
+          <button onClick={navigateToRoster} className="border-b-2 p-2 rosterNav">
             Roster
           </button>
           {userType === "admin" && (
