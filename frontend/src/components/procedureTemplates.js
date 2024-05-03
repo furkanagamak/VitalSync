@@ -228,6 +228,7 @@ const ProcedureTable = ({ filter }) => {
                   border: "none",
                   padding: "0",
                   cursor: "pointer",
+                  marginBottom: "10px", // Space between buttons
                 }}
                 title="Delete"
               >
