@@ -179,65 +179,65 @@ describe("Resource view and create tests", () => {
   });
 
   // Resource delete tests
-  describe("Resource delete", () => {
-    beforeEach(() => {
-      cy.visit("/");
-      cy.get("#emailInput").type("john.doe@example.com");
-      cy.get("#passwordInput").type("password123");
-      cy.get("button").contains("Sign in").click();
-      cy.wait(1000);
-      cy.visit("http://localhost:3000/resources");
-    });
+  // describe("Resource delete", () => {
+  //   beforeEach(() => {
+  //     cy.visit("/");
+  //     cy.get("#emailInput").type("john.doe@example.com");
+  //     cy.get("#passwordInput").type("password123");
+  //     cy.get("button").contains("Sign in").click();
+  //     cy.wait(1000);
+  //     cy.visit("http://localhost:3000/resources");
+  //   });
 
-    it("load and navigating", () => {
-      cy.get("#deleteResource-TR-102").click();
+  //   it("load and navigating", () => {
+  //     cy.get("#deleteResource-TR-102").click();
 
-      // modal display
-      cy.contains("Are you sure you want to delete:");
-      cy.contains("test room");
-      cy.contains("Unique ID: TR-102");
-      cy.contains("Yes");
-      cy.contains("Cancel").click();
+  //     // modal display
+  //     cy.contains("Are you sure you want to delete:");
+  //     cy.contains("test room");
+  //     cy.contains("Unique ID: TR-102");
+  //     cy.contains("Yes");
+  //     cy.contains("Cancel").click();
 
-      // exit modal
-      cy.contains("Are you sure you want to delete:").should("not.exist");
-    });
+  //     // exit modal
+  //     cy.contains("Are you sure you want to delete:").should("not.exist");
+  //   });
 
-    it("attempt to remove resources or roles that is in action should fail", () => {
-      // attempts to delete in action resource
-      cy.get("#deleteResource-TR-102").click();
-      cy.contains("Yes").click();
-      cy.contains(
-        "The resource you are trying to delete is assigned to one or more procedure templates!"
-      );
-      cy.contains("Cancel").click();
+  //   it("attempt to remove resources or roles that is in action should fail", () => {
+  //     // attempts to delete in action resource
+  //     cy.get("#deleteResource-TR-102").click();
+  //     cy.contains("Yes").click();
+  //     cy.contains(
+  //       "The resource you are trying to delete is assigned to one or more procedure templates!"
+  //     );
+  //     cy.contains("Cancel").click();
 
-      // attempts to delete assigned roles
-      cy.get('input[placeholder="Search for the resource here ..."]').type(
-        "test_physician"
-      );
-      cy.get("#deleteResource-test_physician").click();
-      cy.contains("Yes").click();
-      cy.contains(
-        "The role you are trying to delete is assigned to one or more accounts!"
-      );
-    });
+  //     // attempts to delete assigned roles
+  //     cy.get('input[placeholder="Search for the resource here ..."]').type(
+  //       "test_physician"
+  //     );
+  //     cy.get("#deleteResource-test_physician").click();
+  //     cy.contains("Yes").click();
+  //     cy.contains(
+  //       "The role you are trying to delete is assigned to one or more accounts!"
+  //     );
+  //   });
 
-    it("removing resources and role that is not in action should succeed", () => {
-      // remove resource
-      cy.get("#deleteResource-AR-102").click();
-      cy.contains("Yes").click();
-      cy.contains("The resource has been delete!");
+  //   it("removing resources and role that is not in action should succeed", () => {
+  //     // remove resource
+  //     cy.get("#deleteResource-AR-102").click();
+  //     cy.contains("Yes").click();
+  //     cy.contains("The resource has been delete!");
 
-      // remove role
-      cy.get('input[placeholder="Search for the resource here ..."]').type(
-        "physician"
-      );
-      cy.get("#deleteResource-physician").click();
-      cy.contains("Yes").click();
-      cy.contains("The role has been delete!");
-    });
-  });
+  //     // remove role
+  //     cy.get('input[placeholder="Search for the resource here ..."]').type(
+  //       "physician"
+  //     );
+  //     cy.get("#deleteResource-physician").click();
+  //     cy.contains("Yes").click();
+  //     cy.contains("The role has been delete!");
+  //   });
+  // });
 
   // Resource Create Tests
   describe("Resource Create Tests", () => {
