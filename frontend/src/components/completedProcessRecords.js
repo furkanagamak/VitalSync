@@ -236,7 +236,7 @@ const ProcessTable = ({ searchText }) => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        wordBreak: 'break-word',  // Allow words to be broken
+                        wordBreak: 'break-word',  
                         whiteSpace: 'normal',
                       }}
                     >

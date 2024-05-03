@@ -363,7 +363,7 @@ const ProcessTable = ({ filter , fromLocation}) => {
                     </div>
                   </th>
                 ))}
-              </tr>
+              </tr> 
             ))}
           </thead>
           <tbody {...getTableBodyProps()}>
@@ -380,7 +380,7 @@ const ProcessTable = ({ filter , fromLocation}) => {
                         borderBottom: "1px solid #8E0000",
                         padding: "10px",
                         verticalAlign: "middle",
-                        wordBreak: 'break-word',  // Allow words to be broken
+                        wordBreak: 'break-word', 
                         whiteSpace: 'normal',
                       }}>
                         {cell.render("Cell")}

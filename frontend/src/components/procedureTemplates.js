@@ -335,7 +335,7 @@ const ProcedureTable = ({ filter }) => {
                       color: "#8E0000",
                       borderBottom: "1px solid #8E0000",
                       padding: "10px",
-                      wordBreak: 'break-word',  // Allow words to be broken
+                      wordBreak: 'break-word', 
                       whiteSpace: 'normal',
                       minWidth: column.minWidth,
                     }}
