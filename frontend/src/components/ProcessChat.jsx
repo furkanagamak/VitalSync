@@ -158,10 +158,12 @@ const ProcessChat = ({ id }) => {
             className="flex-grow p-2 rounded-l-md border border-gray-300 focus:outline-none"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
+            id={`chatInputElem-${id}`}
           />
           <button
             className="bg-blue-500 text-white px-4 py-2 rounded-r-md"
             type="submit"
+            id={`chatSendElem-${id}`}
           >
             Send
           </button>

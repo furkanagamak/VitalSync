@@ -65,6 +65,11 @@ jobs:
           cd backend
           npx jest --runInBand
 
+      - name: Load Database with Frontend Test Data
+        run: |
+          cd backend
+          node createProcessTestData.js
+
       - name: Run Cypress Tests
         run: |
           cd frontend
