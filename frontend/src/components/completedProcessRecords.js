@@ -196,7 +196,7 @@ const ProcessTable = ({ searchText }) => {
 
   return (
     <>
-      <div
+      <div className="min-w-[640px]"
         style={{
           maxWidth: "95%",
           margin: "auto",
@@ -204,7 +204,7 @@ const ProcessTable = ({ searchText }) => {
           display: "flex",
           justifyContent: "center",
         }}
-      >
+      > 
         <table
           {...getTableProps()}
           style={{
@@ -221,7 +221,7 @@ const ProcessTable = ({ searchText }) => {
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
-                  <th
+                  <th className={`text-sm xl:text-xl border-b px-2 py-1 min-w-[${column.minWidth}px] text-red-800 border-red-800`}
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     style={{
                       ...column.style,
@@ -286,6 +286,7 @@ const ProcessTable = ({ searchText }) => {
                       return (
                         <td
                           {...cell.getCellProps()}
+                          className={`text-xxs md:text-xl border-b border-red-800 py-2 px-4 align-middle whitespace-normal ${cell.column.className || ''}`}
                           style={{
                             ...cell.column.style,
                             borderBottom: "1px solid #8E0000",
@@ -348,12 +349,13 @@ const ProcessTemplateManagement = () => {
   const [searchInput, setSearchInput] = useState("");
 
   return (
-    <div className="flex flex-col items-center space-y-4 relative">
-      <h1 className="text-4xl text-[#8E0000] text-center underline font-bold mt-5">
+    <div className="flex flex-col  space-y-4 relative">
+      <h1 className="text-4xl items-center text-[#8E0000] text-center underline font-bold mt-5">
         Completed Process Records
       </h1>
-
-      <SearchBar inputValue={searchInput} setInputValue={setSearchInput} />
+        <div className="w-full flex justify-center">
+          <SearchBar  inputValue={searchInput} setInputValue={setSearchInput} />
+        </div>
       <div>
         <ProcessTable searchText={searchInput} />
       </div>

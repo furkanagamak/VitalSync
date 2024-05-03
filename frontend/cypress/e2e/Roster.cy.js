@@ -12,22 +12,16 @@ describe('MyComponent Button Functionality', () => {
 
   
     it('filters by position and checks for Filter and name in the table', () => {
-      // Click the dropdown to open the selection menu
       cy.get('select').as('selectFilter').select('Doctor');
   
-      // Assert that the table contains at least one row with "Doctor" as position
+      // table contains "Doctor" as position
       cy.get('table').find('tbody tr').each(($el) => {
         cy.wrap($el).find('td').eq(2).should('have.text', 'Doctor');
       });
 
       cy.get('input[placeholder="Search..."]').type('James Test');
 
-      // Optional: If your application filters on form submission, you might need to submit the form
-      // cy.get('form').submit();
-  
-      // Check if the table contains a row with "James Test"
-
-
+      //Table contains James test as name
       cy.get('table').find('tbody tr').each(($el) => {
         cy.wrap($el).find('td').eq(0).should('have.text', 'James test');
       });
@@ -44,8 +38,10 @@ describe('MyComponent Button Functionality', () => {
       cy.get('table tbody tr').first().click();
 
       cy.contains('Terminate Account').click();
+      //Enter the wrong email
       cy.get('#terminateConfirm').type('wrongemail@gmail.com')
       cy.contains('Submit').click();
+      //Check for error message
       cy.contains('email does not match.').should('be.visible')
     });
 

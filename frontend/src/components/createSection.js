@@ -431,7 +431,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
 
   return (
     <>
-      <div
+      <div className="min-w-[640px] items-center"
         style={{
           border: "2px solid #8E0000",
           borderRadius: "5px",
@@ -483,7 +483,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
               {headerGroups.map((headerGroup) => (
                 <tr {...headerGroup.getHeaderGroupProps()}>
                   {headerGroup.headers.map((column) => (
-                    <th className="text-xxs lg:text-lg py-1"
+                    <th className="text-sm lg:text-lg py-1"
                       {...column.getHeaderProps()}
                       style={{
                         ...column.style,
@@ -513,7 +513,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
                   <tr {...row.getRowProps()}>
                     {row.cells.map((cell) => {
                       return (
-                        <td className="text-xxs lg:text-lg"
+                        <td className="text-sm lg:text-lg"
                           {...cell.getCellProps()}
                           style={{
                             ...cell.column.style,

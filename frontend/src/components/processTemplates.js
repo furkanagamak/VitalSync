@@ -374,13 +374,14 @@ const ProcessTable = ({ filter , fromLocation}) => {
                   <tr {...row.getRowProps()}>
                     {row.cells.map(cell => (
                       <td {...cell.getCellProps()} 
-                      className={`text-sm md:text-xl border-b border-red-800 py-2 px-4 align-middle whitespace-normal ${cell.column.className || ''}`}
+                      className={`text-xxs md:text-xl border-b border-red-800 py-2 px-4 align-middle whitespace-normal ${cell.column.className || ''}`}
                         style={{
                         ...cell.column.style,
                         borderBottom: "1px solid #8E0000",
                         padding: "10px",
                         verticalAlign: "middle",
-                        whiteSpace: 'normal'
+                        wordBreak: 'break-word',  // Allow words to be broken
+                        whiteSpace: 'normal',
                       }}>
                         {cell.render("Cell")}
                       </td>

@@ -302,7 +302,7 @@ const ProcedureTable = ({ filter }) => {
         onConfirm={() => deleteProcedureTemplate(currentTemplate.id)}
         templateName={currentTemplate?.name}
       />
-      <div
+     <div 
         style={{
           maxWidth: "95%",
           margin: "auto",
@@ -327,7 +327,7 @@ const ProcedureTable = ({ filter }) => {
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
-                  <th
+                  <th className="text-sm lg:text-lg py-1"
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     style={{
                       ...column.style,
@@ -390,7 +390,7 @@ const ProcedureTable = ({ filter }) => {
                   <tr {...row.getRowProps()}>
                     {row.cells.map((cell) => {
                       return (
-                        <td
+                        <td className="text-sm lg:text-lg"
                           {...cell.getCellProps()}
                           style={{
                             ...cell.column.style,

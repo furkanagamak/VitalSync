@@ -21,8 +21,8 @@ const theme = createTheme({
 
 function SearchBar({ onChange }) {
   return (
-    <div className="flex justify-center items-center p-5 mb-5 mt-5">
-      <div className="relative w-2/5">
+    <div className="lg:flex justify-center items-center p-5 mb-5 mt-5">
+      <div className="relative lg:w-2/5">
         <input
           type="search"
           placeholder="Search by Process ID or Patient Name"
@@ -60,8 +60,8 @@ function ProcessCell({ process, onModifyClick, onViewClick }) {
       </div>
       <div className="flex-[1] pl-4 flex justify-end items-start min-w-0">
         <div className="flex flex-col space-y-2">
-          <button className="bg-green-500 hover:bg-green-600 rounded-full px-10 py-1 text-center" onClick={handleViewClickID}>View</button>
-          <button className="bg-red-500 hover:bg-red-600 rounded-full px-4 py-1 text-center"   disabled={true}
+          <button className="bg-green-500 hover:bg-green-600  rounded-full px-0 text-lg lg:text-2xl lg:px-8 py-1 text-center" onClick={handleViewClickID}>View</button>
+          <button className="bg-red-500 hover:bg-red-600 rounded-full text-lg lg:text-2xl lg:px-8 py-1 text-center"   disabled={true}
  onClick={onModifyClick}>Modify</button>
         </div>
       </div>
@@ -119,7 +119,7 @@ export function ActiveProcessesList() {
   return (
     <ThemeProvider theme={theme}>
       <SearchBar onChange={setSearchInput} />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-10 py-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-5 py-5">
   {currentItems.length > 0 ? (
     currentItems.map((process, index) => (
       <ProcessCell key={index} process={process} onModifyClick={handleModifyClick} onViewClick={handleViewClick} />

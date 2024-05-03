@@ -482,7 +482,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
               {headerGroups.map((headerGroup) => (
                 <tr {...headerGroup.getHeaderGroupProps()}>
                   {headerGroup.headers.map((column) => (
-                    <th
+                    <th className="text-base lg:text-lg"
                       {...column.getHeaderProps()}
                       style={{
                         ...column.style,
