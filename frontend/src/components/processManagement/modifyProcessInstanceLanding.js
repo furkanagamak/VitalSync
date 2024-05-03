@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { CiCirclePlus } from "react-icons/ci";
 import { FaArrowLeft } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
@@ -12,6 +12,9 @@ import toast, { Toaster } from "react-hot-toast";
 import ProcessDeleteModal from "./processDeleteModal";
 import { useProcessModificationContext } from '../../providers/ProcessModificationProvider';
 import CreateStaffAssignments from './modifyProcessAssignStaff';
+import ReviewStaffAssignments from './modifyProcessReviewStaff'
+import ReviewResourceAssignments from './modifyProcessReviewResources'
+
 
 
 const notify = () => toast.success("Process successfully deleted! Affected staff have been notified.");
@@ -80,9 +83,8 @@ function ProcedureDropdown(){
 export function ModifyProcessLanding() {
 
   const { processID } = useParams();
-  console.log("Process ID:", processID);
   const { processInstance, fetchProcessInstance, isLoading, error, updateProcessDescription
-  , updateProcessName, editedPatient, updateSectionDescription, updateSectionName } = useProcessModificationContext();
+  , updateProcessName, editedPatient, updateSectionDescription, updateSectionName,getStaffAssignments,staffAssignments } = useProcessModificationContext();
 
     
 
@@ -114,7 +116,8 @@ export function ModifyProcessLanding() {
   const[procedureResourceAssignmentsView, setProcedureResourceAssignmentsView] = useState('');
   const[procedureStaffAssignmentsView, setProcedureStaffAssignmentsView] = useState('');
 
-
+  const[sectionReviewStaff, setSectionReviewStaff] = useState('');
+  const[sectionReviewResources, setSectionReviewResources] = useState('');
 
 
 
@@ -122,7 +125,7 @@ export function ModifyProcessLanding() {
     if (processInstance) {
       setDescription(processInstance.description);
       setProcessName(processInstance.processName);
-      setOpenSections(new Set(processInstance.sectionInstances?.map(section => section.name)));
+      setOpenSections(new Set(processInstance.sectionInstances?.slice(0, 1).map(section => section.name)));
       setSectionInstances(processInstance.sectionInstances || []);
     }
   }, [processInstance]);
@@ -164,13 +167,31 @@ export function ModifyProcessLanding() {
     navigate("/processManagement/modifyProcess/activeProcesses");
   };
 
-  const handleReviewResourceAssignments = () => {
-    navigate("/processManagement/modifyProcess/reviewResourceAssignments");
+
+
+
+  const handleReviewStaffAssignments = (section) => {
+    console.log(section);
+      setSectionReviewStaff([section]); 
+  
   };
 
-  const handleReviewStaffAssignments = () => {
-    navigate("/processManagement/modifyProcess/reviewStaffAssignments");
+  const handleReviewStaffAssignmentsBack = () => {
+    setSectionReviewStaff('');
+  }
+
+  const handleReviewResourcesAssignments = (section) => {
+    console.log(section);
+      setSectionReviewResources([section]); 
+  
   };
+
+  const handleReviewResourcesAssignmentsBack = () => {
+    setSectionReviewResources('');
+  }
+
+
+
 
   const handleModifyResourceAssignments = (procedure) => {
     setProcedureResourceAssignmentsView(procedure);
@@ -181,6 +202,7 @@ export function ModifyProcessLanding() {
   };
   const handleCloseModifyStaffAssignments = () => {
     setProcedureResourceAssignmentsView('');
+    console.log(staffAssignments);
   }
 
 /*
@@ -293,6 +315,17 @@ export function ModifyProcessLanding() {
 
   else if (procedureResourceAssignmentsView) {
     return  < CreateStaffAssignments  onClose={handleCloseModifyStaffAssignments} modifyProcedure={procedureResourceAssignmentsView}/> ;
+  }
+
+  else if (sectionReviewStaff.length>0) {
+    console.log(sectionReviewStaff);
+    return  < ReviewStaffAssignments  onBack={handleReviewStaffAssignmentsBack} sections={sectionReviewStaff}/> ;
+  
+  }
+  else if (sectionReviewResources.length>0) {
+    console.log(sectionReviewResources);
+    return  < ReviewResourceAssignments  onBack={handleReviewResourcesAssignmentsBack} sections={sectionReviewResources}/> ;
+  
   }
 
   else if (currentView === 'modifyProcess') {
@@ -467,15 +500,15 @@ export function ModifyProcessLanding() {
                         className={`flex items-center justify-between border-b-2 border-black}`}>
                         {/* REORDERING <HiMiniArrowsUpDown className=" text-primary text-3xl" />*/}
                         <span className="flex-1 text-3xl pl-2 font-bold py-4 mr-10">{procedure.procedureName}</span>
-                        <button className="flex items-center text-highlightGreen underline text-xl mr-10" onClick={() => handleModifyStaffAssignments(procedure)}>
-  <span>Staff Assignments</span>
-  <BsPencilFill className="ml-2" />
-</button>                        
+                       {/*MODIFY ASSIGNMENT BUTTONS <button className="flex items-center text-highlightGreen underline text-xl mr-10" onClick={() => handleModifyStaffAssignments(procedure)}>
+                      <span>Staff Assignments</span>
+                      <BsPencilFill className="ml-2" />
+                    </button>                        
 
-<button className="flex items-center text-highlightGreen underline text-xl mr-10" onClick={() => handleModifyResourceAssignments(procedure)}>
-  <span>Resource Assignments</span>
-  <BsPencilFill className="ml-2" />
-</button>
+                    <button className="flex items-center text-highlightGreen underline text-xl mr-10" onClick={() => handleModifyResourceAssignments(procedure)}>
+                      <span>Resource Assignments</span>
+                      <BsPencilFill className="ml-2" />
+                    </button>*/}
                         <span className="flex items-center">
                           {/*<button disable={true}  className ="text-primary text-2xl ml-2">Modify</button>
                           <MdOutlineOpenInNew className="text-primary ml-1 mr-6 text-3xl" />
@@ -489,18 +522,19 @@ export function ModifyProcessLanding() {
                 {/* Right Section Content */}
                 <div className="w-1/4  mr-10">
                 <div className="flex flex-col mt-4">
-                    <button className="bg-highlightGreen text-white rounded-full px-5 py-2 text-xl flex items-center  mt-5"
-                    onClick={handleReviewResourceAssignments} >
+                    <button className="flex justify-evenly bg-highlightGreen text-white rounded-full px-5 py-2 text-xl flex items-center  mt-5"
+                    onClick={() => handleReviewResourcesAssignments(staffAssignments.sections.find(staffSection => staffSection._id === section._id))} >
                       <MdOutlineOpenInNew className="mr-2" />
                       <span className="mx-auto">
                       Review Resource Assignments </span>
                     </button>
-                    <button className="bg-highlightGreen text-white rounded-full px-5 py-2 text-xl flex items-center mt-5 mb-5 "
-                    onClick={handleReviewStaffAssignments} >
-                      <MdOutlineOpenInNew className="mr-2" />
-                      <span className="mx-auto">
-                      Review Staff Assignments</span>
-                    </button>
+                    <button 
+  className="bg-highlightGreen text-white rounded-full px-5 py-2 text-xl flex items-center mt-5 mb-5 flex justify-evenly"
+  onClick={() => handleReviewStaffAssignments(staffAssignments.sections.find(staffSection => staffSection._id === section._id))}
+>
+  <MdOutlineOpenInNew className="mr-2" />
+  Review Staff Assignments
+</button>
                   </div>
                   {/*<ProcedureDropdown />*/}
                 </div>

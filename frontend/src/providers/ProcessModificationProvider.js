@@ -18,9 +18,25 @@ export const ProcessModificationProvider = ({ children }) => {
         setIsLoading(true);
         try {
             const response = await axios.get(`/processInstance/${processID}`);
-            setProcessInstance(response.data);
-            setEditedPatient(response.data.patient); 
-            console.log(response);
+            const { data } = response;
+    
+            const sections = data.sectionInstances.map(section => ({
+                ...section,
+                procedureInstances: section.procedureInstances.map(proc => ({
+                    ...proc,
+                    rolesAssignedPeople: proc.rolesAssignedPeople.map(role => ({
+                        ...role,
+                        accounts: role.accounts,  
+                        modified: false
+                    }))
+                }))
+            }));
+    
+            setProcessInstance(data);
+            setEditedPatient(data.patient);
+            setStaffAssignments({ sections });
+
+            console.log(sections);
             setIsLoading(false);
         } catch (err) {
             setError(err.message);
@@ -37,7 +53,6 @@ export const ProcessModificationProvider = ({ children }) => {
     }, []);
 
     const updateProcessName = useCallback((name) => {
-        console.log(name);
         setProcessInstance(prev => ({
             ...prev,
             processName: name
@@ -48,18 +63,35 @@ export const ProcessModificationProvider = ({ children }) => {
         setEditedPatient(patient);
     }, []);
 
-    const updateStaffAssignments = useCallback((procedureId, roleId, staffId) => {
-        setStaffAssignments(prev => ({
-            ...prev,
-            [procedureId]: {
-                ...prev[procedureId],
-                [roleId]: staffId
-            }
-        }));
+    const updateStaffAssignments = useCallback((sectionId, procedureId, roleId, newAccount) => {
+        setStaffAssignments(prevState => {
+            return {
+                sections: prevState.sections.map(section => {
+                    if (section._id === sectionId) {
+                        const updatedProcedures = section.procedureInstances.map(proc => {
+                            if (proc._id === procedureId) {
+                                const updatedRoles = proc.rolesAssignedPeople.map(role => {
+                                    if (role._id === roleId) {
+                                        return { ...role, accounts: [newAccount], modified: true };
+                                    }
+                                    return role;
+                                });
+                                return { ...proc, rolesAssignedPeople: updatedRoles };
+                            }
+                            return proc;
+                        });
+                        return { ...section, procedureInstances: updatedProcedures };
+                    }
+                    return section;
+                })
+            };
+        });
     }, []);
 
-    const getStaffAssignments = useCallback((procedureId) => {
-        return staffAssignments[procedureId] || {};
+
+    const getStaffAssignments = useCallback((sectionId, procedureId, roleId) => {
+        
+        return staffAssignments;
     }, [staffAssignments]);
 
     /*
@@ -97,12 +129,21 @@ export const ProcessModificationProvider = ({ children }) => {
         });
     }, []);
 
+    useEffect(() => {
+        const currentPath = location.pathname;
+        if (!currentPath.includes("modifyProcess") || currentPath === "/processManagement/modifyProcess/activeProcesses") {
+            sessionStorage.removeItem('modProcessState');
+            setProcessInstance(null);
+            setEditedPatient(null);
+            setStaffAssignments({});
+        }
+    }, [location.pathname]);
+
 
 
 
     // Persist process state in sessionStorage here
     useEffect(() => {
-        console.log(processInstance);
         const serializedState = JSON.stringify({ processInstance, editedPatient });
         sessionStorage.setItem('modProcessState', serializedState);
     }, [processInstance, editedPatient]);
@@ -110,7 +151,6 @@ export const ProcessModificationProvider = ({ children }) => {
     // Restore state from sessionStorage on component mount here
     useEffect(() => {
         const storedData = sessionStorage.getItem('modProcessState');
-        console.log("RESTORING");
         if (storedData) {
             const { processInstance, editedPatient } = JSON.parse(storedData);
             setProcessInstance(processInstance);
@@ -120,7 +160,6 @@ export const ProcessModificationProvider = ({ children }) => {
 
     useEffect(() => {
         const storedData = sessionStorage.getItem('modProcessState');
-        console.log("RESTORING");
         if (storedData) {
             const { processInstance, editedPatient } = JSON.parse(storedData);
             setProcessInstance(processInstance);
@@ -145,6 +184,7 @@ export const ProcessModificationProvider = ({ children }) => {
             updateSectionName,
             updateStaffAssignments,
             getStaffAssignments,
+            staffAssignments
         }}>
             {children}
         </ProcessModificationContext.Provider>

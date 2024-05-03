@@ -11,21 +11,19 @@ import moment from 'moment';
 
 
 
-export function RoleDropdownContent({ role, eligibleStaff, assignStaff, assignedStaff  }) {
+export function RoleDropdownContent({ role, eligibleStaff, assignStaff, assignedStaff }) {
 
-  const handleAssign = (staff) => {
-    console.log(staff);
-    assignStaff(staff); 
-    setStaffName(`${staff.firstName} ${staff.lastName}`)
+  const handleAssign = (newStaff) => {
+    console.log(newStaff);
+    assignStaff(newStaff); 
   };
-  const [staffName, setStaffName] = useState(`${assignedStaff.firstName} ${assignedStaff.lastName}`);
  
 
   return (
     <div className="flex mx-10 ">
       <div className="flex flex-col w-2/5 text-3xl mt-5">
         <p>Currently Assigned:</p>
-        <p className="text-primary mb-2">{assignedStaff ? staffName : "Not assigned"}</p>
+        <p className="text-primary mb-2">{assignedStaff ? `${assignedStaff.firstName} ${assignedStaff.lastName}` : "Not assigned"}</p>
       </div>
       <div className="w-3/5 ml-5">
         <p className="text-highlightGreen text-2xl mb-3 mt-5">Available Qualified Staff:</p>
@@ -160,17 +158,21 @@ const assignStaff = (newRoleId, newStaff, oldStaff) => {
   console.log("Assigning new staff, previous assignedStaff:", assignedStaff);
 
   const updatedEligibleStaff = Object.keys(eligibleStaff).reduce((acc, key) => {
-      acc[key] = eligibleStaff[key].filter(s => s._id !== newStaff._id);
-      return acc;
+    acc[key] = eligibleStaff[key].filter(s => s._id !== newStaff._id);
+
+    if (oldStaff && oldStaff._id && key === newRoleId) {
+      acc[key] = [...acc[key], oldStaff];
+    }
+    return acc;
   }, {});
   setEligibleStaff(updatedEligibleStaff);
 
-  setAssignedStaff(prev => ({ 
-    ...prev, 
-    [newRoleId]: [...(prev[newRoleId] || []), newStaff] 
+  setAssignedStaff(prev => ({
+    ...prev,
+    [newRoleId]: [newStaff] 
   }));
 
-  updateStaffAssignments(modifyProcedure.procedureId, newRoleId, newStaff._id);
+  // updateStaffAssignments(modifyProcedure.procedureId, newRoleId, newStaff._id);
 };
 
 useEffect(() => {
@@ -245,11 +247,7 @@ const handleSave = () => {
             <div className="flex justify-between items-center">
               <div className="text-3xl font-bold flex items-center">
                 <span>{capitalizeFirstLetter(role.name)}</span>
-                {isAssigned ? (
-                  <FaCheck className="text-green-500 ml-4 text-4xl" />
-                ) : (
-                  <FaRegCalendarTimes className="text-highlightRed ml-4 text-4xl" />
-                )}
+               
               </div>
               <button onClick={() => toggleRole(uniqueId)}>
                 {openRoles.has(uniqueId) ? <BsChevronUp className='text-4xl' /> : <BsChevronDown className='text-4xl' />}
@@ -260,9 +258,9 @@ const handleSave = () => {
                 <RoleDropdownContent
                   role={role}
                   eligibleStaff={eligibleStaff[uniqueId] || []}
-                  assignStaff={staff => assignStaff(uniqueId, staff)}
-                  assignedStaff={assignedStaff[uniqueId][0]}
-                />
+                  assignStaff={(newStaff) => assignStaff(uniqueId, newStaff, assignedStaff[uniqueId] ? assignedStaff[uniqueId][0] : null)}
+                  assignedStaff={assignedStaff[uniqueId] && assignedStaff[uniqueId].length > 0 ? assignedStaff[uniqueId][0] : null}
+                  />
               </div>
             )}
           </div>

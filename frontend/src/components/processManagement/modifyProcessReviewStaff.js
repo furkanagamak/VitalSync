@@ -1,143 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
 import { BsChevronDown, BsChevronUp } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
+import { useProcessModificationContext } from '../../providers/ProcessModificationProvider';
+import axios from 'axios';
 
-
-const sections = [
-    {
-      name: 'Preoperative',
-      procedures: [
-        {
-          title: 'General Anesthesia',
-          assignedStaff: [
-            { role: 'Anesthesiologist', name: 'Suzanne Cooper' },
-          ]
-        },
-        {
-          title: 'Patient Preparation',
-          assignedStaff: [
-            { role: 'Nurse', name: 'Christina Cooper' },
-          ]
-        },
-      ]
-    },
-    {
-      name: 'Intraoperative',
-      procedures: [
-        {
-          title: 'Incision',
-          assignedStaff: [
-            { role: 'Lead Surgeon', name: 'Dennis Fletcher' },
-          ]
-        },
-        {
-          title: 'IV Access',
-          assignedStaff: [
-            { role: 'Assistant Surgeon', name: 'Anna Hart' },
-          ]
-        },
-        {
-          title: 'Radical Prostatectomy',
-          assignedStaff: [
-            { role: 'Lead Surgeon', name: 'Dennis Fletcher' },
-            { role: 'Assistant Surgeon 1', name: 'Anna Hart' },
-            { role: 'Assistant Surgeon 2', name: 'Olivia Hunt' },
-            { role: 'Anesthesiologist', name: 'Suzanne Cooper' },
-            { role: 'Operating Room Nurse', name: 'Christina Cooper' },
-          ]
-        },
-        {
-          title: 'Pain Management',
-          assignedStaff: []
-        },
-      ]
-    },
-    {
-      name: 'Postoperative',
-      procedures: [
-        {
-          title: 'Suture',
-          assignedStaff: []
-        },
-        {
-          title: 'Recovery',
-          assignedStaff: []
-        },
-      ]
-    },
-  ];
-
-function NavButtons({ onBack, onProceed }) {
+function NavButtons({ onBack}) {
   return (
-      <div className="flex justify-between items-center mb-5">
-          <button className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center" onClick={onBack}>
-              <FaArrowLeft className="mr-2" />
-                Go Back
-         </button>
-            <h1 className="text-primary text-3xl font-bold">Review Staff Assignments</h1>
-         <button
-              className="hover:bg-green-700 border-black border-2 flex items-center justify-center bg-highlightGreen text-white rounded-full px-7 py-5 text-4xl"
-              onClick={onProceed}
-                >
-                Proceed
-          </button>
-    </div>)
+    <div className="flex justify-between items-center mb-5">
+      <button className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center" onClick={onBack}>
+        <FaArrowLeft className="mr-2" />
+        Go Back
+      </button>
+      <h1 className="text-primary text-3xl font-bold">Review Staff Assignments</h1>
+    </div>
+  );
 }
 
-export function ReviewStaffAssignments() {
-  const [openSections, setOpenSections] = useState(new Set(sections.map(section => section.name))); // Start with all sections open
+export function ReviewStaffAssignments({ sections, onBack}) {
+  const [openSections, setOpenSections] = useState(new Set(sections.map(section => section._id)));
+  const navigate = useNavigate();
 
-  const toggleSection = (sectionName) => {
+  const toggleSection = (sectionId) => {
     const updatedSections = new Set(openSections);
-    if (updatedSections.has(sectionName)) {
-      updatedSections.delete(sectionName);
+    if (updatedSections.has(sectionId)) {
+      updatedSections.delete(sectionId);
     } else {
-      updatedSections.add(sectionName);
+      updatedSections.add(sectionId);
     }
     setOpenSections(updatedSections);
   };
 
-  const navigate = useNavigate();
-
-  const handleGoBack = () => {
-    navigate("/processManagement/modifyProcess/staffAssignments");
-  };
-
-  const handleProceed = () => {
-    navigate("/processManagement/modifyProcess/landing");
-  };
-
+  
 
   return (
     <div className="container mx-auto p-8">
-      <NavButtons onBack={handleGoBack} onProceed={handleProceed}></NavButtons>
+            <NavButtons onBack={onBack}/>
       <div className="bg-secondary border-red-600 border-2 rounded-md p-4">
         <p className="text-left text-lg italic mb-7">
-          Confirm the following staff assignments for procedures in all sections:
+          Review staff assignments for this section:
         </p>
-        {sections.map((section, index) => (
-          <div key={index} className="mt-4">
+        {sections.map((section) => (
+          <div key={section._id} className="mt-4">
             <button
               className="flex justify-between items-center w-full bg-primary text-white py-2 px-4 rounded-md text-2xl"
-              onClick={() => toggleSection(section.name)}
+              onClick={() => toggleSection(section._id)}
             >
               {section.name}
-              {openSections.has(section.name) ? <BsChevronUp /> : <BsChevronDown />}
+              {openSections.has(section._id) ? <BsChevronUp /> : <BsChevronDown />}
             </button>
-            {openSections.has(section.name) && (
+            {openSections.has(section._id) && (
               <div className="bg-white mt-2 p-4 rounded-md">
-                {section.procedures.map((procedure, idx) => (
-                  <div key={idx} className={`py-2 ${idx < section.procedures.length - 1 ? 'border-b' : ''} border-primary`}>
-                    <span className='font-bold text-xl'>{procedure.title}</span>
-                    <div>
-                      {procedure.assignedStaff.map((staff, staffIdx) => (
-                        <div key={staffIdx} className="flex justify-between my-2">
-                          <span className="text-lg ml-10">{staff.role}:</span>
-                          <span className="text-primary text-xl font-bold mr-8">{staff.name}</span>
-                        </div>
-                      ))}
-                    </div>
+                {section.procedureInstances.map((procedure) => (
+                  <div key={procedure._id} className="py-2 border-b border-primary">
+                    <span className='font-bold text-3xl'>{procedure.procedureName}</span>
+                    {procedure.rolesAssignedPeople.map((role) => (
+                      <div key={role._id} className="flex justify-between my-2">
+                        <span className="text-2xl ml-10">{role.role.name}:</span>
+                        <span className="text-primary text-2xl font-bold mr-8">
+                          {role.accounts.length > 0 ? `${role.accounts[0].firstName} ${role.accounts[0].lastName}` : 'Not Assigned'}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
