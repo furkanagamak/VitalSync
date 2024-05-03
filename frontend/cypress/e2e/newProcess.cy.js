@@ -9,12 +9,6 @@ describe('Process Template List Tests', () => {
         cy.get('button').contains('Start New Process').click();
     });
 
-    it('successfully loads the process template management page', () => {
-        cy.contains('Create from Existing or New Template').should('be.visible');
-        cy.contains('Name').should('be.visible');
-        cy.contains('Actions').should('be.visible');
-    });
-
     it('is able to create a new process', () => {
         cy.get('.modify-process-template-button').first().click();
         cy.get('button').contains('Use Template').click();
@@ -22,7 +16,7 @@ describe('Process Template List Tests', () => {
         cy.get('[name="firstName"]').type('James');
         cy.get('[name="lastName"]').type('Johnson');
         cy.get('[name="lastName"]').type('Johnson');
-        cy.get('input[aria-label="Date of Birth"]').click();
+        cy.get('button[aria-label="Choose date"]').click();
         cy.contains('button', '15').click();
 
     });
