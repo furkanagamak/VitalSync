@@ -39,6 +39,7 @@ describe("Navbar", () => {
     cy.visit("http://localhost:3000/home");
 
     cy.get("#notificationsBtn").click();
+    cy.contains("No new notifications.");
     cy.get("#notificationsBoxBtn").click();
     cy.url().should("include", "/notifications");
   });
@@ -48,5 +49,12 @@ describe("Navbar", () => {
 
     cy.get("#notificationsBtn").click();
     cy.contains("No new notifications.");
+  });
+
+  it("log out test", () => {
+    cy.visit("http://localhost:3000/home");
+    cy.get("#logoutbtn").click();
+    cy.contains("E-mail:");
+    cy.contains("Password:");
   });
 });

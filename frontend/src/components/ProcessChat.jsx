@@ -114,7 +114,10 @@ const ProcessChat = ({ id }) => {
 
   const currUser = user.id;
   return (
-    <div className="flex flex-col h-full w-full p-4 bg-white">
+    <div
+      className="flex flex-col h-full w-full p-4 bg-white"
+      id={`processChat-${id}`}
+    >
       <div
         className="overflow-y-auto space-y-2 h-[500px] p-4"
         ref={messagesContainerRef}
