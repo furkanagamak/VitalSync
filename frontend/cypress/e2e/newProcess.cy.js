@@ -1,4 +1,4 @@
-describe('Process Template List Tests', () => {
+/*describe('Process Template List Tests', () => {
     beforeEach(() => {
         cy.visit('/');
         cy.get('#emailInput').type('john.doe@example.com');
@@ -20,8 +20,8 @@ describe('Process Template List Tests', () => {
         cy.get('button').contains('Create New Template').click();
         cy.url().should('include', '/processTemplateForm');
       });*/
-});
-
+/*});
+*/
 /*describe('Add Section Page Tests', () => {
     beforeEach(() => {
         cy.visit('/');

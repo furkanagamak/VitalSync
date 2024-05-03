@@ -313,7 +313,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
       {
         Header: "Actions",
         Cell: ({ row }) => (
-          <div
+          <div className="flex-col lg:flex-row"
             style={{
               display: "flex",
               alignItems: "center",
@@ -507,7 +507,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
                   <tr {...row.getRowProps()}>
                     {row.cells.map((cell) => {
                       return (
-                        <td
+                        <td className="text-sm lg:text-lg"
                           {...cell.getCellProps()}
                           style={{
                             ...cell.column.style,
@@ -661,33 +661,18 @@ const ModifyProcessTemplateForm = () => {
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          marginTop: "1.2rem",
-          marginBottom: "2rem",
-        }}
-      >
-        <div style={{ position: "absolute", left: "2rem" }}>
-          <GoBackButton />
-        </div>
-        <div style={{ position: "absolute", right: "2rem" }}>
-          <ModifyTemplateButton onModify={updateTemplate} instanceCreation={currentlyModifyingTemplate}/>
-        </div>
-        <h1
-          style={{
-            fontSize: "2.25rem",
-            lineHeight: "2.5rem",
-            textAlign: "center",
-            textDecoration: "underline",
-            color: "#8E0000",
-          }}
-        >
+      <div className="relative mt-6 mb-8 flex flex-col lg:flex-row items-center justify-center">
+        <h1 className="text-4xl leading-10 text-center underline text-red-800">
           Modify Process Template
         </h1>
+        <div className="flex flex-row mt-4 lg:mt-0 lg:flex-row-reverse lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 justify-between w-full px-4 lg:px-0">
+          <div >
+            <GoBackButton />
+          </div>
+          <div >
+            <ModifyTemplateButton onModify={updateTemplate} instanceCreation={currentlyModifyingTemplate}/>
+          </div>
+        </div>
       </div>
       <ProcessForm 
       process={process}

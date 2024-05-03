@@ -192,7 +192,7 @@ const ProcedureTable = ({ filter }) => {
           };
 
           return (
-            <div
+            <div  className="flex sm:flex-row flex-col items-center justify-center"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -206,7 +206,7 @@ const ProcedureTable = ({ filter }) => {
                   border: "none",
                   padding: "0",
                   cursor: "pointer",
-                  marginRight: "10px",
+                  marginBottom: "10px", // Space between buttons
                 }}
                 title="Edit"
               >
@@ -334,6 +334,8 @@ const ProcedureTable = ({ filter }) => {
                       color: "#8E0000",
                       borderBottom: "1px solid #8E0000",
                       padding: "10px",
+                      wordBreak: 'break-word',  // Allow words to be broken
+                      whiteSpace: 'normal',
                       minWidth: column.minWidth,
                     }}
                   >
@@ -395,6 +397,8 @@ const ProcedureTable = ({ filter }) => {
                             borderBottom: "1px solid #8E0000",
                             padding: "10px",
                             verticalAlign: "middle",
+                            wordBreak: 'break-word',  
+                            whiteSpace: 'normal',
                           }}
                         >
                           {cell.render("Cell")}
@@ -455,12 +459,17 @@ const ProcedureTable = ({ filter }) => {
 const ProcedureTemplateManagement = () => {
   const [searchInput, setSearchInput] = useState("");
   return (
-    <div className="flex flex-col items-center space-y-4 relative">
-      <h1 className="text-4xl text-[#8E0000] text-center underline font-bold mt-5">
-        Procedure Template Management
-      </h1>
-      <div className="absolute right-8">
-        <CreateTemplateButton />
+    <div className="flex flex-col items-center space-y-4">
+      <div className="w-full flex flex-col xl:flex-row justify-center items-center">
+        <h1 className="text-4xl text-[#8E0000] underline font-bold mt-5 text-center">
+          Procedure Template Management
+        </h1>
+        <div className="flex-none hidden xl:block absolute right-8 mt-4">
+          <CreateTemplateButton/>
+        </div>
+        <div className="block xl:hidden mt-4">
+          <CreateTemplateButton />
+        </div>
       </div>
       <SearchBar inputValue={searchInput} setInputValue={setSearchInput} />
       <div>

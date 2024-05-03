@@ -7,6 +7,8 @@ import { MdArrowDropDown, MdArrowDropUp } from "react-icons/md";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
+//change layout when md breakpoint
+
 const ResourceView = ({ resources, setResources, navToEditResource }) => {
   // all resources
   const [equipment, setEquipment] = useState(null);
@@ -92,23 +94,30 @@ const ResourceView = ({ resources, setResources, navToEditResource }) => {
   if (displayingResources === null) return <div>Loading Resources ...</div>;
   return (
     <div>
-      <section className="flex flex-col md:flex-row items-center space-y-4 my-8 w-full">
+      <section className="flex flex-col md:flex-row items-center space-y-4 mt-8 mb-4 w-full">
         <div className="w-1/4 text-center text-primary text-3xl font-semibold">
           Resources
         </div>
         <Searchbar setTextFilter={setTextFilter} />
         <CreateNewButton />
       </section>
-      <section className="flex">
-        <Filters tabFilter={tabFilter} setTabFilter={setTabFilter} />
-        <Table
-          resources={displayingResources}
-          navToEditResource={navToEditResource}
-          removeResourceById={removeResourceById}
-        />
+      <section className="flex flex-col xl:flex-row w-full">
+        <div className="flex justify-center">
+          <Filters tabFilter={tabFilter} setTabFilter={setTabFilter} />
+        </div>
+        <div className="flex-1">
+          <Table
+            resources={displayingResources}
+            navToEditResource={navToEditResource}
+            removeResourceById={removeResourceById}
+          />
+        </div>
       </section>
     </div>
   );
+  
+  
+  
 };
 
 const Searchbar = ({ setTextFilter }) => {
@@ -123,7 +132,7 @@ const Searchbar = ({ setTextFilter }) => {
       <input
         type="text"
         placeholder="Search for the resource here ..."
-        className="border rounded-full h-12 py-2 pl-4 pr-12 w-full bg-secondary"
+        className="border rounded-full h-12 py-2 pl-4 pr-12 w-full bg-secondary text-sm md:text-base"
         value={searchText}
         onChange={(e) => {
           setSearchText(e.target.value);
@@ -149,25 +158,26 @@ const CreateNewButton = () => {
   return (
     <Link
       to="/resources/create"
-      className="w-1/6 flex justify-center"
+      className="md:w-32 md:ml-12 flex justify-center"
       id="createNewResourceBtn"
     >
-      <button className="bg-primary text-white text-lg font-semibold rounded-md w-32 py-2">
+      <button className="px-2 md:px-0 bg-primary text-white text-lg font-semibold rounded-md py-2">
         Create New Resources
       </button>
     </Link>
   );
+  
 };
 
 const Filters = ({ tabFilter, setTabFilter }) => {
   const allFilters = ["All", "Equipments", "Spaces", "Personnel"];
 
   return (
-    <div className="flex flex-col items-center bg-secondary h-fit mx-4 py-4 px-2">
+    <div className="flex xl:flex-col items-center bg-secondary h-fit mx-4 py-4 px-2 mb-4 xl:mb-0">
       {allFilters.map((filter) => (
         <button
           key={filter}
-          className={`text-lg font-medium mb-2 flex flex-col items-center ${
+          className={`text-lg font-medium mb-2 flex flex-col items-center mx-4 xl:mx-0 ${
             tabFilter === filter ? "text-red-600" : "text-black"
           }`}
           onClick={() => setTabFilter(filter)}
@@ -184,7 +194,6 @@ const Filters = ({ tabFilter, setTabFilter }) => {
 };
 
 const Table = ({ resources, navToEditResource, removeResourceById }) => {
-  // define all columns and their accessors
   const columns = useMemo(
     () => [
       {
@@ -210,10 +219,10 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
         accessor: "actions",
         disableSortBy: true,
         Cell: ({ row }) => (
-          <div className="flex justify-evenly">
+          <div className="flex justify-evenly flex-col xl:flex-row">
             <FaPen
               onClick={() => navToEditResource(row.original)}
-              className="cursor-pointer text-primary"
+              className="cursor-pointer text-primary my-2 xl:my-0"
             />
             <FaTrashAlt
               onClick={() => {
@@ -247,13 +256,11 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
     usePagination
   );
 
-  // delete modal necessities
+  // Modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [resourceToDelete, setResourceToDelete] = useState(null);
 
-  // actions for delete modal
   const handleDelete = () => {
-    // Perform deletion logic here
     console.log("Deleting resource:", resourceToDelete);
     removeResourceById(resourceToDelete.uniqueIdentifier);
     setShowDeleteModal(false);
@@ -274,19 +281,23 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
           onCancel={handleCancel}
         />
       )}
-      <div className="w-full mx-12">
-        <table {...getTableProps()} className="w-full">
+      <div className="w-full overflow-x-auto">
+        <table {...getTableProps()} className="w-full min-w-xs table-auto">
           <thead>
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column, i) => (
                   <th
                     {...column.getHeaderProps(column.getSortByToggleProps())}
-                    className={`border-b-2 border-[#aa0000] py-2 px-4 text-left text-highlightRed ${
+                    className={`border-b-2 border-[#aa0000] py-2 px-0 xl:px-4 text-left text-highlightRed ${
                       i % 2 === 0 ? "bg-secondary" : ""
                     }`}
+                    style={{
+                      whiteSpace: 'normal',
+                      minWidth: column.minWidth,
+                    }}
                   >
-                    <div className="flex text-center">
+                    <div className="flex text-center flex-col xl:flex-row ">
                       {column.render("Header")}
                       {column.id !== "actions" && (
                         <span className="flex items-center">
@@ -312,22 +323,15 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
               page.map((row) => {
                 prepareRow(row);
                 return (
-                  <tr
-                    {...row.getRowProps()}
-                    className="border-b-2 border-[#aa0000]"
-                  >
-                    {row.cells.map((cell, i) => {
-                      return (
-                        <td
-                          {...cell.getCellProps()}
-                          className={`py-6 px-4 ${
-                            i % 2 === 0 ? "bg-secondary" : ""
-                          }`}
-                        >
-                          {cell.render("Cell")}
-                        </td>
-                      );
-                    })}
+                  <tr {...row.getRowProps()} className="border-b-2 border-[#aa0000]">
+                    {row.cells.map((cell, i) => (
+                      <td
+                        {...cell.getCellProps()}
+                        className={`py-6 px-4 ${i % 2 === 0 ? "bg-secondary" : ""}`}
+                      >
+                        {cell.render("Cell")}
+                      </td>
+                    ))}
                   </tr>
                 );
               })
@@ -336,7 +340,9 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
                 <td
                   colSpan={columns.length}
                   className="text-center py-6"
-                  style={{ borderBottom: "none" }}
+                  style={{ borderBottom: 'none',
+                  wordBreak: 'break-word',  
+                  whiteSpace: 'normal', }}
                 >
                   No results found
                 </td>
@@ -376,5 +382,6 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
     </>
   );
 };
+
 
 export default ResourceView;

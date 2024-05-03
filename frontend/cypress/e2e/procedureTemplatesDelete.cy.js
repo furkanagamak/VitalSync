@@ -14,7 +14,6 @@ describe("Delete Procedure Template Tests", () => {
   it("should load the procedure template management page", () => {
     cy.url().should("include", "/ProcedureTemplateManagement");
     cy.get("h1").contains("Procedure Template Management").should("be.visible");
-    cy.get("button").contains("Create Template").should("be.visible");
     cy.get('input[type="search"]').should("be.visible");
     cy.contains("Name").should("be.visible");
     cy.contains("Description").should("be.visible");

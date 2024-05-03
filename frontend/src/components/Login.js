@@ -103,7 +103,7 @@ function MyComponent() {
           }}
           className="shrink-0 mt-1 mb-2.5 bg-white rounded-lg border border-solid border-stone-500 h-[30px] p-2"
         />
-        <label htmlFor="passwordInput" className="self-start max-md:mt-10">
+        <label htmlFor="passwordInput" className="self-start">
           Password:
         </label>
         <input
