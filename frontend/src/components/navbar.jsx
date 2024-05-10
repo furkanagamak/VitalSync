@@ -185,8 +185,14 @@ const Menu = ({ userType }) => {
   };
 
   const navigate = useNavigate();
-  const navigateToRoster = () => navigate("/Roster");
-  const navigateToAdminActions = () => navigate("/adminActions");
+  const navigateToRoster = () => {
+    setIsOpen(false);
+    navigate("/Roster");
+  };
+  const navigateToAdminActions = () => {
+    setIsOpen(false);
+    navigate("/adminActions");
+  };
 
   return (
     <>
@@ -201,7 +207,7 @@ const Menu = ({ userType }) => {
           >
             Roster
           </button>
-          {userType === "admin" && (
+          {(userType === "system admin" || userType === "hospital admin") && (
             <button onClick={navigateToAdminActions} className="border-b-2 p-2">
               Admin Actions
             </button>
