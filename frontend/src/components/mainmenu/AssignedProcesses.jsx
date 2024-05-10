@@ -184,40 +184,39 @@ const Process = ({ process, socket }) => {
   }
 
   return (
-    <Link to={`/boardProcess/${process.processID}`}>
-      <div
-        title={`View Your Assigned Process "${process.processName}"`}
-        className="bg-primary text-white p-4 rounded-3xl flex flex-col md:grid grid-cols-10 space-x-4 drop-shadow-lg"
-      >
-        <section className="col-start-1 col-end-3 text-center md:space-y-4 border-b-2 md:border-r-2 md:border-b-0 border-white">
-          {displayMyProcedure}
-        </section>
-        <section className="mt-2 md:mt-0 col-start-3 col-end-8 flex flex-col justify-center md:space-y-8 text-2xl">
-          <div className="flex">
-            <h1 className="underline mr-4">Patient:</h1>
-            <p>{process.patientName}</p>
-          </div>
-          <div className="flex ">
-            <h1 className="underline mr-2">Process:</h1>
-            <p>{process.processName}</p>
-          </div>
-        </section>
-        <section className="col-start-8 col-end-11 flex flex-col justify-evenly md:items-center mt-2 md:mt-0 text-xl">
-          <div>
-            <h1 className="underline">Current Procedure:</h1>
-            <p>{process.currentProcedure.procedureName}</p>
-          </div>
-          {myProcedure && (
-            <h1>
-              {process.procedureAhead === 0 ? (
-                <span className="text-green-500">Your Turn!</span>
-              ) : (
-                <span>{`${process.procedureAhead} more procedures ahead`}</span>
-              )}
-            </h1>
-          )}
-        </section>
-      </div>
+    <Link
+      to={`/boardProcess/${process.processID}`}
+      title={`View Your Assigned Process "${process.processName}"`}
+      className="bg-primary text-white p-4 rounded-3xl flex flex-col md:grid grid-cols-10 space-x-4 drop-shadow-lg"
+    >
+      <section className="col-start-1 col-end-3 text-center md:space-y-4 border-b-2 md:border-r-2 md:border-b-0 border-white">
+        {displayMyProcedure}
+      </section>
+      <section className="mt-2 md:mt-0 col-start-3 col-end-8 flex flex-col justify-center md:space-y-8 text-2xl">
+        <div className="flex">
+          <h1 className="underline mr-4">Patient:</h1>
+          <p>{process.patientName}</p>
+        </div>
+        <div className="flex ">
+          <h1 className="underline mr-2">Process:</h1>
+          <p>{process.processName}</p>
+        </div>
+      </section>
+      <section className="col-start-8 col-end-11 flex flex-col justify-evenly md:items-center mt-2 md:mt-0 text-xl">
+        <div>
+          <h1 className="underline">Current Procedure:</h1>
+          <p>{process.currentProcedure.procedureName}</p>
+        </div>
+        {myProcedure && (
+          <h1>
+            {process.procedureAhead === 0 ? (
+              <span className="text-green-500">Your Turn!</span>
+            ) : (
+              <span>{`${process.procedureAhead} more procedures ahead`}</span>
+            )}
+          </h1>
+        )}
+      </section>{" "}
     </Link>
   );
 };

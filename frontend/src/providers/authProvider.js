@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { useSocketContext } from "./SocketProvider";
 import { toast } from "react-hot-toast";
-
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
 
@@ -79,10 +78,13 @@ export const AuthProvider = ({ children }) => {
         } else {
           console.log("User is not logged in!");
           console.log(data);
-          if (location.pathname !== "/RecoveryPage" && location.pathname !== "/") {
+          if (
+            location.pathname !== "/RecoveryPage" &&
+            location.pathname !== "/"
+          ) {
             navigate("/");
-            toast('You were redirected to the login page.', {
-              icon: '⚠️',
+            toast("You were redirected to the login page.", {
+              icon: "⚠️",
             });
           }
         }
@@ -96,7 +98,7 @@ export const AuthProvider = ({ children }) => {
       // }
     };
 
-    if(socket) {
+    if (socket) {
       fetchCheckLogin();
     }
   }, [socket]);

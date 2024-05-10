@@ -68,7 +68,7 @@ const Tabs = ({ userType }) => {
           Roster
         </button>
       </section>
-      {userType === "admin" && (
+      {(userType === "system admin" || userType === "hospital admin") && (
         <section className="px-8 flex pb-2">
           <button
             title="Go to Admin Actions"
