@@ -30,7 +30,7 @@ const AssignedProcesses = () => {
       );
       if (!res.ok) {
         console.log("assigned processes fetch failed");
-        toast.error(await res.text());
+        console.log(await res.text());
       } else {
         const data = await res.json();
         console.log("Received process");

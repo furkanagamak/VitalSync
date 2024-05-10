@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from "../providers/authProvider.js";
 
 export default function NotFoundPage() {
-  const { user } = useAuth();
+  /*const { user } = useAuth();
 
   if (!user) {
     return (
@@ -18,7 +18,7 @@ export default function NotFoundPage() {
           </div>
       </div>
     );
-  }
+  }*/
   return (
     <div className="flex flex-col gap-2 ">
         <div className="text-7xl mt-10 ml-10 text-primary">
