@@ -21,8 +21,8 @@ const theme = createTheme({
 
 function SearchBar({ onChange }) {
   return (
-    <div className="flex justify-center items-center p-5 mb-5 mt-5">
-      <div className="relative w-2/5">
+    <div className="flex justify-center items-center px-5 pt-5 mb-5 mt-5">
+      <div className="relative lg:w-2/5">
         <input
           type="search"
           placeholder="Search by Process ID or Patient Name"
@@ -47,7 +47,7 @@ function ProcessCell({ process, onModifyClick, onViewClick, pid }) {
   const navigate = useNavigate();
 
   return (
-    <div className="flex overflow-hidden bg-primary rounded-2xl p-7 mb-5 text-white text-2xl m-5">
+    <div className="flex overflow-hidden bg-primary rounded-2xl p-7 mb-5 text-white text-sm lg:text-2xl m-5">
       <div className="flex-[1.5] border-r border-white min-w-0 pr-4">
         <div className="space-y-1">
           <p className="truncate">
@@ -74,24 +74,24 @@ function ProcessCell({ process, onModifyClick, onViewClick, pid }) {
           </p>
         </div>
       </div>
-      <div className="flex-[1] pl-4 flex justify-end items-start min-w-0">
-        <div className="flex flex-col space-y-2">
-          <button
-            className="bg-green-500 hover:bg-green-600 rounded-full px-10 py-1 text-center"
-            onClick={handleViewClickID}
-            id={`activeProcessViewBtn-${process.processID}`}
-          >
-            View
-          </button>
-          <button
-            className="bg-red-500 hover:bg-red-600 rounded-full px-4 py-1 text-center"
-            onClick={handleModifyClickID}
-            id={`activeProcessModifyBtn-${process.processID}`}
-          >
-            Modify
-          </button>
+        <div className="flex-[1] pl-4 flex justify-center items-center min-w-0">
+          <div className="flex flex-col space-y-2 w-full lg:w-3/4">
+            <button
+              className="bg-green-500 hover:bg-green-600 rounded-full w-full lg:px-4 py-1 text-center mb-2 text-sm lg:text-2xl"
+              onClick={handleViewClickID}
+              id={`activeProcessViewBtn-${process.processID}`}
+            >
+              View
+            </button>
+            <button
+              className="bg-red-500 hover:bg-red-600 rounded-full w-full lg:px-4 py-1 text-center text-sm lg:text-2xl"
+              onClick={handleModifyClickID}
+              id={`activeProcessModifyBtn-${process.processID}`}
+            >
+              Modify
+            </button>
+          </div>
         </div>
-      </div>
     </div>
   );
 }
@@ -164,7 +164,7 @@ export function ActiveProcessesList() {
   return (
     <ThemeProvider theme={theme}>
       <SearchBar onChange={setSearchInput} />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-10 py-5">
+      <div className="grid grid-cols-1 gap-4 px-5 py-5">
         {currentItems.length > 0 ? (
           currentItems.map((process, index) => (
             <ProcessCell

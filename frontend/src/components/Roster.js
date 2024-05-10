@@ -222,7 +222,7 @@ function MyComponent() {
         <input
           type="text"
           placeholder="Search..."
-          className="px-3 py-2 border rounded"
+          className=" focus:outline-none focus:border-primary inline-flex items-center rounded-full text-xl placeholder-primary border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative mb-2"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
