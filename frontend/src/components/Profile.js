@@ -1295,45 +1295,48 @@ function MyComponent() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      setIsLoading(true);
+    const fetchUserData = async () => {
       try {
-        console.log(id);
         const response = await axios.get(`/user/${id}`);
-        setUser(response.data); // Set the user data in state
+        return response.data;
       } catch (error) {
         console.error("Failed to fetch user:", error);
-      } finally {
-        setIsLoading(false);
       }
     };
 
-    fetchUser();
-  }, [id]);
-
-  useEffect(() => {
-    const fetchUserImg = async () => {
-      setIsLoading(true);
+    const fetchUserProfilePicture = async () => {
       try {
         const res = await fetch(
           `${process.env.REACT_APP_API_BASE_URL}/user/profilePicture/url/${id}`
         );
-
         const txt = await res.text();
-        if (res.ok) {
-          if (txt !== "") setImgUrl(txt);
-        } else {
-          console.log("server responded with error text ", txt);
+        if (res.ok && txt !== "") {
+          return txt;
         }
       } catch (e) {
         console.log("fetch profile image fail");
+      }
+    };
+
+    const fetchAllData = async () => {
+      setIsLoading(true);
+      try {
+        const [userData, profileImgUrl] = await Promise.all([
+          fetchUserData(),
+          fetchUserProfilePicture(),
+        ]);
+
+        if (userData) setUser(userData);
+        if (profileImgUrl) setImgUrl(profileImgUrl);
+      } catch (error) {
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchUserImg();
-  }, [imgUrl, id]);
+    fetchAllData();
+  }, [id, imgUrl]);
 
   // Handles the transition to the account termination confirmation modal
   const handleTerminateAccount = () => setShowTerminationModal(true);
