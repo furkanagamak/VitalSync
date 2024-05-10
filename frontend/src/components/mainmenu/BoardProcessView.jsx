@@ -232,16 +232,14 @@ const Procedure = ({ procedure, currUser, currentProcedure }) => {
           <p>{procedure.peopleCompleted.length}</p>
         </div>
         {procedure.peopleCompleted.includes(currUser) && (
-          <div className="text-highlightGreen underline">
-            You have completed the task!
-          </div>
+          <div className="text-green-400">You have completed the task!</div>
         )}
         {!procedure.peopleCompleted.includes(currUser) &&
           procedure.peopleAssigned.includes(currUser) &&
           currentProcedure?._id === procedure?._id && (
             <button
               onClick={markProcedureAsComplete}
-              className="text-highlightGreen underline"
+              className="text-green-400 underline"
             >
               Mark as completed ✅
             </button>

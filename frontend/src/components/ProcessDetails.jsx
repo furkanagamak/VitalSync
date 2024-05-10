@@ -194,14 +194,14 @@ const Procedure = ({ procedure, currentProcedure }) => {
           <p>{procedure.specialNotes}</p>
         </div>
         {userInPeopleCompleted && (
-          <p className="text-highlightGreen">You have completed this task!</p>
+          <p className="text-green-400">You have completed this task!</p>
         )}
         {!userInPeopleCompleted &&
           userInPeopleAssigned &&
           currentProcedure?._id === procedure?._id && (
             <button
               onClick={markProcedureAsComplete}
-              className="text-highlightGreen"
+              className="text-green-400"
             >
               Mark as Completed ✅
             </button>
