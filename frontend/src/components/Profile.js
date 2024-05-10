@@ -548,6 +548,10 @@ function ContactInfo({ user, authUser, id }) {
     setShowPasswordResetConfirmation(true);
   };
 
+  const isAdmin =
+    authUser.accountType === "system admin" ||
+    authUser.accountType === "hospital admin";
+
   console.log("profile is", user?.userId);
 
   return (
@@ -620,16 +624,14 @@ function ContactInfo({ user, authUser, id }) {
         </>
       )}
       <div className="flex gap-5 justify-between items-start mt-24 text-sm font-medium text-neutral-600 max-md:pr-5 max-md:mt-10">
-        {id &&
-          authUser &&
-          (authUser.id === id || authUser.accountType === "admin") && (
-            <button
-              onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
-              className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
-            >
-              {editMode ? "Save Changes" : "Edit Contact Info"}
-            </button>
-          )}
+        {id && authUser && (authUser.id === id || isAdmin) && (
+          <button
+            onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
+            className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
+          >
+            {editMode ? "Save Changes" : "Edit Contact Info"}
+          </button>
+        )}
         {id && authUser && authUser.id === id && (
           <button
             onClick={handleResetPasswordClick}
@@ -768,6 +770,10 @@ function ProfileDetails({ user, authUser, id }) {
   const [department, setDepartment] = useState(user ? user.department : "");
   const [isRolesModalOpen, setIsRolesModalOpen] = useState(false);
 
+  const isAdmin =
+    authUser.accountType === "system admin" ||
+    authUser.accountType === "hospital admin";
+
   useEffect(() => {
     if (user) {
       setName(`${user.firstName} ${user.lastName}`);
@@ -853,26 +859,22 @@ function ProfileDetails({ user, authUser, id }) {
           </>
         )}
       </div>
-      {id &&
-        authUser &&
-        (authUser.id === id || authUser.accountType === "admin") && (
-          <button
-            onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
-            className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
-          >
-            {editMode ? "Save Changes" : "Edit Profile"}
-          </button>
-        )}
-      {id &&
-        authUser &&
-        (authUser.id === id || authUser.accountType === "admin") && (
-          <button
-            className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
-            onClick={() => setIsRolesModalOpen(true)}
-          >
-            Edit Eligible Roles
-          </button>
-        )}
+      {id && authUser && (authUser.id === id || isAdmin) && (
+        <button
+          onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
+          className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
+        >
+          {editMode ? "Save Changes" : "Edit Profile"}
+        </button>
+      )}
+      {id && authUser && (authUser.id === id || isAdmin) && (
+        <button
+          className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
+          onClick={() => setIsRolesModalOpen(true)}
+        >
+          Edit Eligible Roles
+        </button>
+      )}
       <EditRolesModal
         isOpen={isRolesModalOpen}
         onRequestClose={() => setIsRolesModalOpen(false)}
@@ -999,19 +1001,20 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
     return;
   }
 
+  const isAdmin =
+    authUser.accountType === "system admin" ||
+    authUser.accountType === "hospital admin";
+
   return (
     <div>
-      {!preview &&
-        id &&
-        authUser &&
-        (authUser.id === id || authUser.accountType === "admin") && (
-          <button
-            onClick={onScheduleChange}
-            className="mt-2 mb-5 justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
-          >
-            Edit Schedule
-          </button>
-        )}
+      {!preview && id && authUser && (authUser.id === id || isAdmin) && (
+        <button
+          onClick={onScheduleChange}
+          className="mt-2 mb-5 justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
+        >
+          Edit Schedule
+        </button>
+      )}
       <Calendar
         minDate={today}
         maxDate={threeYearsLater}
@@ -1291,6 +1294,9 @@ function MyComponent() {
   const [user, setUser] = useState(null); // State to hold the user data
   const { user: authUser } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
+  const isAdmin =
+    authUser.accountType === "system admin" ||
+    authUser.accountType === "hospital admin";
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -1391,17 +1397,14 @@ function MyComponent() {
   // Default view rendering (profile view)
   return (
     <div className="flex flex-col items-center pt-10 pr-5 pb-8 pl-14 bg-white max-md:pl-5">
-      {id &&
-        authUser &&
-        authUser.id !== id &&
-        authUser.accountType === "admin" && (
-          <button
-            onClick={handleTerminateAccount}
-            className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-primary rounded-lg border border-solid border-neutral-600"
-          >
-            Terminate Account
-          </button>
-        )}
+      {id && authUser && authUser.id !== id && isAdmin && (
+        <button
+          onClick={handleTerminateAccount}
+          className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-primary rounded-lg border border-solid border-neutral-600"
+        >
+          Terminate Account
+        </button>
+      )}
       <div className="self-stretch mt-2 max-md:max-w-full">
         <div className="flex gap-5 flex-col xl:flex-row max-md:gap-0">
           <div className="flex flex-col w-[24%] max-md:ml-0 max-md:w-full">
