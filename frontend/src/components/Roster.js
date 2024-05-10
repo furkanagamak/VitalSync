@@ -66,6 +66,7 @@ function Table({ rows, onRowClick }) {
                 key={index}
                 onClick={() => onRowClick(row)}
                 style={{ cursor: "pointer" }}
+                title={`Click to view ${row[0]}'s profile`}
               >
                 <td
                   className="px-4 py-2"
@@ -202,7 +203,7 @@ function MyComponent() {
           value={filterValue}
           onChange={(e) => setFilterValue(e.target.value)}
         >
-          <option value="">Select Category</option>
+          <option value="">Filter by Category</option>
           <optgroup label="Department">
             {departments.map((department) => (
               <option key={department} value={department}>
