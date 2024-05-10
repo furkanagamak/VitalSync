@@ -60,6 +60,11 @@ const BoardProcessView = () => {
     socket.on("procedure complete - refresh", () => {
       triggerRefresh();
     });
+
+    socket.emit("join process event room", id);
+    return () => {
+      socket.emit("leave process event room", id);
+    };
   }, [socket]);
 
   if (!process) return <div>Loading ...</div>;

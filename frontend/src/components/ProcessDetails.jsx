@@ -38,9 +38,15 @@ const ProcessDetails = () => {
   // socket events
   useEffect(() => {
     if (!socket) return;
+    socket.emit("join process event room", id);
+
     socket.on("procedure complete - refresh", () => {
       triggerRefresh();
     });
+
+    return () => {
+      socket.emit("leave process event room", id);
+    };
   }, [socket]);
 
   if (!process || !user) return <div>Loading ...</div>;

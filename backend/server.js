@@ -219,6 +219,38 @@ io.on("connection", async (socket) => {
     io.to(processID).emit("notification refresh");
   });
 
+  socket.on("join process event room", async (processID) => {
+    // check process instance existence
+    const processInstance = await ProcessInstance.findOne({
+      processID: processID,
+    });
+    if (!processInstance)
+      return console.log(
+        `user ${socket._uid} attempted to join a process event room ${processID} that does not exists`
+      );
+
+    socket.join(`process-event-${processID}`);
+    console.log(
+      `socket: ${socket.id} has joined process event room: ${processID}`
+    );
+  });
+
+  socket.on("leave process event room", async (processID) => {
+    // check process instance existence
+    const processInstance = await ProcessInstance.findOne({
+      processID: processID,
+    });
+    if (!processInstance)
+      return console.log(
+        `user ${socket._uid} attempted to leave a room ${processID} that does not exists`
+      );
+
+    socket.leave(`process-event-${processID}`);
+    console.log(
+      `socket: ${socket.id} has left process event room: ${processID}`
+    );
+  });
+
   socket.on("test", () => {
     console.log(`This is socket id ${socket.id} with user: ${socket._uid}`);
   });
@@ -1765,7 +1797,9 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
     });
 
     // signals to frontend of the current procedure update
-    io.to(process.processID).emit("procedure complete - refresh");
+    io.to(`process-event-${process.processID}`).emit(
+      "procedure complete - refresh"
+    );
 
     if (assignedCount === completedCount) {
       const procedureIndex = section.procedureInstances.indexOf(procedure._id);
@@ -1884,7 +1918,9 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
       const newCurrentProcedure = await ProcedureInstance.findOne({
         _id: nextProcedureId,
       });
-      io.to(process.processID).emit("procedure complete - refresh");
+      io.to(`process-event-${process.processID}`).emit(
+        "procedure complete - refresh"
+      );
 
       res.send("Procedure marked as complete");
     } else {
@@ -2343,44 +2379,47 @@ app.post("/processInstances", async (req, res) => {
   }
 });
 
-app.put('/processInstances/:id', async (req, res) => {
+app.put("/processInstances/:id", async (req, res) => {
   const { id } = req.params;
   const { processName, description, patient, sections } = req.body;
-  
+
   try {
-      const processInstance = await ProcessInstance.findById(id);
-      if (!processInstance) {
-          return res.status(404).send({ message: "Process instance not found." });
-      }
+    const processInstance = await ProcessInstance.findById(id);
+    if (!processInstance) {
+      return res.status(404).send({ message: "Process instance not found." });
+    }
 
-      if (processName) processInstance.processName = processName;
-      if (description) processInstance.description = description;
+    if (processName) processInstance.processName = processName;
+    if (description) processInstance.description = description;
 
-      if (patient && patient._id) {
-          await Patient.findByIdAndUpdate(patient._id, patient, { new: true });
-      }
+    if (patient && patient._id) {
+      await Patient.findByIdAndUpdate(patient._id, patient, { new: true });
+    }
 
-      if (sections && sections.length > 0) {
-        processInstance.sectionInstances = processInstance.sectionInstances.map(section => {
-          const sectionUpdate = sections.find(s => s._id.toString() === section._id.toString());
+    if (sections && sections.length > 0) {
+      processInstance.sectionInstances = processInstance.sectionInstances.map(
+        (section) => {
+          const sectionUpdate = sections.find(
+            (s) => s._id.toString() === section._id.toString()
+          );
           if (sectionUpdate) {
-              return { ...section._doc, ...sectionUpdate };
+            return { ...section._doc, ...sectionUpdate };
           }
           return section;
-        });
-      }
+        }
+      );
+    }
 
-      // Save the updated process instance
-      await processInstance.save();
-      res.send(processInstance);
+    // Save the updated process instance
+    await processInstance.save();
+    res.send(processInstance);
   } catch (error) {
-      res.status(500).send({
-          message: "Failed to update the process instance",
-          error: error.toString(),
-      });
+    res.status(500).send({
+      message: "Failed to update the process instance",
+      error: error.toString(),
+    });
   }
 });
-
 
 app.get("/users/:userId/eligibleRoles", async (req, res) => {
   try {
