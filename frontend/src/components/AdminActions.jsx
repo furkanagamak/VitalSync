@@ -4,7 +4,7 @@ const AdminActions = () => {
   return (
     <div>
       <section className="text-center mt-8 mb-16">
-        <h1 className="text-3xl underline underline-offset-8">
+        <h1 className="underline underline-offset-20 text-4xl text-primary text-center font-bold">
           Admin Management
         </h1>
       </section>
