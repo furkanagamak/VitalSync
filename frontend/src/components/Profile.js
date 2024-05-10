@@ -216,32 +216,32 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
       <div className="flex flex-col justify-center max-w-[364px] bg-lime-50 rounded-lg border border-red-800 border-solid shadow">
         <div className="px-12 py-4 text-center text-black">
-          <p className="text-sm leading-5">Enter your new password:</p>
+          <p className="text-base leading-5">Enter your new password:</p>
           <input
             id="newPassword"
             type="password"
             value={newPassword}
             onChange={handlePasswordChange}
-            className="mt-2 p-2 border rounded w-full"
+            className="mt-2 p-2 border rounded"
             placeholder="New password"
-            style={{ maxWidth: "200px", fontSize: "0.875rem" }}
+            style={{ width: "100%", fontSize: "0.875rem" }}
           />
           <input
             id="ConfirmNewPassword"
             type="password"
             value={confirmPassword}
             onChange={handleConfirmPasswordChange}
-            className="mt-2 p-2 border rounded w-full"
+            className="mt-2 p-2 border rounded"
             placeholder="Confirm new password"
-            style={{ maxWidth: "200px", fontSize: "0.875rem" }}
+            style={{width: "100%", fontSize: "0.875rem" }}
           />
           {error && <p className="text-xs text-red-500">{error}</p>}
         </div>
-        <div className="flex justify-evenly mt-3">
+        <div className="flex justify-center gap-6">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1 bg-zinc-300 text-black rounded-lg border border-solid border-neutral-600 text-xs mb-3"
+            className="px-4 py-3 bg-zinc-300 text-black rounded-lg border border-solid border-neutral-600 text-base mb-3"
           >
             Close
           </button>
@@ -249,12 +249,12 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
             id="resetConfirm"
             type="button"
             onClick={handleSubmit}
-            className="px-4 py-1 bg-red-800 text-white rounded-lg border border-solid border-neutral-600 text-xs mb-3"
+            className="px-4 py-3 bg-red-800 text-white rounded-lg border border-solid border-neutral-600 text-base mb-3"
           >
             Reset Password
           </button>
         </div>
-        <p className="text-xs text-center mb-2">
+        <p className="text-base text-center mb-2 mx-4">
           The new password must be at least 6 characters long and must not
           include your email address.
         </p>

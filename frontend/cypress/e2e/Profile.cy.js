@@ -185,10 +185,10 @@ describe('MyComponent Button Functionality', () => {
     });
       
 
-    it('opens the image uploader and clicks upload', () => {
-      cy.contains('Change Profile Image').click();
-      cy.contains('Upload').click();
-    });
+    // it('opens the image uploader and clicks upload', () => {
+    //   cy.contains('Change Profile Image').click();
+    //   cy.contains('Upload').click();
+    // });
 
       /*it('opens termination modal on clicking Terminate Account button', () => {
         cy.contains('Terminate Account').click();
@@ -201,7 +201,7 @@ describe('MyComponent Button Functionality', () => {
         cy.get('input[type="text"]').type('john smith');
         cy.contains('Submit').click();
         cy.contains('Account has been Terminated').should('exist');
-      });
+      });*/
       
       describe('Profile Image Upload', () => {
         it('allows the user to upload a new profile image', () => {
@@ -212,7 +212,7 @@ describe('MyComponent Button Functionality', () => {
           cy.get('#imageupload').click();
           cy.contains('Your profile image has been updated!').should('be.visible');
         });
-      });*/
+      });
 
 
 
