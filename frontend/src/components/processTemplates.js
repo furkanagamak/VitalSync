@@ -266,25 +266,20 @@ const ProcessTable = ({ filter, fromLocation, data, setData, isLoading }) => {
         onConfirm={() => deleteProcessTemplate(currentTemplate.id)}
         templateName={currentTemplate?.name}
       />
-      <div
+      <div  className=" w-full"
         style={{
           maxWidth: "95%",
           margin: "auto",
           overflowX: "auto",
-          display: "flex",
-          justifyContent: "center",
+
         }}
       >
-        <table
+        <table 
           {...getTableProps()}
+          className="w-full h-full text-center text-lg table-auto lg:table-fixed  border-separate"
           style={{
-            width: "100%",
-            height: "100%",
-            tableLayout: "fixed",
-            borderCollapse: "separate",
             borderSpacing: "0 1px",
-            fontSize: "1.32rem",
-            textAlign: "center",
+
           }}
         >
           <thead>
@@ -363,7 +358,6 @@ const ProcessTable = ({ filter, fromLocation, data, setData, isLoading }) => {
                           borderBottom: "1px solid #8E0000",
                           padding: "10px",
                           verticalAlign: "middle",
-                          wordBreak: "break-word",
                           whiteSpace: "normal",
                         }}
                       >

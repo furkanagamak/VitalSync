@@ -257,7 +257,7 @@ const Procedure = ({ procedure, currUser, currentProcedure }) => {
 
 const BoardProcessChat = ({ id }) => {
   return (
-    <div className="p-8 w-3/4 mx-auto" id="boardProcessChat">
+    <div className="p-8 lg:w-3/4 mx-auto" id="boardProcessChat">
       <ProcessChat id={id} />
     </div>
   );
