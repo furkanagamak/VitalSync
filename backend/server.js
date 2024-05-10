@@ -859,21 +859,27 @@ app.get("/users/accountsByRole/:roleId", async (req, res) => {
 
 app.put("/user/:userId", async (req, res) => {
   const { userId } = req.params;
-  const updateData = req.body;
+  const { unavailableTimes, deletedTimes } = req.body;
 
   try {
-    const updatedUser = await Account.findByIdAndUpdate(userId, updateData, {
-      new: true,
-    });
-    if (!updatedUser) {
+    const user = await Account.findById(userId);
+    if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
+    if (deletedTimes && deletedTimes.length > 0) {
+      user.unavailableTimes = user.unavailableTimes.filter(time => !deletedTimes.includes(time._id.toString()));
+    }
+
+    if (unavailableTimes && unavailableTimes.length > 0) {
+      user.unavailableTimes.push(...unavailableTimes);
+    }
+
+    const updatedUser = await user.save();
     res.json({ message: "Profile updated successfully", user: updatedUser });
   } catch (error) {
     console.error("Error updating user:", error);
-    res
-      .status(500)
-      .json({ message: "Error updating user", error: error.message });
+    res.status(500).json({ message: "Error updating user", error: error.message });
   }
 });
 

@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../providers/authProvider.js";
 import axios from "axios";
-import { DateRangePicker } from "rsuite";
 import "rsuite/dist/rsuite-no-reset.min.css";
 import {
   TextField,
@@ -11,11 +10,18 @@ import {
   Select,
   MenuItem,
   InputLabel,
+  IconButton
 } from "@mui/material";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./Calendar.css";
 import { FormControlLabel, Checkbox } from "@mui/material";
+import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { FaArrowLeft } from "react-icons/fa";
+import RestoreIcon from '@mui/icons-material/Restore';
+import DeleteIcon from '@mui/icons-material/Delete';
+import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -1045,10 +1051,23 @@ function ChangeAvailability({
   id,
 }) {
   const [dateRange, setDateRange] = useState([new Date(), new Date()]);
-  const [status, setStatus] = useState("Work Hours");
+  const [status, setStatus] = useState('');
   const [errors, setErrors] = useState({});
   const [weeklySchedule, setWeeklySchedule] = useState([...user.usualHours]);
   const [previewSchedule, setPreviewSchedule] = useState([...user.usualHours]);
+  const [startTime, setStartTime] = useState(null);
+  const [endTime, setEndTime] = useState(null); 
+  const [markedForDeletion, setMarkedForDeletion] = useState([]);
+
+
+  const handleStartTimeChange = (newValue) => {
+    setStartTime(newValue);
+    setEndTime(new Date(newValue.getTime() + 3600000)); 
+};
+
+const handleEndTimeChange = (newValue) => {
+    setEndTime(newValue);
+};
 
   useEffect(() => {
     setPreviewSchedule([...weeklySchedule]);
@@ -1100,23 +1119,26 @@ function ChangeAvailability({
     onRevertToProfile();
   };
 
+
   const handleSubmitTimeOff = async () => {
-    if (!dateRange[0] || !dateRange[1] || !status) {
+    console.log(markedForDeletion);
+    console.log(status);
+    if ((!startTime || !endTime || !status) && (markedForDeletion.length === 0)) {
       setErrors({ msg: "Please fill in all fields." });
       return;
     }
-
-    const updateData = {
-      unavailableTimes: [
-        ...user.unavailableTimes,
-        {
-          start: dateRange[0],
-          end: dateRange[1],
-          reason: status,
-        },
-      ],
+  
+    const newUnavailableTime = {
+      start: startTime.toISOString(),
+      end: endTime.toISOString(),
+      reason: status,
     };
-
+  
+    const updateData = {
+      unavailableTimes: status ? [newUnavailableTime] : [],
+      deletedTimes: markedForDeletion,
+    };
+  
     try {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
@@ -1124,16 +1146,11 @@ function ChangeAvailability({
         setUser({
           ...user,
           usualHours: weeklySchedule,
-          unavailableTimes: [
-            ...user.unavailableTimes,
-            {
-              start: dateRange[0],
-              end: dateRange[1],
-              reason: status,
-            },
-          ],
+          unavailableTimes: user.unavailableTimes.filter(time => 
+            !markedForDeletion.includes(time._id)
+          ).concat(status ? [newUnavailableTime] : [])
         });
-        onRevertToProfile();
+        onRevertToProfile(); 
       } else {
         toast.error("Failed to update availability.");
       }
@@ -1142,6 +1159,15 @@ function ChangeAvailability({
       toast.error("Error updating user: " + error.message);
     }
   };
+
+const handleToggleDeleteTimeOff = (timeOffId) => {
+  if (markedForDeletion.includes(timeOffId)) {
+    setMarkedForDeletion(markedForDeletion.filter(id => id !== timeOffId));
+  } else {
+    setMarkedForDeletion([...markedForDeletion, timeOffId]);
+  }
+};
+
 
   const handleSubmitWeeklySchedule = async () => {
     const updateData = {
@@ -1164,42 +1190,67 @@ function ChangeAvailability({
   };
 
   return (
+    
     <div className="flex flex-col px-8 pt-10 pb-8 bg-white">
-      <button
+            <button
         onClick={handleBackWithoutSaving}
-        className="mb-4 bg-primary p-2 rounded text-white text-xl w-1/6"
-      >
-        Back to Profile
+className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center w-1/6" >
+        <FaArrowLeft className="mr-2" />
+        <span className="mx-auto">Back to Profile</span>
       </button>
       <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
         <header className="flex justify-between items-center max-w-full text-red-800 mb-5">
           <h1 className="text-4xl">Time-Off Request</h1>
-          <p className="text-lg">Please select a status before submitting.</p>
         </header>
         <div className="flex flex-col mt-4">
-          <DateRangePicker
-            showOneCalendar
-            appearance="default"
-            placeholder="Select Date Range"
-            format="yyyy-MM-dd HH:mm"
-            value={dateRange}
-            onChange={handleDateChange}
-          />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Status</InputLabel>
-            <Select
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <div className="flex ">
+              <div className="mr-5">
+                <DateTimePicker
+                    label="Start Time"
+                    value={startTime}
+                    onChange={handleStartTimeChange}
+                    renderInput={(params) => <TextField {...params} />}
+                /></div>
+                <DateTimePicker
+                    label="End Time"
+                    value={endTime}
+                    onChange={handleEndTimeChange}
+                    minDateTime={startTime ? new Date(startTime.getTime() + 3600000) : null}
+                    renderInput={(params) => <TextField {...params} />}
+                />
+            </div>
+            <div className="bg-white my-5 w-1/3">
+            <TextField
+              fullWidth
+              label="Reason for Request"
               value={status}
-              label="Status"
               onChange={handleStatusChange}
-              defaultValue="Time-Off"
-            >
-              <MenuItem value="Time-Off">Time-Off</MenuItem>
-              <MenuItem value="Vacation">Vacation</MenuItem>
-            </Select>
-          </FormControl>
+              variant="outlined"
+              multiline
+                  rows={2}
+            /></div>
+        </LocalizationProvider>
+        <div className="flex-grow">
+          <h2 className="text-2xl text-primary">Scheduled Time-Offs</h2>
+          <p className="text-md mb-2">Click to mark/unmark for deletion:</p>
+          <ul>
+            {user.unavailableTimes.map((timeOff) => (
+              <li key={timeOff._id} style={{
+                opacity: markedForDeletion.includes(timeOff._id) ? 0.3 : 1
+              }}>
+                <IconButton onClick={() => handleToggleDeleteTimeOff(timeOff._id)} color="error">
+                  {markedForDeletion.includes(timeOff._id) ? <RestoreFromTrashIcon /> : <DeleteIcon />}
+                </IconButton>
+                {`${new Date(timeOff.start).toLocaleString()} - ${new Date(timeOff.end).toLocaleString()}`}
+      <span className="text-primary text-xl mx-2">|  Reason:</span> {`${timeOff.reason}`}
+              </li>
+            ))}
+          </ul>
+        </div>
           {errors.msg && <div style={{ color: "red" }}>{errors.msg}</div>}
           <button
-            className="bg-primary text-white px-5 py-2.5 text-lg rounded-full cursor-pointer w-2/5 mx-auto max-w-xs"
+            className="my-5 bg-primary text-white px-5 py-2.5 text-lg rounded-full cursor-pointer w-2/5 mx-auto max-w-xs"
             onClick={handleSubmitTimeOff}
           >
             Submit Changes
