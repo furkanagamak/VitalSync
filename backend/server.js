@@ -529,7 +529,7 @@ app.post("/login", async (req, res) => {
       if (result) {
         // Set a cookie with the account ID
         res.cookie("accountId", account._id, {
-          maxAge: 10000000,
+          maxAge: 28000000000,
           sameSite: "none",
           secure: true,
         });

@@ -710,7 +710,7 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
   const saveRoles = async () => {
     try {
       await axios.put(`/updateRoles/${userId}`, { roles: selectedRoles });
-      toast.success("Roles updated successfully.");
+      toast.success("Roles successfully updated.");
       setInitialSelectedRoles(selectedRoles); // Update initial state
       onRequestClose(); // Close the modal
     } catch (error) {
@@ -1119,7 +1119,7 @@ function ChangeAvailability({
     try {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
-        toast.success("Availability updated successfully!");
+        toast.success("Availability successfully updated.");
         setUser({
           ...user,
           usualHours: weeklySchedule,
