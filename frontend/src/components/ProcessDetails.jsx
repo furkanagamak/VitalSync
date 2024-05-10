@@ -6,6 +6,7 @@ import { useAuth } from "../providers/authProvider.js";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { useSocketContext } from "../providers/SocketProvider";
+import { ClipLoader } from "react-spinners";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -49,7 +50,12 @@ const ProcessDetails = () => {
     };
   }, [socket]);
 
-  if (!process || !user) return <div>Loading ...</div>;
+  if (!process || !user)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
   return (
     <div className="w-11/12 mx-auto">
       <section className="flex justify-between text-primary text-3xl my-4">
