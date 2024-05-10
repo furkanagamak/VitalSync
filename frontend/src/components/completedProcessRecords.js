@@ -175,22 +175,17 @@ const ProcessTable = ({ searchText, processes, isLoading }) => {
   return (
     <>
       <div
-        className="min-w-[640px]"
+        className="w-full"
         style={{
           maxWidth: "95%",
           margin: "auto",
           overflowX: "auto",
-          display: "flex",
-          justifyContent: "center",
         }}
       >
         <table
+        className="w-full h-full text-center text-lg table-auto lg:table-fixed  border-separate"
           {...getTableProps()}
           style={{
-            width: "100%",
-            height: "100%",
-            tableLayout: "fixed",
-            borderCollapse: "separate",
             borderSpacing: "0 1px",
             fontSize: "1.32rem",
             textAlign: "center",
@@ -216,7 +211,6 @@ const ProcessTable = ({ searchText, processes, isLoading }) => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        wordBreak: "break-word",
                         whiteSpace: "normal",
                       }}
                     >

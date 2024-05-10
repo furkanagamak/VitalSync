@@ -16,7 +16,9 @@ const SearchBar = ({ inputValue, setInputValue }) => {
   const handleClearInput = () => setInputValue("");
 
   return (
-    <div className="inline-flex items-center rounded-full text-xl border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative">
+    <div className="inline-flex items-center rounded-full 
+    text-xl border-2 border-[#8E0000] bg-[#F5F5DC] 
+    p-2 min-width relative">
       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#8E0000]">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -262,25 +264,18 @@ const ProcedureTable = ({ filter, data, setData, isLoading }) => {
         onConfirm={() => deleteProcedureTemplate(currentTemplate.id)}
         templateName={currentTemplate?.name}
       />
-      <div
+      <div className=" w-full"
         style={{
           maxWidth: "95%",
           margin: "auto",
           overflowX: "auto",
-          display: "flex",
-          justifyContent: "center",
         }}
       >
         <table
           {...getTableProps()}
+          className="w-full h-full text-center text-lg table-auto lg:table-fixed  border-separate"
           style={{
-            width: "100%",
-            height: "100%",
-            tableLayout: "fixed",
-            borderCollapse: "separate",
-            borderSpacing: "0 1px",
-            fontSize: "1.25rem",
-            textAlign: "center",
+            borderSpacing: "0 1px"
           }}
         >
           <thead>
@@ -295,7 +290,6 @@ const ProcedureTable = ({ filter, data, setData, isLoading }) => {
                       color: "#8E0000",
                       borderBottom: "1px solid #8E0000",
                       padding: "10px",
-                      wordBreak: "break-word",
                       whiteSpace: "normal",
                       minWidth: column.minWidth,
                     }}
@@ -359,7 +353,6 @@ const ProcedureTable = ({ filter, data, setData, isLoading }) => {
                             borderBottom: "1px solid #8E0000",
                             padding: "10px",
                             verticalAlign: "middle",
-                            wordBreak: "break-word",
                             whiteSpace: "normal",
                           }}
                         >
@@ -476,7 +469,7 @@ const ProcedureTemplateManagement = () => {
   }
 
   return (
-    <div className="flex flex-col items-center space-y-4">
+    <div className="flex flex-col relative space-y-4">
       <div className="w-full flex flex-col xl:flex-row justify-center items-center">
         <h1 className="text-4xl text-[#8E0000] underline font-bold mt-5 text-center">
           Procedure Template Management
@@ -487,8 +480,10 @@ const ProcedureTemplateManagement = () => {
         <div className="block xl:hidden mt-4">
           <CreateTemplateButton />
         </div>
+      </div >
+      <div className="w-full flex justify-center">
+        <SearchBar inputValue={searchInput} setInputValue={setSearchInput} />
       </div>
-      <SearchBar inputValue={searchInput} setInputValue={setSearchInput} />
       <div>
         <ProcedureTable
           filter={searchInput}

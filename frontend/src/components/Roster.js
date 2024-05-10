@@ -199,11 +199,13 @@ function MyComponent() {
         className="w-full flex justify-end items-center"
       >
         <select
-          className="px-3 py-2 border rounded mr-2 w-full sm:w-64"
+          className="px-3 py-2 border rounded mr-2 w-full sm:w-64  focus:outline-none focus:border-primary 
+            inline-flex items-center rounded-full text-xl placeholder-primary border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative mb-2"
           value={filterValue}
           onChange={(e) => setFilterValue(e.target.value)}
         >
-          <option value="">Filter by Category</option>
+          
+            <option value="">Filter by Category</option>
           <optgroup label="Department">
             {departments.map((department) => (
               <option key={department} value={department}>
