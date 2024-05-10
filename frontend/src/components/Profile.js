@@ -430,16 +430,14 @@ function ProfileImage({ authUser, id, imgUrl, setImgUrl }) {
           loading="lazy"
         />
       </div>
-      {id &&
-        authUser &&
-        (authUser.id === id || authUser.accountType === "admin") && (
-          <div
-            className="justify-center self-center p-1 mt-3.5 rounded-lg border border-solid bg-primary text-white border-neutral-600 cursor-pointer"
-            onClick={() => setShowUploader(true)}
-          >
-            Change Profile Image
-          </div>
-        )}
+      {id && authUser && authUser.id === id && (
+        <div
+          className="justify-center self-center p-1 mt-3.5 rounded-lg border border-solid bg-primary text-white border-neutral-600 cursor-pointer"
+          onClick={() => setShowUploader(true)}
+        >
+          Change Profile Image
+        </div>
+      )}
       {showUploader && (
         <ImageUploader
           onClose={() => setShowUploader(false)}
