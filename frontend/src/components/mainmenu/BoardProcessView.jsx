@@ -12,6 +12,7 @@ import { useAuth } from "../../providers/authProvider.js";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { useSocketContext } from "../../providers/SocketProvider";
+import { ClipLoader } from "react-spinners";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -60,9 +61,19 @@ const BoardProcessView = () => {
     socket.on("procedure complete - refresh", () => {
       triggerRefresh();
     });
+
+    socket.emit("join process event room", id);
+    return () => {
+      socket.emit("leave process event room", id);
+    };
   }, [socket]);
 
-  if (!process) return <div>Loading ...</div>;
+  if (!process)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
   return (
     <div className="bg-secondary w-11/12 mx-auto my-8 rounded-3xl">
       <BoardProcessHeader
@@ -227,16 +238,14 @@ const Procedure = ({ procedure, currUser, currentProcedure }) => {
           <p>{procedure.peopleCompleted.length}</p>
         </div>
         {procedure.peopleCompleted.includes(currUser) && (
-          <div className="text-highlightGreen underline">
-            You have completed the task!
-          </div>
+          <div className="text-green-400">You have completed the task!</div>
         )}
         {!procedure.peopleCompleted.includes(currUser) &&
           procedure.peopleAssigned.includes(currUser) &&
           currentProcedure?._id === procedure?._id && (
             <button
               onClick={markProcedureAsComplete}
-              className="text-highlightGreen underline"
+              className="text-green-400 underline"
             >
               Mark as completed ✅
             </button>
@@ -248,7 +257,7 @@ const Procedure = ({ procedure, currUser, currentProcedure }) => {
 
 const BoardProcessChat = ({ id }) => {
   return (
-    <div className="p-8 w-3/4 mx-auto" id="boardProcessChat">
+    <div className="p-8 lg:w-3/4 mx-auto" id="boardProcessChat">
       <ProcessChat id={id} />
     </div>
   );

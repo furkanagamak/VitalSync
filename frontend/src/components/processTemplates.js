@@ -6,7 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import ConfirmationModal from "./templateConfirmationModal";
 import { useNavigate, useLocation } from "react-router-dom";
-
+import { ClipLoader } from "react-spinners";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -66,17 +66,24 @@ const SearchBar = ({ inputValue, setInputValue }) => {
   );
 };
 
-const CreateTemplateButton = ({fromLocation} ) => {
+const CreateTemplateButton = ({ fromLocation }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    if(fromLocation){
-      navigate("/CreateProcessTemplateForm", {state: {incomingUrl: "/processManagement/newProcess/processTemplates"} });
-    }else{
-    navigate("/CreateProcessTemplateForm");}
+    if (fromLocation) {
+      navigate("/CreateProcessTemplateForm", {
+        state: {
+          incomingUrl: "/processManagement/newProcess/processTemplates",
+        },
+      });
+    } else {
+      navigate("/CreateProcessTemplateForm");
+    }
   };
 
-  const buttonText = fromLocation ? "Create Instance from New Template" : "Create New Template";
+  const buttonText = fromLocation
+    ? "Create Instance from New Template"
+    : "Create New Template";
 
   return (
     <button
@@ -84,59 +91,32 @@ const CreateTemplateButton = ({fromLocation} ) => {
       onClick={handleClick}
     >
       <TbLayoutGridAdd className="mr-2 size-10" />
-      {buttonText}    </button>
+      {buttonText}{" "}
+    </button>
   );
 };
 
-const ProcessTable = ({ filter , fromLocation}) => {
+const ProcessTable = ({ filter, fromLocation, data, setData, isLoading }) => {
   console.log(fromLocation);
-  const [data, setData] = useState([]);
   const navigate = useNavigate();
 
-
-  const handleEditClick = useCallback((rowId) => {
-    console.log(fromLocation);
-    if (fromLocation) {
-      navigate(`/ModifyProcessTemplateForm/${rowId}`, { state: { incomingUrl: "/processManagement/newProcess/processTemplates" } });
-    } else {
+  const handleEditClick = useCallback(
+    (rowId) => {
       console.log(fromLocation);
+      if (fromLocation) {
+        navigate(`/ModifyProcessTemplateForm/${rowId}`, {
+          state: {
+            incomingUrl: "/processManagement/newProcess/processTemplates",
+          },
+        });
+      } else {
+        console.log(fromLocation);
 
-      navigate(`/ModifyProcessTemplateForm/${rowId}`);
-    }
-  }, [navigate, fromLocation]);
-
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("/processTemplates");
-        setData(
-          response.data.map((processTemplate) => ({
-            id: processTemplate._id,
-            name: processTemplate.processName,
-            description: processTemplate.description,
-            sections: processTemplate.sectionTemplates
-              .map((section) => section.sectionName)
-              .join(", "),
-            procedures: processTemplate.sectionTemplates
-              .reduce((acc, section) => {
-                section.procedureTemplates.forEach((procedure) => {
-                  if (!acc.includes(procedure.procedureName)) {
-                    acc.push(procedure.procedureName);
-                  }
-                });
-                return acc;
-              }, [])
-              .join(", "),
-          }))
-        );
-      } catch (error) {
-        console.error("Failed to fetch process templates:", error);
+        navigate(`/ModifyProcessTemplateForm/${rowId}`);
       }
-    };
-
-    fetchData();
-  }, []);
+    },
+    [navigate, fromLocation]
+  );
 
   const filteredData = useMemo(() => {
     if (!filter) return data;
@@ -173,7 +153,8 @@ const ProcessTable = ({ filter , fromLocation}) => {
         Header: "Actions",
         Cell: ({ row }) => {
           return (
-            <div className="flex justify-evenly flex-col md:flex-row"
+            <div
+              className="flex justify-evenly flex-col md:flex-row"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -181,9 +162,9 @@ const ProcessTable = ({ filter , fromLocation}) => {
               }}
             >
               <button
-              className="modify-process-template-button"
-              onClick={() => handleEditClick(row.original.id)}                
-              style={{
+                className="modify-process-template-button"
+                onClick={() => handleEditClick(row.original.id)}
+                style={{
                   background: "none",
                   border: "none",
                   padding: "0",
@@ -203,28 +184,29 @@ const ProcessTable = ({ filter , fromLocation}) => {
                   <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
                 </svg>
               </button>
-              {(!fromLocation) && (
-              <button
-                onClick={() => promptDelete(row.original)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  padding: "0",
-                  cursor: "pointer",
-                }}
-                title="Delete"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="40"
-                  height="40"
-                  fill="#8E0000"
-                  className="bi bi-trash3"
-                  viewBox="0 0 16 16"
+              {!fromLocation && (
+                <button
+                  onClick={() => promptDelete(row.original)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: "0",
+                    cursor: "pointer",
+                  }}
+                  title="Delete"
                 >
-                  <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5" />
-                </svg>
-              </button>)}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="40"
+                    height="40"
+                    fill="#8E0000"
+                    className="bi bi-trash3"
+                    viewBox="0 0 16 16"
+                  >
+                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5" />
+                  </svg>
+                </button>
+              )}
             </div>
           );
         },
@@ -276,7 +258,6 @@ const ProcessTable = ({ filter , fromLocation}) => {
     setCurrentTemplate(template);
     setIsModalOpen(true);
   };
-
   return (
     <>
       <ConfirmationModal
@@ -285,25 +266,20 @@ const ProcessTable = ({ filter , fromLocation}) => {
         onConfirm={() => deleteProcessTemplate(currentTemplate.id)}
         templateName={currentTemplate?.name}
       />
-      <div
+      <div  className=" w-full"
         style={{
           maxWidth: "95%",
           margin: "auto",
           overflowX: "auto",
-          display: "flex",
-          justifyContent: "center",
+
         }}
       >
-        <table
+        <table 
           {...getTableProps()}
+          className="w-full h-full text-center text-lg table-auto lg:table-fixed  border-separate"
           style={{
-            width: "100%",
-            height: "100%",
-            tableLayout: "fixed",
-            borderCollapse: "separate",
             borderSpacing: "0 1px",
-            fontSize: "1.32rem",
-            textAlign: "center",
+
           }}
         >
           <thead>
@@ -311,7 +287,7 @@ const ProcessTable = ({ filter , fromLocation}) => {
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
                   <th
-                  className={`text-base xl:text-xl border-b px-2 py-1 min-w-[${column.minWidth}px] text-red-800 border-red-800`}
+                    className={`text-base xl:text-xl border-b px-2 py-1 min-w-[${column.minWidth}px] text-red-800 border-red-800`}
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     style={{
                       ...column.style,
@@ -321,7 +297,7 @@ const ProcessTable = ({ filter , fromLocation}) => {
                       minWidth: column.minWidth,
                     }}
                   >
-                    <div 
+                    <div
                       className="flex text-center flex-col xl:flex-row"
                       style={{
                         display: "flex",
@@ -330,8 +306,7 @@ const ProcessTable = ({ filter , fromLocation}) => {
                       }}
                     >
                       {column.render("Header")}
-                      <span 
-                      style={{ marginLeft: "3px", textAlign: "center" }}>
+                      <span style={{ marginLeft: "3px", textAlign: "center" }}>
                         {column.isSorted ? (
                           column.isSortedDesc ? (
                             <svg
@@ -363,26 +338,29 @@ const ProcessTable = ({ filter , fromLocation}) => {
                     </div>
                   </th>
                 ))}
-              </tr> 
+              </tr>
             ))}
           </thead>
           <tbody {...getTableBodyProps()}>
             {page.length > 0 ? (
-              page.map(row => {
+              page.map((row) => {
                 prepareRow(row);
                 return (
                   <tr {...row.getRowProps()}>
-                    {row.cells.map(cell => (
-                      <td {...cell.getCellProps()} 
-                      className={`text-xxs md:text-xl border-b border-red-800 py-2 px-4 align-middle whitespace-normal ${cell.column.className || ''}`}
+                    {row.cells.map((cell) => (
+                      <td
+                        {...cell.getCellProps()}
+                        className={`text-xxs md:text-xl border-b border-red-800 py-2 px-4 align-middle whitespace-normal ${
+                          cell.column.className || ""
+                        }`}
                         style={{
-                        ...cell.column.style,
-                        borderBottom: "1px solid #8E0000",
-                        padding: "10px",
-                        verticalAlign: "middle",
-                        wordBreak: 'break-word', 
-                        whiteSpace: 'normal',
-                      }}>
+                          ...cell.column.style,
+                          borderBottom: "1px solid #8E0000",
+                          padding: "10px",
+                          verticalAlign: "middle",
+                          whiteSpace: "normal",
+                        }}
+                      >
                         {cell.render("Cell")}
                       </td>
                     ))}
@@ -391,7 +369,10 @@ const ProcessTable = ({ filter , fromLocation}) => {
               })
             ) : (
               <tr>
-                <td colSpan={columns.length} style={{ textAlign: 'center', padding: '20px' }}>
+                <td
+                  colSpan={columns.length}
+                  style={{ textAlign: "center", padding: "20px" }}
+                >
                   No results found
                 </td>
               </tr>
@@ -431,18 +412,66 @@ const ProcessTable = ({ filter , fromLocation}) => {
 };
 
 const ProcessTemplateManagement = () => {
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchInput, setSearchInput] = useState("");
   const navigate = useNavigate();
-  const location = useLocation(); 
+  const location = useLocation();
   const [incomingUrl, setIncomingUrl] = useState("");
 
   useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get("/processTemplates");
+        setData(
+          response.data.map((processTemplate) => ({
+            id: processTemplate._id,
+            name: processTemplate.processName,
+            description: processTemplate.description,
+            sections: processTemplate.sectionTemplates
+              .map((section) => section.sectionName)
+              .join(", "),
+            procedures: processTemplate.sectionTemplates
+              .reduce((acc, section) => {
+                section.procedureTemplates.forEach((procedure) => {
+                  if (!acc.includes(procedure.procedureName)) {
+                    acc.push(procedure.procedureName);
+                  }
+                });
+                return acc;
+              }, [])
+              .join(", "),
+          }))
+        );
+      } catch (error) {
+        console.error("Failed to fetch process templates:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
     console.log(location.pathname);
-    if (location.pathname.includes("/processManagement/newProcess/processTemplates")) {
+    if (
+      location.pathname.includes(
+        "/processManagement/newProcess/processTemplates"
+      )
+    ) {
       setIncomingUrl(location.pathname);
     }
   }, [location]);
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center space-y-4 relative">
@@ -465,12 +494,22 @@ const ProcessTemplateManagement = () => {
       <div className="block xl:hidden mt-4">
         <CreateTemplateButton fromLocation={incomingUrl} />
       </div>
-      <SearchBar inputValue={searchInput} setInputValue={setSearchInput} fromLocation={incomingUrl} />
+      <SearchBar
+        inputValue={searchInput}
+        setInputValue={setSearchInput}
+        fromLocation={incomingUrl}
+      />
       <div>
-        <ProcessTable filter={searchInput} fromLocation={incomingUrl} />
+        <ProcessTable
+          filter={searchInput}
+          fromLocation={incomingUrl}
+          data={data}
+          setData={setData}
+          isLoading={isLoading}
+        />
       </div>
     </div>
-  );  
+  );
 };
 
 export default ProcessTemplateManagement;

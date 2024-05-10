@@ -16,6 +16,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./Calendar.css";
 import { FormControlLabel, Checkbox } from "@mui/material";
+import { ClipLoader } from "react-spinners";
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { FaArrowLeft } from "react-icons/fa";
@@ -435,16 +436,14 @@ function ProfileImage({ authUser, id, imgUrl, setImgUrl }) {
           loading="lazy"
         />
       </div>
-      {id &&
-        authUser &&
-        (authUser.id === id || authUser.accountType === "admin") && (
-          <div
-            className="justify-center self-center p-1 mt-3.5 rounded-lg border border-solid bg-primary text-white border-neutral-600 cursor-pointer"
-            onClick={() => setShowUploader(true)}
-          >
-            Change Profile Image
-          </div>
-        )}
+      {id && authUser && authUser.id === id && (
+        <div
+          className="justify-center self-center p-1 mt-3.5 rounded-lg border border-solid bg-primary text-white border-neutral-600 cursor-pointer"
+          onClick={() => setShowUploader(true)}
+        >
+          Change Profile Image
+        </div>
+      )}
       {showUploader && (
         <ImageUploader
           onClose={() => setShowUploader(false)}
@@ -555,6 +554,10 @@ function ContactInfo({ user, authUser, id }) {
     setShowPasswordResetConfirmation(true);
   };
 
+  const isAdmin =
+    authUser.accountType === "system admin" ||
+    authUser.accountType === "hospital admin";
+
   console.log("profile is", user?.userId);
 
   return (
@@ -627,16 +630,14 @@ function ContactInfo({ user, authUser, id }) {
         </>
       )}
       <div className="flex gap-5 justify-between items-start mt-24 text-sm font-medium text-neutral-600 max-md:pr-5 max-md:mt-10">
-        {id &&
-          authUser &&
-          (authUser.id === id || authUser.accountType === "admin") && (
-            <button
-              onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
-              className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
-            >
-              {editMode ? "Save Changes" : "Edit Contact Info"}
-            </button>
-          )}
+        {id && authUser && (authUser.id === id || isAdmin) && (
+          <button
+            onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
+            className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
+          >
+            {editMode ? "Save Changes" : "Edit Contact Info"}
+          </button>
+        )}
         {id && authUser && authUser.id === id && (
           <button
             onClick={handleResetPasswordClick}
@@ -717,7 +718,7 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
   const saveRoles = async () => {
     try {
       await axios.put(`/updateRoles/${userId}`, { roles: selectedRoles });
-      toast.success("Roles updated successfully.");
+      toast.success("Roles successfully updated.");
       setInitialSelectedRoles(selectedRoles); // Update initial state
       onRequestClose(); // Close the modal
     } catch (error) {
@@ -774,6 +775,10 @@ function ProfileDetails({ user, authUser, id }) {
   const [specialty, setSpecialty] = useState(user ? user.position : "");
   const [department, setDepartment] = useState(user ? user.department : "");
   const [isRolesModalOpen, setIsRolesModalOpen] = useState(false);
+
+  const isAdmin =
+    authUser.accountType === "system admin" ||
+    authUser.accountType === "hospital admin";
 
   useEffect(() => {
     if (user) {
@@ -860,26 +865,22 @@ function ProfileDetails({ user, authUser, id }) {
           </>
         )}
       </div>
-      {id &&
-        authUser &&
-        (authUser.id === id || authUser.accountType === "admin") && (
-          <button
-            onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
-            className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
-          >
-            {editMode ? "Save Changes" : "Edit Profile"}
-          </button>
-        )}
-      {id &&
-        authUser &&
-        (authUser.id === id || authUser.accountType === "admin") && (
-          <button
-            className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
-            onClick={() => setIsRolesModalOpen(true)}
-          >
-            Edit Eligible Roles
-          </button>
-        )}
+      {id && authUser && (authUser.id === id || isAdmin) && (
+        <button
+          onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
+          className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
+        >
+          {editMode ? "Save Changes" : "Edit Profile"}
+        </button>
+      )}
+      {id && authUser && (authUser.id === id || isAdmin) && (
+        <button
+          className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
+          onClick={() => setIsRolesModalOpen(true)}
+        >
+          Edit Eligible Roles
+        </button>
+      )}
       <EditRolesModal
         isOpen={isRolesModalOpen}
         onRequestClose={() => setIsRolesModalOpen(false)}
@@ -1003,22 +1004,23 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
   };
 
   if (!user) {
-    return <p>Loading user data...</p>;
+    return;
   }
+
+  const isAdmin =
+    authUser.accountType === "system admin" ||
+    authUser.accountType === "hospital admin";
 
   return (
     <div>
-      {!preview &&
-        id &&
-        authUser &&
-        (authUser.id === id || authUser.accountType === "admin") && (
-          <button
-            onClick={onScheduleChange}
-            className="mt-2 mb-5 justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
-          >
-            Edit Schedule
-          </button>
-        )}
+      {!preview && id && authUser && (authUser.id === id || isAdmin) && (
+        <button
+          onClick={onScheduleChange}
+          className="mt-2 mb-5 justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
+        >
+          Edit Schedule
+        </button>
+      )}
       <Calendar
         minDate={today}
         maxDate={threeYearsLater}
@@ -1142,7 +1144,7 @@ const handleEndTimeChange = (newValue) => {
     try {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
-        toast.success("Availability updated successfully!");
+        toast.success("Availability successfully updated.");
         setUser({
           ...user,
           usualHours: weeklySchedule,
@@ -1342,41 +1344,51 @@ function MyComponent() {
   const { id } = useParams();
   const [user, setUser] = useState(null); // State to hold the user data
   const { user: authUser } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserData = async () => {
       try {
-        console.log(id);
         const response = await axios.get(`/user/${id}`);
-        setUser(response.data); // Set the user data in state
+        return response.data;
       } catch (error) {
         console.error("Failed to fetch user:", error);
       }
     };
 
-    fetchUser();
-  }, [id]);
-
-  useEffect(() => {
-    const fetchUserImg = async () => {
+    const fetchUserProfilePicture = async () => {
       try {
         const res = await fetch(
           `${process.env.REACT_APP_API_BASE_URL}/user/profilePicture/url/${id}`
         );
-
         const txt = await res.text();
-        if (res.ok) {
-          if (txt !== "") setImgUrl(txt);
-        } else {
-          console.log("server responded with error text ", txt);
+        if (res.ok && txt !== "") {
+          return txt;
         }
       } catch (e) {
         console.log("fetch profile image fail");
       }
     };
 
-    fetchUserImg();
-  }, [imgUrl, id]);
+    const fetchAllData = async () => {
+      setIsLoading(true);
+      try {
+        const [userData, profileImgUrl] = await Promise.all([
+          fetchUserData(),
+          fetchUserProfilePicture(),
+        ]);
+
+        if (userData) setUser(userData);
+        if (profileImgUrl) setImgUrl(profileImgUrl);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAllData();
+  }, [id, imgUrl]);
 
   // Handles the transition to the account termination confirmation modal
   const handleTerminateAccount = () => setShowTerminationModal(true);
@@ -1422,20 +1434,29 @@ function MyComponent() {
     );
   }
 
+  if (isLoading || !authUser) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
+  }
+
+  const isAdmin =
+    authUser.accountType === "system admin" ||
+    authUser.accountType === "hospital admin";
+
   // Default view rendering (profile view)
   return (
     <div className="flex flex-col items-center pt-10 pr-5 pb-8 pl-14 bg-white max-md:pl-5">
-      {id &&
-        authUser &&
-        authUser.id !== id &&
-        authUser.accountType === "admin" && (
-          <button
-            onClick={handleTerminateAccount}
-            className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-primary rounded-lg border border-solid border-neutral-600"
-          >
-            Terminate Account
-          </button>
-        )}
+      {id && authUser && authUser.id !== id && isAdmin && (
+        <button
+          onClick={handleTerminateAccount}
+          className="justify-center self-end px-3 py-1 text-sm font-medium text-white bg-primary rounded-lg border border-solid border-neutral-600"
+        >
+          Terminate Account
+        </button>
+      )}
       <div className="self-stretch mt-2 max-md:max-w-full">
         <div className="flex gap-5 flex-col xl:flex-row max-md:gap-0">
           <div className="flex flex-col w-[24%] max-md:ml-0 max-md:w-full">

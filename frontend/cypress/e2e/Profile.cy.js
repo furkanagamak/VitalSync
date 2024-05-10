@@ -229,7 +229,7 @@ describe('Edit Eligible Roles interaction', () => {
     // Click "Save Changes" button
     cy.contains('Save Changes').click(); 
 
-    cy.contains('Roles updated successfully.').should('be.visible');
+    cy.contains('Roles successfully updated.').should('be.visible');
 
     // Re-open the Edit roles modal to verify
     cy.contains('Edit Eligible Roles').click();

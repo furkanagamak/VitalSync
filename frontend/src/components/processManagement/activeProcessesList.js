@@ -6,6 +6,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
+import { ClipLoader } from "react-spinners";
 
 const theme = createTheme({
   palette: {
@@ -20,8 +21,8 @@ const theme = createTheme({
 
 function SearchBar({ onChange }) {
   return (
-    <div className="flex justify-center items-center p-5 mb-5 mt-5">
-      <div className="relative w-2/5">
+    <div className="flex justify-center items-center px-5 pt-5 mb-5 mt-5">
+      <div className="relative lg:w-2/5">
         <input
           type="search"
           placeholder="Search by Process ID or Patient Name"
@@ -46,8 +47,8 @@ function ProcessCell({ process, onModifyClick, onViewClick, pid }) {
   const navigate = useNavigate();
 
   return (
-    <div className="flex overflow-hidden bg-primary rounded-2xl p-7 mb-5 text-white text-2xl m-5">
-      <div className="flex-[1.5] border-r border-white min-w-0 pr-4">
+    <div className="flex overflow-hidden bg-primary rounded-2xl p-7 mb-5 text-white text-sm lg:text-2xl m-5 flex-col lg:flex-row">
+      <div className="flex-[1.5] lg:border-r border-white min-w-0 pr-4">
         <div className="space-y-1">
           <p className="truncate">
             <span className="underline">Patient:</span>{" "}
@@ -61,7 +62,7 @@ function ProcessCell({ process, onModifyClick, onViewClick, pid }) {
           </p>
         </div>
       </div>
-      <div className="flex-[2] border-r border-white min-w-0 px-4">
+      <div className="flex-[2] lg:border-r border-white py-1 pb-2 min-w-0 lg:py-0 lg:px-4">
         <div className="space-y-1">
           <p className="truncate">
             <span className="underline">Current Procedure:</span>{" "}
@@ -73,24 +74,24 @@ function ProcessCell({ process, onModifyClick, onViewClick, pid }) {
           </p>
         </div>
       </div>
-      <div className="flex-[1] pl-4 flex justify-end items-start min-w-0">
-        <div className="flex flex-col space-y-2">
-          <button
-            className="bg-green-500 hover:bg-green-600 rounded-full px-10 py-1 text-center"
-            onClick={handleViewClickID}
-            id={`activeProcessViewBtn-${process.processID}`}
-          >
-            View
-          </button>
-          <button
-            className="bg-red-500 hover:bg-red-600 rounded-full px-4 py-1 text-center"
-            onClick={handleModifyClickID}
-            id={`activeProcessModifyBtn-${process.processID}`}
-          >
-            Modify
-          </button>
+        <div className="flex-[1] lg:pl-4 flex justify-center items-center min-w-0">
+          <div className="flex flex-col space-y-2 w-full lg:w-3/4">
+            <button
+              className="bg-green-500 hover:bg-green-600 rounded-full w-full lg:px-4 py-1 text-center mb-2 text-sm lg:text-2xl"
+              onClick={handleViewClickID}
+              id={`activeProcessViewBtn-${process.processID}`}
+            >
+              View
+            </button>
+            <button
+              className="bg-red-500 hover:bg-red-600 rounded-full w-full lg:px-4 py-1 text-center text-sm lg:text-2xl"
+              onClick={handleModifyClickID}
+              id={`activeProcessModifyBtn-${process.processID}`}
+            >
+              Modify
+            </button>
+          </div>
         </div>
-      </div>
     </div>
   );
 }
@@ -100,11 +101,13 @@ export function ActiveProcessesList() {
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [filteredProcesses, setFilteredProcesses] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProcesses = async () => {
+      setIsLoading(true);
       try {
         const response = await axios.get("/processInstancesActive");
         setProcesses(response.data);
@@ -112,6 +115,8 @@ export function ActiveProcessesList() {
         console.log(response.data);
       } catch (error) {
         console.error("Failed to fetch process instances", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -148,10 +153,18 @@ export function ActiveProcessesList() {
     indexOfLastItem
   );
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <SearchBar onChange={setSearchInput} />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-10 py-5">
+      <div className="grid grid-cols-1 gap-4 px-1 lg:px-5 py-4">
         {currentItems.length > 0 ? (
           currentItems.map((process, index) => (
             <ProcessCell

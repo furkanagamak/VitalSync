@@ -4,7 +4,7 @@ const AdminActions = () => {
   return (
     <div>
       <section className="text-center mt-8 mb-16">
-        <h1 className="text-3xl underline underline-offset-8">
+        <h1 className="underline underline-offset-20 text-4xl text-primary text-center font-bold">
           Admin Management
         </h1>
       </section>
@@ -14,6 +14,7 @@ const AdminActions = () => {
             id="processTemplates"
             to="/ProcessTemplateManagement"
             className="flex flex-col justify-center items-center"
+            title="Go to Process Template Management"
           >
             <img src="/svg/processTemplates.svg" alt="logo" />
             <h1>Process</h1>
@@ -23,6 +24,7 @@ const AdminActions = () => {
             id="procedureTemplates"
             to="/ProcedureTemplateManagement"
             className="flex flex-col justify-center items-center"
+            title="Go to Procedure Template Management"
           >
             <img src="/svg/procedureTemplates.svg" alt="logo" />
             <h1>Procedure</h1>
@@ -32,6 +34,7 @@ const AdminActions = () => {
             id="processRecords"
             to="/recordLookup"
             className="flex flex-col justify-center items-center"
+            title="Go to Process Records Lookup"
           >
             <img src="/svg/processRecords.svg" alt="logo" />
             <h1>Process</h1>
@@ -43,6 +46,7 @@ const AdminActions = () => {
             id="processManagement"
             to="/processManagement/modifyProcess/activeProcesses"
             className="flex flex-col justify-center items-center"
+            title="Go to Process Management"
           >
             <img src="/svg/processManagement.svg" alt="logo" />
             <h1>Process</h1>
@@ -52,6 +56,7 @@ const AdminActions = () => {
             id="resourceManagement"
             to="/resources"
             className="flex flex-col justify-center items-center"
+            title="Go to Resource Management"
           >
             <img src="/svg/resourceManagement.svg" alt="logo" />
             <h1>Resource</h1>
@@ -61,6 +66,7 @@ const AdminActions = () => {
             id="createAccount"
             to="/createAccount"
             className="flex flex-col justify-center items-center"
+            title="Go to Create Account"
           >
             <img src="/svg/createAccount.svg" alt="logo" />
             <h1>Create</h1>

@@ -5,6 +5,7 @@ import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ClipLoader } from "react-spinners";
 
 const notify = () => toast.success("Process Template Deleted!");
 
@@ -61,30 +62,7 @@ const SearchBar = ({ inputValue, setInputValue }) => {
   );
 };
 
-const ProcessTable = ({ searchText }) => {
-  const [processes, setProcesses] = useState([]);
-
-  useEffect(() => {
-    const fetchProcesses = async () => {
-      try {
-        const response = await axios.get("/processInstances");
-        setProcesses(
-          response.data.map((process) => ({
-            id: process.processID,
-            patient: process.patientFullName,
-            description: process.description,
-            name: process.processName,
-            procedures: process.procedures.join(", "),
-          }))
-        );
-      } catch (error) {
-        console.error("Failed to fetch processes:", error);
-      }
-    };
-
-    fetchProcesses();
-  }, []);
-
+const ProcessTable = ({ searchText, processes, isLoading }) => {
   const filteredProcesses = useMemo(() => {
     return processes.filter(
       (process) =>
@@ -196,22 +174,18 @@ const ProcessTable = ({ searchText }) => {
 
   return (
     <>
-      <div className="min-w-[640px]"
+      <div
+        className="w-full"
         style={{
           maxWidth: "95%",
           margin: "auto",
           overflowX: "auto",
-          display: "flex",
-          justifyContent: "center",
         }}
-      > 
+      >
         <table
+        className="w-full h-full text-center text-lg table-auto lg:table-fixed  border-separate"
           {...getTableProps()}
           style={{
-            width: "100%",
-            height: "100%",
-            tableLayout: "fixed",
-            borderCollapse: "separate",
             borderSpacing: "0 1px",
             fontSize: "1.32rem",
             textAlign: "center",
@@ -221,7 +195,8 @@ const ProcessTable = ({ searchText }) => {
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
-                  <th className={`text-sm xl:text-xl border-b px-2 py-1 min-w-[${column.minWidth}px] text-red-800 border-red-800`}
+                  <th
+                    className={`text-sm xl:text-xl border-b px-2 py-1 min-w-[${column.minWidth}px] text-red-800 border-red-800`}
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     style={{
                       ...column.style,
@@ -236,8 +211,7 @@ const ProcessTable = ({ searchText }) => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        wordBreak: 'break-word',  
-                        whiteSpace: 'normal',
+                        whiteSpace: "normal",
                       }}
                     >
                       {column.render("Header")}
@@ -286,7 +260,9 @@ const ProcessTable = ({ searchText }) => {
                       return (
                         <td
                           {...cell.getCellProps()}
-                          className={`text-xxs md:text-xl border-b border-red-800 py-2 px-4 align-middle whitespace-normal ${cell.column.className || ''}`}
+                          className={`text-xxs md:text-xl border-b border-red-800 py-2 px-4 align-middle whitespace-normal ${
+                            cell.column.className || ""
+                          }`}
                           style={{
                             ...cell.column.style,
                             borderBottom: "1px solid #8E0000",
@@ -347,17 +323,55 @@ const ProcessTable = ({ searchText }) => {
 
 const ProcessTemplateManagement = () => {
   const [searchInput, setSearchInput] = useState("");
+  const [processes, setProcesses] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProcesses = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get("/processInstances");
+        setProcesses(
+          response.data.map((process) => ({
+            id: process.processID,
+            patient: process.patientFullName,
+            description: process.description,
+            name: process.processName,
+            procedures: process.procedures.join(", "),
+          }))
+        );
+      } catch (error) {
+        console.error("Failed to fetch processes:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProcesses();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col  space-y-4 relative">
       <h1 className="text-4xl items-center text-[#8E0000] text-center underline font-bold mt-5">
         Completed Process Records
       </h1>
-        <div className="w-full flex justify-center">
-          <SearchBar  inputValue={searchInput} setInputValue={setSearchInput} />
-        </div>
+      <div className="w-full flex justify-center">
+        <SearchBar inputValue={searchInput} setInputValue={setSearchInput} />
+      </div>
       <div>
-        <ProcessTable searchText={searchInput} />
+        <ProcessTable
+          searchText={searchInput}
+          processes={processes}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );

@@ -11,7 +11,7 @@ const Navbar = () => {
   const { user, fetchImg } = useAuth();
   const socket = useSocketContext();
 
-  if (!user) return "error loading user!";
+  if (!user) return <></>;
   return (
     <nav className="h-20 bg-primary flex text-white">
       <Header />
@@ -41,6 +41,7 @@ const Header = () => {
     <div
       id="navHeader"
       className="w-32 flex justify-evenly items-center font-semibold text-2xl mx-2 cursor-pointer"
+      title="Go to Your Process Dashboard"
       onClick={handleNavigate}
     >
       <img src="/logo.png" className="w-12 h-12" alt="logo" />
@@ -59,13 +60,21 @@ const Tabs = ({ userType }) => {
   return (
     <div className="border-x-2 border-white text-2xl hidden md:flex text-center">
       <section className="border-r-2 px-8 flex pb-2 rosterNav">
-        <button className="my-auto" onClick={navigateToRoster}>
+        <button
+          title="Go to the Roster Page"
+          className="my-auto"
+          onClick={navigateToRoster}
+        >
           Roster
         </button>
       </section>
-      {userType === "admin" && (
+      {(userType === "system admin" || userType === "hospital admin") && (
         <section className="px-8 flex pb-2">
-          <button onClick={navigateToAdminActions} className="my-auto">
+          <button
+            title="Go to Admin Actions"
+            onClick={navigateToAdminActions}
+            className="my-auto"
+          >
             Admin Actions
           </button>
         </section>
@@ -105,7 +114,7 @@ const UserNav = ({ id, firstName, lastName, profileUrl, fetchImg }) => {
 
   return (
     <div
-      title="Click on this button to view your profile."
+      title="View Your Profile"
       className="ml-auto space-x-4 flex items-center mx-2 cursor-pointer"
       onClick={handleNavigate}
       id="userNav"
@@ -127,7 +136,7 @@ const Notifications = () => {
   return (
     <>
       <button
-        title="Click on this button to view notifications."
+        title="View Your Notifications"
         id="notificationsBtn"
         className="flex items-center ml-2 mr-4"
         onClick={flickDropDown}
@@ -158,7 +167,7 @@ const LogoutButton = () => {
 
   return (
     <button
-      title="Click on this button to logout."
+      title="Sign out of VitalSync"
       id="logoutbtn"
       onClick={handleLogout}
       className="flex items-center ml-0 mr-4"
@@ -176,8 +185,14 @@ const Menu = ({ userType }) => {
   };
 
   const navigate = useNavigate();
-  const navigateToRoster = () => navigate("/Roster");
-  const navigateToAdminActions = () => navigate("/adminActions");
+  const navigateToRoster = () => {
+    setIsOpen(false);
+    navigate("/Roster");
+  };
+  const navigateToAdminActions = () => {
+    setIsOpen(false);
+    navigate("/adminActions");
+  };
 
   return (
     <>
@@ -186,10 +201,13 @@ const Menu = ({ userType }) => {
       </button>
       {isOpen && (
         <div className="md:hidden absolute right-0 top-20 bg-primary text-2xl text-center z-10 flex flex-col ">
-          <button onClick={navigateToRoster} className="border-b-2 p-2 rosterNav">
+          <button
+            onClick={navigateToRoster}
+            className="border-b-2 p-2 rosterNav"
+          >
             Roster
           </button>
-          {userType === "admin" && (
+          {(userType === "system admin" || userType === "hospital admin") && (
             <button onClick={navigateToAdminActions} className="border-b-2 p-2">
               Admin Actions
             </button>

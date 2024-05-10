@@ -14,6 +14,7 @@ import { useProcessModificationContext } from '../../providers/ProcessModificati
 import CreateStaffAssignments from './modifyProcessAssignStaff';
 import ReviewStaffAssignments from './modifyProcessReviewStaff'
 import ReviewResourceAssignments from './modifyProcessReviewResources'
+import { ClipLoader } from "react-spinners";
 
 
 
@@ -313,7 +314,11 @@ toast.success("Process successfully modified!");
 
 
   if (!processInstance) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
   }
 
   else if (procedureResourceAssignmentsView) {

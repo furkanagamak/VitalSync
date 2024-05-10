@@ -6,6 +6,7 @@ import { useAuth } from "../providers/authProvider.js";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { useSocketContext } from "../providers/SocketProvider";
+import { ClipLoader } from "react-spinners";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -38,12 +39,23 @@ const ProcessDetails = () => {
   // socket events
   useEffect(() => {
     if (!socket) return;
+    socket.emit("join process event room", id);
+
     socket.on("procedure complete - refresh", () => {
       triggerRefresh();
     });
+
+    return () => {
+      socket.emit("leave process event room", id);
+    };
   }, [socket]);
 
-  if (!process || !user) return <div>Loading ...</div>;
+  if (!process || !user)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
   return (
     <div className="w-11/12 mx-auto">
       <section className="flex justify-between text-primary text-3xl my-4">
@@ -188,14 +200,14 @@ const Procedure = ({ procedure, currentProcedure }) => {
           <p>{procedure.specialNotes}</p>
         </div>
         {userInPeopleCompleted && (
-          <p className="text-highlightGreen">You have completed this task!</p>
+          <p className="text-green-400">You have completed this task!</p>
         )}
         {!userInPeopleCompleted &&
           userInPeopleAssigned &&
           currentProcedure?._id === procedure?._id && (
             <button
               onClick={markProcedureAsComplete}
-              className="text-highlightGreen"
+              className="text-green-400"
             >
               Mark as Completed ✅
             </button>

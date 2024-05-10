@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ClipLoader } from "react-spinners";
 
 // Table component
 function Table({ rows, onRowClick }) {
@@ -65,6 +66,7 @@ function Table({ rows, onRowClick }) {
                 key={index}
                 onClick={() => onRowClick(row)}
                 style={{ cursor: "pointer" }}
+                title={`Click to view ${row[0]}'s profile`}
               >
                 <td
                   className="px-4 py-2"
@@ -123,9 +125,11 @@ function MyComponent() {
   const [users, setUsers] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [positions, setPositions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const usersResponse = await axios.get("/users");
         const positionsResponse = await axios.get("/positions");
@@ -144,6 +148,8 @@ function MyComponent() {
         setDepartments(departmentsResponse.data);
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -175,6 +181,14 @@ function MyComponent() {
     navigate(`/Profile/${userId}`); // Navigate to the profile route
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col justify-center items-center h-screen">
       <h1 className="text-4xl text-[#8E0000] text-center underline font-bold">
@@ -185,11 +199,13 @@ function MyComponent() {
         className="w-full flex justify-end items-center"
       >
         <select
-          className="px-3 py-2 border rounded mr-2 w-full sm:w-64"
+          className="px-3 py-2 border rounded mr-2 w-full sm:w-64  focus:outline-none focus:border-primary 
+            inline-flex items-center rounded-full text-xl placeholder-primary border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative mb-2"
           value={filterValue}
           onChange={(e) => setFilterValue(e.target.value)}
         >
-          <option value="">Select Category</option>
+          
+            <option value="">Filter by Category</option>
           <optgroup label="Department">
             {departments.map((department) => (
               <option key={department} value={department}>
@@ -208,7 +224,7 @@ function MyComponent() {
         <input
           type="text"
           placeholder="Search..."
-          className="px-3 py-2 border rounded"
+          className=" focus:outline-none focus:border-primary inline-flex items-center rounded-full text-xl placeholder-primary border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative mb-2"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />

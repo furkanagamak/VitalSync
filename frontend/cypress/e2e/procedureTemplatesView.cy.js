@@ -19,7 +19,7 @@ describe("View Procedure Templates Tests", () => {
     cy.contains("Estimated Time").should("be.visible");
     cy.contains("Special Notes").should("be.visible");
     cy.contains("Actions").should("be.visible");
-    cy.contains("Create Template").should("exist");
+    cy.contains("Create New Template").should("exist");
   });
 
   it("can input and clear search term", () => {
@@ -32,7 +32,7 @@ describe("View Procedure Templates Tests", () => {
   });
 
   it("should navigate to create procedure template form", () => {
-    cy.get("button").contains("Create Template").click({force: true});
+    cy.get("button").contains("Create New Template").click({force: true});
     cy.url().should("include", "/CreateProcedureTemplateForm");
     cy.contains("Create New Procedure Template").should("be.visible");
     cy.get("button").contains("Save Template").should("be.visible");

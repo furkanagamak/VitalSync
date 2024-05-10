@@ -11,6 +11,7 @@ import { useAuth } from "../../providers/authProvider";
 import { useSocketContext } from "../../providers/SocketProvider";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { ClipLoader } from "react-spinners";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -57,7 +58,12 @@ const NotificationBox = () => {
     };
   }, [user?.id, socket]);
 
-  if (isLoading) return <div>Loading ...</div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
   return (
     <div className="flex flex-col px-4 space-y-4 mt-4 w-full m-auto">
       <h1 className="text-primary text-3xl font-semibold">My Notifications</h1>

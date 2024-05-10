@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useSocketContext } from "../../providers/SocketProvider";
 import { useAuth } from "../../providers/authProvider";
+import { ClipLoader } from "react-spinners";
 
 const AssignedProcesses = () => {
   const { user } = useAuth();
@@ -29,7 +30,7 @@ const AssignedProcesses = () => {
       );
       if (!res.ok) {
         console.log("assigned processes fetch failed");
-        toast.error(await res.text());
+        console.log(await res.text());
       } else {
         const data = await res.json();
         console.log("Received process");
@@ -90,7 +91,12 @@ const AssignedProcesses = () => {
     setTablePage((prevPage) => Math.max(prevPage - 1, 0));
   };
 
-  if (!displayingProcesses || !user) return <div>Loading ...</div>;
+  if (!displayingProcesses || !user)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
   return (
     <div className="w-11/12 mx-auto">
       <div className="bg-secondary mt-4 p-8 rounded-xl">
@@ -154,12 +160,7 @@ const Process = ({ process, socket }) => {
   if (myProcedure) {
     displayMyProcedure = (
       <>
-        <Link
-          to={`/boardProcess/${process.processID}`}
-          className="text-2xl hover:underline"
-        >
-          {myProcedure.procedureName}
-        </Link>
+        <h1 className="text-2xl">{myProcedure.procedureName} </h1>
         <h1 className="text-lg">
           {calculateTimeUntilDate(myProcedureStartDate)}
         </h1>
@@ -183,7 +184,11 @@ const Process = ({ process, socket }) => {
   }
 
   return (
-    <div className="bg-primary text-white p-4 rounded-3xl flex flex-col md:grid grid-cols-10 space-x-4 drop-shadow-lg">
+    <Link
+      to={`/boardProcess/${process.processID}`}
+      title={`View Your Assigned Process "${process.processName}"`}
+      className="bg-primary text-white p-4 rounded-3xl flex flex-col md:grid grid-cols-10 space-x-4 drop-shadow-lg"
+    >
       <section className="col-start-1 col-end-3 text-center md:space-y-4 border-b-2 md:border-r-2 md:border-b-0 border-white">
         {displayMyProcedure}
       </section>
@@ -211,8 +216,8 @@ const Process = ({ process, socket }) => {
             )}
           </h1>
         )}
-      </section>
-    </div>
+      </section>{" "}
+    </Link>
   );
 };
 
