@@ -1296,6 +1296,7 @@ function MyComponent() {
 
   useEffect(() => {
     const fetchUser = async () => {
+      setIsLoading(true);
       try {
         console.log(id);
         const response = await axios.get(`/user/${id}`);
@@ -1312,6 +1313,7 @@ function MyComponent() {
 
   useEffect(() => {
     const fetchUserImg = async () => {
+      setIsLoading(true);
       try {
         const res = await fetch(
           `${process.env.REACT_APP_API_BASE_URL}/user/profilePicture/url/${id}`
@@ -1325,6 +1327,8 @@ function MyComponent() {
         }
       } catch (e) {
         console.log("fetch profile image fail");
+      } finally {
+        setIsLoading(false);
       }
     };
 
