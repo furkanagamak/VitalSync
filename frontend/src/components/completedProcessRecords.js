@@ -62,34 +62,7 @@ const SearchBar = ({ inputValue, setInputValue }) => {
   );
 };
 
-const ProcessTable = ({ searchText }) => {
-  const [processes, setProcesses] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProcesses = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get("/processInstances");
-        setProcesses(
-          response.data.map((process) => ({
-            id: process.processID,
-            patient: process.patientFullName,
-            description: process.description,
-            name: process.processName,
-            procedures: process.procedures.join(", "),
-          }))
-        );
-      } catch (error) {
-        console.error("Failed to fetch processes:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProcesses();
-  }, []);
-
+const ProcessTable = ({ searchText, processes, isLoading }) => {
   const filteredProcesses = useMemo(() => {
     return processes.filter(
       (process) =>
@@ -198,14 +171,6 @@ const ProcessTable = ({ searchText }) => {
     useSortBy,
     usePagination
   );
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <ClipLoader size={150} color={"#8E0000"} />
-      </div>
-    );
-  }
 
   return (
     <>
@@ -364,6 +329,40 @@ const ProcessTable = ({ searchText }) => {
 
 const ProcessTemplateManagement = () => {
   const [searchInput, setSearchInput] = useState("");
+  const [processes, setProcesses] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProcesses = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get("/processInstances");
+        setProcesses(
+          response.data.map((process) => ({
+            id: process.processID,
+            patient: process.patientFullName,
+            description: process.description,
+            name: process.processName,
+            procedures: process.procedures.join(", "),
+          }))
+        );
+      } catch (error) {
+        console.error("Failed to fetch processes:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProcesses();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col  space-y-4 relative">
@@ -374,7 +373,11 @@ const ProcessTemplateManagement = () => {
         <SearchBar inputValue={searchInput} setInputValue={setSearchInput} />
       </div>
       <div>
-        <ProcessTable searchText={searchInput} />
+        <ProcessTable
+          searchText={searchInput}
+          processes={processes}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );

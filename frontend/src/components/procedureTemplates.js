@@ -97,54 +97,7 @@ const CreateTemplateButton = () => {
   );
 };
 
-const ProcedureTable = ({ filter }) => {
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  function capitalizeWords(string) {
-    return string
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(" ");
-  }
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get("/procedureTemplates");
-        setData(
-          response.data.map((template) => ({
-            id: template._id,
-            name: template.procedureName,
-            description: template.description || "",
-            resources: template.requiredResources
-              .map((resource) => {
-                const name = resource.resource?.name;
-                return name ? capitalizeWords(name) : null;
-              })
-              .filter((name) => name)
-              .join(", "),
-            roles: template.roles
-              .map((role) => {
-                const name = role.role?.name;
-                return name ? capitalizeWords(name) : null;
-              })
-              .filter((name) => name)
-              .join(", "),
-            time: template.estimatedTime + " minutes",
-            notes: template.specialNotes || "",
-          }))
-        );
-      } catch (error) {
-        console.error("Failed to fetch procedure templates:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
+const ProcedureTable = ({ filter, data, setData, isLoading }) => {
   const filteredData = useMemo(() => {
     if (!filter) return data;
     return data.filter(
@@ -300,14 +253,6 @@ const ProcedureTable = ({ filter }) => {
     setCurrentTemplate(template);
     setIsModalOpen(true);
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <ClipLoader size={150} color={"#8E0000"} />
-      </div>
-    );
-  }
 
   return (
     <>
@@ -474,7 +419,62 @@ const ProcedureTable = ({ filter }) => {
 };
 
 const ProcedureTemplateManagement = () => {
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchInput, setSearchInput] = useState("");
+
+  function capitalizeWords(string) {
+    return string
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get("/procedureTemplates");
+        setData(
+          response.data.map((template) => ({
+            id: template._id,
+            name: template.procedureName,
+            description: template.description || "",
+            resources: template.requiredResources
+              .map((resource) => {
+                const name = resource.resource?.name;
+                return name ? capitalizeWords(name) : null;
+              })
+              .filter((name) => name)
+              .join(", "),
+            roles: template.roles
+              .map((role) => {
+                const name = role.role?.name;
+                return name ? capitalizeWords(name) : null;
+              })
+              .filter((name) => name)
+              .join(", "),
+            time: template.estimatedTime + " minutes",
+            notes: template.specialNotes || "",
+          }))
+        );
+      } catch (error) {
+        console.error("Failed to fetch procedure templates:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center space-y-4">
       <div className="w-full flex flex-col xl:flex-row justify-center items-center">
@@ -490,7 +490,12 @@ const ProcedureTemplateManagement = () => {
       </div>
       <SearchBar inputValue={searchInput} setInputValue={setSearchInput} />
       <div>
-        <ProcedureTable filter={searchInput} />
+        <ProcedureTable
+          filter={searchInput}
+          data={data}
+          setData={setData}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );

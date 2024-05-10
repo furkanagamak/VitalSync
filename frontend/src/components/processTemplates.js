@@ -96,11 +96,9 @@ const CreateTemplateButton = ({ fromLocation }) => {
   );
 };
 
-const ProcessTable = ({ filter, fromLocation }) => {
+const ProcessTable = ({ filter, fromLocation, data, setData, isLoading }) => {
   console.log(fromLocation);
-  const [data, setData] = useState([]);
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
 
   const handleEditClick = useCallback(
     (rowId) => {
@@ -119,41 +117,6 @@ const ProcessTable = ({ filter, fromLocation }) => {
     },
     [navigate, fromLocation]
   );
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get("/processTemplates");
-        setData(
-          response.data.map((processTemplate) => ({
-            id: processTemplate._id,
-            name: processTemplate.processName,
-            description: processTemplate.description,
-            sections: processTemplate.sectionTemplates
-              .map((section) => section.sectionName)
-              .join(", "),
-            procedures: processTemplate.sectionTemplates
-              .reduce((acc, section) => {
-                section.procedureTemplates.forEach((procedure) => {
-                  if (!acc.includes(procedure.procedureName)) {
-                    acc.push(procedure.procedureName);
-                  }
-                });
-                return acc;
-              }, [])
-              .join(", "),
-          }))
-        );
-      } catch (error) {
-        console.error("Failed to fetch process templates:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const filteredData = useMemo(() => {
     if (!filter) return data;
@@ -295,15 +258,6 @@ const ProcessTable = ({ filter, fromLocation }) => {
     setCurrentTemplate(template);
     setIsModalOpen(true);
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <ClipLoader size={150} color={"#8E0000"} />
-      </div>
-    );
-  }
-
   return (
     <>
       <ConfirmationModal
@@ -464,10 +418,47 @@ const ProcessTable = ({ filter, fromLocation }) => {
 };
 
 const ProcessTemplateManagement = () => {
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchInput, setSearchInput] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const [incomingUrl, setIncomingUrl] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get("/processTemplates");
+        setData(
+          response.data.map((processTemplate) => ({
+            id: processTemplate._id,
+            name: processTemplate.processName,
+            description: processTemplate.description,
+            sections: processTemplate.sectionTemplates
+              .map((section) => section.sectionName)
+              .join(", "),
+            procedures: processTemplate.sectionTemplates
+              .reduce((acc, section) => {
+                section.procedureTemplates.forEach((procedure) => {
+                  if (!acc.includes(procedure.procedureName)) {
+                    acc.push(procedure.procedureName);
+                  }
+                });
+                return acc;
+              }, [])
+              .join(", "),
+          }))
+        );
+      } catch (error) {
+        console.error("Failed to fetch process templates:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     console.log(location.pathname);
@@ -479,6 +470,14 @@ const ProcessTemplateManagement = () => {
       setIncomingUrl(location.pathname);
     }
   }, [location]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center space-y-4 relative">
@@ -507,7 +506,13 @@ const ProcessTemplateManagement = () => {
         fromLocation={incomingUrl}
       />
       <div>
-        <ProcessTable filter={searchInput} fromLocation={incomingUrl} />
+        <ProcessTable
+          filter={searchInput}
+          fromLocation={incomingUrl}
+          data={data}
+          setData={setData}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );
