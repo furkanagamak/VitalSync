@@ -2025,7 +2025,9 @@ app.get("/chatMessages/:pid", messagesController.getChatMessagesByProcess);
 
 app.get("/processInstancesActive", async (req, res) => {
   try {
-    const processInstances = await ProcessInstance.find({})
+    const processInstances = await ProcessInstance.find({
+      currentProcedure: { $ne: null },
+    })
       .populate({
         path: "patient",
         select: "fullName",
