@@ -1123,21 +1123,24 @@ const handleEndTimeChange = (newValue) => {
 
 
   const handleSubmitTimeOff = async () => {
-    console.log(markedForDeletion);
-    console.log(status);
-    if ((!startTime || !endTime || !status) && (markedForDeletion.length === 0)) {
-      setErrors({ msg: "Please fill in all fields." });
+    if ((!startTime || !endTime || !status.trim()) && markedForDeletion.length === 0) {
+      setErrors({ msg: "Please fill in all fields or mark items for deletion." });
       return;
     }
   
-    const newUnavailableTime = {
+    if ((startTime && endTime && !status.trim()) || (status.trim() && (!startTime || !endTime))) {
+      setErrors({ msg: "Please complete all fields for new time off." });
+      return;
+    }
+  
+    const newUnavailableTime = (startTime && endTime && status.trim()) ? {
       start: startTime.toISOString(),
       end: endTime.toISOString(),
       reason: status,
-    };
+    } : null;
   
     const updateData = {
-      unavailableTimes: status ? [newUnavailableTime] : [],
+      unavailableTimes: newUnavailableTime ? [newUnavailableTime] : [],
       deletedTimes: markedForDeletion,
     };
   
@@ -1145,13 +1148,14 @@ const handleEndTimeChange = (newValue) => {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
         toast.success("Availability successfully updated.");
-        setUser({
-          ...user,
+        setUser(prevState => ({
+          ...prevState,
           usualHours: weeklySchedule,
-          unavailableTimes: user.unavailableTimes.filter(time => 
-            !markedForDeletion.includes(time._id)
-          ).concat(status ? [newUnavailableTime] : [])
-        });
+          unavailableTimes: [
+            ...prevState.unavailableTimes.filter(time => !markedForDeletion.includes(time._id)),
+            ...(newUnavailableTime ? [newUnavailableTime] : [])
+          ]
+        }));
         onRevertToProfile(); 
       } else {
         toast.error("Failed to update availability.");
