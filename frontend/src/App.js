@@ -85,7 +85,6 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Login />} />
                   <Route path="/RecoveryPage" element={<RecoveryPage />} />
-                  <Route path="*" element={<NotFoundPageLogin />} />
 
                   <Route element={<NavbarLayout />}>
                     <Route path="/Roster" element={<Roster />} />

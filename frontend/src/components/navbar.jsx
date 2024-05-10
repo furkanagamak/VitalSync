@@ -11,7 +11,7 @@ const Navbar = () => {
   const { user, fetchImg } = useAuth();
   const socket = useSocketContext();
 
-  if (!user) return "error loading user!";
+  if (!user) return <></>;
   return (
     <nav className="h-20 bg-primary flex text-white">
       <Header />
