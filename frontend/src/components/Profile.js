@@ -1294,9 +1294,6 @@ function MyComponent() {
   const [user, setUser] = useState(null); // State to hold the user data
   const { user: authUser } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-  const isAdmin =
-    authUser.accountType === "system admin" ||
-    authUser.accountType === "hospital admin";
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -1386,13 +1383,17 @@ function MyComponent() {
     );
   }
 
-  if (isLoading) {
+  if (isLoading || !authUser) {
     return (
       <div className="flex justify-center items-center h-screen">
         <ClipLoader size={150} color={"#8E0000"} />
       </div>
     );
   }
+
+  const isAdmin =
+    authUser.accountType === "system admin" ||
+    authUser.accountType === "hospital admin";
 
   // Default view rendering (profile view)
   return (
