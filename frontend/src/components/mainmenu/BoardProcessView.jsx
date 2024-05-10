@@ -12,7 +12,7 @@ import { useAuth } from "../../providers/authProvider.js";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { useSocketContext } from "../../providers/SocketProvider";
-import ClipLoader from "react-spinners/ClipLoader";
+import { ClipLoader } from "react-spinners";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;

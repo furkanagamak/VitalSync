@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useSocketContext } from "../../providers/SocketProvider";
 import { useAuth } from "../../providers/authProvider";
-import ClipLoader from "react-spinners/ClipLoader";
+import { ClipLoader } from "react-spinners";
 
 const AssignedProcesses = () => {
   const { user } = useAuth();
