@@ -6,6 +6,7 @@ import { FaPen, FaTrashAlt } from "react-icons/fa";
 import { MdArrowDropDown, MdArrowDropUp } from "react-icons/md";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { ClipLoader } from "react-spinners";
 
 //change layout when md breakpoint
 
@@ -17,6 +18,7 @@ const ResourceView = ({ resources, setResources, navToEditResource }) => {
   // filters
   const [tabFilter, setTabFilter] = useState("All");
   const [textFilter, setTextFilter] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   // all resources displayed inside the table
   const [displayingResources, setDisplayingResources] = useState([]);
@@ -33,6 +35,7 @@ const ResourceView = ({ resources, setResources, navToEditResource }) => {
   // initial fetch
   useEffect(() => {
     const fetchResources = async () => {
+      setIsLoading(true);
       try {
         const resPromise = axios.get("/resources");
         const rolePromise = axios.get("/roles");
@@ -52,6 +55,8 @@ const ResourceView = ({ resources, setResources, navToEditResource }) => {
         console.log("Combined Resources:", combinedResources);
       } catch (error) {
         console.error("Error fetching resources:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchResources();
@@ -92,7 +97,13 @@ const ResourceView = ({ resources, setResources, navToEditResource }) => {
     setDisplayingResources(filteredResources);
   }, [tabFilter, textFilter, resources]);
 
-  if (displayingResources === null) return <div>Loading Resources ...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
+  }
   return (
     <div>
       <section className="flex flex-col md:flex-row items-center space-y-4 mt-8 mb-4 w-full">

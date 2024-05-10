@@ -6,6 +6,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
+import ClipLoader from "react-spinners/ClipLoader";
 
 const theme = createTheme({
   palette: {
@@ -100,11 +101,13 @@ export function ActiveProcessesList() {
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [filteredProcesses, setFilteredProcesses] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProcesses = async () => {
+      setIsLoading(true);
       try {
         const response = await axios.get("/processInstancesActive");
         setProcesses(response.data);
@@ -112,6 +115,8 @@ export function ActiveProcessesList() {
         console.log(response.data);
       } catch (error) {
         console.error("Failed to fetch process instances", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -147,6 +152,14 @@ export function ActiveProcessesList() {
     indexOfFirstItem,
     indexOfLastItem
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
+  }
 
   return (
     <ThemeProvider theme={theme}>

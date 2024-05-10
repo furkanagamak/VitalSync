@@ -16,6 +16,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./Calendar.css";
 import { FormControlLabel, Checkbox } from "@mui/material";
+import ClipLoader from "react-spinners/ClipLoader";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -997,7 +998,7 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
   };
 
   if (!user) {
-    return <p>Loading user data...</p>;
+    return;
   }
 
   return (
@@ -1291,6 +1292,7 @@ function MyComponent() {
   const { id } = useParams();
   const [user, setUser] = useState(null); // State to hold the user data
   const { user: authUser } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -1300,6 +1302,8 @@ function MyComponent() {
         setUser(response.data); // Set the user data in state
       } catch (error) {
         console.error("Failed to fetch user:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -1368,6 +1372,14 @@ function MyComponent() {
         authUser={authUser}
         id={id}
       />
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
     );
   }
 

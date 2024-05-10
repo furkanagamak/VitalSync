@@ -5,6 +5,7 @@ import { useAuth } from "../providers/authProvider.js";
 import { UTCToEastern } from "../utils/helperFunctions.js";
 import toast from "react-hot-toast";
 import io from "socket.io-client";
+import { ClipLoader } from "react-spinners";
 
 const ProcessChat = ({ id }) => {
   const [messages, setMessages] = useState(null);
@@ -110,7 +111,12 @@ const ProcessChat = ({ id }) => {
     fetchMessages();
   }, [refreshTick]);
 
-  if (!user || !socket || !messages) return <div>Loading ...</div>;
+  if (!user || !socket || !messages)
+    return (
+      <div className="flex justify-center items-center">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
 
   const currUser = user.id;
   return (

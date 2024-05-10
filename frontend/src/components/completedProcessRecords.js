@@ -5,6 +5,7 @@ import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ClipLoader } from "react-spinners";
 
 const notify = () => toast.success("Process Template Deleted!");
 
@@ -63,9 +64,11 @@ const SearchBar = ({ inputValue, setInputValue }) => {
 
 const ProcessTable = ({ searchText }) => {
   const [processes, setProcesses] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchProcesses = async () => {
+      setIsLoading(true);
       try {
         const response = await axios.get("/processInstances");
         setProcesses(
@@ -79,6 +82,8 @@ const ProcessTable = ({ searchText }) => {
         );
       } catch (error) {
         console.error("Failed to fetch processes:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -194,9 +199,18 @@ const ProcessTable = ({ searchText }) => {
     usePagination
   );
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className="min-w-[640px]"
+      <div
+        className="min-w-[640px]"
         style={{
           maxWidth: "95%",
           margin: "auto",
@@ -204,7 +218,7 @@ const ProcessTable = ({ searchText }) => {
           display: "flex",
           justifyContent: "center",
         }}
-      > 
+      >
         <table
           {...getTableProps()}
           style={{
@@ -221,7 +235,8 @@ const ProcessTable = ({ searchText }) => {
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
-                  <th className={`text-sm xl:text-xl border-b px-2 py-1 min-w-[${column.minWidth}px] text-red-800 border-red-800`}
+                  <th
+                    className={`text-sm xl:text-xl border-b px-2 py-1 min-w-[${column.minWidth}px] text-red-800 border-red-800`}
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     style={{
                       ...column.style,
@@ -236,8 +251,8 @@ const ProcessTable = ({ searchText }) => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        wordBreak: 'break-word',  
-                        whiteSpace: 'normal',
+                        wordBreak: "break-word",
+                        whiteSpace: "normal",
                       }}
                     >
                       {column.render("Header")}
@@ -286,7 +301,9 @@ const ProcessTable = ({ searchText }) => {
                       return (
                         <td
                           {...cell.getCellProps()}
-                          className={`text-xxs md:text-xl border-b border-red-800 py-2 px-4 align-middle whitespace-normal ${cell.column.className || ''}`}
+                          className={`text-xxs md:text-xl border-b border-red-800 py-2 px-4 align-middle whitespace-normal ${
+                            cell.column.className || ""
+                          }`}
                           style={{
                             ...cell.column.style,
                             borderBottom: "1px solid #8E0000",
@@ -353,9 +370,9 @@ const ProcessTemplateManagement = () => {
       <h1 className="text-4xl items-center text-[#8E0000] text-center underline font-bold mt-5">
         Completed Process Records
       </h1>
-        <div className="w-full flex justify-center">
-          <SearchBar  inputValue={searchInput} setInputValue={setSearchInput} />
-        </div>
+      <div className="w-full flex justify-center">
+        <SearchBar inputValue={searchInput} setInputValue={setSearchInput} />
+      </div>
       <div>
         <ProcessTable searchText={searchInput} />
       </div>

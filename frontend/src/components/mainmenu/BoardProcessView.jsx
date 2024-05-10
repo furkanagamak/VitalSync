@@ -12,6 +12,7 @@ import { useAuth } from "../../providers/authProvider.js";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { useSocketContext } from "../../providers/SocketProvider";
+import ClipLoader from "react-spinners/ClipLoader";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -67,7 +68,12 @@ const BoardProcessView = () => {
     };
   }, [socket]);
 
-  if (!process) return <div>Loading ...</div>;
+  if (!process)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
   return (
     <div className="bg-secondary w-11/12 mx-auto my-8 rounded-3xl">
       <BoardProcessHeader

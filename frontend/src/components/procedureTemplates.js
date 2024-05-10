@@ -5,6 +5,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ConfirmationModal from "./templateConfirmationModal";
+import { ClipLoader } from "react-spinners";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -98,6 +99,7 @@ const CreateTemplateButton = () => {
 
 const ProcedureTable = ({ filter }) => {
   const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   function capitalizeWords(string) {
     return string
@@ -108,6 +110,7 @@ const ProcedureTable = ({ filter }) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const response = await axios.get("/procedureTemplates");
         setData(
@@ -135,6 +138,8 @@ const ProcedureTable = ({ filter }) => {
         );
       } catch (error) {
         console.error("Failed to fetch procedure templates:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -192,7 +197,8 @@ const ProcedureTable = ({ filter }) => {
           };
 
           return (
-            <div  className="flex sm:flex-row flex-col items-center justify-center"
+            <div
+              className="flex sm:flex-row flex-col items-center justify-center"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -295,6 +301,14 @@ const ProcedureTable = ({ filter }) => {
     setIsModalOpen(true);
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
+  }
+
   return (
     <>
       <ConfirmationModal
@@ -303,7 +317,7 @@ const ProcedureTable = ({ filter }) => {
         onConfirm={() => deleteProcedureTemplate(currentTemplate.id)}
         templateName={currentTemplate?.name}
       />
-     <div 
+      <div
         style={{
           maxWidth: "95%",
           margin: "auto",
@@ -328,15 +342,16 @@ const ProcedureTable = ({ filter }) => {
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
-                  <th className="text-sm lg:text-lg py-1"
+                  <th
+                    className="text-sm lg:text-lg py-1"
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     style={{
                       ...column.style,
                       color: "#8E0000",
                       borderBottom: "1px solid #8E0000",
                       padding: "10px",
-                      wordBreak: 'break-word', 
-                      whiteSpace: 'normal',
+                      wordBreak: "break-word",
+                      whiteSpace: "normal",
                       minWidth: column.minWidth,
                     }}
                   >
@@ -391,15 +406,16 @@ const ProcedureTable = ({ filter }) => {
                   <tr {...row.getRowProps()}>
                     {row.cells.map((cell) => {
                       return (
-                        <td className="text-sm lg:text-lg"
+                        <td
+                          className="text-sm lg:text-lg"
                           {...cell.getCellProps()}
                           style={{
                             ...cell.column.style,
                             borderBottom: "1px solid #8E0000",
                             padding: "10px",
                             verticalAlign: "middle",
-                            wordBreak: 'break-word',  
-                            whiteSpace: 'normal',
+                            wordBreak: "break-word",
+                            whiteSpace: "normal",
                           }}
                         >
                           {cell.render("Cell")}
@@ -466,7 +482,7 @@ const ProcedureTemplateManagement = () => {
           Procedure Template Management
         </h1>
         <div className="flex-none hidden xl:block absolute right-8 mt-4">
-          <CreateTemplateButton/>
+          <CreateTemplateButton />
         </div>
         <div className="block xl:hidden mt-4">
           <CreateTemplateButton />

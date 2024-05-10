@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useSocketContext } from "../../providers/SocketProvider";
 import { useAuth } from "../../providers/authProvider";
+import ClipLoader from "react-spinners/ClipLoader";
 
 const AssignedProcesses = () => {
   const { user } = useAuth();
@@ -90,7 +91,12 @@ const AssignedProcesses = () => {
     setTablePage((prevPage) => Math.max(prevPage - 1, 0));
   };
 
-  if (!displayingProcesses || !user) return <div>Loading ...</div>;
+  if (!displayingProcesses || !user)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
   return (
     <div className="w-11/12 mx-auto">
       <div className="bg-secondary mt-4 p-8 rounded-xl">

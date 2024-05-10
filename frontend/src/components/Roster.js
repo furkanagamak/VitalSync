@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import ClipLoader from "react-spinners/ClipLoader";
 
 // Table component
 function Table({ rows, onRowClick }) {
@@ -123,9 +124,11 @@ function MyComponent() {
   const [users, setUsers] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [positions, setPositions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const usersResponse = await axios.get("/users");
         const positionsResponse = await axios.get("/positions");
@@ -144,6 +147,8 @@ function MyComponent() {
         setDepartments(departmentsResponse.data);
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -174,6 +179,14 @@ function MyComponent() {
     const userId = row[3]; // Access the user ID
     navigate(`/Profile/${userId}`); // Navigate to the profile route
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col justify-center items-center h-screen">
