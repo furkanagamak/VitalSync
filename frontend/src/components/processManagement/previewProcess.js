@@ -70,9 +70,8 @@ const ProcessDetailsPreview = () => {
   const handleConfirm = async () => {
     try {
       await createProcessInstance(); 
-      toast.success("Process successfully created! Assigned staff have been notified.");      navigate("/processManagement/");  
+      navigate("/processManagement/");  
     } catch (error) {
-      toast.error("Failed to create the process. Please try again.");
       console.error("Error creating process instance:", error);
     }
   };

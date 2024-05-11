@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 
 
 function ProcessStartTime() {
-  const { setStartTime } = useProcessCreation();
+  const { setStartTime, setFetchedSections } = useProcessCreation();
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(new Date());
@@ -31,6 +31,7 @@ function ProcessStartTime() {
       toast.error("Invalid Start Time.");
       return;
     }
+    setFetchedSections([]);
     setStartTime(combinedDateTime.toISOString()); 
     navigate("/processManagement/newProcess/pendingStaffAssignments");
   };
