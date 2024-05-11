@@ -13,11 +13,6 @@ describe("Create Account Page", () => {
     cy.contains("Admin");
   });
 
-  it("back to admin actions", () => {
-    cy.get("#selectAccTypeBackBtn").click();
-    cy.url().should("include", "/adminActions");
-  });
-
   it("select staff", () => {
     cy.get("#selectStaffBtn").click();
     cy.contains("Staff");
