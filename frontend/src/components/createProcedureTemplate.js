@@ -33,6 +33,7 @@ const CreateTemplateButton = ({ onCreate }) => {
     <button
       onClick={handleCreateClick}
       className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
+      title="Save Template"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -65,6 +66,7 @@ const GoBackButton = () => {
     <button
       onClick={handleGoBackClick}
       className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
+      title="Go Back to Procedure Template Management"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -473,6 +475,7 @@ const ProcedureForm = ({
               fontSize: "1rem",
             }}
             onClick={addResource}
+            title="Add Resource to Selected Resources"
           >
             Add Resource
           </Button>
@@ -513,6 +516,7 @@ const ProcedureForm = ({
                         edge="end"
                         aria-label="delete"
                         onClick={() => updateResourceQuantity(index, -1)}
+                        title="Decrease Quantity"
                       >
                         <RemoveCircleOutlineIcon />
                       </IconButton>
@@ -521,6 +525,7 @@ const ProcedureForm = ({
                         edge="end"
                         aria-label="add"
                         onClick={() => updateResourceQuantity(index, 1)}
+                        title="Increase Quantity"
                       >
                         <AddCircleOutlineIcon />
                       </IconButton>
@@ -530,6 +535,7 @@ const ProcedureForm = ({
                         aria-label="delete"
                         id="deleteResource"
                         onClick={() => deleteResource(index)}
+                        title="Delete Resource"
                       >
                         <DeleteIcon />
                       </IconButton>
@@ -602,6 +608,7 @@ const ProcedureForm = ({
               fontSize: "1rem",
             }}
             onClick={addRole}
+            title="Add Role to Selected Roles"
           >
             Add Role
           </Button>
@@ -642,6 +649,7 @@ const ProcedureForm = ({
                         edge="end"
                         aria-label="delete"
                         onClick={() => updateRoleQuantity(index, -1)}
+                        title="Decrease Quantity"
                       >
                         <RemoveCircleOutlineIcon />
                       </IconButton>
@@ -650,6 +658,7 @@ const ProcedureForm = ({
                         edge="end"
                         aria-label="add"
                         onClick={() => updateRoleQuantity(index, 1)}
+                        title="Increase Quantity"
                       >
                         <AddCircleOutlineIcon />
                       </IconButton>
@@ -658,6 +667,7 @@ const ProcedureForm = ({
                         edge="end"
                         aria-label="delete"
                         onClick={() => deleteRole(index)}
+                        title="Delete Role"
                       >
                         <DeleteIcon />
                       </IconButton>

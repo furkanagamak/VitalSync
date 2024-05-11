@@ -285,14 +285,15 @@ const SelectAccType = ({ navToAdminActions, makeAccTypeSelection }) => {
   return (
     <div>
       <section className="flex justify-center items-center relative py-4">
-        <Link
+        {/*<Link
           to="/adminActions"
           onClick={navToAdminActions}
           className="absolute left-4"
           id="selectAccTypeBackBtn"
+          title="Go Back to Admin Actions"
         >
           <FaArrowLeft className="h-6 w-6" />
-        </Link>
+          </Link>*/}
         <h1 className="text-primary text-3xl font-semibold">
           Create New Account
         </h1>
@@ -307,6 +308,7 @@ const SelectAccType = ({ navToAdminActions, makeAccTypeSelection }) => {
           id="selectStaffBtn"
           className="flex flex-col items-center bg-primary text-white py-2 px-4"
           onClick={selectStaff}
+          title="Create a Staff Account"
         >
           Staff
         </button>
@@ -314,6 +316,7 @@ const SelectAccType = ({ navToAdminActions, makeAccTypeSelection }) => {
           id="selectAdminBtn"
           className="flex flex-col items-center bg-primary text-white py-2 px-4"
           onClick={selectAdmin}
+          title="Create a Hospital Admin Account"
         >
           Admin
         </button>
@@ -337,6 +340,7 @@ const Form1 = ({
           onClick={navToTypeSelection}
           className="absolute left-4"
           id="form1BackBtn"
+          title="Go Back to Account Type Selection"
         >
           <FaArrowLeft className="h-6 w-6" />
         </button>
@@ -365,7 +369,7 @@ const Form1 = ({
               Type
             </label>
             <div className="flex  justify-center items-center text-primary">
-              <p className="">
+              <p className="capitalize">
                 {accType.charAt(0).toUpperCase() + accType.slice(1)}
               </p>
             </div>
@@ -433,6 +437,7 @@ const Form1 = ({
               onChange={handleChange}
               style={{ color: "#8E0000" }}
               id="eligibleRolesInp"
+              className="capitalize"
             >
               <MenuItem value="">Select Role</MenuItem>
               {rolesList.map((role) => (
@@ -448,6 +453,7 @@ const Form1 = ({
               className="bg-primary text-white rounded-md ml-auto h-fit py-2 px-4"
               onClick={navToForm2}
               id="nextBtn"
+              title="Proceed to Next Step"
             >
               Next
             </button>
@@ -466,12 +472,14 @@ const Form2 = ({ formData, handleChange, handleSubmit, navToForm1 }) => {
           onClick={navToForm1}
           className="absolute left-4"
           id="form2BackBtn"
+          title="Go Back to the Previous Step"
         >
           <FaArrowLeft className="h-6 w-6" />
         </button>
-        <h1 className="text-primary text-3xl font-semibold">
-          Create New Account
-        </h1>
+        <div className="flex flex-col justify-center items-center text-primary">
+          <h1 className="text-3xl font-semibold">Create New Account</h1>
+          <p>All fields with * are required</p>
+        </div>
       </section>
       <form
         className="mx-auto max-w-lg bg-[#f5f5dc] pt-8 pb-4 px-8 space-y-8"
@@ -522,6 +530,7 @@ const Form2 = ({ formData, handleChange, handleSubmit, navToForm1 }) => {
             type="submit"
             className="bg-highlightGreen text-white py-2 px-4 rounded-md ml-auto"
             id="submitBtn"
+            title="Submit Form and Create Account"
           >
             Submit
           </button>

@@ -148,15 +148,10 @@ const Searchbar = ({ setTextFilter }) => {
           setSearchText(e.target.value);
           handleSearch(e.target.value);
         }}
-        onKeyPress={(event) => {
-          if (event.key === "Enter") {
-            handleSearch(searchText);
-          }
-        }}
       />
       <button
         className="absolute right-0 top-0 bottom-0 h-12 rounded-r-md pr-4"
-        onClick={() => handleSearch(searchText)}
+        style={{ pointerEvents: "none" }}
       >
         <AiOutlineSearch className="text-highlightRed h-8 w-8" />
       </button>
@@ -171,7 +166,10 @@ const CreateNewButton = () => {
       className="md:w-32 md:ml-12 flex justify-center"
       id="createNewResourceBtn"
     >
-      <button className="px-2 md:px-0 bg-primary text-white text-lg font-semibold rounded-md py-2">
+      <button
+        title="Click to Create a New Resource"
+        className="px-2 md:px-0 bg-primary text-white text-lg font-semibold rounded-md py-2"
+      >
         Create New Resources
       </button>
     </Link>
@@ -194,6 +192,7 @@ const Filters = ({ tabFilter, setTabFilter }) => {
           }`}
           onClick={() => setTabFilter(filter)}
           id={`${filter}Filter`}
+          title={`Filter by ${filter}`}
         >
           {filter}
           {tabFilter === filter && (
@@ -211,24 +210,30 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
       {
         Header: "Name",
         accessor: "name",
+        tooltip: "Sort by Name",
         Cell: ({ value }) => <div className="capitalize">{value}</div>,
       },
       {
         Header: "Description",
         accessor: "description",
+        tooltip: "Sort by Description",
       },
       {
         Header: "Location",
         accessor: "location",
+        tooltip: "Sort by Location",
         Cell: ({ value }) => <div className="capitalize">{value}</div>,
       },
       {
         Header: "Unique ID",
         accessor: "uniqueIdentifier",
+        tooltip: "Sort by Unique ID",
       },
       {
         Header: "Actions",
         accessor: "actions",
+        id: "actions",
+        tooltip: "",
         disableSortBy: true,
         Cell: ({ row }) => (
           <div className="flex justify-evenly flex-col xl:flex-row">
@@ -236,6 +241,7 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
               onClick={() => navToEditResource(row.original)}
               className="cursor-pointer text-primary my-2 xl:my-0"
               id={`editResource-${row.original.uniqueIdentifier}`}
+              title="Edit Resource"
             />
             <FaTrashAlt
               onClick={() => {
@@ -244,6 +250,7 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
               }}
               className="cursor-pointer text-primary"
               id={`deleteResource-${row.original.uniqueIdentifier}`}
+              title="Delete Resource"
             />
           </div>
         ),
@@ -306,9 +313,11 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
                     className={`border-b-2 border-[#aa0000] py-2 px-0 xl:px-4 text-left text-highlightRed ${
                       i % 2 === 0 ? "bg-secondary" : ""
                     }`}
+                    title={column.tooltip}
                     style={{
                       whiteSpace: "normal",
                       minWidth: column.minWidth,
+                      cursor: column.id !== "actions" ? "pointer" : "default",
                     }}
                   >
                     <div className="flex text-center flex-col xl:flex-row">

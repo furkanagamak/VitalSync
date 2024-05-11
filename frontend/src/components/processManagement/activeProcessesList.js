@@ -74,24 +74,24 @@ function ProcessCell({ process, onModifyClick, onViewClick, pid }) {
           </p>
         </div>
       </div>
-        <div className="flex-[1] lg:pl-4 flex justify-center items-center min-w-0">
-          <div className="flex flex-col space-y-2 w-full lg:w-3/4">
-            <button
-              className="bg-green-500 hover:bg-green-600 rounded-full w-full lg:px-4 py-1 text-center mb-2 text-sm lg:text-2xl"
-              onClick={handleViewClickID}
-              id={`activeProcessViewBtn-${process.processID}`}
-            >
-              View
-            </button>
-            <button
-              className="bg-red-500 hover:bg-red-600 rounded-full w-full lg:px-4 py-1 text-center text-sm lg:text-2xl"
-              onClick={handleModifyClickID}
-              id={`activeProcessModifyBtn-${process.processID}`}
-            >
-              Modify
-            </button>
-          </div>
+      <div className="flex-[1] lg:pl-4 flex justify-center items-center min-w-0">
+        <div className="flex flex-col space-y-2 w-full lg:w-3/4">
+          <button
+            className="bg-green-500 hover:bg-green-600 rounded-full w-full lg:px-4 py-1 text-center mb-2 text-sm lg:text-2xl"
+            onClick={handleViewClickID}
+            id={`activeProcessViewBtn-${process.processID}`}
+          >
+            View
+          </button>
+          <button
+            className="bg-red-500 hover:bg-red-600 rounded-full w-full lg:px-4 py-1 text-center text-sm lg:text-2xl"
+            onClick={handleModifyClickID}
+            id={`activeProcessModifyBtn-${process.processID}`}
+          >
+            Modify
+          </button>
         </div>
+      </div>
     </div>
   );
 }

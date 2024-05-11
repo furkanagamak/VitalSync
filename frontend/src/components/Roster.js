@@ -204,8 +204,7 @@ function MyComponent() {
           value={filterValue}
           onChange={(e) => setFilterValue(e.target.value)}
         >
-
-            <option value="">Filter by Category</option>
+          <option value="">Filter by Category</option>
           <optgroup label="Department">
             {departments.map((department) => (
               <option key={department} value={department}>

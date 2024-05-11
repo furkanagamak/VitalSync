@@ -16,9 +16,11 @@ const SearchBar = ({ inputValue, setInputValue }) => {
   const handleClearInput = () => setInputValue("");
 
   return (
-    <div className="inline-flex items-center rounded-full 
+    <div
+      className="inline-flex items-center rounded-full 
     text-xl border-2 border-[#8E0000] bg-[#F5F5DC] 
-    p-2 min-width relative">
+    p-2 min-width relative"
+    >
       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#8E0000]">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -78,6 +80,7 @@ const CreateTemplateButton = () => {
     <button
       className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
       onClick={handleClick}
+      title="Click to Create a New Procedure Template"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -118,32 +121,40 @@ const ProcedureTable = ({ filter, data, setData, isLoading }) => {
       {
         Header: "Name",
         accessor: "name",
+        tooltip: "Sort by Name",
         style: { backgroundColor: "#F5F5DC" },
       },
       {
         Header: "Description",
         accessor: "description",
+        tooltip: "Sort by Description",
       },
       {
         Header: "Resources",
         accessor: "resources",
+        tooltip: "Sort by Resources",
         style: { backgroundColor: "#F5F5DC" },
       },
       {
         Header: "Roles",
         accessor: "roles",
+        tooltip: "Sort by Roles",
       },
       {
         Header: "Estimated Time",
         accessor: "time",
+        tooltip: "Sort by Estimated Time",
         style: { backgroundColor: "#F5F5DC" },
       },
       {
         Header: "Special Notes",
         accessor: "notes",
+        tooltip: "Sort by Special Notes",
       },
       {
         Header: "Actions",
+        id: "actions",
+        tooltip: "",
         Cell: ({ row }) => {
           const navigate = useNavigate();
 
@@ -264,7 +275,8 @@ const ProcedureTable = ({ filter, data, setData, isLoading }) => {
         onConfirm={() => deleteProcedureTemplate(currentTemplate.id)}
         templateName={currentTemplate?.name}
       />
-      <div className=" w-full"
+      <div
+        className=" w-full"
         style={{
           maxWidth: "95%",
           margin: "auto",
@@ -275,7 +287,7 @@ const ProcedureTable = ({ filter, data, setData, isLoading }) => {
           {...getTableProps()}
           className="w-full h-full text-center text-lg table-auto lg:table-fixed  border-separate"
           style={{
-            borderSpacing: "0 1px"
+            borderSpacing: "0 1px",
           }}
         >
           <thead>
@@ -285,6 +297,7 @@ const ProcedureTable = ({ filter, data, setData, isLoading }) => {
                   <th
                     className="text-sm lg:text-lg py-1"
                     {...column.getHeaderProps(column.getSortByToggleProps())}
+                    title={column.tooltip}
                     style={{
                       ...column.style,
                       color: "#8E0000",
@@ -292,6 +305,7 @@ const ProcedureTable = ({ filter, data, setData, isLoading }) => {
                       padding: "10px",
                       whiteSpace: "normal",
                       minWidth: column.minWidth,
+                      cursor: column.id !== "actions" ? "pointer" : "default",
                     }}
                   >
                     <div
@@ -480,7 +494,7 @@ const ProcedureTemplateManagement = () => {
         <div className="block xl:hidden mt-4">
           <CreateTemplateButton />
         </div>
-      </div >
+      </div>
       <div className="w-full flex justify-center">
         <SearchBar inputValue={searchInput} setInputValue={setSearchInput} />
       </div>

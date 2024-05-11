@@ -23,6 +23,7 @@ function ForgotPasswordLink({ label, to }) {
     <Link
       to={to}
       className="self-center mt-3.5 mb-5 text-base text-blue-700 underline"
+      title="Forgot Password? Click here to reset it."
     >
       {label}
     </Link>

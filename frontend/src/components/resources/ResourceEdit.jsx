@@ -207,6 +207,7 @@ const ResourceEdit = ({ navToViewResource, resource, changeResourceById }) => {
               type="submit"
               className="bg-highlightGreen text-white py-2 px-4 rounded-md ml-auto"
               id="editResourceSubmitBtn"
+              title="Save Changes and Submit"
             >
               Submit
             </button>

@@ -81,28 +81,35 @@ const ProcessTable = ({ searchText, processes, isLoading }) => {
       {
         Header: "Patient Name",
         accessor: "patient",
+        tooltip: "Sort by Patient Name",
         style: { backgroundColor: "#F5F5DC" },
       },
       {
         Header: "Process ID",
         accessor: "id",
+        tooltip: "Sort by Process ID",
       },
       {
         Header: "Process Name",
         accessor: "name",
+        tooltip: "Sort by Process Name",
         style: { backgroundColor: "#F5F5DC" },
       },
       {
         Header: "Description",
         accessor: "description",
+        tooltip: "Sort by Description",
       },
       {
         Header: "Procedures",
         accessor: "procedures",
+        tooltip: "Sort by Procedures",
         style: { backgroundColor: "#F5F5DC" },
       },
       {
         Header: "Actions",
+        id: "actions",
+        tooltip: "",
         Cell: ({ row }) => {
           const navigate = useNavigate();
           const handleEditClick = () => {
@@ -118,6 +125,7 @@ const ProcessTable = ({ searchText, processes, isLoading }) => {
               }}
             >
               <button
+                title="View Process Details"
                 onClick={handleEditClick}
                 style={{
                   background: "none",
@@ -183,7 +191,7 @@ const ProcessTable = ({ searchText, processes, isLoading }) => {
         }}
       >
         <table
-        className="w-full h-full text-center text-lg table-auto lg:table-fixed  border-separate"
+          className="w-full h-full text-center text-lg table-auto lg:table-fixed  border-separate"
           {...getTableProps()}
           style={{
             borderSpacing: "0 1px",
@@ -198,12 +206,14 @@ const ProcessTable = ({ searchText, processes, isLoading }) => {
                   <th
                     className={`text-sm xl:text-xl border-b px-2 py-1 min-w-[${column.minWidth}px] text-red-800 border-red-800`}
                     {...column.getHeaderProps(column.getSortByToggleProps())}
+                    title={column.tooltip}
                     style={{
                       ...column.style,
                       color: "#8E0000",
                       borderBottom: "1px solid #8E0000",
                       padding: "10px",
                       minWidth: column.minWidth,
+                      cursor: column.id !== "actions" ? "pointer" : "default",
                     }}
                   >
                     <div

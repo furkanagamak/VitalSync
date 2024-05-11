@@ -92,7 +92,10 @@ function ImageUploader({ onClose, setImgUrl }) {
           Supported image formats: {fileTypes.join(", ")}
         </p>
         <div className="flex items-center gap-2 self-stretch mt-1.5 text-xs text-center text-black">
-          <label className="justify-center px-2 py-1.5 rounded-sm border border-black border-solid bg-zinc-300 cursor-pointer">
+          <label
+            title="Choose an Image to Upload"
+            className="justify-center px-2 py-1.5 rounded-sm border border-black border-solid bg-zinc-300 cursor-pointer"
+          >
             Choose File
             <input
               type="file"
@@ -109,6 +112,7 @@ function ImageUploader({ onClose, setImgUrl }) {
           <button
             className="flex-1 cursor-pointer border border-solid border-neutral-600 text-neutral-600 text-center py-1.5 rounded-lg"
             onClick={onClose}
+            title="Cancel Image Upload"
           >
             Cancel
           </button>
@@ -116,6 +120,7 @@ function ImageUploader({ onClose, setImgUrl }) {
             id="imageupload"
             className="flex-1 cursor-pointer bg-red-800 text-white text-center py-1.5 rounded-lg"
             onClick={handleSubmit}
+            title="Upload Image"
           >
             Upload
           </button>
@@ -233,7 +238,7 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
             onChange={handleConfirmPasswordChange}
             className="mt-2 p-2 border rounded"
             placeholder="Confirm new password"
-            style={{width: "100%", fontSize: "0.875rem" }}
+            style={{ width: "100%", fontSize: "0.875rem" }}
           />
           {error && <p className="text-xs text-red-500">{error}</p>}
         </div>
@@ -242,6 +247,7 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
             type="button"
             onClick={onClose}
             className="px-4 py-3 bg-zinc-300 text-black rounded-lg border border-solid border-neutral-600 text-base mb-3"
+            title="Close Password Reset Modal"
           >
             Close
           </button>
@@ -250,6 +256,7 @@ function PasswordResetConfirmation({ onClose, userId, user }) {
             type="button"
             onClick={handleSubmit}
             className="px-4 py-3 bg-red-800 text-white rounded-lg border border-solid border-neutral-600 text-base mb-3"
+            title="Reset Password"
           >
             Reset Password
           </button>
@@ -309,13 +316,13 @@ function ConfirmResetPasswordModal({ user, onClose, onConfirm }) {
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center ConfirmResetPasswordModal">
       <div className="flex flex-col justify-center max-w-[364px] bg-lime-50 rounded-lg border border-red-800 border-solid shadow">
         <div className="text-base leading-6 text-center text-black px-16 py-6">
-          To reset the Password enter your current Password
+          To reset your password, please enter your current password.
         </div>
         <div className="flex flex-col gap-3 px-5 pb-5 mt-3">
           <input
             id="currentPassword"
             type="password"
-            placeholder="Enter Current Password"
+            placeholder="Enter Your Current Password"
             value={currentPassword}
             onChange={handlePasswordChange}
             onKeyPress={handleKeyPress}
@@ -326,12 +333,14 @@ function ConfirmResetPasswordModal({ user, onClose, onConfirm }) {
             <button
               onClick={onClose}
               className="flex-1 justify-center px-5 py-3.5 bg-white rounded-lg border border-solid border-neutral-600 text-neutral-600"
+              title="Cancel Password Reset"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
               className="flex-1 justify-center px-5 py-3.5 bg-red-800 rounded-lg text-white"
+              title="Confirm Your Password"
             >
               Confirm
             </button>
@@ -434,6 +443,7 @@ function ProfileImage({ authUser, id, imgUrl, setImgUrl }) {
         <div
           className="justify-center self-center p-1 mt-3.5 rounded-lg border border-solid bg-primary text-white border-neutral-600 cursor-pointer"
           onClick={() => setShowUploader(true)}
+          title="Change Your Profile Image"
         >
           Change Profile Image
         </div>
@@ -628,6 +638,11 @@ function ContactInfo({ user, authUser, id }) {
           <button
             onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
             className="justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
+            title={
+              editMode
+                ? "Save Changes to Contact Information"
+                : "Edit Contact Information"
+            }
           >
             {editMode ? "Save Changes" : "Edit Contact Info"}
           </button>
@@ -636,6 +651,7 @@ function ContactInfo({ user, authUser, id }) {
           <button
             onClick={handleResetPasswordClick}
             className="justify-center px-2 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
+            title="Reset Your Password"
           >
             Reset Password
           </button>
@@ -745,12 +761,14 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
           <button
             onClick={handleClose}
             className="px-4 py-2 rounded-md hover:underline text-black"
+            title="Cancel Changes"
           >
             Cancel
           </button>
           <button
             onClick={saveRoles}
             className="bg-primary text-white px-4 py-2 rounded-md hover:bg-red-600"
+            title="Save Changes to Eligible Roles"
           >
             Save Changes
           </button>
@@ -863,6 +881,11 @@ function ProfileDetails({ user, authUser, id }) {
         <button
           onClick={editMode ? handleSaveChanges : () => setEditMode(true)}
           className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
+          title={
+            editMode
+              ? "Save Changes to Profile Information"
+              : "Edit Profile Information"
+          }
         >
           {editMode ? "Save Changes" : "Edit Profile"}
         </button>
@@ -871,6 +894,7 @@ function ProfileDetails({ user, authUser, id }) {
         <button
           className="px-5 py-1 text-sm font-medium bg-primary text-white border border-solid border-neutral-600 rounded-lg self-start mt-auto"
           onClick={() => setIsRolesModalOpen(true)}
+          title="Edit Eligible Roles"
         >
           Edit Eligible Roles
         </button>
@@ -1011,6 +1035,7 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
         <button
           onClick={onScheduleChange}
           className="mt-2 mb-5 justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
+          title="Edit Schedule for Availability"
         >
           Edit Schedule
         </button>
@@ -1170,6 +1195,7 @@ function ChangeAvailability({
       <button
         onClick={handleBackWithoutSaving}
         className="mb-4 bg-primary p-2 rounded text-white text-xl w-1/6"
+        title="Go Back to Profile"
       >
         Back to Profile
       </button>
@@ -1203,6 +1229,7 @@ function ChangeAvailability({
           <button
             className="bg-primary text-white px-5 py-2.5 text-lg rounded-full cursor-pointer w-2/5 mx-auto max-w-xs"
             onClick={handleSubmitTimeOff}
+            title="Submit Time-Off Request"
           >
             Submit Changes
           </button>
@@ -1258,6 +1285,7 @@ function ChangeAvailability({
           <button
             onClick={handleSubmitWeeklySchedule}
             className="bg-primary text-white px-5 py-2.5 text-lg rounded-full cursor-pointer w-2/5 mx-auto max-w-xs"
+            title="Update Weekly Schedule"
           >
             Update Schedule
           </button>
