@@ -38,11 +38,15 @@ const CreateTemplateButton = ({ onCreate, instanceCreation }) => {
   };
 
   const buttonText = instanceCreation ? "Use Template" : "Save Template";
+  const buttonTitle = instanceCreation
+  ? "Use This Process Template"
+  : "Save Template";
 
   return (
     <button
       onClick={handleCreateClick}
       className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
+      title={buttonTitle}
     >
       <TbLayoutGridAdd className="mr-2 size-10" />
       {buttonText}
@@ -61,6 +65,7 @@ const GoBackButton = () => {
     <button
       onClick={handleGoBackClick}
       className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
+      title="Go Back to Process Template Management"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -250,12 +255,18 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
 
 
   const moveSection = (index, direction) => {
-    setSections(currentSections => {
+    setSections((currentSections) => {
       let newSections = [...currentSections];
-      if (direction === 'up' && index > 0) {
-        [newSections[index], newSections[index - 1]] = [newSections[index - 1], newSections[index]];
-      } else if (direction === 'down' && index < newSections.length - 1) {
-        [newSections[index], newSections[index + 1]] = [newSections[index + 1], newSections[index]];
+      if (direction === "up" && index > 0) {
+        [newSections[index], newSections[index - 1]] = [
+          newSections[index - 1],
+          newSections[index],
+        ];
+      } else if (direction === "down" && index < newSections.length - 1) {
+        [newSections[index], newSections[index + 1]] = [
+          newSections[index + 1],
+          newSections[index],
+        ];
       }
       handleSessionUpdate(process, newSections); // Update session storage
       return newSections;
@@ -263,7 +274,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
   };
 
   const deleteSection = (index) => {
-    setSections(currentSections => {
+    setSections((currentSections) => {
       const newSections = currentSections.filter((_, i) => i !== index);
       handleSessionUpdate(process, newSections); // Update session storage
       return newSections;
@@ -602,35 +613,33 @@ const CreateProcessTemplateForm = () => {
     const procData = {
       processName: process.name,
       description: process.description,
-      sections: sections.map(section => ({
-          _id: section._id, 
-          sectionName: section.sectionName,
-          description: section.description,
-          procedureTemplates: section.procedureTemplates.map(p => p._id || p) 
-      }))
-  };
-    if(currentlyCreatingTemplate){
+      sections: sections.map((section) => ({
+        _id: section._id,
+        sectionName: section.sectionName,
+        description: section.description,
+        procedureTemplates: section.procedureTemplates.map((p) => p._id || p),
+      })),
+    };
+    if (currentlyCreatingTemplate) {
       updateProcessTemplate(procData);
-      navigate("/processManagement/newProcess/patientForm", { state: { from: '/processManagement/newProcess' } });
-    }
-    else{
-    try {
-      const response = await axios.post("/processTemplates", procData);
-      console.log("Template Created:", response.data);
-      navigate("/ProcessTemplateManagement");
-      toast.success("Process Template Created Successfully!");
+      navigate("/processManagement/newProcess/patientForm", {
+        state: { from: "/processManagement/newProcess" },
+      });
+    } else {
+      try {
+        const response = await axios.post("/processTemplates", procData);
+        console.log("Template Created:", response.data);
+        navigate("/ProcessTemplateManagement");
+        toast.success("Process Template Created Successfully!");
 
-      setProcess({ name: "", description: "", sections: "" });
-      setSections([]);
+        setProcess({ name: "", description: "", sections: "" });
+        setSections([]);
 
-      sessionStorage.removeItem('processTemplateState');
-
-    } catch (error) {
-      console.error("Error creating process template:", error);
-      toast.error(
-        "Failed to create process template"
-      );
-    }
+        sessionStorage.removeItem("processTemplateState");
+      } catch (error) {
+        console.error("Error creating process template:", error);
+        toast.error("Failed to create process template");
+      }
     }
   };
 
