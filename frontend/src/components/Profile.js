@@ -937,55 +937,60 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
   };
 
   const getWorkingHoursForDay = (date, usualHours) => {
-    if (
-      !usualHours ||
-      (usualHours.start === "0:00" && usualHours.end === "0:00")
-    )
-      return ["Off"];
+    if (!usualHours || (usualHours.start === "0:00" && usualHours.end === "0:00"))
+        return ["Off"]; // No working hours
 
+    const dateStr = date.toISOString().substring(0, 10);
+    const usualStart = parseTime(usualHours.start);
+    const usualEnd = parseTime(usualHours.end);
+
+    // Get time offs that affect the current day
     const timeOffs = getTimeOffsForDay(date);
     let segments = [];
-    let currentStart = parseTime(usualHours.start);
+    let currentStart = {...usualStart};
 
-    timeOffs
-      .sort((a, b) => new Date(a.start) - new Date(b.start))
-      .forEach((timeOff) => {
-        const timeOffStart = parseTime(
-          new Date(timeOff.start).toLocaleTimeString("it-IT")
-        );
-        const timeOffEnd = parseTime(
-          new Date(timeOff.end).toLocaleTimeString("it-IT")
-        );
-        if (
-          currentStart.hours < timeOffStart.hours ||
-          (currentStart.hours === timeOffStart.hours &&
-            currentStart.minutes < timeOffStart.minutes)
-        ) {
-          segments.push(
-            `${currentStart.hours}:${currentStart.minutes
-              .toString()
-              .padStart(2, "0")} - ${timeOffStart.hours}:${timeOffStart.minutes
-              .toString()
-              .padStart(2, "0")}`
-          );
+    timeOffs.sort((a, b) => new Date(a.start) - new Date(b.start)).forEach(timeOff => {
+        const timeOffStartDate = new Date(timeOff.start);
+        const timeOffEndDate = new Date(timeOff.end);
+        let timeOffStart = parseTime(timeOffStartDate.toLocaleTimeString("it-IT"));
+        let timeOffEnd = parseTime(timeOffEndDate.toLocaleTimeString("it-IT"));
+
+        // Adjust for multi-day unavailability starting before or on the current day
+        if (timeOffStartDate.toISOString().substring(0, 10) < dateStr) {
+            timeOffStart = {...timeOffStart, hours: 0, minutes: 0};
         }
-        currentStart = timeOffEnd;
-      });
+        // Adjust for multi-day unavailability ending on or after the current day
+        if (timeOffEndDate.toISOString().substring(0, 10) > dateStr) {
+            timeOffEnd = {...timeOffEnd, hours: 23, minutes: 59};
+        }
 
-    if (currentStart.hours < parseTime(usualHours.end).hours) {
-      segments.push(
-        `${currentStart.hours}:${currentStart.minutes
-          .toString()
-          .padStart(2, "0")} - ${parseTime(usualHours.end).hours}:${parseTime(
-          usualHours.end
-        )
-          .minutes.toString()
-          .padStart(2, "0")}`
-      );
+        // Check if the time off is during working hours
+        if (timeOffEnd.hours < usualStart.hours || timeOffStart.hours > usualEnd.hours) {
+            // Time off is completely outside working hours, ignore
+        } else {
+            // Adjust start time if time off starts before working hours
+            if (timeOffStart.hours < usualStart.hours || (timeOffStart.hours === usualStart.hours && timeOffStart.minutes < usualStart.minutes)) {
+                timeOffStart = {...usualStart};
+            }
+            // Adjust end time if time off ends after working hours
+            if (timeOffEnd.hours > usualEnd.hours || (timeOffEnd.hours === usualEnd.hours && timeOffEnd.minutes > usualEnd.minutes)) {
+                timeOffEnd = {...usualEnd};
+            }
+            // Add working segment before the time off
+            if (currentStart.hours < timeOffStart.hours || (currentStart.hours === timeOffStart.hours && currentStart.minutes < timeOffStart.minutes)) {
+                segments.push(`${currentStart.hours}:${currentStart.minutes.toString().padStart(2, "0")} - ${timeOffStart.hours}:${timeOffStart.minutes.toString().padStart(2, "0")}`);
+            }
+            currentStart = timeOffEnd;
+        }
+    });
+
+    // Add the remaining time after the last unavailability
+    if (currentStart.hours < usualEnd.hours || (currentStart.hours === usualEnd.hours && currentStart.minutes < usualEnd.minutes)) {
+        segments.push(`${currentStart.hours}:${currentStart.minutes.toString().padStart(2, "0")} - ${usualEnd.hours}:${usualEnd.minutes.toString().padStart(2, "0")}`);
     }
 
     return segments.length ? segments : ["Off"];
-  };
+};
 
   const getUsualHoursForDay = (day) => {
     const weekdayNames = [
@@ -1017,6 +1022,7 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
         <button
           onClick={onScheduleChange}
           className="mt-2 mb-5 justify-center px-1.5 py-1 rounded-lg border border-solid bg-primary text-white border-neutral-600"
+          title="Edit Schedule for Availability"
         >
           Edit Schedule
         </button>
@@ -1044,7 +1050,6 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
     </div>
   );
 }
-
 function ChangeAvailability({
   user,
   onRevertToProfile,

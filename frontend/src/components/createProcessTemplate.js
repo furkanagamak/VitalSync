@@ -53,11 +53,16 @@ const CreateTemplateButton = ({ onCreate, instanceCreation }) => {
   );
 };
 
-const GoBackButton = () => {
+const GoBackButton = ({instanceCreation }) => {
   const navigate = useNavigate();
 
   const handleGoBackClick = () => {
-    navigate(-1);
+    if(instanceCreation){
+      navigate('/processManagement/newProcess/processTemplates')
+    }
+    else{
+      navigate('/ProcessTemplateManagement')
+    }
   };
 
   return (
@@ -200,7 +205,8 @@ const ProcessForm = ({ process, setProcess, createTemplate }) => {
 };
 
 const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate, process }) => {
-  const data = React.useMemo(() => sections, [sections]);
+  console.log(sections);
+  const data = sections;
   const navigate = useNavigate();
   const location = useLocation(); 
 
@@ -567,14 +573,11 @@ const CreateProcessTemplateForm = () => {
     }
   }, [location.state]);
 
-  const handleSaveState = () => {
-    const stateToSave = { process, sections };
-    sessionStorage.setItem('processTemplateState', JSON.stringify(stateToSave));
-  };
 
   useEffect(() => {
     const savedState = JSON.parse(sessionStorage.getItem('processTemplateState'));
     if (savedState) {
+      console.log("session stored");
       setProcess(savedState.process);
       setSections(savedState.sections);
     }
@@ -644,7 +647,7 @@ const CreateProcessTemplateForm = () => {
         </h1>
         <div className="flex flex-row mt-4 lg:mt-0 lg:flex-row lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 justify-between w-full px-4">
           <div>
-            <GoBackButton />
+            <GoBackButton instanceCreation={currentlyCreatingTemplate}/>
           </div>
           <div>
             <CreateTemplateButton onCreate={createTemplate} instanceCreation={currentlyCreatingTemplate}/>

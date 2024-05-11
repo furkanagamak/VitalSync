@@ -61,11 +61,16 @@ const ModifyTemplateButton = ({ onModify,instanceCreation }) => {
   );
 };
 
-const GoBackButton = () => {
+const GoBackButton = ({instanceCreation }) => {
   const navigate = useNavigate();
 
   const handleGoBackClick = () => {
-    navigate(-1);
+    if(instanceCreation){
+      navigate('/processManagement/newProcess/processTemplates')
+    }
+    else{
+      navigate('/ProcessTemplateManagement')
+    }
   };
 
   return (
@@ -673,7 +678,7 @@ const ModifyProcessTemplateForm = () => {
         </h1>
         <div className="flex flex-row mt-4 lg:mt-0 lg:flex-row lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 justify-between w-full px-4">
           <div >
-            <GoBackButton />
+            <GoBackButton instanceCreation={currentlyModifyingTemplate}/>
           </div>
           <div >
             <ModifyTemplateButton onModify={updateTemplate} instanceCreation={currentlyModifyingTemplate}/>
