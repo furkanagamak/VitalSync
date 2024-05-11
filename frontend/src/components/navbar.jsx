@@ -1,9 +1,10 @@
-import { CiBellOn } from "react-icons/ci";
+import { BsBell } from "react-icons/bs";
 import { useState, useEffect } from "react";
 import { IoMenu } from "react-icons/io5";
 import NotificationDropDown from "./notifications/NotificationDropDown";
 import { useNavigate } from "react-router-dom";
-import { TbLogout } from "react-icons/tb";
+import { RiLogoutBoxRLine } from "react-icons/ri";
+import { IoPersonOutline } from "react-icons/io5";
 import { useAuth } from "../providers/authProvider.js";
 import { useSocketContext } from "../providers/SocketProvider.js";
 
@@ -84,7 +85,7 @@ const Tabs = ({ userType }) => {
 };
 
 const UserNav = ({ id, firstName, lastName, profileUrl, fetchImg }) => {
-  const [url, setUrl] = useState("/profileicon.png");
+  const [url, setUrl] = useState("");
   const navigate = useNavigate();
 
   const handleNavigate = () => {
@@ -120,8 +121,11 @@ const UserNav = ({ id, firstName, lastName, profileUrl, fetchImg }) => {
       id="userNav"
     >
       <p className="text-2xl hidden md:block">{`${firstName} ${lastName}`}</p>
-      <div className="h-12 w-12 overflow-hidden rounded-full">
-        <img src={url} alt="Profile" className="h-full w-full object-cover" />
+      <div className="h-12 w-12 overflow-hidden rounded-full bg-white">
+        {!url && <IoPersonOutline className="h-full w-full text-black p-1.5" />}
+        {url && (
+          <img src={url} alt="Profile" className="h-full w-full object-cover" />
+        )}
       </div>
     </div>
   );
@@ -141,7 +145,7 @@ const Notifications = () => {
         className="flex items-center ml-2 mr-4"
         onClick={flickDropDown}
       >
-        <CiBellOn className="h-12 w-12 text-black bg-white rounded-full" />
+        <BsBell className="h-12 w-12 text-black bg-white rounded-full p-1.5" />
       </button>
       {isOpen && (
         <div className="absolute right-0 top-20 z-10">
@@ -172,7 +176,7 @@ const LogoutButton = () => {
       onClick={handleLogout}
       className="flex items-center ml-0 mr-4"
     >
-      <TbLogout className="h-12 w-12 text-black bg-white rounded-full p-1.5" />
+      <RiLogoutBoxRLine className="h-12 w-12 text-black bg-white rounded-full p-1.5" />
     </button>
   );
 };
@@ -200,15 +204,18 @@ const Menu = ({ userType }) => {
         <IoMenu className="w-12 h-12 text-white" />
       </button>
       {isOpen && (
-        <div className="md:hidden absolute right-0 top-20 bg-primary text-2xl text-center z-10 flex flex-col ">
+        <div className="md:hidden absolute right-0 top-20 bg-highlightRed text-2xl text-center z-10 flex flex-col p-4 space-y-4">
           <button
             onClick={navigateToRoster}
-            className="border-b-2 p-2 rosterNav"
+            className="hover:underline underline-offset-8 w-fit m-auto rosterNav"
           >
             Roster
           </button>
           {(userType === "system admin" || userType === "hospital admin") && (
-            <button onClick={navigateToAdminActions} className="border-b-2 p-2">
+            <button
+              onClick={navigateToAdminActions}
+              className="hover:underline underline-offset-8"
+            >
               Admin Actions
             </button>
           )}
