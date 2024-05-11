@@ -1041,7 +1041,7 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
     authUser.accountType === "hospital admin";
 
   return (
-    <div>
+    <div >
       {!preview && id && authUser && (authUser.id === id || isAdmin) && (
         <button
           onClick={onScheduleChange}
@@ -1051,6 +1051,7 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
           Edit Schedule
         </button>
       )}
+      <div className="text-left md:text-center">
       <Calendar
         minDate={today}
         maxDate={threeYearsLater}
@@ -1071,6 +1072,7 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
         prevLabel={<div style={customStyles.navigationButton}>‹</div>}
         nextLabel={<div style={customStyles.navigationButton}>›</div>}
       />
+      </div>
     </div>
   );
 }
@@ -1485,7 +1487,7 @@ function MyComponent() {
 
   // Default view rendering (profile view)
   return (
-    <div className="flex flex-col items-center pt-10 pr-5 pb-8 pl-14 bg-white max-md:pl-5">
+    <div className="flex flex-col lg:items-center pt-10 pr-5 pb-8 pl-14 bg-white max-md:pl-5">
       {id && authUser && authUser.id !== id && isAdmin && (
         <button
           onClick={handleTerminateAccount}

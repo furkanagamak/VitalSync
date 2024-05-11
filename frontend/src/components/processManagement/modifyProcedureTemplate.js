@@ -418,12 +418,7 @@ const ProcedureForm = ({
           inputProps={{ style: { color: "#8E0000" } }}
         />
         <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            marginTop: "20px",
-            marginBottom: "20px",
-          }}
+          className="flex lg:flex-row gap-2.5 mt-5 mb-5 flex-col"
         >
           <div style={{ display: "flex", flexGrow: 2, gap: "10px" }}>
             <FormControl fullWidth>
@@ -578,7 +573,7 @@ const ProcedureForm = ({
           </>
         )}
 
-        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+        <div className="flex lg:flex-row gap-2.5 mt-5 mb-5 flex-col">
           <div style={{ display: "flex", flexGrow: 2, gap: "10px" }}>
             <FormControl fullWidth>
               <InputLabel id="rolename" style={{ color: "#8E0000" }}>
