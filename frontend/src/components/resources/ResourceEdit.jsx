@@ -29,6 +29,11 @@ const ResourceEdit = ({ navToViewResource, resource, changeResourceById }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.name) {
+      return toast.error("Please insert a name!");
+    } else if (resourceType !== "roles" && !formData.location) {
+      return toast.error("Please insert a location for a non-role resource");
+    }
     try {
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/resources`,
