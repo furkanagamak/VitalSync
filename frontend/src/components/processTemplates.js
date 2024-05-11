@@ -71,12 +71,16 @@ const CreateTemplateButton = ({ fromLocation }) => {
 
   const handleClick = () => {
     if (fromLocation) {
+      sessionStorage.clear();
+
       navigate("/CreateProcessTemplateForm", {
         state: {
           incomingUrl: "/processManagement/newProcess/processTemplates",
         },
       });
     } else {
+      sessionStorage.clear();
+
       navigate("/CreateProcessTemplateForm");
     }
   };
@@ -105,6 +109,8 @@ const ProcessTable = ({ filter, fromLocation, data, setData, isLoading }) => {
     (rowId) => {
       console.log(fromLocation);
       if (fromLocation) {
+        sessionStorage.clear();
+
         navigate(`/ModifyProcessTemplateForm/${rowId}`, {
           state: {
             incomingUrl: "/processManagement/newProcess/processTemplates",
@@ -112,7 +118,7 @@ const ProcessTable = ({ filter, fromLocation, data, setData, isLoading }) => {
         });
       } else {
         console.log(fromLocation);
-
+        sessionStorage.clear();
         navigate(`/ModifyProcessTemplateForm/${rowId}`);
       }
     },

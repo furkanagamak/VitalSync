@@ -64,8 +64,8 @@ const SearchBar = () => {
 
 const CreateTemplateButton = () => {
   const navigate = useNavigate();
-
   const handleClick = () => {
+    sessionStorage.clear();
     navigate("/processManagement/newProcess/processTemplateForm");
   };
 
@@ -161,6 +161,8 @@ const ProcessTableNew = () => {
           const navigate = useNavigate();
 
           const handleEditClick = () => {
+            sessionStorage.clear();
+
             navigate("/processManagement/newProcess/processTemplateModifyForm");
           };
 

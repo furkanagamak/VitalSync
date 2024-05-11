@@ -256,6 +256,44 @@ useEffect(() => {
   }
 
 
+  useEffect(() => {
+    if (location.pathname.includes('ProcessTemplateManagement')) {
+        clearSessionStorage();
+        setProcessTemplate({
+          processName: '',
+          description: '',
+          sections: []
+        });
+        setPatientInformation({
+          firstName: '',
+          lastName: '',
+          street: '',
+          city: '',
+          state: '',
+          zip: '',
+          dob: '',
+          sex: '',
+          phone: '',
+          emergencyContact1Name: '',
+          emergencyContact1Relation: '',
+          emergencyContact1Phone: '',
+          emergencyContact2Name: '',
+          emergencyContact2Relation: '',
+          emergencyContact2Phone: '',
+          knownConditions: '',
+          allergies: '',
+          insuranceProvider: '',
+          insuranceGroup: '',
+          insurancePolicy: ''
+        });
+        setFetchedSections([]);
+        setStartTime('');
+        setCurrentlyModifyingTemplate(false);
+        setCurrentlyCreatingTemplate(false);
+    }
+  }, [location.pathname]);
+
+
   return (
     <ProcessCreationContext.Provider value={{
       assignStaffToRole,

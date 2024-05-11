@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../providers/authProvider.js";
 import axios from "axios";
-import { DateRangePicker } from "rsuite";
 import "rsuite/dist/rsuite-no-reset.min.css";
 import {
   TextField,
@@ -11,12 +10,19 @@ import {
   Select,
   MenuItem,
   InputLabel,
+  IconButton
 } from "@mui/material";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./Calendar.css";
 import { FormControlLabel, Checkbox } from "@mui/material";
 import { ClipLoader } from "react-spinners";
+import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { FaArrowLeft } from "react-icons/fa";
+import RestoreIcon from '@mui/icons-material/Restore';
+import DeleteIcon from '@mui/icons-material/Delete';
+import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -955,55 +961,60 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
   };
 
   const getWorkingHoursForDay = (date, usualHours) => {
-    if (
-      !usualHours ||
-      (usualHours.start === "0:00" && usualHours.end === "0:00")
-    )
-      return ["Off"];
+    if (!usualHours || (usualHours.start === "0:00" && usualHours.end === "0:00"))
+        return ["Off"]; // No working hours
 
+    const dateStr = date.toISOString().substring(0, 10);
+    const usualStart = parseTime(usualHours.start);
+    const usualEnd = parseTime(usualHours.end);
+
+    // Get time offs that affect the current day
     const timeOffs = getTimeOffsForDay(date);
     let segments = [];
-    let currentStart = parseTime(usualHours.start);
+    let currentStart = {...usualStart};
 
-    timeOffs
-      .sort((a, b) => new Date(a.start) - new Date(b.start))
-      .forEach((timeOff) => {
-        const timeOffStart = parseTime(
-          new Date(timeOff.start).toLocaleTimeString("it-IT")
-        );
-        const timeOffEnd = parseTime(
-          new Date(timeOff.end).toLocaleTimeString("it-IT")
-        );
-        if (
-          currentStart.hours < timeOffStart.hours ||
-          (currentStart.hours === timeOffStart.hours &&
-            currentStart.minutes < timeOffStart.minutes)
-        ) {
-          segments.push(
-            `${currentStart.hours}:${currentStart.minutes
-              .toString()
-              .padStart(2, "0")} - ${timeOffStart.hours}:${timeOffStart.minutes
-              .toString()
-              .padStart(2, "0")}`
-          );
+    timeOffs.sort((a, b) => new Date(a.start) - new Date(b.start)).forEach(timeOff => {
+        const timeOffStartDate = new Date(timeOff.start);
+        const timeOffEndDate = new Date(timeOff.end);
+        let timeOffStart = parseTime(timeOffStartDate.toLocaleTimeString("it-IT"));
+        let timeOffEnd = parseTime(timeOffEndDate.toLocaleTimeString("it-IT"));
+
+        // Adjust for multi-day unavailability starting before or on the current day
+        if (timeOffStartDate.toISOString().substring(0, 10) < dateStr) {
+            timeOffStart = {...timeOffStart, hours: 0, minutes: 0};
         }
-        currentStart = timeOffEnd;
-      });
+        // Adjust for multi-day unavailability ending on or after the current day
+        if (timeOffEndDate.toISOString().substring(0, 10) > dateStr) {
+            timeOffEnd = {...timeOffEnd, hours: 23, minutes: 59};
+        }
 
-    if (currentStart.hours < parseTime(usualHours.end).hours) {
-      segments.push(
-        `${currentStart.hours}:${currentStart.minutes
-          .toString()
-          .padStart(2, "0")} - ${parseTime(usualHours.end).hours}:${parseTime(
-          usualHours.end
-        )
-          .minutes.toString()
-          .padStart(2, "0")}`
-      );
+        // Check if the time off is during working hours
+        if (timeOffEnd.hours < usualStart.hours || timeOffStart.hours > usualEnd.hours) {
+            // Time off is completely outside working hours, ignore
+        } else {
+            // Adjust start time if time off starts before working hours
+            if (timeOffStart.hours < usualStart.hours || (timeOffStart.hours === usualStart.hours && timeOffStart.minutes < usualStart.minutes)) {
+                timeOffStart = {...usualStart};
+            }
+            // Adjust end time if time off ends after working hours
+            if (timeOffEnd.hours > usualEnd.hours || (timeOffEnd.hours === usualEnd.hours && timeOffEnd.minutes > usualEnd.minutes)) {
+                timeOffEnd = {...usualEnd};
+            }
+            // Add working segment before the time off
+            if (currentStart.hours < timeOffStart.hours || (currentStart.hours === timeOffStart.hours && currentStart.minutes < timeOffStart.minutes)) {
+                segments.push(`${currentStart.hours}:${currentStart.minutes.toString().padStart(2, "0")} - ${timeOffStart.hours}:${timeOffStart.minutes.toString().padStart(2, "0")}`);
+            }
+            currentStart = timeOffEnd;
+        }
+    });
+
+    // Add the remaining time after the last unavailability
+    if (currentStart.hours < usualEnd.hours || (currentStart.hours === usualEnd.hours && currentStart.minutes < usualEnd.minutes)) {
+        segments.push(`${currentStart.hours}:${currentStart.minutes.toString().padStart(2, "0")} - ${usualEnd.hours}:${usualEnd.minutes.toString().padStart(2, "0")}`);
     }
 
     return segments.length ? segments : ["Off"];
-  };
+};
 
   const getUsualHoursForDay = (day) => {
     const weekdayNames = [
@@ -1063,7 +1074,6 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
     </div>
   );
 }
-
 function ChangeAvailability({
   user,
   onRevertToProfile,
@@ -1072,10 +1082,23 @@ function ChangeAvailability({
   id,
 }) {
   const [dateRange, setDateRange] = useState([new Date(), new Date()]);
-  const [status, setStatus] = useState("Work Hours");
+  const [status, setStatus] = useState('');
   const [errors, setErrors] = useState({});
   const [weeklySchedule, setWeeklySchedule] = useState([...user.usualHours]);
   const [previewSchedule, setPreviewSchedule] = useState([...user.usualHours]);
+  const [startTime, setStartTime] = useState(null);
+  const [endTime, setEndTime] = useState(null); 
+  const [markedForDeletion, setMarkedForDeletion] = useState([]);
+
+
+  const handleStartTimeChange = (newValue) => {
+    setStartTime(newValue);
+    setEndTime(new Date(newValue.getTime() + 3600000)); 
+};
+
+const handleEndTimeChange = (newValue) => {
+    setEndTime(newValue);
+};
 
   useEffect(() => {
     setPreviewSchedule([...weeklySchedule]);
@@ -1127,40 +1150,42 @@ function ChangeAvailability({
     onRevertToProfile();
   };
 
+
   const handleSubmitTimeOff = async () => {
-    if (!dateRange[0] || !dateRange[1] || !status) {
-      setErrors({ msg: "Please fill in all fields." });
+    if ((!startTime || !endTime || !status.trim()) && markedForDeletion.length === 0) {
+      setErrors({ msg: "Please fill in all fields or mark items for deletion." });
       return;
     }
-
+  
+    if ((startTime && endTime && !status.trim()) || (status.trim() && (!startTime || !endTime))) {
+      setErrors({ msg: "Please complete all fields for new time off." });
+      return;
+    }
+  
+    const newUnavailableTime = (startTime && endTime && status.trim()) ? {
+      start: startTime.toISOString(),
+      end: endTime.toISOString(),
+      reason: status,
+    } : null;
+  
     const updateData = {
-      unavailableTimes: [
-        ...user.unavailableTimes,
-        {
-          start: dateRange[0],
-          end: dateRange[1],
-          reason: status,
-        },
-      ],
+      unavailableTimes: newUnavailableTime ? [newUnavailableTime] : [],
+      deletedTimes: markedForDeletion,
     };
-
+  
     try {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
         toast.success("Availability successfully updated.");
-        setUser({
-          ...user,
+        setUser(prevState => ({
+          ...prevState,
           usualHours: weeklySchedule,
           unavailableTimes: [
-            ...user.unavailableTimes,
-            {
-              start: dateRange[0],
-              end: dateRange[1],
-              reason: status,
-            },
-          ],
-        });
-        onRevertToProfile();
+            ...prevState.unavailableTimes.filter(time => !markedForDeletion.includes(time._id)),
+            ...(newUnavailableTime ? [newUnavailableTime] : [])
+          ]
+        }));
+        onRevertToProfile(); 
       } else {
         toast.error("Failed to update availability.");
       }
@@ -1169,6 +1194,15 @@ function ChangeAvailability({
       toast.error("Error updating user: " + error.message);
     }
   };
+
+const handleToggleDeleteTimeOff = (timeOffId) => {
+  if (markedForDeletion.includes(timeOffId)) {
+    setMarkedForDeletion(markedForDeletion.filter(id => id !== timeOffId));
+  } else {
+    setMarkedForDeletion([...markedForDeletion, timeOffId]);
+  }
+};
+
 
   const handleSubmitWeeklySchedule = async () => {
     const updateData = {
@@ -1191,43 +1225,69 @@ function ChangeAvailability({
   };
 
   return (
+    
     <div className="flex flex-col px-8 pt-10 pb-8 bg-white">
-      <button
+            <button
         onClick={handleBackWithoutSaving}
-        className="mb-4 bg-primary p-2 rounded text-white text-xl w-1/6"
-        title="Go Back to Profile"
-      >
-        Back to Profile
+
+className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center w-1/6" >
+        <FaArrowLeft className="mr-2" />
+        <span className="mx-auto">Back to Profile</span>
+
       </button>
       <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
         <header className="flex justify-between items-center max-w-full text-red-800 mb-5">
           <h1 className="text-4xl">Time-Off Request</h1>
-          <p className="text-lg">Please select a status before submitting.</p>
         </header>
         <div className="flex flex-col mt-4">
-          <DateRangePicker
-            showOneCalendar
-            appearance="default"
-            placeholder="Select Date Range"
-            format="yyyy-MM-dd HH:mm"
-            value={dateRange}
-            onChange={handleDateChange}
-          />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Status</InputLabel>
-            <Select
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <div className="flex ">
+              <div className="mr-5">
+                <DateTimePicker
+                    label="Start Time"
+                    value={startTime}
+                    onChange={handleStartTimeChange}
+                    renderInput={(params) => <TextField {...params} />}
+                /></div>
+                <DateTimePicker
+                    label="End Time"
+                    value={endTime}
+                    onChange={handleEndTimeChange}
+                    minDateTime={startTime ? new Date(startTime.getTime() + 3600000) : null}
+                    renderInput={(params) => <TextField {...params} />}
+                />
+            </div>
+            <div className="bg-white my-5 w-1/3">
+            <TextField
+              fullWidth
+              label="Reason for Request"
               value={status}
-              label="Status"
               onChange={handleStatusChange}
-              defaultValue="Time-Off"
-            >
-              <MenuItem value="Time-Off">Time-Off</MenuItem>
-              <MenuItem value="Vacation">Vacation</MenuItem>
-            </Select>
-          </FormControl>
+              variant="outlined"
+              multiline
+                  rows={2}
+            /></div>
+        </LocalizationProvider>
+        <div className="flex-grow">
+          <h2 className="text-2xl text-primary">Scheduled Time-Offs</h2>
+          <p className="text-md mb-2">Click to mark/unmark for deletion:</p>
+          <ul>
+            {user.unavailableTimes.map((timeOff) => (
+              <li key={timeOff._id} style={{
+                opacity: markedForDeletion.includes(timeOff._id) ? 0.3 : 1
+              }}>
+                <IconButton onClick={() => handleToggleDeleteTimeOff(timeOff._id)} color="error">
+                  {markedForDeletion.includes(timeOff._id) ? <RestoreFromTrashIcon /> : <DeleteIcon />}
+                </IconButton>
+                {`${new Date(timeOff.start).toLocaleString()} - ${new Date(timeOff.end).toLocaleString()}`}
+      <span className="text-primary text-xl mx-2">|  Reason:</span> {`${timeOff.reason}`}
+              </li>
+            ))}
+          </ul>
+        </div>
           {errors.msg && <div style={{ color: "red" }}>{errors.msg}</div>}
           <button
-            className="bg-primary text-white px-5 py-2.5 text-lg rounded-full cursor-pointer w-2/5 mx-auto max-w-xs"
+            className="my-5 bg-primary text-white px-5 py-2.5 text-lg rounded-full cursor-pointer w-2/5 mx-auto max-w-xs"
             onClick={handleSubmitTimeOff}
             title="Submit Time-Off Request"
           >
