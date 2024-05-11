@@ -362,7 +362,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
         Header: "Actions",
         Cell: ({ row }) => (
           <div
-            className="flex-col lg:flex-row"
+            className="flex-col lg:flex-row lg:mr-3"
             style={{
               display: "flex",
               justifyContent: "center",
@@ -377,7 +377,6 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
                 border: "none",
                 padding: "0",
                 cursor: "pointer",
-                marginRight: "10px",
               }}
               title="Move Up"
             >
@@ -397,13 +396,12 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
             </button>
             <button
               onClick={() => onMoveProcedure(row.index, "down")}
-              className="moveDownProc"
+              className="moveDownProc lg:mr-3"
               style={{
                 background: "none",
                 border: "none",
                 padding: "0",
                 cursor: "pointer",
-                marginRight: "10px",
               }}
               title="Move Down"
             >
@@ -457,7 +455,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
   return (
     <>
       <div
-        className="min-w-[640px] items-center"
+        className="items-center"
         style={{
           border: "2px solid #8E0000",
           borderRadius: "5px",
@@ -482,22 +480,19 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
           Selected Procedures
         </h1>
         <div
-          className="scrollbar1"
+          className="scrollbar1 w-full"
           style={{
             overflowX: "auto",
-            display: "flex",
-            justifyContent: "center",
             maxHeight: "28vh",
             paddingRight: "20px",
             minHeight: "28vh",
           }}
         >
-          <table
+          <table className="table-auto lg:table-fixed"
             {...getTableProps()}
             style={{
               width: "100%",
               height: "100%",
-              tableLayout: "fixed",
               borderCollapse: "separate",
               borderSpacing: "0 1px",
               fontSize: "1.1rem",
@@ -549,8 +544,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
                             borderBottom: "1px solid #8E0000",
                             padding: "10px",
                             verticalAlign: "middle",
-                            wordBreak: "break-word",
-                            whiteSpace: "normal",
+                            whiteSpace: 'normal',
                           }}
                         >
                           {cell.render("Cell")}

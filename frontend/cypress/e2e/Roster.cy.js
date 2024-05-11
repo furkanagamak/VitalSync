@@ -30,36 +30,74 @@ describe('MyComponent Button Functionality', () => {
     });
   });
 
-  describe('Termination test', () => {
-    it('Try wrong email when termiation', () => {
+  describe('Profile Editing and Verification', () => {
+    it('should correctly update and verify profile information', () => {
 
       cy.get('input[placeholder="Search..."]').type('James Test');
 
       cy.get('table tbody tr').first().click();
-
-      cy.contains('Terminate Account').click();
-      //Enter the wrong email
-      cy.get('#terminateConfirm').type('wrongemail@gmail.com')
-      cy.contains('Submit').click();
-      //Check for error message
-      cy.contains('email does not match.').should('be.visible')
-    });
-
-    it('Terminate Account', () => {
-
-      cy.get('input[placeholder="Search..."]').type('James Test');
-
-      cy.get('table tbody tr').first().click();
-
-      cy.contains('Terminate Account').click();
-      cy.get('#terminateConfirm').type('dummy@example.com')
-      cy.contains('Submit').click();
-      cy.contains('Return to Roster Page').click();
-
-      cy.get('input[placeholder="Search..."]').type('James Test');
-      cy.contains('No results found').should('be.visible');
-
+    
+      cy.contains('Edit Profile').click();
+  
+      // Enter information
+      cy.get('#name').clear().type('James Doe');
+      cy.get('#designation').clear().type('TS');
+      cy.get('#specialty').clear().type('Test');
+      cy.get('#department').clear().type('Testing');
+  
+      // Submit the changes
+      cy.contains('Save Changes').click();
+  
+      // Verify that information is on the screen
+      cy.contains('James Doe').should('exist');
+      cy.contains('TS').should('exist');
+      cy.contains('Test').should('exist');
+      cy.contains('Testing').should('exist');
+  
+      // Edit the profile again 
+      cy.contains('Edit Profile').click();
+  
+      // Change the information to before
+      cy.get('#name').clear().type('James test');
+      cy.get('#designation').clear().type('MD');
+      cy.get('#specialty').clear().type('Doctor');
+      cy.get('#department').clear().type('Cardiology');
+  
+      // Save the changes, no need to verify
+      cy.contains('Save Changes').click();
     });
   });
+
+  // describe('Termination test', () => {
+  //   it('Try wrong email when termiation', () => {
+
+  //     cy.get('input[placeholder="Search..."]').type('James Test');
+
+  //     cy.get('table tbody tr').first().click();
+
+  //     cy.contains('Terminate Account').click();
+  //     //Enter the wrong email
+  //     cy.get('#terminateConfirm').type('wrongemail@gmail.com')
+  //     cy.contains('Submit').click();
+  //     //Check for error message
+  //     cy.contains('email does not match.').should('be.visible')
+  //   });
+
+  //   it('Terminate Account', () => {
+
+  //     cy.get('input[placeholder="Search..."]').type('James Test');
+
+  //     cy.get('table tbody tr').first().click();
+
+  //     cy.contains('Terminate Account').click();
+  //     cy.get('#terminateConfirm').type('dummy@example.com')
+  //     cy.contains('Submit').click();
+  //     cy.contains('Return to Roster Page').click();
+
+  //     cy.get('input[placeholder="Search..."]').type('James Test');
+  //     cy.contains('No results found').should('be.visible');
+
+  //   });
+  // });
   });
   

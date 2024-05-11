@@ -350,14 +350,13 @@ const SectionTable = ({
               justifyContent: "center",
             }}
           >
-            <button
+            <button className="lg:mr-3"
               onClick={() => moveSection(row.index, "up")}
               style={{
                 background: "none",
                 border: "none",
                 padding: "0",
                 cursor: "pointer",
-                marginRight: "10px",
               }}
               title="Move Up"
             >
@@ -375,14 +374,13 @@ const SectionTable = ({
                 />
               </svg>
             </button>
-            <button
+            <button className="lg:mr-3"
               onClick={() => moveSection(row.index, "down")}
               style={{
                 background: "none",
                 border: "none",
                 padding: "0",
                 cursor: "pointer",
-                marginRight: "10px",
               }}
               title="Move Down"
             >
@@ -400,14 +398,13 @@ const SectionTable = ({
                 />
               </svg>
             </button>
-            <button
+            <button className="lg:mr-3"
               onClick={() => handleModifySection(row.index)}
               style={{
                 background: "none",
                 border: "none",
                 padding: "0",
                 cursor: "pointer",
-                marginRight: "10px",
               }}
               title="Edit"
             >
@@ -483,19 +480,16 @@ const SectionTable = ({
           className="scrollbar1"
           style={{
             overflowX: "auto",
-            display: "flex",
-            justifyContent: "center",
             maxHeight: "30vh",
             paddingRight: "20px",
             minHeight: "30vh",
           }}
         >
-          <table
+          <table className="table-auto lg:table-fixed"
             {...getTableProps()}
             style={{
               width: "100%",
               height: "100%",
-              tableLayout: "fixed",
               borderCollapse: "separate",
               borderSpacing: "0 1px",
               fontSize: "1.1rem",
