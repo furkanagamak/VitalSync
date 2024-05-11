@@ -13,9 +13,11 @@ const SearchBar = ({ inputValue, setInputValue }) => {
   const handleClearInput = () => setInputValue("");
 
   return (
-    <div className="inline-flex items-center rounded-full 
+    <div
+      className="inline-flex items-center rounded-full 
     text-xl border-2 border-[#8E0000] bg-[#F5F5DC] 
-    p-2 min-width relative">
+    p-2 min-width relative"
+    >
       <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#8E0000]">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -185,7 +187,7 @@ const ProcessTable = ({ searchText, processes, isLoading }) => {
   return (
     <>
       <div
-        className="w-full"
+        className="custom-scrollbar-table w-full"
         style={{
           maxWidth: "95%",
           margin: "auto",

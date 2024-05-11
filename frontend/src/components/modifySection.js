@@ -480,7 +480,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
           Selected Procedures
         </h1>
         <div
-          className="scrollbar1 w-full"
+          className="custom-scrollbar-table w-full"
           style={{
             overflowX: "auto",
             maxHeight: "28vh",
@@ -488,7 +488,8 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
             minHeight: "28vh",
           }}
         >
-          <table className="table-auto lg:table-fixed"
+          <table
+            className="table-auto lg:table-fixed"
             {...getTableProps()}
             style={{
               width: "100%",
@@ -544,7 +545,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
                             borderBottom: "1px solid #8E0000",
                             padding: "10px",
                             verticalAlign: "middle",
-                            whiteSpace: 'normal',
+                            whiteSpace: "normal",
                           }}
                         >
                           {cell.render("Cell")}

@@ -50,3 +50,25 @@ input[type=number] {
   background-color: #8E0000;
 }
 
+.custom-scrollbar-table {
+  padding-bottom: 2px !important;
+}
+
+.custom-scrollbar-table::-webkit-scrollbar {
+  width: 10px !important; 
+}
+
+.custom-scrollbar-table::-webkit-scrollbar-track {
+  border-radius: 8px !important;
+  background: white !important;
+}
+
+.custom-scrollbar-table::-webkit-scrollbar-thumb {
+  border-radius: 8px !important;
+  background: #A30000 !important;
+}
+
+.custom-scrollbar-table::-webkit-scrollbar-thumb:hover {
+  background: #8E0000 !important;
+}
+
