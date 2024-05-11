@@ -93,6 +93,7 @@ const CreateTemplateButton = ({ fromLocation }) => {
     <button
       className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
       onClick={handleClick}
+      title="Click to Create a New Process Template"
     >
       <TbLayoutGridAdd className="mr-2 size-10" />
       {buttonText}{" "}
@@ -140,23 +141,29 @@ const ProcessTable = ({ filter, fromLocation, data, setData, isLoading }) => {
       {
         Header: "Name",
         accessor: "name",
+        tooltip: "Sort by Name",
         style: { backgroundColor: "#F5F5DC" },
       },
       {
         Header: "Description",
         accessor: "description",
+        tooltip: "Sort by Description",
       },
       {
         Header: "Sections",
         accessor: "sections",
+        tooltip: "Sort by Sections",
         style: { backgroundColor: "#F5F5DC" },
       },
       {
         Header: "Procedures",
         accessor: "procedures",
+        tooltip: "Sort by Procedures",
       },
       {
         Header: "Actions",
+        id: "actions",
+        tooltip: "",
         Cell: ({ row }) => {
           return (
             <div
@@ -272,20 +279,19 @@ const ProcessTable = ({ filter, fromLocation, data, setData, isLoading }) => {
         onConfirm={() => deleteProcessTemplate(currentTemplate.id)}
         templateName={currentTemplate?.name}
       />
-      <div  className=" w-full"
+      <div
+        className=" w-full"
         style={{
           maxWidth: "95%",
           margin: "auto",
           overflowX: "auto",
-
         }}
       >
-        <table 
+        <table
           {...getTableProps()}
           className="w-full h-full text-center text-lg table-auto lg:table-fixed  border-separate"
           style={{
             borderSpacing: "0 1px",
-
           }}
         >
           <thead>
@@ -295,12 +301,14 @@ const ProcessTable = ({ filter, fromLocation, data, setData, isLoading }) => {
                   <th
                     className={`text-base xl:text-xl border-b px-2 py-1 min-w-[${column.minWidth}px] text-red-800 border-red-800`}
                     {...column.getHeaderProps(column.getSortByToggleProps())}
+                    title={column.tooltip}
                     style={{
                       ...column.style,
                       color: "#8E0000",
                       borderBottom: "1px solid #8E0000",
                       padding: "10px",
                       minWidth: column.minWidth,
+                      cursor: column.id !== "actions" ? "pointer" : "default",
                     }}
                   >
                     <div

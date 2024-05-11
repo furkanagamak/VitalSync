@@ -203,6 +203,10 @@ function MyComponent() {
       case "resetPassword":
         return (
           <>
+            <label htmlFor="textInput" className="mt-5 text-center block">
+              Please enter your new password below. Password must be at least 6
+              characters and not contain your email.
+            </label>
             <label
               htmlFor="newPassword"
               className="mt-1.5 text-left max-md:ml-2.5"

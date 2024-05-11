@@ -191,7 +191,7 @@ function MyComponent() {
 
   return (
     <div className="flex flex-col justify-center items-center h-screen">
-      <h1 className="text-4xl text-[#8E0000] text-center underline font-bold">
+      <h1 className="text-4xl text-[#8E0000] text-center underline font-bold pb-4">
         Roster
       </h1>
       <div
@@ -204,8 +204,7 @@ function MyComponent() {
           value={filterValue}
           onChange={(e) => setFilterValue(e.target.value)}
         >
-          
-            <option value="">Filter by Category</option>
+          <option value="">Filter by Category</option>
           <optgroup label="Department">
             {departments.map((department) => (
               <option key={department} value={department}>

@@ -31,6 +31,14 @@ const ResourceCreate = ({ navToViewResource }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.name) {
+      return toast.error("Please insert a name!");
+    } else if (
+      resourceType !== "roles" &&
+      (!formData.location || !formData.description)
+    ) {
+      return toast.error("Please insert a location for a non-role resource");
+    }
     try {
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/resources`,
@@ -166,7 +174,10 @@ const SelectType = ({ navToViewResource, makeTypeSelection }) => {
     <div>
       <section className="flex justify-center items-center relative py-4">
         <Link to="/resources" className="absolute left-4">
-          <FaArrowLeft className="h-6 w-6" />
+          <FaArrowLeft
+            title="Go Back to Resource Management"
+            className="h-6 w-6"
+          />
         </Link>
         <h1 className="text-primary text-3xl font-semibold">
           Create New Resources
@@ -182,6 +193,7 @@ const SelectType = ({ navToViewResource, makeTypeSelection }) => {
           className="flex flex-col items-center"
           onClick={selectEquipment}
           id="selectEquipmentsBtn"
+          title="Create a New Equipment Resource"
         >
           <MdOutlineMedicalServices className="w-8 h-8" />
           <p>Equipment</p>
@@ -190,6 +202,7 @@ const SelectType = ({ navToViewResource, makeTypeSelection }) => {
           className="flex flex-col items-center"
           onClick={selectRole}
           id="selectRoleBtn"
+          title="Create a New Role Resource"
         >
           <IoPersonOutline className="w-8 h-8" />
           <p>Role</p>
@@ -198,6 +211,7 @@ const SelectType = ({ navToViewResource, makeTypeSelection }) => {
           className="flex flex-col items-center"
           onClick={selectSpace}
           id="selectSpacesBtn"
+          title="Create a New Space Resource"
         >
           <LuBedDouble className="w-8 h-8" />
           <p>Spaces</p>
@@ -223,7 +237,10 @@ const ResourceForm = ({
           className="absolute left-4"
           id="backToSeleResTypeBtn"
         >
-          <FaArrowLeft className="h-6 w-6" />
+          <FaArrowLeft
+            title="Go Back to Resource Type Selection"
+            className="h-6 w-6"
+          />
         </button>
         <h1 className="text-primary text-3xl font-semibold">
           Create New Resource
@@ -296,6 +313,7 @@ const ResourceForm = ({
             type="submit"
             className="bg-highlightGreen text-white py-2 px-4 rounded-md ml-auto"
             id="submitBtn"
+            title="Submit Form and Create Resource"
           >
             Submit
           </button>

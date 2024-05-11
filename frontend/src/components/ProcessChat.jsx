@@ -133,7 +133,7 @@ const ProcessChat = ({ id }) => {
         </h1>
         {messages.length === 0 ? (
           <div className="h-[300px] flex justify-center items-center">
-            There are no chat yet ...
+            No messages yet...
           </div>
         ) : (
           <></>

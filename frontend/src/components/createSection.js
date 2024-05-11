@@ -21,16 +21,17 @@ import { useTable, useSortBy, usePagination } from "react-table";
 import Autocomplete from "@mui/material/Autocomplete";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
-import { useNavigate, useLocation} from "react-router-dom";
-import axios from 'axios';
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
 const notify = () => toast.success("Section Added!");
 
-const AddSectionButton = ({ onAddSection,sectionDetails }) => {
+const AddSectionButton = ({ onAddSection, sectionDetails }) => {
   return (
     <button
       onClick={() => onAddSection(sectionDetails)}
       className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
+      title="Save Section and Add It to the Process Template"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -49,7 +50,6 @@ const AddSectionButton = ({ onAddSection,sectionDetails }) => {
 };
 
 const GoBackButton = () => {
-
   const navigate = useNavigate();
 
   const handleGoBackClick = () => {
@@ -60,6 +60,7 @@ const GoBackButton = () => {
     <button
       onClick={handleGoBackClick}
       className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
+      title="Go Back to Previous Page"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -98,9 +99,9 @@ const SectionForm = ({ onAddProcedure, section, setSection }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setSection(prevState => ({
+    setSection((prevState) => ({
       ...prevState,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -110,20 +111,23 @@ const SectionForm = ({ onAddProcedure, section, setSection }) => {
 
   const addProcedureToSection = () => {
     if (!currentProcedure) {
-        toast.error("Please select a procedure to add.");
-        return; 
+      toast.error("Please select a procedure to add.");
+      return;
     }
-    if (section.procedureTemplates.some(proc => proc._id === currentProcedure._id)) {
-        toast.error("This procedure has already been added.");
-        return; 
+    if (
+      section.procedureTemplates.some(
+        (proc) => proc._id === currentProcedure._id
+      )
+    ) {
+      toast.error("This procedure has already been added.");
+      return;
     }
-    setSection(prevState => ({
-        ...prevState,
-        procedureTemplates: [...prevState.procedureTemplates, currentProcedure]
+    setSection((prevState) => ({
+      ...prevState,
+      procedureTemplates: [...prevState.procedureTemplates, currentProcedure],
     }));
-    setCurrentProcedure(null); 
-};
-
+    setCurrentProcedure(null);
+  };
 
   const theme = createTheme({
     typography: {
@@ -217,7 +221,7 @@ const SectionForm = ({ onAddProcedure, section, setSection }) => {
           fullWidth
           label="Section Name"
           name="sectionName"
-          value={section.sectionName || ''}
+          value={section.sectionName || ""}
           onChange={handleInputChange}
           margin="normal"
           InputLabelProps={{ style: { color: "#8E0000" } }}
@@ -230,7 +234,7 @@ const SectionForm = ({ onAddProcedure, section, setSection }) => {
           rows={4}
           label="Description"
           name="description"
-          value={section.description || ''}
+          value={section.description || ""}
           onChange={handleInputChange}
           margin="normal"
           InputLabelProps={{ style: { color: "#8E0000" } }}
@@ -240,11 +244,11 @@ const SectionForm = ({ onAddProcedure, section, setSection }) => {
 
         <Grid container spacing={3} alignItems="center">
           <Grid item xs>
-          <Autocomplete
-              key={section.procedureTemplates.length}  
+            <Autocomplete
+              key={section.procedureTemplates.length}
               id="procedure-name"
               options={procedureOptions}
-              getOptionLabel={(option) => option ? option.procedureName : ''}
+              getOptionLabel={(option) => (option ? option.procedureName : "")}
               isOptionEqualToValue={(option, value) => option._id === value._id}
               value={currentProcedure}
               onChange={handleProcedureChange}
@@ -285,9 +289,10 @@ const SectionForm = ({ onAddProcedure, section, setSection }) => {
                 textTransform: "none",
                 marginRight: "120px",
               }}
+              title="Add Procedure to the Section"
             >
               Add Procedure
-            </Button>      
+            </Button>
           </Grid>
         </Grid>
       </div>
@@ -313,28 +318,37 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
         Header: "Resources",
         accessor: "requiredResources",
         style: { backgroundColor: "#F5F5DC" },
-        Cell: ({ value }) => value ? (
-          <div>
-            {value.map((item, index) => (
-              <span key={index}>
-                {item.resource.name}{index < value.length - 1 ? ', ' : ''}
-              </span>
-            ))}
-          </div>
-        ) : "No resources"
+        Cell: ({ value }) =>
+          value ? (
+            <div>
+              {value.map((item, index) => (
+                <span key={index}>
+                  {item.resource.name}
+                  {index < value.length - 1 ? ", " : ""}
+                </span>
+              ))}
+            </div>
+          ) : (
+            "No resources"
+          ),
       },
       {
         Header: "Roles",
         accessor: "roles",
-        Cell: ({ value }) => value ? (
-          <div>
-            {value.map((role, index) => (
-              <span key={index}>
-                {role.role.name.charAt(0).toUpperCase() + role.role.name.slice(1)}{index < value.length - 1 ? ', ' : ''}
-              </span>
-            ))}
-          </div>
-        ) : "No roles"
+        Cell: ({ value }) =>
+          value ? (
+            <div>
+              {value.map((role, index) => (
+                <span key={index}>
+                  {role.role.name.charAt(0).toUpperCase() +
+                    role.role.name.slice(1)}
+                  {index < value.length - 1 ? ", " : ""}
+                </span>
+              ))}
+            </div>
+          ) : (
+            "No roles"
+          ),
       },
       {
         Header: "Estimated Time",
@@ -343,29 +357,34 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
       },
       {
         Header: "Special Notes",
-        accessor: "specialNotes"
+        accessor: "specialNotes",
       },
       {
         Header: "Actions",
         Cell: ({ row }) => (
-          <div className="flex-col lg:flex-row"
-            style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div
+            className="flex-col lg:flex-row lg:mr-3"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
             <button
-            onClick={() => onMoveProcedure(row.index, "up")}
+              onClick={() => onMoveProcedure(row.index, "up")}
               className="moveUpProc "
               style={{
                 background: "none",
                 border: "none",
                 padding: "0",
                 cursor: "pointer",
-                marginRight: "10px",
               }}
               title="Move Up"
-            > 
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="#8E0000"
-                className="w-4 h-4 sm:w-8 sm:h-8"  
+                className="w-4 h-4 sm:w-8 sm:h-8"
                 viewBox="0 0 16 16"
               >
                 <path
@@ -375,21 +394,20 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
               </svg>
             </button>
             <button
-            onClick={() => onMoveProcedure(row.index, "down")}
-              className="moveDownProc"
+              onClick={() => onMoveProcedure(row.index, "down")}
+              className="moveDownProc lg:mr-3"
               style={{
                 background: "none",
                 border: "none",
                 padding: "0",
                 cursor: "pointer",
-                marginRight: "10px",
               }}
               title="Move Down"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="#8E0000"
-                className="w-4 h-4 sm:w-8 sm:h-8"  
+                className="w-4 h-4 sm:w-8 sm:h-8"
                 viewBox="0 0 16 16"
               >
                 <path
@@ -399,7 +417,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
               </svg>
             </button>
             <button
-            onClick={() => onDeleteProcedure(row.index)}
+              onClick={() => onDeleteProcedure(row.index)}
               className="deleteProc"
               style={{
                 background: "none",
@@ -412,7 +430,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="#8E0000"
-                className="w-4 h-4 sm:w-8 sm:h-8" 
+                className="w-4 h-4 sm:w-8 sm:h-8"
                 viewBox="0 0 16 16"
               >
                 <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5" />
@@ -431,7 +449,8 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
 
   return (
     <>
-      <div className="min-w-[640px] items-center"
+      <div
+        className="items-center"
         style={{
           border: "2px solid #8E0000",
           borderRadius: "5px",
@@ -456,22 +475,20 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
           Selected Procedures
         </h1>
         <div
-          className="scrollbar1"
+          className="scrollbar1  w-full"
           style={{
             overflowX: "auto",
-            display: "flex",
-            justifyContent: "center",
             maxHeight: "28vh",
             paddingRight: "20px",
             minHeight: "28vh",
           }}
         >
-          <table
+          <table className="table-auto lg:table-fixed"
             {...getTableProps()}
             style={{
+              overflowX: "auto",
               width: "100%",
               height: "100%",
-              tableLayout: "fixed",
               borderCollapse: "separate",
               borderSpacing: "0 1px",
               fontSize: "1.1rem",
@@ -483,7 +500,8 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
               {headerGroups.map((headerGroup) => (
                 <tr {...headerGroup.getHeaderGroupProps()}>
                   {headerGroup.headers.map((column) => (
-                    <th className="text-sm lg:text-lg py-1"
+                    <th
+                      className="text-sm lg:text-lg py-1 px-2"
                       {...column.getHeaderProps()}
                       style={{
                         ...column.style,
@@ -513,13 +531,13 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
                   <tr {...row.getRowProps()}>
                     {row.cells.map((cell) => {
                       return (
-                        <td className="text-sm lg:text-lg"
+                        <td
+                          className="text-sm lg:text-lg"
                           {...cell.getCellProps()}
                           style={{
                             ...cell.column.style,
                             borderBottom: "1px solid #8E0000",
                             verticalAlign: "middle",
-                            wordBreak: 'break-word',
                             whiteSpace: 'normal',
                           }}
                         >
@@ -552,48 +570,59 @@ const AddSectionForm = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setSection(prev => ({ ...prev, [name]: value }));
+    setSection((prev) => ({ ...prev, [name]: value }));
   };
 
   const addProcedure = (procedure) => {
-    setSection(prev => ({
+    setSection((prev) => ({
       ...prev,
-      procedureTemplates: [...prev.procedureTemplates, procedure]
+      procedureTemplates: [...prev.procedureTemplates, procedure],
     }));
   };
 
   const deleteProcedure = (index) => {
-    setSection(prev => ({
+    setSection((prev) => ({
       ...prev,
-      procedureTemplates: prev.procedureTemplates.filter((_, i) => i !== index)
+      procedureTemplates: prev.procedureTemplates.filter((_, i) => i !== index),
     }));
   };
 
   const onAddSection = () => {
-    if(!section.sectionName){
+    if (!section.sectionName) {
       toast.error("Section name is required.");
       return;
     }
-    if(!section.description){
+    if (!section.description) {
       toast.error("A description is required.");
       return;
     }
-    if(section.procedureTemplates.length === 0){
+    if (section.procedureTemplates.length === 0) {
       toast.error("At least one procedure is required.");
       return;
-    }    
-    
+    }
+
     navigate(location.state.url, { state: { newSection: section } });
-    setSection({ _id: "", sectionName: "", description: "", procedureTemplates: [] }); // Clear state
+    setSection({
+      _id: "",
+      sectionName: "",
+      description: "",
+      procedureTemplates: [],
+    }); // Clear state
     //notify();
   };
 
   const moveProcedure = (index, direction) => {
-    setSection(prev => {
+    setSection((prev) => {
       let newProcedures = [...prev.procedureTemplates];
-      if ((direction === "up" && index > 0) || (direction === "down" && index < newProcedures.length - 1)) {
+      if (
+        (direction === "up" && index > 0) ||
+        (direction === "down" && index < newProcedures.length - 1)
+      ) {
         const positionChange = direction === "up" ? -1 : 1;
-        [newProcedures[index], newProcedures[index + positionChange]] = [newProcedures[index + positionChange], newProcedures[index]];
+        [newProcedures[index], newProcedures[index + positionChange]] = [
+          newProcedures[index + positionChange],
+          newProcedures[index],
+        ];
       }
       return { ...prev, procedureTemplates: newProcedures };
     });
@@ -610,15 +639,23 @@ const AddSectionForm = () => {
             <GoBackButton />
           </div>
           <div>
-          <AddSectionButton
-          onAddSection={onAddSection}
-          sectionDetails={section}  
-          />
+            <AddSectionButton
+              onAddSection={onAddSection}
+              sectionDetails={section}
+            />
           </div>
         </div>
       </div>
-      <SectionForm onAddProcedure={addProcedure} section={section} setSection={setSection} />
-      <SectionTable procedures={section.procedureTemplates} onMoveProcedure={moveProcedure} onDeleteProcedure={deleteProcedure} />
+      <SectionForm
+        onAddProcedure={addProcedure}
+        section={section}
+        setSection={setSection}
+      />
+      <SectionTable
+        procedures={section.procedureTemplates}
+        onMoveProcedure={moveProcedure}
+        onDeleteProcedure={deleteProcedure}
+      />
     </div>
   );
 };

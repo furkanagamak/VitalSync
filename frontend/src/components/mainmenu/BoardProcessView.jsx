@@ -109,7 +109,7 @@ const BoardProcessHeader = ({
       <section className="flex flex-col space-y-2 justify-center items-center relative">
         <p className="text-sm">Back to Dashboard</p>
         <Link to="/home" id="homeBtn">
-          <FaArrowLeft className="w-8 h-8" />
+          <FaArrowLeft title="Go Back to Dashboard" className="w-8 h-8" />
         </Link>
       </section>
       <section className="text-2xl">
@@ -132,6 +132,7 @@ const BoardProcessHeader = ({
               boardProcessPage === "procedures" ? "text-red-500" : ""
             }`}
             onClick={navToProcedures}
+            title="View Procedures for the Process"
             id="proceduresBtn"
           >
             <GoChecklist className="w-8 h-8" />
@@ -139,6 +140,7 @@ const BoardProcessHeader = ({
           <button
             className={boardProcessPage === "chat" ? "text-red-500" : ""}
             onClick={navToChat}
+            title="View Live Chat for the Process"
             id="chatBtn"
           >
             <BsChatLeftText className="w-8 h-8" />
@@ -146,6 +148,7 @@ const BoardProcessHeader = ({
           <Link
             to={`/processDetails/${processId}`}
             className="border-l-2 border-black"
+            title="View Process Details"
             id="processDetailsBtn"
           >
             <MdOutlineInfo className="w-8 h-8" />
@@ -246,6 +249,7 @@ const Procedure = ({ procedure, currUser, currentProcedure }) => {
             <button
               onClick={markProcedureAsComplete}
               className="text-green-400 underline"
+              title="Mark Procedure as Completed"
             >
               Mark as completed ✅
             </button>

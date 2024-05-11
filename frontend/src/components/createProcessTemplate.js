@@ -21,12 +21,9 @@ import { TbLayoutGridAdd } from "react-icons/tb";
 import "./TemplateStyles.css";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from 'axios';
-import { debounce } from 'lodash';
-import { useProcessCreation } from '../providers/ProcessCreationProvider';
-
-
-
+import axios from "axios";
+import { debounce } from "lodash";
+import { useProcessCreation } from "../providers/ProcessCreationProvider";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -41,11 +38,15 @@ const CreateTemplateButton = ({ onCreate, instanceCreation }) => {
   };
 
   const buttonText = instanceCreation ? "Use Template" : "Save Template";
+  const buttonTitle = instanceCreation
+  ? "Use This Process Template"
+  : "Save Template";
 
   return (
     <button
       onClick={handleCreateClick}
       className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
+      title={buttonTitle}
     >
       <TbLayoutGridAdd className="mr-2 size-10" />
       {buttonText}
@@ -69,6 +70,7 @@ const GoBackButton = ({instanceCreation }) => {
     <button
       onClick={handleGoBackClick}
       className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
+      title="Go Back to Process Template Management"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -259,12 +261,18 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
 
 
   const moveSection = (index, direction) => {
-    setSections(currentSections => {
+    setSections((currentSections) => {
       let newSections = [...currentSections];
-      if (direction === 'up' && index > 0) {
-        [newSections[index], newSections[index - 1]] = [newSections[index - 1], newSections[index]];
-      } else if (direction === 'down' && index < newSections.length - 1) {
-        [newSections[index], newSections[index + 1]] = [newSections[index + 1], newSections[index]];
+      if (direction === "up" && index > 0) {
+        [newSections[index], newSections[index - 1]] = [
+          newSections[index - 1],
+          newSections[index],
+        ];
+      } else if (direction === "down" && index < newSections.length - 1) {
+        [newSections[index], newSections[index + 1]] = [
+          newSections[index + 1],
+          newSections[index],
+        ];
       }
       handleSessionUpdate(process, newSections); // Update session storage
       return newSections;
@@ -272,7 +280,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
   };
 
   const deleteSection = (index) => {
-    setSections(currentSections => {
+    setSections((currentSections) => {
       const newSections = currentSections.filter((_, i) => i !== index);
       handleSessionUpdate(process, newSections); // Update session storage
       return newSections;
@@ -293,34 +301,38 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
         Header: "Procedures",
         accessor: "procedureTemplates",
         style: { backgroundColor: "#F5F5DC" },
-        Cell: ({ value }) => value && Array.isArray(value) ? (
+        Cell: ({ value }) =>
+          value && Array.isArray(value) ? (
             <div>
-                {value.map((procedure, index) => (
-                    <span key={index}>
-                        {procedure.procedureName}{index < value.length - 1 ? ', ' : ''}
-                    </span>
-                ))}
+              {value.map((procedure, index) => (
+                <span key={index}>
+                  {procedure.procedureName}
+                  {index < value.length - 1 ? ", " : ""}
+                </span>
+              ))}
             </div>
-        ) : "No procedures listed"
-    },
+          ) : (
+            "No procedures listed"
+          ),
+      },
       {
         Header: "Actions",
         Cell: ({ row }) => (
-          <div className="flex-col lg:flex-row"
+          <div
+            className="flex-col lg:flex-row"
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <button
-              onClick={() => moveSection(row.index, 'up')}
+            <button className="lg:mr-3"
+              onClick={() => moveSection(row.index, "up")}
               style={{
                 background: "none",
                 border: "none",
                 padding: "0",
                 cursor: "pointer",
-                marginRight: "10px",
               }}
               title="Move Up"
             >
@@ -337,15 +349,14 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
                   d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5"
                 />
               </svg>
-            </button>
-            <button
+            </button >
+            <button className="lg:mr-3"
             onClick={() => moveSection(row.index, 'down')}
               style={{
                 background: "none",
                 border: "none",
                 padding: "0",
                 cursor: "pointer",
-                marginRight: "10px",
               }}
               title="Move Down"
             >
@@ -363,14 +374,13 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
                 />
               </svg>
             </button>
-            <button
+            <button className="lg:mr-3"
                 onClick={() => handleModifySection(row.index)}
                 style={{
                 background: "none",
                 border: "none",
                 padding: "0",
                 cursor: "pointer",
-                marginRight: "10px",
               }}
               title="Edit"
             >
@@ -386,7 +396,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
               </svg>
             </button>
             <button
-            onClick={() => deleteSection(row.index)}
+              onClick={() => deleteSection(row.index)}
               style={{
                 background: "none",
                 border: "none",
@@ -443,22 +453,20 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
           Selected Sections
         </h1>
         <div
-          className="scrollbar1"
+          className="scrollbar1 w-full"
           style={{
             overflowX: "auto",
-            display: "flex",
-            justifyContent: "center",
+
             maxHeight: "30vh",
             paddingRight: "20px",
             minHeight: "30vh",
           }}
         >
-          <table
+          <table className="table-auto lg:table-fixed"
             {...getTableProps()}
             style={{
               width: "100%",
               height: "100%",
-              tableLayout: "fixed",
               borderCollapse: "separate",
               borderSpacing: "0 1px",
               fontSize: "1.1rem",
@@ -470,7 +478,8 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
               {headerGroups.map((headerGroup) => (
                 <tr {...headerGroup.getHeaderGroupProps()}>
                   {headerGroup.headers.map((column) => (
-                    <th className="text-sm lg:text-lg"
+                    <th
+                      className="text-sm lg:text-lg"
                       {...column.getHeaderProps()}
                       style={{
                         ...column.style,
@@ -501,7 +510,8 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
                   <tr {...row.getRowProps()}>
                     {row.cells.map((cell) => {
                       return (
-                        <td className="text-sm lg:text-lg"
+                        <td
+                          className="text-sm lg:text-lg"
                           {...cell.getCellProps()}
                           style={{
                             ...cell.column.style,
@@ -540,6 +550,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
               fontSize: "1.1rem",
               textTransform: "none",
             }}
+            title="Add New Section to the Process Template"
           >
             Add Section
           </Button>
@@ -553,11 +564,10 @@ const CreateProcessTemplateForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-
   const [process, setProcess] = useState({
     name: "",
     description: "",
-    sections: []
+    sections: [],
   });
   const [sections, setSections] = useState([]);
   const [incomingUrl, setIncomingUrl] = useState("");
@@ -606,35 +616,33 @@ const CreateProcessTemplateForm = () => {
     const procData = {
       processName: process.name,
       description: process.description,
-      sections: sections.map(section => ({
-          _id: section._id, 
-          sectionName: section.sectionName,
-          description: section.description,
-          procedureTemplates: section.procedureTemplates.map(p => p._id || p) 
-      }))
-  };
-    if(currentlyCreatingTemplate){
+      sections: sections.map((section) => ({
+        _id: section._id,
+        sectionName: section.sectionName,
+        description: section.description,
+        procedureTemplates: section.procedureTemplates.map((p) => p._id || p),
+      })),
+    };
+    if (currentlyCreatingTemplate) {
       updateProcessTemplate(procData);
-      navigate("/processManagement/newProcess/patientForm", { state: { from: '/processManagement/newProcess' } });
-    }
-    else{
-    try {
-      const response = await axios.post("/processTemplates", procData);
-      console.log("Template Created:", response.data);
-      navigate("/ProcessTemplateManagement");
-      toast.success("Process Template Created Successfully!");
+      navigate("/processManagement/newProcess/patientForm", {
+        state: { from: "/processManagement/newProcess" },
+      });
+    } else {
+      try {
+        const response = await axios.post("/processTemplates", procData);
+        console.log("Template Created:", response.data);
+        navigate("/ProcessTemplateManagement");
+        toast.success("Process Template Created Successfully!");
 
-      setProcess({ name: "", description: "", sections: "" });
-      setSections([]);
+        setProcess({ name: "", description: "", sections: "" });
+        setSections([]);
 
-      sessionStorage.removeItem('processTemplateState');
-
-    } catch (error) {
-      console.error("Error creating process template:", error);
-      toast.error(
-        "Failed to create process template"
-      );
-    }
+        sessionStorage.removeItem("processTemplateState");
+      } catch (error) {
+        console.error("Error creating process template:", error);
+        toast.error("Failed to create process template");
+      }
     }
   };
 

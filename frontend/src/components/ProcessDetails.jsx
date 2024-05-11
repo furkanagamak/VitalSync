@@ -208,6 +208,7 @@ const Procedure = ({ procedure, currentProcedure }) => {
             <button
               onClick={markProcedureAsComplete}
               className="text-green-400"
+              title="Mark Procedure as Completed"
             >
               Mark as Completed ✅
             </button>

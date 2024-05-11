@@ -43,12 +43,14 @@ const ResourceDeleteModal = ({ resource, onDelete, onCancel }) => {
           <button
             onClick={onCancel}
             className="px-4 py-2 rounded-md hover:underline"
+            title="Cancel Deletion"
           >
             Cancel
           </button>
           <button
             onClick={handleDeletionSubmit}
             className="bg-primary text-white px-4 py-2 rounded-md hover:bg-red-600"
+            title="Confirm Deletion"
           >
             Yes
           </button>

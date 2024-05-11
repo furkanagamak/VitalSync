@@ -104,7 +104,7 @@ const NotificationBoxItem = ({ notification }) => {
 
   return (
     <Link to={`/processDetails/${processId}`} className="no-underline">
-      <div>
+      <div title="Click to View the Process Details for This Notification">
         <div className="bg-primary text-white space-y-4 flex flex-col md:grid grid-cols-10">
           <section className="flex flex-col items-center space-y-8 col-start-1 col-end-3 md:border-r-4 p-4 text-center relative">
             <p className="mr-auto absolute top-2 left-2"></p>

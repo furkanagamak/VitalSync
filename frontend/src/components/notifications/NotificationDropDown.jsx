@@ -84,7 +84,10 @@ const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
         id="notificationsBoxBtn"
         onClick={closeDropDown}
       >
-        <HiOutlineDotsVertical className="h-8 w-8" />
+        <HiOutlineDotsVertical
+          title="View All Your Notifications"
+          className="h-8 w-8"
+        />
       </Link>
     </div>
   );
@@ -112,7 +115,10 @@ const NotificationDDItem = ({ notification, closeDropDown }) => {
       onClick={closeDropDown}
       className="no-underline"
     >
-      <div className="bg-primary text-white p-4 space-y-4">
+      <div
+        title="Click to View the Process Details for This Notification"
+        className="bg-primary text-white p-4 space-y-4"
+      >
         <section className="grid grid-cols-5">
           {CurrIcon}
           <h1 className="col-start-2 col-end-5 mx-auto text-xl">
