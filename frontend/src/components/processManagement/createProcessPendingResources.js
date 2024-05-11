@@ -235,7 +235,8 @@ export function PendingNewResources() {
     const newAssignmentCompletion = {};
     fetchedSections.forEach(section => {
       section.procedureTemplates.forEach(procedure => {
-        newAssignmentCompletion[procedure._id] = procedure.requiredResources.every(resource => resource.resourceInstance);
+        const key = `${section._id}-${procedure._id}`;
+        newAssignmentCompletion[key] = procedure.requiredResources.every(resource => resource.resourceInstance);
       });
     });
     setAssignmentCompletion(newAssignmentCompletion);
@@ -248,7 +249,7 @@ export function PendingNewResources() {
   };
 
   const handleGoBack = () => {
-    navigate(-1);
+    navigate("/processManagement/newProcess/reviewStaffAssignments");
   };
 
   const handleProceed = () => {
@@ -261,7 +262,10 @@ export function PendingNewResources() {
     setViewAlternateComponent(true);
   };
 
-  const isFullyAssigned = (procedureId) => assignmentCompletion[procedureId] || false;
+  const isFullyAssigned = (procedureId, sectionId) => {
+    const key = `${sectionId}-${procedureId}`;
+    return assignmentCompletion[key] || false;
+  };
 
   const handleClose = () => {
     setViewAlternateComponent(false);
@@ -301,12 +305,12 @@ export function PendingNewResources() {
                 {section.procedureTemplates.map((procedure, idx) => (
                   <div key={idx} className={`flex justify-between items-center py-2 ${idx < section.procedureTemplates.length - 1 ? 'border-b' : ''} border-black`}>
                     <span className='text-2xl'>{procedure.procedureName}</span>
-                    <div className={`flex items-center text-2xl font-bold ${isFullyAssigned(procedure._id) ? 'text-green-500' : 'text-highlightRed underline'}`}>
+                    <div className={`flex items-center text-2xl font-bold ${isFullyAssigned(procedure._id, section._id) ? 'text-green-500' : 'text-highlightRed underline'}`}>
                       <button
                         className="flex items-center text-current p-0 border-none bg-transparent"
                         onClick={() => handleClick(procedure, section._id)}
                       >
-                        {isFullyAssigned(procedure._id) ? (
+                        {isFullyAssigned(procedure._id, section._id) ? (
                           <div className="flex items-center text-green-500">
                             <FaCheck className="mr-2" /> Assigned
                           </div>

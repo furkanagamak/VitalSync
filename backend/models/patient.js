@@ -18,6 +18,9 @@ const patientSchema = new mongoose.Schema({
   ],
   knownConditions: {type: String},
   allergies: {type: String},
+  insuranceProvider: { type: String, required: false },
+  insuranceGroup: { type: String, required: false },
+  insurancePolicy:{ type: String, required: false }
 });
 
 module.exports = mongoose.model("Patient", patientSchema);

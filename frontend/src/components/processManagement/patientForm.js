@@ -72,7 +72,9 @@ function PatientInformationForm() {
   const transformAndSetPatient = (editedPatient) => {
     const {
       _id, fullName, street, city, state, zip, dob, sex, phone, 
-      emergencyContacts, knownConditions, allergies
+      emergencyContacts, knownConditions, allergies,insuranceProvider,
+      insuranceGroup,
+      insurancePolicy,
     } = editedPatient;
   
     const names = fullName.split(' ');
@@ -100,9 +102,9 @@ function PatientInformationForm() {
       emergencyContact2Phone: emergencyContact2.phone || '',
       knownConditions: knownConditions || '',
       allergies: allergies || '',
-      insuranceProvider: '', 
-      insuranceGroup: '', 
-      insurancePolicy: ''
+      insuranceProvider: insuranceProvider || '', 
+      insuranceGroup: insuranceGroup || '', 
+      insurancePolicy: insurancePolicy || ''
     };
   
     return transformedPatient;
@@ -159,7 +161,11 @@ function PatientInformationForm() {
         emergencyContact2Relation,
         emergencyContact2Phone,
         knownConditions,
-        allergies
+        allergies,
+        insuranceProvider, 
+        insuranceGroup, 
+        insurancePolicy
+
     } = patientInfo;
 
     return {
@@ -176,7 +182,10 @@ function PatientInformationForm() {
             { name: emergencyContact2Name, relation: emergencyContact2Relation, phone: emergencyContact2Phone }
         ],
         knownConditions,
-        allergies
+        allergies,
+        insuranceProvider, 
+        insuranceGroup, 
+        insurancePolicy
     };
 };
 
@@ -189,6 +198,7 @@ function PatientInformationForm() {
       navigate(-1);
     }
     setPatientInformation(patientInfo);
+    console.log(patientInfo);
     navigate("/processManagement/newProcess/startTime");
   };
 

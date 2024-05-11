@@ -1,6 +1,8 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from "axios";
 import { useLocation } from 'react-router-dom';
+import toast from "react-hot-toast";
+
 
 
 const ProcessCreationContext  = createContext(null);
@@ -14,6 +16,7 @@ export const ProcessCreationProvider = ({ children }) => {
 
   const initialState = (key, defaultValue) => {
     const stored = sessionStorage.getItem(key);
+    console.log(key, stored);
     return stored ? JSON.parse(stored) : defaultValue;
 };
 
@@ -51,6 +54,7 @@ const [processTemplate, setProcessTemplate] = useState(() => initialState('proce
 };
 
 const clearSessionStorage = () => {
+  console.log("called");
   sessionStorage.removeItem('processTemplate');
   sessionStorage.removeItem('patientInformation');
   sessionStorage.removeItem('fetchedSections');
@@ -87,6 +91,7 @@ useEffect(() => {
         insuranceGroup: '',
         insurancePolicy: ''
       });
+      console.log("called");
       setFetchedSections([]);
       setStartTime('');
   }
@@ -150,6 +155,8 @@ useEffect(() => {
   };
 
   const fetchAndSetProcedureTemplates = async () => {
+    console.log("called");
+
       if (!startTime) return;
 
       const parsedStartTime = new Date(startTime);
@@ -181,13 +188,16 @@ useEffect(() => {
   };
 
   useEffect(() => {
-      if (processTemplate.sections.length > 0 && startTime) {
+    console.log("called", fetchedSections);
+
+      if (processTemplate.sections.length > 0 && startTime && fetchedSections.length===0) {
           fetchAndSetProcedureTemplates();
       }
   }, [processTemplate.sections, startTime]);
 
 
   const assignStaffToRole = (sectionId, procedureId, roleId, staffId) => {
+    console.log("called");
     setFetchedSections(sections => sections.map(section => {
       if (section._id === sectionId) {
         return {
@@ -238,6 +248,7 @@ useEffect(() => {
   };
 
   const createProcessInstance = async () => {
+    
     const processDetails = {
       processTemplate: {
         processName: processTemplate.processName,
@@ -246,18 +257,27 @@ useEffect(() => {
       patientInformation,
       fetchedSections
     };
+    console.log(patientInformation);
   
     try {
       const { data } = await axios.post('/processInstances', processDetails);
-      console.log('Process instance created successfully:', data);
+        toast.success(`Process ${data.processID} successfully created! Assigned staff have been notified.`,{
+          id: data.processID,
+        }); 
+
+
     } catch (error) {
-      console.error('Failed to create process instance:', error);
+      toast.error("Failed to create process instance. Please try again.");
+
     }
   }
 
 
   useEffect(() => {
+    
     if (location.pathname.includes('ProcessTemplateManagement')) {
+      console.log("called");
+
         clearSessionStorage();
         setProcessTemplate({
           processName: '',
@@ -303,6 +323,7 @@ useEffect(() => {
       patientInformation,
       setPatientInformation,
       fetchedSections,
+      setFetchedSections,
       startTime,
       setStartTime,
       currentlyModifyingTemplate, setCurrentlyModifyingTemplate,
