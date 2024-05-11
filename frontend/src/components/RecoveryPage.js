@@ -204,7 +204,8 @@ function MyComponent() {
         return (
           <>
             <label htmlFor="textInput" className="mt-5 text-center block">
-              Please enter your new password below. Password must be at least 6 characters and not contain your email.
+              Please enter your new password below. Password must be at least 6
+              characters and not contain your email.
             </label>
             <label
               htmlFor="newPassword"
