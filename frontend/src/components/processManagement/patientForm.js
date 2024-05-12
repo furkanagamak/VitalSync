@@ -114,7 +114,6 @@ function PatientInformationForm() {
 
   useEffect(() => {
     if (shouldRedirect) {
-      // Redirect the user procedurally, not declaratively
       navigate("/processManagement/modifyProcess/activeProcesses", { replace: true });
     }
   }, [navigate, shouldRedirect]);
@@ -126,8 +125,10 @@ function PatientInformationForm() {
     console.log(editedPatient);
     if(location.pathname.includes("modify")){
       if(Object.keys(editedPatient).length > 0){
-        console.log("setting patient");
+        console.log(editedPatient);
         const transformedPatient = transformAndSetPatient(editedPatient);
+        console.log(transformedPatient);
+
         setPatientInfo(transformedPatient);      }
       else if(Object.keys(processInstance.patient).length > 0){
         setPatientInfo(processInstance.patient);
@@ -204,6 +205,7 @@ function PatientInformationForm() {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+    console.log(name,value);
   
     if (['zip', 'insuranceGroup', 'insurancePolicy'].includes(name)) {
       if (!/^\d*$/.test(value)) {
@@ -387,6 +389,7 @@ function PatientInformationForm() {
               <PhoneInput
               country={'us'}
               className="phoneInput2"
+              value={patientInfo.emergencyContact1Phone}
 
               onChange={(phone ) => handlePhoneChange(phone , 'emergencyContact1Phone')}/>
               </Box>
@@ -404,6 +407,7 @@ function PatientInformationForm() {
               <PhoneInput
               country={'us'}
               className="phoneInput3"
+              value={patientInfo.emergencyContact2Phone}
 
               onChange={(phone ) => handlePhoneChange(phone , 'emergencyContact2Phone')}/>
               </Box>

@@ -62,7 +62,7 @@ function ProcessCell({ process, onModifyClick, onViewClick, pid }) {
           </p>
         </div>
       </div>
-      <div className="flex-[2] lg:border-r border-white py-1 pb-2 min-w-0 lg:py-0 lg:px-4">
+      <div className="flex-[2] lg:border-r border-white py-1 pb-2 min-w-0 lg:py-0 lg:px-4 ml-5">
         <div className="space-y-1">
           <p className="truncate">
             <span className="underline">Current Procedure:</span>{" "}
@@ -77,14 +77,14 @@ function ProcessCell({ process, onModifyClick, onViewClick, pid }) {
       <div className="flex-[1] lg:pl-4 flex justify-center items-center min-w-0">
         <div className="flex flex-col space-y-2 w-full lg:w-3/4">
           <button
-            className="bg-green-500 hover:bg-green-600 rounded-full w-full lg:px-4 py-1 text-center mb-2 text-sm lg:text-2xl"
+            className="bg-green-500 hover:bg-green-600 rounded-full w-full lg:px-4 py-1 text-center mb-2 text-sm lg:text-3xl"
             onClick={handleViewClickID}
             id={`activeProcessViewBtn-${process.processID}`}
           >
             View
           </button>
           <button
-            className="bg-red-500 hover:bg-red-600 rounded-full w-full lg:px-4 py-1 text-center text-sm lg:text-2xl"
+            className="bg-red-500 hover:bg-red-600 rounded-full w-full lg:px-4 py-1 text-center text-sm lg:text-3xl"
             onClick={handleModifyClickID}
             id={`activeProcessModifyBtn-${process.processID}`}
           >

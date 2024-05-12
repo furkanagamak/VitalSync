@@ -18,40 +18,45 @@ export function RoleDropdownContent({ role, eligibleStaff, assignStaff, assigned
   };
 
   return (
-    <div className="flex mx-10 ">
+    <div className="flex mx-10 mb-5">
       <div className="flex flex-col w-2/5 text-3xl mt-5">
         <p>Currently Assigned:</p>
         <p className="text-primary mb-2">{assignedStaff ? `${assignedStaff.firstName} ${assignedStaff.lastName}` : "Not assigned"}</p>
       </div>
       <div className="w-3/5 ml-5">
         <p className="text-highlightGreen text-2xl mb-3 mt-5">Available Qualified Staff:</p>
-        <div className="border-gray-400 border-2 rounded-lg p-3 overflow-y-auto" style={{ maxHeight: '12rem' }}>
-          <table className="w-full text-left">
-            <thead className="border-b border-primary">
-              <tr>
-                <th className="text-primary text-2xl">Name</th>
-                <th className="text-primary text-2xl">Title</th>
-                <th className="text-primary text-2xl">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {eligibleStaff.map((staff, index) => (
-                <tr key={index} style={{ borderBottom: '1px solid black' }}>
-                <td className="py-2 text-2xl">{staff.firstName} {staff.lastName}</td>
-                  <td className="text-2xl">{staff.position}</td>
-                  <td>
-                    <button 
-                      className="text-xl bg-green-500 hover:bg-green-700 text-white rounded-full px-3 py-1"
-                      onClick={() => handleAssign(staff)}
-                    >
-                      Assign
-                    </button>
-                  </td>
+        {eligibleStaff.length > 0 ? (
+          <div className="border-gray-400 border-2 rounded-lg p-3 overflow-y-auto" style={{ maxHeight: '12rem' }}>
+            <table className="w-full text-left">
+              <thead className="border-b border-primary">
+                <tr>
+                  <th className="text-primary text-2xl">Name</th>
+                  <th className="text-primary text-2xl">Title</th>
+                  <th className="text-primary text-2xl">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {eligibleStaff.map((staff, index) => (
+                  <tr key={index} style={{ borderBottom: '1px solid black' }}>
+                    <td className="py-2 text-2xl">{staff.firstName} {staff.lastName}</td>
+                    <td className="text-2xl">{staff.position}</td>
+                    <td>
+                      <button 
+                        className="text-xl bg-green-500 hover:bg-green-700 text-white rounded-full px-3 py-1"
+                        onClick={() => handleAssign(staff)}
+                      >
+                        Assign
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="text-xl text-red-500">No other qualified staff available at this time.</p>
+
+        )}
       </div>
     </div>
   );
@@ -143,15 +148,31 @@ export function CreateStaffAssignments({ sectionId, procedureId, procedureName, 
     fetchEligibleStaff();
   }, [roles, startTime, endTime]);
 
-  const assignStaff = (roleId, staff) => {
 
+  const assignStaff = (roleId, staff) => {
+    const previouslyAssignedStaff = assignedStaff[roleId];
+
+    // Update assigned staff
+    setAssignedStaff(prev => ({ ...prev, [roleId]: staff }));
+
+    // Remove newly assigned staff from all eligible lists
     const updatedStaff = Object.keys(eligibleStaff).reduce((acc, key) => {
-      acc[key] = eligibleStaff[key].filter(s => s._id !== staff._id);
-      return acc;
+        acc[key] = eligibleStaff[key].filter(s => s._id !== staff._id);
+        return acc;
     }, {});
     setEligibleStaff(updatedStaff);
-    setAssignedStaff(prev => ({ ...prev, [roleId]: staff }));
-  };
+
+    // If there was previously assigned staff, add them back to the eligible lists where appropriate
+    if (previouslyAssignedStaff) {
+        const updatedEligibleStaff = { ...updatedStaff };
+        roles.forEach(role => {
+            if (!updatedEligibleStaff[role.uniqueId].find(s => s._id === previouslyAssignedStaff._id)) {
+                updatedEligibleStaff[role.uniqueId].push(previouslyAssignedStaff);
+            }
+        });
+        setEligibleStaff(updatedEligibleStaff);
+    }
+};
 
   const toggleRole = (uniqueId) => {
     setOpenRoles(prevOpenRoles => {
@@ -187,14 +208,27 @@ export function CreateStaffAssignments({ sectionId, procedureId, procedureName, 
 
   if (isLoading) return <div>Loading...</div>;
 
-  const autoAssignStaff = () => {
+const autoAssignStaff = () => {
+    let updatedEligibleStaff = { ...eligibleStaff };
+    let updatedAssignedStaff = { ...assignedStaff };
+
     roles.forEach(role => {
-      const roleEligibleStaff = eligibleStaff[role.uniqueId];
-      if (roleEligibleStaff && roleEligibleStaff.length > 0 && !assignedStaff[role.uniqueId]) {
-        assignStaff(role.uniqueId, roleEligibleStaff[0]);  
-      }
+        const roleEligibleStaff = updatedEligibleStaff[role.uniqueId];
+        const availableStaff = roleEligibleStaff.filter(staff => !updatedAssignedStaff[role.uniqueId]);
+
+        if (availableStaff.length > 0 && !updatedAssignedStaff[role.uniqueId]) {
+            updatedAssignedStaff[role.uniqueId] = availableStaff[0];
+            // Remove the assigned staff from all eligible lists to prevent reassignment
+            Object.keys(updatedEligibleStaff).forEach(key => {
+                updatedEligibleStaff[key] = updatedEligibleStaff[key].filter(staff => staff._id !== availableStaff[0]._id);
+            });
+        }
     });
-  };
+
+    // Update state after all assignments are processed
+    setAssignedStaff(updatedAssignedStaff);
+    setEligibleStaff(updatedEligibleStaff);
+};
 
 
   return (

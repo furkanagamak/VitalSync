@@ -19,7 +19,7 @@ export function ResourceDropdownContent({ requiredResource, eligibleResources, a
   console.log(eligibleResources);
 
   return (
-    <div className="flex mx-10">
+    <div className="flex mx-10 mb-5">
       <div className="flex flex-col w-2/5 text-3xl mt-5">
         <p>Currently Assigned:</p>
         <p className="text-primary mb-2">
@@ -28,31 +28,35 @@ export function ResourceDropdownContent({ requiredResource, eligibleResources, a
       </div>
       <div className="w-3/5 ml-5">
         <p className="text-highlightGreen text-2xl mb-3 mt-5">Available Resources:</p>
-        <div className="border-gray-400 border-2 rounded-lg p-3 overflow-y-auto" style={{ maxHeight: '12rem' }}>
-          <table className="w-full text-left">
-            <thead className="border-b border-primary">
-              <tr>
-                <th className="text-primary text-2xl">Identifier</th>
-                <th className="text-primary text-2xl">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {eligibleResources.map((resource, index) => (
-                <tr key={index} style={{ borderBottom: '1px solid black' }}>
-                <td className="py-2 text-2xl">{resource.uniqueIdentifier}</td>
-                  <td>
-                    <button 
-                      className="text-xl bg-green-500 hover:bg-green-700 mt-2 text-white rounded-full px-3 py-1"
-                      onClick={() => handleAssign(resource)}
-                    >
-                      Assign
-                    </button>
-                  </td>
+        {eligibleResources.length > 0 ? (
+          <div className="border-gray-400 border-2 rounded-lg p-3 overflow-y-auto" style={{ maxHeight: '12rem' }}>
+            <table className="w-full text-left">
+              <thead className="border-b border-primary">
+                <tr>
+                  <th className="text-primary text-2xl">Identifier</th>
+                  <th className="text-primary text-2xl">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {eligibleResources.map((resource, index) => (
+                  <tr key={index} style={{ borderBottom: '1px solid black' }}>
+                    <td className="py-2 text-2xl">{resource.uniqueIdentifier}</td>
+                    <td>
+                      <button 
+                        className="text-xl bg-green-500 hover:bg-green-700 mt-2 text-white rounded-full px-3 py-1"
+                        onClick={() => handleAssign(resource)}
+                      >
+                        Assign
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="text-xl text-red-500">No other available resources at this time.</p>
+        )}
       </div>
     </div>
   );
@@ -100,10 +104,41 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
   }, [requiredResources, startTime, endTime]);
 
   const assignResource = (resourceUniqueId, resourceInstance) => {
-    const updatedResources = {...eligibleResources};
-    updatedResources[resourceUniqueId] = updatedResources[resourceUniqueId].filter(r => r._id !== resourceInstance._id);
-    setEligibleResources(updatedResources);
+    // Capture the previously assigned resource for this role if it exists
+    const previouslyAssignedResource = assignedResources[resourceUniqueId];
+  
+    // Update the assigned resources with the new assignment
     setAssignedResources(prev => ({ ...prev, [resourceUniqueId]: resourceInstance }));
+  
+    // Remove the newly assigned resource from the eligible list across all roles
+    const updatedResources = Object.keys(eligibleResources).reduce((acc, key) => {
+      acc[key] = eligibleResources[key].filter(r => r._id !== resourceInstance._id);
+      return acc;
+    }, {});
+  
+    // If there was previously assigned resource, add it back to the eligible lists where appropriate
+    if (previouslyAssignedResource) {
+      const updatedEligibleResources = { ...updatedResources };
+      console.log("Debug: Starting to re-add previously assigned resource if not present.");
+    
+      requiredResources.forEach(resource => {
+        // Debugging: Check if the resource already contains the previously assigned resource
+        const isPreviouslyAssignedResourcePresent = updatedEligibleResources[resource.uniqueId].find(r => r._id === previouslyAssignedResource._id);
+        console.log(`Debug: Checking if previously assigned resource (${previouslyAssignedResource._id}) is already in eligible list for resource (${resource.uniqueId}). Present: ${!!isPreviouslyAssignedResourcePresent}`);
+    
+        if (!isPreviouslyAssignedResourcePresent && (resource.name === previouslyAssignedResource.name)) {
+          console.log(`Debug: Adding previously assigned resource (${previouslyAssignedResource._id}) back to eligible list for resource (${resource.uniqueId}). The resource is`, resource, previouslyAssignedResource);
+          updatedEligibleResources[resource.uniqueId].push(previouslyAssignedResource);
+        }
+      });
+    
+      // Debugging: Output the final states of eligible resources after the update
+      console.log("Debug: Final updated eligible resources state:", updatedEligibleResources);
+      setEligibleResources(updatedEligibleResources);
+    } else {
+      console.log("Debug: No previously assigned resource to add back. Setting updated resources.");
+      setEligibleResources(updatedResources);
+    }
   };
 
   const toggleResource = (uniqueId) => {
@@ -140,15 +175,28 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
   };
 
   const autoAssignResources = () => {
-    requiredResources.forEach(requiredResource => {
-      const resourceEligibleInstances = eligibleResources[requiredResource.uniqueId];
-      if (resourceEligibleInstances && resourceEligibleInstances.length > 0 && !assignedResources[requiredResource.uniqueId]) {
-        assignResource(requiredResource.uniqueId, resourceEligibleInstances[0]);  
-      }
-    });
-  };
+    let updatedEligibleResources = { ...eligibleResources };
+    let updatedAssignedResources = { ...assignedResources };
 
-  if (isLoading) return <div>Loading...</div>;
+    requiredResources.forEach(requiredResource => {
+        const resourceEligibleInstances = updatedEligibleResources[requiredResource.uniqueId];
+        const availableResources = resourceEligibleInstances.filter(resourceInstance => !updatedAssignedResources[requiredResource.uniqueId]);
+
+        if (availableResources.length > 0 && !updatedAssignedResources[requiredResource.uniqueId]) {
+            updatedAssignedResources[requiredResource.uniqueId] = availableResources[0];
+            // Remove the assigned resource from all eligible lists to prevent reassignment
+            Object.keys(updatedEligibleResources).forEach(key => {
+                updatedEligibleResources[key] = updatedEligibleResources[key].filter(resource => resource._id !== availableResources[0]._id);
+            });
+        }
+    });
+
+    // Update state after all assignments are processed
+    setAssignedResources(updatedAssignedResources);
+    setEligibleResources(updatedEligibleResources);
+};
+
+  if (isLoading) return <div></div>;
 
   return (
     <div className="bg-secondary min-h-screen">
