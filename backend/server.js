@@ -2581,6 +2581,31 @@ app.put("/processInstances/:id", async (req, res) => {
       console.log("Updated sections:", updatedSections);
     }
 
+    console.log(deletedProcedures);
+
+     // Handle deletion of procedures if provided
+     if (deletedProcedures && deletedProcedures.length > 0) {
+      await Promise.all(deletedProcedures.map(async (procedureId) => {
+        const procedureInstance = await ProcedureInstance.findById(procedureId);
+        console.log(procedureInstance);
+        if (!procedureInstance) return;
+
+        // Update accounts
+        await Account.updateMany(
+          { _id: { $in: procedureInstance.rolesAssignedPeople.map(r => r.accounts).flat() }},
+          { $pull: { assignedProcedures: procedureId, unavailableTimes: { reason: procedureId.toString() }}}
+        );
+
+        // Update resources
+        await ResourceInstance.updateMany(
+          { _id: { $in: procedureInstance.assignedResources }},
+          { $pull: { unavailableTimes: { reason: procedureId.toString() }}}
+        );
+
+        await ProcedureInstance.findByIdAndDelete(procedureId);
+      }));
+    }
+
     // Save the updated process instance
     await processInstance.save();
     res.send(processInstance);

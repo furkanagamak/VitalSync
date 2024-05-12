@@ -19,6 +19,8 @@ import axios from 'axios';
 import DeleteIcon from "@mui/icons-material/Delete";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import {IconButton} from "@mui/material";
+import { FaCheck } from 'react-icons/fa';
+
 
 
 
@@ -495,35 +497,52 @@ deletedProcedures, markProcedureAsDeleted } = useProcessModificationContext();
                   </div>
                 {/* Middle Section Content */}
                 {section.procedureInstances && (
-            <div className="mt-6 w-3/5 mr-20">
-                <p className="text-4xl font-bold mb-4 text-primary underline">Procedures</p>
-                {section.procedureInstances.map((procedure, index) => {
-                    const isDeleted = deletedProcedures.some(deletedSection => 
-                        deletedSection._id === section._id && 
-                        deletedSection.procedureInstances.some(proc => proc._id === procedure._id && proc.deleted)
-                    );
+    <div className="mt-6 w-3/5 mr-20">
+        <p className="text-4xl font-bold mb-4 text-primary underline">Procedures</p>
+        {section.procedureInstances.map((procedure, index) => {
+            const isDeleted = deletedProcedures.some(deletedSection => 
+                deletedSection._id === section._id && 
+                deletedSection.procedureInstances.some(proc => proc._id === procedure._id && proc.deleted)
+            );
+            const isCompleted = deletedProcedures.some(deletedSection => 
+                deletedSection._id === section._id && 
+                deletedSection.procedureInstances.some(proc => proc._id === procedure._id && proc.completed)
+            );
+            const isInProgress = processInstance.currentProcedure && procedure._id === processInstance.currentProcedure._id;
+            console.log(procedure._id);
+            console.log(processInstance.currentProcedure._id);
 
-                    return (
-                        <div 
-                            key={index} 
-                            className={`flex items-center justify-between border-b-2 border-black ${isDeleted ? 'opacity-30' : ''}`}
+            return (
+                <div 
+                    key={index} 
+                    className={`flex items-center justify-between border-b-2 border-black ${isDeleted || isCompleted ? 'opacity-30' : ''}`}
+                >
+                    <div className="flex-1 flex items-center">
+                        <span className="text-3xl pl-2 font-bold py-4 mr-10">
+                            {procedure.procedureName}
+                            {isInProgress && <span className="ml-2 text-highlightGreen text-xl">(In Progress)</span>}
+                        </span>
+                    </div>
+                    {isCompleted ? (
+                        <FaCheck className="text-green-500 text-3xl" />
+                    ) : (
+                        <IconButton
+                            onClick={() => markProcedureAsDeleted(section._id, procedure._id)}
+                            color="error"
                         >
-                            <span className="flex-1 text-3xl pl-2 font-bold py-4 mr-10">{procedure.procedureName}   </span>
-                            <IconButton
-                                onClick={() => markProcedureAsDeleted(section._id, procedure._id)}
-                                color="error"
-                            >
-                                {isDeleted ? (
-                                    <RestoreFromTrashIcon />
-                                ) : (
-                                    <DeleteIcon />
-                                )}
-                            </IconButton>
-                        </div>
-                    );
-                })}
-            </div>
-        )}
+                            {isDeleted ? (
+                                <RestoreFromTrashIcon />
+                            ) : (
+                                <DeleteIcon />
+                            )}
+                        </IconButton>
+                    )}
+                </div>
+            );
+        })}
+    </div>
+)}
+
 
                 {/* Right Section Content */}
                 <div className="w-1/4  mr-10">

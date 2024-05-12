@@ -30,17 +30,19 @@ export const ProcessModificationProvider = ({ children }) => {
                         ...role,
                         accounts: role.accounts,  
                         modified: false
+
                     }))
                 }))
             }));
 
-            const initialDeletedProcedures = sections.map(section => ({ //add more fields here if needed
-                _id: section._id,
-                procedureInstances: section.procedureInstances.map(proc => ({
-                    _id: proc._id,
-                    deleted: false
-                }))
-            }));
+            const initialDeletedProcedures = sections.map(section => ({
+            _id: section._id,
+            procedureInstances: section.procedureInstances.map(proc => ({
+                _id: proc._id,
+                deleted: false,
+                completed: proc.rolesAssignedPeople.length === proc.peopleMarkAsCompleted.length 
+            }))
+        }));
     
             console.log(initialDeletedProcedures);
             setProcessInstance(data);
@@ -74,6 +76,7 @@ export const ProcessModificationProvider = ({ children }) => {
             }
             return section;
         }));
+        console.log(deletedProcedures);
     }, []);
 
     const updateProcessDescription = useCallback((description) => {
@@ -201,14 +204,38 @@ export const ProcessModificationProvider = ({ children }) => {
         }
     
         // Extract IDs of deleted procedures from each section
+        let deleteEntireProcess = true; // Initialize to true and check conditions
         const deletedProcedureIds = deletedProcedures.flatMap(section =>
             section.procedureInstances
                 .filter(proc => proc.deleted)  // Only include procedures that are marked as deleted
-                .map(proc => proc._id)
+                .map(proc => {
+                    deleteEntireProcess = deleteEntireProcess && true; // Keep it true if all procedures are deleted
+                    return proc._id;
+                })
         );
     
+        // Check if any procedure is not marked for deletion
+        deletedProcedures.forEach(section => {
+            section.procedureInstances.forEach(proc => {
+                if (!proc.deleted) {
+                    deleteEntireProcess = false;
+                }
+            });
+        });
+    
         console.log(deletedProcedureIds);
+        console.log("Delete entire process:", deleteEntireProcess);
         
+        if (deleteEntireProcess && deletedProcedureIds.length > 0) {
+        try {
+            const deleteResponse = await axios.delete(`/processInstances/${processInstance.processID}`);
+            console.log("Deleted process instance:", deleteResponse.data);
+            toast.success("Process instance deleted!");
+        } catch (error) {
+            console.error("Failed to delete process instance:", error);
+            toast.error("Failed to delete process instance. Please try again");
+        }
+    } else {
         const updateData = {
             processName: processInstance.processName,
             description: processInstance.description,
@@ -223,7 +250,7 @@ export const ProcessModificationProvider = ({ children }) => {
             })),
             deletedProcedures: deletedProcedureIds 
         };
-    
+
         try {
             const response = await axios.put(`/processInstances/${processInstance._id}`, updateData);
             console.log("Updated process instance:", response.data);
@@ -232,7 +259,8 @@ export const ProcessModificationProvider = ({ children }) => {
             console.error("Failed to update process instance:", error);
             toast.error("Failed to update process instance. Please try again");
         }
-    }, [processInstance, editedPatient, deletedProcedures]);
+    }
+}, [processInstance, editedPatient, deletedProcedures]);
 
 
     return (

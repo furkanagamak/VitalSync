@@ -144,6 +144,7 @@ useEffect(() => {
   };
 
   const expandItemsByQuantity = (items, itemType) => {
+    console.log(items, itemType);
     return items.reduce((acc, item, index) => {
       const expandedItems = Array(item.quantity).fill().map((_, idx) => ({
         ...item[itemType],
@@ -165,8 +166,12 @@ useEffect(() => {
       const updatedSections = await Promise.all(processTemplate.sections.map(async (section) => {
           const procedureTemplates = await Promise.all(section.procedureTemplates.map(async (templateId) => {
               const template = await fetchProcedureTemplate(templateId);
+              console.log(template);
               const expandedResources = expandItemsByQuantity(template.requiredResources, 'resource');
+              //console.log(template.requiredResources);
+              console.log(template.roles);
               const expandedRoles = expandItemsByQuantity(template.roles, 'role');
+              console.log(expandedRoles);
 
               const procedureStartTime = new Date(currentTime);
               currentTime.setMinutes(currentTime.getMinutes() + template.estimatedTime);

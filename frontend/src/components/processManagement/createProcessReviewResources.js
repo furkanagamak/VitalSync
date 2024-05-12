@@ -13,7 +13,7 @@ function NavButtons({ onBack, onProceed }) {
         Go Back
       </button>
       <h1 className="text-primary text-3xl font-bold">Review Resource Assignments</h1>
-      <button className="flex items-center justify-center bg-highlightGreen text-white rounded-3xl px-7 py-5 text-3xl" onClick={onProceed}>
+      <button className="hover:bg-green-600 flex items-center justify-center bg-highlightGreen text-white rounded-3xl px-7 py-5 text-3xl" onClick={onProceed}>
                 Proceed
             </button>
     </div>

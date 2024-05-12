@@ -84,7 +84,7 @@ const ProcessDetailsPreview = () => {
         Go Back
       </button>
         <h1 className="font-semibold text-4xl underline">Process Preview</h1>
-        <button onClick={handleConfirm} className=" px-12 flex items-center justify-center bg-highlightGreen text-white rounded-3xl py-5 text-3xl">
+        <button onClick={handleConfirm} className=" px-12 flex items-center justify-center bg-highlightGreen text-white rounded-3xl py-5 text-3xl hover:bg-green-600">
           Confirm
         </button>
 
