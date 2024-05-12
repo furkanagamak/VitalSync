@@ -21,7 +21,7 @@ function ProcessStartTime() {
 
 
   const handleGoBack = () => {
-    navigate(-1);
+    navigate('/processManagement/newProcess/patientForm');
   };
 
   const handleProceed = () => {

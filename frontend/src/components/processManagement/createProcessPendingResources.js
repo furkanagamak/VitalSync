@@ -209,7 +209,7 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
         </button>
         <button
 
-          className="mr-5 mt-5 bg-highlightGreen text-white text-2xl py-4 px-16 rounded-3xl"
+          className="mr-5 mt-5 bg-highlightGreen text-white text-2xl py-4 px-16 rounded-3xl hover:bg-green-600"
           style={{ maxWidth: '30%' }}
           onClick={handleSave}
         >
@@ -263,7 +263,7 @@ function NavButtons({ onBack, onProceed }) {
                 Go Back
             </button>
             <h1 className="text-primary text-4xl font-bold">Pending Resource Assignments</h1>
-            <button className="flex items-center justify-center bg-highlightGreen text-white rounded-3xl px-7 py-5 text-3xl" onClick={onProceed}>
+            <button className="hover:bg-green-600 flex items-center justify-center bg-highlightGreen text-white rounded-3xl px-7 py-5 text-3xl" onClick={onProceed}>
                 Proceed
             </button>
         </div>
