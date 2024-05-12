@@ -15,14 +15,13 @@ function Table({ rows, onRowClick }) {
       }}
     >
       <table
-        className="w-full"
+        className="w-full text-sm lg:text-xl"
         style={{
           width: "100%",
           height: "100%",
           tableLayout: "fixed",
           borderCollapse: "separate",
           borderSpacing: "0 1px",
-          fontSize: "1.32rem",
           textAlign: "center",
         }}
       >
@@ -62,13 +61,13 @@ function Table({ rows, onRowClick }) {
         <tbody>
           {rows.length > 0 ? (
             rows.map((row, index) => (
-              <tr
+              <tr 
                 key={index}
                 onClick={() => onRowClick(row)}
                 style={{ cursor: "pointer" }}
                 title={`Click to view ${row[0]}'s profile`}
               >
-                <td
+                <td 
                   className="px-4 py-2"
                   style={{
                     verticalAlign: "middle",
@@ -199,8 +198,8 @@ function MyComponent() {
         className="w-full flex justify-end items-center"
       >
         <select
-          className="px-3 py-2 border rounded mr-2 w-full sm:w-64  focus:outline-none focus:border-primary 
-            inline-flex items-center rounded-full text-xl placeholder-primary border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative mb-2"
+          className=" px-3 py-2  mr-2 w-full sm:w-64  focus:outline-none focus:border-primary 
+            inline-flex items-center rounded-full text:sm lg:text-xl placeholder-primary border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-w-32 relative mb-2"
           value={filterValue}
           onChange={(e) => setFilterValue(e.target.value)}
         >
@@ -223,7 +222,7 @@ function MyComponent() {
         <input
           type="text"
           placeholder="Search..."
-          className=" focus:outline-none focus:border-primary inline-flex items-center rounded-full text-xl placeholder-primary border-2 border-[#8E0000] bg-[#F5F5DC] p-2 min-width relative mb-2"
+          className=" focus:outline-none focus:border-primary inline-flex items-center rounded-full text-xl placeholder-primary border-2  min-w-32 border-[#8E0000] bg-[#F5F5DC] p-2 mb-2"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />

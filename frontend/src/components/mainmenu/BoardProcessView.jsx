@@ -6,7 +6,7 @@ import { MdOutlineInfo } from "react-icons/md";
 import { FaArrowLeft } from "react-icons/fa";
 import { calculateTimeUntilDate } from "../../utils/helperFunctions";
 import ProcessChat from "../ProcessChat";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../providers/authProvider.js";
 import toast from "react-hot-toast";
@@ -26,6 +26,7 @@ const BoardProcessView = () => {
   const { user } = useAuth();
   const { socket } = useSocketContext();
   const [refreshTick, setRefreshTick] = useState(false);
+  const navigate = useNavigate();
 
   const triggerRefresh = () => {
     setRefreshTick((refreshTick) => !refreshTick);
@@ -58,13 +59,36 @@ const BoardProcessView = () => {
   // socket events
   useEffect(() => {
     if (!socket) return;
-    socket.on("procedure complete - refresh", () => {
+    socket.on("procedure complete - refresh", triggerRefresh);
+
+    const processDeleteRedirectCb = (deletedPID) => {
+      if (id === deletedPID) {
+        toast("This process has just been deleted!", {
+          icon: "⚠️",
+        });
+        navigate("/home");
+      }
+    };
+    socket.on("process deleted - redirect", processDeleteRedirectCb);
+
+    const processModifyRefreshCb = () => {
       triggerRefresh();
-    });
+      toast(
+        "Parts of this process has just been modified and the page has just refreshed",
+        {
+          icon: "⚠️",
+        }
+      );
+    };
+    socket.on("process modify - refresh", processModifyRefreshCb);
 
     socket.emit("join process event room", id);
+
     return () => {
       socket.emit("leave process event room", id);
+      socket.off("process deleted - redirect", processDeleteRedirectCb);
+      socket.off("procedure complete - refresh", triggerRefresh);
+      socket.off("process modify - refresh", processModifyRefreshCb);
     };
   }, [socket]);
 
