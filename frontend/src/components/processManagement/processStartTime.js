@@ -13,7 +13,12 @@ function ProcessStartTime() {
   const { setStartTime, setFetchedSections } = useProcessCreation();
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedTime, setSelectedTime] = useState(new Date());
+
+  const now = new Date();
+  const oneHourLater = new Date(now.getTime() + 3600000);
+  const [selectedTime, setSelectedTime] = useState(oneHourLater);
+
+
 
   const handleGoBack = () => {
     navigate(-1);
