@@ -12,10 +12,22 @@ import moment from 'moment';
 
 
 export function RoleDropdownContent({ role, eligibleStaff, assignStaff, assignedStaff  }) {
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleAssign = (staff) => {
     assignStaff(role.uniqueId, staff);
   };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredStaff = eligibleStaff.filter(staff =>
+    `${staff.firstName.toLowerCase()} ${staff.lastName.toLowerCase()}`.includes(searchTerm.toLowerCase()) ||
+    staff.position.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  
 
   return (
     <div className="flex mx-10 mb-5">
@@ -25,7 +37,14 @@ export function RoleDropdownContent({ role, eligibleStaff, assignStaff, assigned
       </div>
       <div className="w-3/5 ml-5">
         <p className="text-highlightGreen text-2xl mb-3 mt-5">Available Qualified Staff:</p>
-        {eligibleStaff.length > 0 ? (
+        <input
+          type="text"
+          placeholder="Search by Name or Position..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          className="mb-3 px-2 py-1 border-gray-400 border-2 rounded w-2/5"
+        />
+        {filteredStaff.length > 0 ? (
           <div className="border-gray-400 border-2 rounded-lg p-3 overflow-y-auto" style={{ maxHeight: '12rem' }}>
             <table className="w-full text-left">
               <thead className="border-b border-primary">
@@ -36,7 +55,7 @@ export function RoleDropdownContent({ role, eligibleStaff, assignStaff, assigned
                 </tr>
               </thead>
               <tbody>
-                {eligibleStaff.map((staff, index) => (
+                {filteredStaff.map((staff, index) => (
                   <tr key={index} style={{ borderBottom: '1px solid black' }}>
                     <td className="py-2 text-2xl">{staff.firstName} {staff.lastName}</td>
                     <td className="text-2xl">{staff.position}</td>
@@ -88,6 +107,11 @@ export function CreateStaffAssignments({ sectionId, procedureId, procedureName, 
     }
 ]
 '2024-05-03T02:57:00.000Z'*/
+
+useEffect(() => {
+  const allRoleIds = new Set(roles.map(role => role.uniqueId));
+  setOpenRoles(allRoleIds);
+}, [roles]);
 
   useEffect(() => {
     if (!roles.length) return;

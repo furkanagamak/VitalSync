@@ -15,8 +15,17 @@ export function ResourceDropdownContent({ requiredResource, eligibleResources, a
   const handleAssign = (resource) => {
     assignResources(requiredResource.uniqueId, resource);
   };
+  const [searchTerm, setSearchTerm] = useState('');
 
-  console.log(eligibleResources);
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredResources = eligibleResources.filter(resource =>
+    resource.uniqueIdentifier.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  //console.log(eligibleResources);
 
   return (
     <div className="flex mx-10 mb-5">
@@ -28,7 +37,14 @@ export function ResourceDropdownContent({ requiredResource, eligibleResources, a
       </div>
       <div className="w-3/5 ml-5">
         <p className="text-highlightGreen text-2xl mb-3 mt-5">Available Resources:</p>
-        {eligibleResources.length > 0 ? (
+        <input
+          type="text"
+          placeholder="Search by Identifier..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          className="mb-3 px-2 py-1 border-gray-400 border-2 rounded"
+        />
+        {filteredResources.length > 0 ? (
           <div className="border-gray-400 border-2 rounded-lg p-3 overflow-y-auto" style={{ maxHeight: '12rem' }}>
             <table className="w-full text-left">
               <thead className="border-b border-primary">
@@ -38,7 +54,7 @@ export function ResourceDropdownContent({ requiredResource, eligibleResources, a
                 </tr>
               </thead>
               <tbody>
-                {eligibleResources.map((resource, index) => (
+                {filteredResources.map((resource, index) => (
                   <tr key={index} style={{ borderBottom: '1px solid black' }}>
                     <td className="py-2 text-2xl">{resource.uniqueIdentifier}</td>
                     <td>
@@ -69,7 +85,12 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
   const [eligibleResources, setEligibleResources] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [assignedResources, setAssignedResources] = useState({});
-  const { assignResourceToRequiredResource } = useProcessCreation(); // This function needs to be defined in your context provider
+  const { assignResourceToRequiredResource } = useProcessCreation();
+
+  useEffect(() => {
+    const allResourceIds = new Set(requiredResources.map(requiredResource => requiredResource.uniqueId));
+    setOpenResources(allResourceIds);
+  }, [requiredResources]);
 
   useEffect(() => {
     const fetchEligibleResources = async () => {
@@ -116,7 +137,6 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
       return acc;
     }, {});
   
-    // If there was previously assigned resource, add it back to the eligible lists where appropriate
     if (previouslyAssignedResource) {
       const updatedEligibleResources = { ...updatedResources };
       console.log("Debug: Starting to re-add previously assigned resource if not present.");
