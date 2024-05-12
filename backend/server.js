@@ -129,6 +129,21 @@ io.on("connection", async (socket) => {
     });
   });
 
+  socket.on("join process room", async (processID) => {
+    const processInstance = await ProcessInstance.findOne({
+      processID: processID,
+    });
+    if (!processInstance)
+      return console.log(
+        `user ${socket._uid} attempted to join a room ${processID} that does not exists`
+      );
+
+    socket.join(processID);
+    console.log(
+      `socket asscociated with user ${socket._uid} has joined ${processID}`
+    );
+  });
+
   socket.on("join process chat room", async (processID) => {
     // check process instance existence
     const processInstance = await ProcessInstance.findOne({
@@ -2391,8 +2406,16 @@ app.post("/processInstances", async (req, res) => {
       );
     });
 
-    console.log("sending sockets data: ", Array.from(allUserIds));
-    io.sockets.emit("new process - refresh", Array.from(allUserIds));
+    const arrAUIds = Array.from(allUserIds);
+
+    console.log("sending sockets data: ", arrAUIds);
+    io.sockets.emit("new process - refresh", arrAUIds);
+
+    io.sockets.emit(
+      "trigger join process room",
+      arrAUIds,
+      processInstance.processID
+    );
 
     res.status(201).send(processInstance);
   } catch (error) {

@@ -97,11 +97,21 @@ export const AuthProvider = ({ children }) => {
       //   console.log("fetch fail");
       // }
     };
-
     if (socket) {
       fetchCheckLogin();
     }
   }, [socket]);
+
+  // for when new processes are added
+  useEffect(() => {
+    if (socket) {
+      socket.on("trigger join process room", (involvedUser, processID) => {
+        if (user && involvedUser.includes(user.id)) {
+          socket.emit("join process room", processID);
+        }
+      });
+    }
+  }, [user, socket]);
 
   return (
     <AuthContext.Provider
