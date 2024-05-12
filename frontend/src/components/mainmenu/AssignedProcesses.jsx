@@ -81,6 +81,10 @@ const AssignedProcesses = () => {
     socket.on("new process - refresh", () => {
       triggerRefresh();
     });
+
+    socket.on("process deleted - refresh", () => {
+      triggerRefresh();
+    });
   }, [socket]);
 
   const handleNextPage = () => {

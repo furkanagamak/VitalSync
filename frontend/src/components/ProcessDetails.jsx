@@ -7,6 +7,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { useSocketContext } from "../providers/SocketProvider";
 import { ClipLoader } from "react-spinners";
+import { useNavigate } from "react-router-dom";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -17,6 +18,7 @@ const ProcessDetails = () => {
   const [refreshTick, setRefreshTick] = useState(false);
   const { socket } = useSocketContext();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const triggerRefresh = () => {
     setRefreshTick((refreshTick) => !refreshTick);
@@ -41,12 +43,22 @@ const ProcessDetails = () => {
     if (!socket) return;
     socket.emit("join process event room", id);
 
-    socket.on("procedure complete - refresh", () => {
-      triggerRefresh();
-    });
+    socket.on("procedure complete - refresh", triggerRefresh);
+
+    const processDeleteRedirectCb = (deletedPID) => {
+      if (id === deletedPID) {
+        toast("This process has just been deleted!", {
+          icon: "⚠️",
+        });
+        navigate("/home");
+      }
+    };
+    socket.on("process deleted - redirect", processDeleteRedirectCb);
 
     return () => {
       socket.emit("leave process event room", id);
+      socket.off("process deleted - redirect", processDeleteRedirectCb);
+      socket.off("procedure complete - refresh", triggerRefresh);
     };
   }, [socket]);
 

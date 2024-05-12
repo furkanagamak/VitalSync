@@ -2532,6 +2532,12 @@ app.delete("/processInstances/:id", async (req, res) => {
     });
 
     io.sockets.emit("process deleted - refresh");
+
+    io.to(processInstance.processID).emit(
+      "process deleted - redirect",
+      processInstance.processID
+    );
+
     console.log(`Process instance ID: ${id} deleted successfully.`);
     res.send({ message: "Process instance deleted successfully." });
   } catch (error) {
@@ -2545,7 +2551,8 @@ app.delete("/processInstances/:id", async (req, res) => {
 
 app.put("/processInstances/:id", async (req, res) => {
   const { id } = req.params;
-  const { processName, description, patient, sections, deletedProcedures } = req.body;
+  const { processName, description, patient, sections, deletedProcedures } =
+    req.body;
 
   try {
     const processInstance = await ProcessInstance.findById(id);
@@ -2583,27 +2590,42 @@ app.put("/processInstances/:id", async (req, res) => {
 
     console.log(deletedProcedures);
 
-     // Handle deletion of procedures if provided
-     if (deletedProcedures && deletedProcedures.length > 0) {
-      await Promise.all(deletedProcedures.map(async (procedureId) => {
-        const procedureInstance = await ProcedureInstance.findById(procedureId);
-        console.log(procedureInstance);
-        if (!procedureInstance) return;
+    // Handle deletion of procedures if provided
+    if (deletedProcedures && deletedProcedures.length > 0) {
+      await Promise.all(
+        deletedProcedures.map(async (procedureId) => {
+          const procedureInstance = await ProcedureInstance.findById(
+            procedureId
+          );
+          console.log(procedureInstance);
+          if (!procedureInstance) return;
 
-        // Update accounts
-        await Account.updateMany(
-          { _id: { $in: procedureInstance.rolesAssignedPeople.map(r => r.accounts).flat() }},
-          { $pull: { assignedProcedures: procedureId, unavailableTimes: { reason: procedureId.toString() }}}
-        );
+          // Update accounts
+          await Account.updateMany(
+            {
+              _id: {
+                $in: procedureInstance.rolesAssignedPeople
+                  .map((r) => r.accounts)
+                  .flat(),
+              },
+            },
+            {
+              $pull: {
+                assignedProcedures: procedureId,
+                unavailableTimes: { reason: procedureId.toString() },
+              },
+            }
+          );
 
-        // Update resources
-        await ResourceInstance.updateMany(
-          { _id: { $in: procedureInstance.assignedResources }},
-          { $pull: { unavailableTimes: { reason: procedureId.toString() }}}
-        );
+          // Update resources
+          await ResourceInstance.updateMany(
+            { _id: { $in: procedureInstance.assignedResources } },
+            { $pull: { unavailableTimes: { reason: procedureId.toString() } } }
+          );
 
-        await ProcedureInstance.findByIdAndDelete(procedureId);
-      }));
+          await ProcedureInstance.findByIdAndDelete(procedureId);
+        })
+      );
     }
 
     // Save the updated process instance
