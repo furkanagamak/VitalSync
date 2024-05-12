@@ -71,12 +71,24 @@ const BoardProcessView = () => {
     };
     socket.on("process deleted - redirect", processDeleteRedirectCb);
 
+    const processModifyRefreshCb = () => {
+      triggerRefresh();
+      toast(
+        "Parts of this process has just been modified and the page has just refreshed",
+        {
+          icon: "⚠️",
+        }
+      );
+    };
+    socket.on("process modify - refresh", processModifyRefreshCb);
+
     socket.emit("join process event room", id);
 
     return () => {
       socket.emit("leave process event room", id);
       socket.off("process deleted - redirect", processDeleteRedirectCb);
       socket.off("procedure complete - refresh", triggerRefresh);
+      socket.off("process modify - refresh", processModifyRefreshCb);
     };
   }, [socket]);
 

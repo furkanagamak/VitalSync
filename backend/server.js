@@ -2630,6 +2630,9 @@ app.put("/processInstances/:id", async (req, res) => {
 
     // Save the updated process instance
     await processInstance.save();
+
+    io.to(processInstance.processID).emit("process modify - refresh");
+
     res.send(processInstance);
   } catch (error) {
     console.error("Error updating process instance:", error);
