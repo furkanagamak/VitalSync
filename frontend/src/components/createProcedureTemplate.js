@@ -338,7 +338,7 @@ const ProcedureForm = ({
           id="name"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
-          style={{ overflowX: "auto" }}
+
         />
         <TextField
           fullWidth

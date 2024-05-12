@@ -11,15 +11,13 @@
  }
  .react-calendar__navigation button {
   color: #8e0000;
-  min-width: 10rem !important;
+
   background: none;
   margin-top: 8px;
   font-size: 2em !important;
   font-weight: bold;
   padding-top: 15px !important;
   padding-bottom: 15px !important;
-
-
  }
  .react-calendar__navigation button:enabled:hover,
  .react-calendar__navigation button:enabled:focus {

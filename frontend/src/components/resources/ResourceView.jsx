@@ -236,7 +236,7 @@ const Table = ({ resources, navToEditResource, removeResourceById }) => {
         tooltip: "",
         disableSortBy: true,
         Cell: ({ row }) => (
-          <div className="flex justify-evenly flex-col xl:flex-row">
+          <div className="flex justify-evenly flex-col xl:flex-row items-center">
             <FaPen
               onClick={() => navToEditResource(row.original)}
               className="cursor-pointer text-primary my-2 xl:my-0"
