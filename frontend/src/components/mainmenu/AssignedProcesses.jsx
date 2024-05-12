@@ -54,37 +54,31 @@ const AssignedProcesses = () => {
   useEffect(() => {
     if (!socket) return;
 
-    // updates process's current procedure field upon procedure completion event
-    // socket.on(
-    //   "procedure complete - current procedure reflect",
-    //   (currentProcedure, processID) => {
-    //     setAssignedProcesses((assignedProcesses) =>
-    //       assignedProcesses.map((assignedProcess) => {
-    //         if (assignedProcess.processID === processID) {
-    //           console.log("found matching!");
-    //           assignedProcess.proceduresAhead--;
-    //           return {
-    //             ...assignedProcess,
-    //             currentProcedure: currentProcedure,
-    //           };
-    //         } else {
-    //           return assignedProcess;
-    //         }
-    //       })
-    //     );
-    //   }
-    // );
-    socket.on("procedure complete - refresh", () => {
-      triggerRefresh();
-    });
+    socket.on("procedure complete - refresh", triggerRefresh);
+    socket.on("new process - refresh", triggerRefresh);
 
-    socket.on("new process - refresh", () => {
+    const processDeleteRedirectCb = () => {
       triggerRefresh();
-    });
+      toast("A process that you are assigned to has been deleted!", {
+        icon: "⚠️",
+      });
+    };
+    socket.on("process deleted - refresh", processDeleteRedirectCb);
 
-    socket.on("process deleted - refresh", () => {
+    const processModifyRedirectCb = () => {
       triggerRefresh();
-    });
+      toast("A process that you are assigned to has been modified!", {
+        icon: "⚠️",
+      });
+    };
+    socket.on("process modify - refresh", processModifyRedirectCb);
+
+    return () => {
+      socket.off("procedure complete - refresh", triggerRefresh);
+      socket.off("new process - refresh", triggerRefresh);
+      socket.off("process deleted - refresh", processDeleteRedirectCb);
+      socket.off("process modify - refresh", processModifyRedirectCb);
+    };
   }, [socket]);
 
   const handleNextPage = () => {
