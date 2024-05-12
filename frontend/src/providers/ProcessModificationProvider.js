@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
+import toast, { Toaster } from "react-hot-toast";
 
 
 const ProcessModificationContext = createContext();
@@ -194,8 +195,10 @@ export const ProcessModificationProvider = ({ children }) => {
         try {
             const response = await axios.put(`/processInstances/${processInstance._id}`, updateData);
             console.log("Updated process instance:", response.data);
+            toast.success("Process changes saved!"); 
         } catch (error) {
             console.error("Failed to update process instance:", error);
+            toast.error("Failed to update process instance. Please try again");
         }
     }, [processInstance, editedPatient]);
 
