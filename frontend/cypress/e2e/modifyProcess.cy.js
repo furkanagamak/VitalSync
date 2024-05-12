@@ -23,7 +23,7 @@ describe('Modify Process Landing Page Tests', () => {
         cy.get('#editProcessNameSave').click();
         cy.wait(300);
         cy.get('button').contains('Save Changes').click();
-        cy.contains('Process successfully modified!').should('be.visible');
+        cy.contains('Process changes saved!').should('be.visible');
         cy.url().should("include", "/activeProcesses");
 
 

@@ -153,7 +153,6 @@ export function ModifyProcessLanding() {
 
   const handleSaveChanges = async () => {
     await saveAllChanges();  
-toast.success("Process changes saved!"); 
    navigate("/processManagement/modifyProcess/activeProcesses");
 };
 
