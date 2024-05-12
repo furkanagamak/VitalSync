@@ -161,7 +161,7 @@ const ProcessChat = ({ id }) => {
           <input
             type="text"
             placeholder="Type your message..."
-            className="flex-grow p-2 rounded-l-md border border-gray-300 focus:outline-none"
+            className="flex-1 p-2 rounded-l-md border border-gray-300 focus:outline-none min-w-0"
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
             id={`chatInputElem-${id}`}

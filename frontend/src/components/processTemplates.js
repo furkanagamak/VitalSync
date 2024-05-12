@@ -92,7 +92,7 @@ const CreateTemplateButton = ({ fromLocation }) => {
 
   return (
     <button
-      className="flex items-center text-xl justify-center px-4 py-2 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
+      className="flex items-center text-base justify-center px-2 py-1 bg-[#F5F5DC] text-[#8E0000] border-2 border-[#8E0000] rounded-full hover:bg-[#ede9d4]"
       onClick={handleClick}
       title="Click to Create a New Process Template"
     >
@@ -168,7 +168,7 @@ const ProcessTable = ({ filter, fromLocation, data, setData, isLoading }) => {
         Cell: ({ row }) => {
           return (
             <div
-              className="flex justify-evenly flex-col md:flex-row"
+              className="flex justify-evenly flex-col xl:flex-row"
               style={{
                 display: "flex",
                 alignItems: "center",

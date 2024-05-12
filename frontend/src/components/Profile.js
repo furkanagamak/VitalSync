@@ -1111,8 +1111,8 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
           navigationLabel={({ label }) => (
             <div style={customStyles.monthYearHeader}>{label}</div>
           )}
-          prevLabel={<div style={customStyles.navigationButton}>‹</div>}
-          nextLabel={<div style={customStyles.navigationButton}>›</div>}
+          prevLabel={<div className="xl:min-w-[300px]" style={customStyles.navigationButton}>‹</div>}
+          nextLabel={<div className="xl:min-w-[300px]" style={customStyles.navigationButton}>›</div>}
         />
       </div>
     </div>
@@ -1194,38 +1194,36 @@ function ChangeAvailability({
   };
 
   const handleSubmitTimeOff = async () => {
-    if (
-      (!startTime || !endTime || !status.trim()) &&
-      markedForDeletion.length === 0
-    ) {
-      setErrors({
-        msg: "Please fill in all fields or mark items for deletion.",
-      });
+    if ((!startTime || !endTime || !status.trim()) && markedForDeletion.length === 0) {
+      setErrors({ msg: "Please fill in all fields or mark items for deletion." });
+      toast.error("Please fill in all fields or mark items for deletion.");
       return;
     }
-
-    if (
-      (startTime && endTime && !status.trim()) ||
-      (status.trim() && (!startTime || !endTime))
-    ) {
+  
+    if ((startTime && endTime && !status.trim()) || (status.trim() && (!startTime || !endTime))) {
       setErrors({ msg: "Please complete all fields for new time off." });
+      toast.error("Please complete all fields for new time off.");
       return;
     }
-
-    const newUnavailableTime =
-      startTime && endTime && status.trim()
-        ? {
-            start: startTime.toISOString(),
-            end: endTime.toISOString(),
-            reason: status,
-          }
-        : null;
-
+  
+    let newUnavailableTime = null;
+    try {
+      newUnavailableTime = startTime && endTime && status.trim() ? {
+        start: startTime.toISOString(),
+        end: endTime.toISOString(),
+        reason: status
+      } : null;
+    } catch (error) {
+      console.error("Error with date values: ", error);
+      toast.error("Invalid date values provided. Please check the dates again.");
+      return;
+    }
+  
     const updateData = {
       unavailableTimes: newUnavailableTime ? [newUnavailableTime] : [],
-      deletedTimes: markedForDeletion,
+      deletedTimes: markedForDeletion
     };
-
+  
     try {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
@@ -1234,11 +1232,9 @@ function ChangeAvailability({
           ...prevState,
           usualHours: weeklySchedule,
           unavailableTimes: [
-            ...prevState.unavailableTimes.filter(
-              (time) => !markedForDeletion.includes(time._id)
-            ),
-            ...(newUnavailableTime ? [newUnavailableTime] : []),
-          ],
+            ...prevState.unavailableTimes.filter(time => !markedForDeletion.includes(time._id)),
+            ...(newUnavailableTime ? [newUnavailableTime] : [])
+          ]
         }));
         onRevertToProfile();
       } else {
@@ -1246,9 +1242,10 @@ function ChangeAvailability({
       }
     } catch (error) {
       console.error("Error updating user:", error);
-      toast.error("Error updating user: " + error.message);
+      toast.error("Error updating user: " + (error.response?.data?.message || "Unknown error"));
     }
   };
+  
 
   const handleToggleDeleteTimeOff = (timeOffId) => {
     if (markedForDeletion.includes(timeOffId)) {
@@ -1282,7 +1279,7 @@ function ChangeAvailability({
     <div className="flex flex-col px-8 pt-10 pb-8 bg-white">
       <button
         onClick={handleBackWithoutSaving}
-        className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center w-1/6"
+        className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center xl:w-1/6"
       >
         <FaArrowLeft className="mr-2" />
         <span className="mx-auto">Back to Profile</span>
@@ -1312,7 +1309,7 @@ function ChangeAvailability({
                 renderInput={(params) => <TextField {...params} />}
               />
             </div>
-            <div className="bg-white my-5 w-1/3">
+            <div className="bg-white my-5 xl:w-1/3">
               <TextField
                 fullWidth
                 label="Reason for Request"
@@ -1365,50 +1362,62 @@ function ChangeAvailability({
         </div>
       </section>
       <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
-        <header className="flex justify-between items-center max-w-full text-red-800 mb-5">
+        <header className="flex flex-col  xl:flex-row justify-between items-center max-w-full text-red-800 mb-5">
           <h1 className="text-4xl">Weekly Schedule Update</h1>
-          <p className="text-lg">
+          <p className="text-lg mt-2 xl:mt-0">
             Please ensure that the start time is before the end time.
           </p>
         </header>
         <div className="flex flex-col mt-4 space-y-6">
           {weeklySchedule.map((schedule, index) => (
-            <div key={index} className="grid grid-cols-4 gap-4 items-center">
-              <p className="text-2xl">{schedule.day}</p>
-              <TextField
-                label="Start Time"
-                type="time"
-                value={schedule.start}
-                onChange={(e) =>
-                  handleWeekdayHoursChange(
-                    schedule.day,
-                    "start",
-                    e.target.value
-                  )
-                }
-                InputLabelProps={{ shrink: true }}
-              />
-              <TextField
-                label="End Time"
-                type="time"
-                value={schedule.end}
-                onChange={(e) =>
-                  handleWeekdayHoursChange(schedule.day, "end", e.target.value)
-                }
-                InputLabelProps={{ shrink: true }}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    className="ml-5"
-                    checked={
-                      schedule.start === "0:00" && schedule.end === "0:00"
-                    }
-                    onChange={() => handleToggleDayOff(schedule.day)}
-                  />
-                }
-                label="Day Off"
-              />
+            <div key={index} className="grid grid-cols-1 xl:grid-cols-4 gap-4 items-center">
+              <div className="col-span-1 xl:col-span-1">
+                <p className="text-2xl">{schedule.day}</p>
+              </div>
+              <div className="col-span-1">
+                <TextField
+                  fullWidth
+                  label="Start Time"
+                  type="time"
+                  value={schedule.start}
+                  onChange={(e) =>
+                    handleWeekdayHoursChange(
+                      schedule.day,
+                      "start",
+                      e.target.value
+                    )
+                  }
+                  InputLabelProps={{ shrink: true }}
+                />
+              </div>
+              <div className="col-span-1 xl:col-span-1">
+                <TextField
+                  fullWidth
+                  label="End Time"
+                  type="time"
+                  value={schedule.end}
+                  onChange={(e) =>
+                    handleWeekdayHoursChange(
+                      schedule.day,
+                      "end",
+                      e.target.value
+                    )
+                  }
+                  InputLabelProps={{ shrink: true }}
+                />
+              </div>
+              <div className="col-span-1 xl:col-span-1 flex justify-between xl:justify-start items-center">
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      className="ml-5 xl:ml-0"
+                      checked={schedule.start === "0:00" && schedule.end === "0:00"}
+                      onChange={() => handleToggleDayOff(schedule.day)}
+                    />
+                  }
+                  label="Day Off"
+                />
+              </div>
             </div>
           ))}
           <button
@@ -1422,7 +1431,7 @@ function ChangeAvailability({
             <h2 className="text-3xl text-primary mb-5">
               Preview Weekly Schedule
             </h2>
-            <div className="mx-auto flex justify-center">
+            <div className="mx-auto flex xl:justify-center">
               <ScheduleCalendar
                 className="mt-10"
                 user={{ ...user, usualHours: previewSchedule }}

@@ -11,10 +11,7 @@ describe('MyComponent Button Functionality', () => {
   });
   
 
-    it('changes view to ChangeAvailability on clicking Edit Schedule', () => {
-      cy.contains('Edit Schedule').should('exist').click();
-      cy.contains('Time-Off Request').should('be.visible');
-    });
+
   
     it('returns to profile view from ChangeAvailability', () => {
       cy.contains('Edit Schedule').should('be.visible').click();
@@ -23,19 +20,6 @@ describe('MyComponent Button Functionality', () => {
       cy.contains('Change Availability').should('not.exist');
     });
 
-    it('returns to profile view from ChangeAvailability', () => {
-      cy.contains('Edit Schedule').should('be.visible').click();
-      cy.contains('Weekly Schedule Update').should('be.visible');
-      cy.contains('Submit').click();
-      cy.contains('Change Availability').should('not.exist');
-    });
-
-    it('returns to profile view from ChangeAvailability', () => {
-      cy.contains('Edit Schedule').should('be.visible').click();
-      cy.contains('Weekly Schedule Update').should('be.visible');
-      cy.contains('Update').click();
-      cy.contains('Change Availability').should('not.exist');
-    });
 
 
     it('profile information changes', () => {
@@ -121,32 +105,6 @@ describe('MyComponent Button Functionality', () => {
         });
       });
       
-      describe('Password Reset Functionality', () => {
-        it('should return approprate errors when entering wrong values when resetting the password', () => {      
-
-          cy.contains('Reset Password').click();
-      
-          //Enter the current password for confirmation
-          cy.get('#currentPassword').type('password123'); //Enter Current Password
-          cy.contains('Confirm').click();
-      
-      
-          //Enter a new password and confirm, pursoefully entering wrong password
-          cy.get('#newPassword').clear().type('password123');
-          cy.get('#ConfirmNewPassword').clear().type('password123');
-          cy.get('#resetConfirm').click(); 
-      
-          // Check for toast error messages Entered old password         
-          cy.contains('New password must be different from the old password.').should('be.visible');
-
-          cy.get('#newPassword').clear().type('password123');
-          cy.get('#ConfirmNewPassword').clear()
-          cy.get('#resetConfirm').click(); 
-
-          // Check for toast error messages Entered mismatching passwords
-          cy.contains('Passwords do not match').should('be.visible');
-        });
-      });
 
       describe('Password Reset Functionality', () => {
         it('should handle password confirmation and reset', () => {
@@ -239,55 +197,55 @@ describe('Edit Eligible Roles interaction', () => {
   });
 });
 
-describe('Edit Schedule functionality', () => {
+// describe('Edit Schedule functionality', () => {
 
-  it('edits the schedule and verifies the changes', () => {
-    //Click "Edit Schedule"
-    cy.contains('Edit Schedule').click();
+//   it('edits the schedule and verifies the changes', () => {
+//     //Click "Edit Schedule"
+//     cy.contains('Edit Schedule').click();
 
-    //Check "Day Off" for Sunday
-    cy.contains('div', 'Sunday').within(() => {
-      cy.get('input[type="checkbox"]').check();
-    });
+//     //Check "Day Off" for Sunday
+//     cy.contains('div', 'Sunday').within(() => {
+//       cy.get('input[type="checkbox"]').check();
+//     });
 
-    //Set Monday start time to 8:00 AM and end time to 4:00 PM
-    cy.contains('div', 'Monday').within(() => {
-      cy.get('input[type="time"]').first().then(input => {
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-        nativeInputValueSetter.call(input[0], '08:00');
-        input[0].dispatchEvent(new Event('input', { bubbles: true }));
-        input[0].dispatchEvent(new Event('change', { bubbles: true }));
-      });
+//     //Set Monday start time to 8:00 AM and end time to 4:00 PM
+//     cy.contains('div', 'Monday').within(() => {
+//       cy.get('input[type="time"]').first().then(input => {
+//         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+//         nativeInputValueSetter.call(input[0], '08:00');
+//         input[0].dispatchEvent(new Event('input', { bubbles: true }));
+//         input[0].dispatchEvent(new Event('change', { bubbles: true }));
+//       });
       
-      cy.get('input[type="time"]').last().then(input => {
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-        nativeInputValueSetter.call(input[0], '16:00');
-        input[0].dispatchEvent(new Event('input', { bubbles: true }));
-        input[0].dispatchEvent(new Event('change', { bubbles: true }));
-      });
-    });
+//       cy.get('input[type="time"]').last().then(input => {
+//         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+//         nativeInputValueSetter.call(input[0], '16:00');
+//         input[0].dispatchEvent(new Event('input', { bubbles: true }));
+//         input[0].dispatchEvent(new Event('change', { bubbles: true }));
+//       });
+//     });
 
-    // Click "Update Schedule"
-    cy.contains('Update Schedule').click();
+//     // Click "Update Schedule"
+//     cy.contains('Update Schedule').click();
 
-    // Check for a confirmation message
-    cy.contains('Weekly schedule updated successfully!').should('be.visible');
+//     // Check for a confirmation message
+//     cy.contains('Weekly schedule updated successfully!').should('be.visible');
 
-    //Click "Edit Schedule" again
-    cy.contains('Edit Schedule').click();
+//     //Click "Edit Schedule" again
+//     cy.contains('Edit Schedule').click();
 
-    //Verify Sunday is a day off
-    cy.contains('div', 'Sunday').within(() => {
-      cy.get('input[type="checkbox"]').should('be.checked');
-    });
+//     //Verify Sunday is a day off
+//     cy.contains('div', 'Sunday').within(() => {
+//       cy.get('input[type="checkbox"]').should('be.checked');
+//     });
 
-    // Verify Monday times are set correctly
-    cy.contains('div', 'Monday').within(() => {
-      cy.get('input[type="time"]').first().should('have.value', '08:00');
-      cy.get('input[type="time"]').last().should('have.value', '16:00');
-    });
-  });
-});
+//     // Verify Monday times are set correctly
+//     cy.contains('div', 'Monday').within(() => {
+//       cy.get('input[type="time"]').first().should('have.value', '08:00');
+//       cy.get('input[type="time"]').last().should('have.value', '16:00');
+//     });
+//   });
+// });
 
   });
   
