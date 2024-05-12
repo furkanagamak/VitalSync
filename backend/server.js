@@ -2531,7 +2531,7 @@ app.delete("/processInstances/:id", async (req, res) => {
       );
     });
 
-    io.sockets.emit("process deleted - refresh");
+    io.to(processInstance.processID).sockets.emit("process deleted - refresh");
 
     io.to(processInstance.processID).emit(
       "process deleted - redirect",
@@ -2590,15 +2590,6 @@ app.put("/processInstances/:id", async (req, res) => {
 
     console.log(deletedProcedures);
 
-    // Handle deletion of procedures if provided
-    if (deletedProcedures && deletedProcedures.length > 0) {
-      await Promise.all(
-        deletedProcedures.map(async (procedureId) => {
-          const procedureInstance = await ProcedureInstance.findById(
-            procedureId
-          );
-          console.log(procedureInstance);
-          if (!procedureInstance) return;
     // Handle deletion of procedures if provided
     if (deletedProcedures && deletedProcedures.length > 0) {
       const allUserIds = new Set(); // To store unique user IDs
