@@ -10,19 +10,20 @@ import {
   Select,
   MenuItem,
   InputLabel,
-  IconButton
+  IconButton,
 } from "@mui/material";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./Calendar.css";
 import { FormControlLabel, Checkbox } from "@mui/material";
 import { ClipLoader } from "react-spinners";
-import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { FaArrowLeft } from "react-icons/fa";
-import RestoreIcon from '@mui/icons-material/Restore';
-import DeleteIcon from '@mui/icons-material/Delete';
-import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
+import RestoreIcon from "@mui/icons-material/Restore";
+import DeleteIcon from "@mui/icons-material/Delete";
+import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
+import { IoPersonOutline } from "react-icons/io5";
 
 axios.defaults.baseURL = process.env.REACT_APP_API_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -438,12 +439,15 @@ function ProfileImage({ authUser, id, imgUrl, setImgUrl }) {
     <div className="flex flex-col self-stretch my-auto text-sm font-medium text-neutral-600 max-md:mt-10">
       {/* <img loading="lazy" alt="" src={imgUrl} className="w-full aspect-[1]" /> */}
       <div className="h-[300px] w-[300px] overflow-hidden m-auto">
-        <img
-          src={imgUrl}
-          alt="Profile"
-          className="h-full w-full object-cover"
-          loading="lazy"
-        />
+        {!imgUrl && <IoPersonOutline className="h-full w-full text-black" />}
+        {imgUrl && (
+          <img
+            src={imgUrl}
+            alt="Profile"
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+        )}
       </div>
       {id && authUser && authUser.id === id && (
         <div
@@ -961,8 +965,11 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
   };
 
   const getWorkingHoursForDay = (date, usualHours) => {
-    if (!usualHours || (usualHours.start === "0:00" && usualHours.end === "0:00"))
-        return ["Off"]; // No working hours
+    if (
+      !usualHours ||
+      (usualHours.start === "0:00" && usualHours.end === "0:00")
+    )
+      return ["Off"]; // No working hours
 
     const dateStr = date.toISOString().substring(0, 10);
     const usualStart = parseTime(usualHours.start);
@@ -971,50 +978,85 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
     // Get time offs that affect the current day
     const timeOffs = getTimeOffsForDay(date);
     let segments = [];
-    let currentStart = {...usualStart};
+    let currentStart = { ...usualStart };
 
-    timeOffs.sort((a, b) => new Date(a.start) - new Date(b.start)).forEach(timeOff => {
+    timeOffs
+      .sort((a, b) => new Date(a.start) - new Date(b.start))
+      .forEach((timeOff) => {
         const timeOffStartDate = new Date(timeOff.start);
         const timeOffEndDate = new Date(timeOff.end);
-        let timeOffStart = parseTime(timeOffStartDate.toLocaleTimeString("it-IT"));
+        let timeOffStart = parseTime(
+          timeOffStartDate.toLocaleTimeString("it-IT")
+        );
         let timeOffEnd = parseTime(timeOffEndDate.toLocaleTimeString("it-IT"));
 
         // Adjust for multi-day unavailability starting before or on the current day
         if (timeOffStartDate.toISOString().substring(0, 10) < dateStr) {
-            timeOffStart = {...timeOffStart, hours: 0, minutes: 0};
+          timeOffStart = { ...timeOffStart, hours: 0, minutes: 0 };
         }
         // Adjust for multi-day unavailability ending on or after the current day
         if (timeOffEndDate.toISOString().substring(0, 10) > dateStr) {
-            timeOffEnd = {...timeOffEnd, hours: 23, minutes: 59};
+          timeOffEnd = { ...timeOffEnd, hours: 23, minutes: 59 };
         }
 
         // Check if the time off is during working hours
-        if (timeOffEnd.hours < usualStart.hours || timeOffStart.hours > usualEnd.hours) {
-            // Time off is completely outside working hours, ignore
+        if (
+          timeOffEnd.hours < usualStart.hours ||
+          timeOffStart.hours > usualEnd.hours
+        ) {
+          // Time off is completely outside working hours, ignore
         } else {
-            // Adjust start time if time off starts before working hours
-            if (timeOffStart.hours < usualStart.hours || (timeOffStart.hours === usualStart.hours && timeOffStart.minutes < usualStart.minutes)) {
-                timeOffStart = {...usualStart};
-            }
-            // Adjust end time if time off ends after working hours
-            if (timeOffEnd.hours > usualEnd.hours || (timeOffEnd.hours === usualEnd.hours && timeOffEnd.minutes > usualEnd.minutes)) {
-                timeOffEnd = {...usualEnd};
-            }
-            // Add working segment before the time off
-            if (currentStart.hours < timeOffStart.hours || (currentStart.hours === timeOffStart.hours && currentStart.minutes < timeOffStart.minutes)) {
-                segments.push(`${currentStart.hours}:${currentStart.minutes.toString().padStart(2, "0")} - ${timeOffStart.hours}:${timeOffStart.minutes.toString().padStart(2, "0")}`);
-            }
-            currentStart = timeOffEnd;
+          // Adjust start time if time off starts before working hours
+          if (
+            timeOffStart.hours < usualStart.hours ||
+            (timeOffStart.hours === usualStart.hours &&
+              timeOffStart.minutes < usualStart.minutes)
+          ) {
+            timeOffStart = { ...usualStart };
+          }
+          // Adjust end time if time off ends after working hours
+          if (
+            timeOffEnd.hours > usualEnd.hours ||
+            (timeOffEnd.hours === usualEnd.hours &&
+              timeOffEnd.minutes > usualEnd.minutes)
+          ) {
+            timeOffEnd = { ...usualEnd };
+          }
+          // Add working segment before the time off
+          if (
+            currentStart.hours < timeOffStart.hours ||
+            (currentStart.hours === timeOffStart.hours &&
+              currentStart.minutes < timeOffStart.minutes)
+          ) {
+            segments.push(
+              `${currentStart.hours}:${currentStart.minutes
+                .toString()
+                .padStart(2, "0")} - ${
+                timeOffStart.hours
+              }:${timeOffStart.minutes.toString().padStart(2, "0")}`
+            );
+          }
+          currentStart = timeOffEnd;
         }
-    });
+      });
 
     // Add the remaining time after the last unavailability
-    if (currentStart.hours < usualEnd.hours || (currentStart.hours === usualEnd.hours && currentStart.minutes < usualEnd.minutes)) {
-        segments.push(`${currentStart.hours}:${currentStart.minutes.toString().padStart(2, "0")} - ${usualEnd.hours}:${usualEnd.minutes.toString().padStart(2, "0")}`);
+    if (
+      currentStart.hours < usualEnd.hours ||
+      (currentStart.hours === usualEnd.hours &&
+        currentStart.minutes < usualEnd.minutes)
+    ) {
+      segments.push(
+        `${currentStart.hours}:${currentStart.minutes
+          .toString()
+          .padStart(2, "0")} - ${usualEnd.hours}:${usualEnd.minutes
+          .toString()
+          .padStart(2, "0")}`
+      );
     }
 
     return segments.length ? segments : ["Off"];
-};
+  };
 
   const getUsualHoursForDay = (day) => {
     const weekdayNames = [
@@ -1041,7 +1083,7 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
     authUser.accountType === "hospital admin";
 
   return (
-    <div >
+    <div>
       {!preview && id && authUser && (authUser.id === id || isAdmin) && (
         <button
           onClick={onScheduleChange}
@@ -1052,26 +1094,26 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
         </button>
       )}
       <div className="text-left md:text-center">
-      <Calendar
-        minDate={today}
-        maxDate={threeYearsLater}
-        tileContent={({ date, view }) => {
-          if (view === "month") {
-            const usualHours = getUsualHoursForDay(date.getDay());
-            const workingHours = getWorkingHoursForDay(date, usualHours);
-            return (
-              <div style={customStyles.tile}>
-                <div className="text-md mt-4">{workingHours.join(", ")}</div>
-              </div>
-            );
-          }
-        }}
-        navigationLabel={({ label }) => (
-          <div style={customStyles.monthYearHeader}>{label}</div>
-        )}
-        prevLabel={<div style={customStyles.navigationButton}>‹</div>}
-        nextLabel={<div style={customStyles.navigationButton}>›</div>}
-      />
+        <Calendar
+          minDate={today}
+          maxDate={threeYearsLater}
+          tileContent={({ date, view }) => {
+            if (view === "month") {
+              const usualHours = getUsualHoursForDay(date.getDay());
+              const workingHours = getWorkingHoursForDay(date, usualHours);
+              return (
+                <div style={customStyles.tile}>
+                  <div className="text-md mt-4">{workingHours.join(", ")}</div>
+                </div>
+              );
+            }
+          }}
+          navigationLabel={({ label }) => (
+            <div style={customStyles.monthYearHeader}>{label}</div>
+          )}
+          prevLabel={<div style={customStyles.navigationButton}>‹</div>}
+          nextLabel={<div style={customStyles.navigationButton}>›</div>}
+        />
       </div>
     </div>
   );
@@ -1084,23 +1126,22 @@ function ChangeAvailability({
   id,
 }) {
   const [dateRange, setDateRange] = useState([new Date(), new Date()]);
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState("");
   const [errors, setErrors] = useState({});
   const [weeklySchedule, setWeeklySchedule] = useState([...user.usualHours]);
   const [previewSchedule, setPreviewSchedule] = useState([...user.usualHours]);
   const [startTime, setStartTime] = useState(null);
-  const [endTime, setEndTime] = useState(null); 
+  const [endTime, setEndTime] = useState(null);
   const [markedForDeletion, setMarkedForDeletion] = useState([]);
-
 
   const handleStartTimeChange = (newValue) => {
     setStartTime(newValue);
-    setEndTime(new Date(newValue.getTime() + 3600000)); 
-};
+    setEndTime(new Date(newValue.getTime() + 3600000));
+  };
 
-const handleEndTimeChange = (newValue) => {
+  const handleEndTimeChange = (newValue) => {
     setEndTime(newValue);
-};
+  };
 
   useEffect(() => {
     setPreviewSchedule([...weeklySchedule]);
@@ -1152,42 +1193,54 @@ const handleEndTimeChange = (newValue) => {
     onRevertToProfile();
   };
 
-
   const handleSubmitTimeOff = async () => {
-    if ((!startTime || !endTime || !status.trim()) && markedForDeletion.length === 0) {
-      setErrors({ msg: "Please fill in all fields or mark items for deletion." });
+    if (
+      (!startTime || !endTime || !status.trim()) &&
+      markedForDeletion.length === 0
+    ) {
+      setErrors({
+        msg: "Please fill in all fields or mark items for deletion.",
+      });
       return;
     }
-  
-    if ((startTime && endTime && !status.trim()) || (status.trim() && (!startTime || !endTime))) {
+
+    if (
+      (startTime && endTime && !status.trim()) ||
+      (status.trim() && (!startTime || !endTime))
+    ) {
       setErrors({ msg: "Please complete all fields for new time off." });
       return;
     }
-  
-    const newUnavailableTime = (startTime && endTime && status.trim()) ? {
-      start: startTime.toISOString(),
-      end: endTime.toISOString(),
-      reason: status,
-    } : null;
-  
+
+    const newUnavailableTime =
+      startTime && endTime && status.trim()
+        ? {
+            start: startTime.toISOString(),
+            end: endTime.toISOString(),
+            reason: status,
+          }
+        : null;
+
     const updateData = {
       unavailableTimes: newUnavailableTime ? [newUnavailableTime] : [],
       deletedTimes: markedForDeletion,
     };
-  
+
     try {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
         toast.success("Availability successfully updated.");
-        setUser(prevState => ({
+        setUser((prevState) => ({
           ...prevState,
           usualHours: weeklySchedule,
           unavailableTimes: [
-            ...prevState.unavailableTimes.filter(time => !markedForDeletion.includes(time._id)),
-            ...(newUnavailableTime ? [newUnavailableTime] : [])
-          ]
+            ...prevState.unavailableTimes.filter(
+              (time) => !markedForDeletion.includes(time._id)
+            ),
+            ...(newUnavailableTime ? [newUnavailableTime] : []),
+          ],
         }));
-        onRevertToProfile(); 
+        onRevertToProfile();
       } else {
         toast.error("Failed to update availability.");
       }
@@ -1197,14 +1250,13 @@ const handleEndTimeChange = (newValue) => {
     }
   };
 
-const handleToggleDeleteTimeOff = (timeOffId) => {
-  if (markedForDeletion.includes(timeOffId)) {
-    setMarkedForDeletion(markedForDeletion.filter(id => id !== timeOffId));
-  } else {
-    setMarkedForDeletion([...markedForDeletion, timeOffId]);
-  }
-};
-
+  const handleToggleDeleteTimeOff = (timeOffId) => {
+    if (markedForDeletion.includes(timeOffId)) {
+      setMarkedForDeletion(markedForDeletion.filter((id) => id !== timeOffId));
+    } else {
+      setMarkedForDeletion([...markedForDeletion, timeOffId]);
+    }
+  };
 
   const handleSubmitWeeklySchedule = async () => {
     const updateData = {
@@ -1227,15 +1279,13 @@ const handleToggleDeleteTimeOff = (timeOffId) => {
   };
 
   return (
-    
     <div className="flex flex-col px-8 pt-10 pb-8 bg-white">
-            <button
+      <button
         onClick={handleBackWithoutSaving}
-
-className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center w-1/6" >
+        className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center w-1/6"
+      >
         <FaArrowLeft className="mr-2" />
         <span className="mx-auto">Back to Profile</span>
-
       </button>
       <section className="flex flex-col px-8 pt-7 pb-2.5 mt-6 bg-lime-50">
         <header className="flex justify-between items-center max-w-full text-red-800 mb-5">
@@ -1246,47 +1296,64 @@ className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-cente
             <div className="flex ">
               <div className="mr-5">
                 <DateTimePicker
-                    label="Start Time"
-                    value={startTime}
-                    onChange={handleStartTimeChange}
-                    renderInput={(params) => <TextField {...params} />}
-                /></div>
-                <DateTimePicker
-                    label="End Time"
-                    value={endTime}
-                    onChange={handleEndTimeChange}
-                    minDateTime={startTime ? new Date(startTime.getTime() + 3600000) : null}
-                    renderInput={(params) => <TextField {...params} />}
+                  label="Start Time"
+                  value={startTime}
+                  onChange={handleStartTimeChange}
+                  renderInput={(params) => <TextField {...params} />}
                 />
+              </div>
+              <DateTimePicker
+                label="End Time"
+                value={endTime}
+                onChange={handleEndTimeChange}
+                minDateTime={
+                  startTime ? new Date(startTime.getTime() + 3600000) : null
+                }
+                renderInput={(params) => <TextField {...params} />}
+              />
             </div>
             <div className="bg-white my-5 w-1/3">
-            <TextField
-              fullWidth
-              label="Reason for Request"
-              value={status}
-              onChange={handleStatusChange}
-              variant="outlined"
-              multiline
-                  rows={2}
-            /></div>
-        </LocalizationProvider>
-        <div className="flex-grow">
-          <h2 className="text-2xl text-primary">Scheduled Time-Offs</h2>
-          <p className="text-md mb-2">Click to mark/unmark for deletion:</p>
-          <ul>
-            {user.unavailableTimes.map((timeOff) => (
-              <li key={timeOff._id} style={{
-                opacity: markedForDeletion.includes(timeOff._id) ? 0.3 : 1
-              }}>
-                <IconButton onClick={() => handleToggleDeleteTimeOff(timeOff._id)} color="error">
-                  {markedForDeletion.includes(timeOff._id) ? <RestoreFromTrashIcon /> : <DeleteIcon />}
-                </IconButton>
-                {`${new Date(timeOff.start).toLocaleString()} - ${new Date(timeOff.end).toLocaleString()}`}
-      <span className="text-primary text-xl mx-2">|  Reason:</span> {`${timeOff.reason}`}
-              </li>
-            ))}
-          </ul>
-        </div>
+              <TextField
+                fullWidth
+                label="Reason for Request"
+                value={status}
+                onChange={handleStatusChange}
+                variant="outlined"
+                multiline
+                rows={2}
+              />
+            </div>
+          </LocalizationProvider>
+          <div className="flex-grow">
+            <h2 className="text-2xl text-primary">Scheduled Time-Offs</h2>
+            <p className="text-md mb-2">Click to mark/unmark for deletion:</p>
+            <ul>
+              {user.unavailableTimes.map((timeOff) => (
+                <li
+                  key={timeOff._id}
+                  style={{
+                    opacity: markedForDeletion.includes(timeOff._id) ? 0.3 : 1,
+                  }}
+                >
+                  <IconButton
+                    onClick={() => handleToggleDeleteTimeOff(timeOff._id)}
+                    color="error"
+                  >
+                    {markedForDeletion.includes(timeOff._id) ? (
+                      <RestoreFromTrashIcon />
+                    ) : (
+                      <DeleteIcon />
+                    )}
+                  </IconButton>
+                  {`${new Date(timeOff.start).toLocaleString()} - ${new Date(
+                    timeOff.end
+                  ).toLocaleString()}`}
+                  <span className="text-primary text-xl mx-2">| Reason:</span>{" "}
+                  {`${timeOff.reason}`}
+                </li>
+              ))}
+            </ul>
+          </div>
           {errors.msg && <div style={{ color: "red" }}>{errors.msg}</div>}
           <button
             className="my-5 bg-primary text-white px-5 py-2.5 text-lg rounded-full cursor-pointer w-2/5 mx-auto max-w-xs"

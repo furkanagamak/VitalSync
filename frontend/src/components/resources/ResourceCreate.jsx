@@ -242,9 +242,15 @@ const ResourceForm = ({
             className="h-6 w-6"
           />
         </button>
-        <h1 className="text-primary text-3xl font-semibold">
-          Create New Resource
-        </h1>
+        <div className="flex flex-col justify-center items-center mb-3 text-primary ml-16 sm:ml-0">
+          <h1 className="text-3xl font-semibold mb-3">Create New Resource</h1>
+          <p className="text-sm">
+            If you want to add a new instance of an existing resource,
+          </p>
+          <p className="text-sm">
+            ensure the name field is the same as the existing resource name.
+          </p>
+        </div>
       </section>
       <form
         className="mx-auto max-w-lg bg-[#f5f5dc] py-4 px-8"

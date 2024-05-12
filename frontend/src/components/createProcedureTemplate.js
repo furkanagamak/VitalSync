@@ -319,7 +319,7 @@ const ProcedureForm = ({
           padding: "20px",
           marginTop: "10px",
           marginBottom: "30px",
-          overflowX: "auto"
+          overflowX: "auto",
         }}
       >
         <Typography
@@ -338,7 +338,7 @@ const ProcedureForm = ({
           id="name"
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
-          style={{overflowX: "auto"}}
+          style={{ overflowX: "auto" }}
         />
         <TextField
           fullWidth
@@ -391,8 +391,7 @@ const ProcedureForm = ({
           InputLabelProps={{ style: { color: "#8E0000" } }}
           inputProps={{ style: { color: "#8E0000" } }}
         />
-        <div className="flex lg:flex-row gap-2.5 mt-5 mb-5 flex-col"
-        >
+        <div className="flex lg:flex-row gap-2.5 mt-5 mb-5 flex-col">
           <div style={{ display: "flex", flexGrow: 2, gap: "10px" }}>
             <FormControl fullWidth>
               <InputLabel id="resourcetype" style={{ color: "#8E0000" }}>
@@ -438,17 +437,16 @@ const ProcedureForm = ({
               </Select>
             </FormControl>
           </div>
-          <TextField 
+          <TextField
             label="Quantity"
             type="number"
             name="quantity"
-            style={{minWidth: "105px"}}
+            style={{ minWidth: "105px" }}
             value={newResource.quantity}
             onChange={handleResourceChange}
             inputProps={{
               min: 1,
-              style: { color: "#8E0000",
-               },
+              style: { color: "#8E0000" },
               onKeyDown: (e) => {
                 if (
                   e.key === "-" ||
@@ -491,7 +489,7 @@ const ProcedureForm = ({
               Selected Resources
             </Typography>
             <List
-              className="custom-scrollbar"
+              className="custom-scrollbar-table"
               style={{
                 maxHeight: "125px",
                 overflowY: "auto",
@@ -625,7 +623,7 @@ const ProcedureForm = ({
               Selected Roles
             </Typography>
             <List
-              className="custom-scrollbar"
+              className="custom-scrollbar-table"
               style={{
                 maxHeight: "125px",
                 overflowY: "auto",

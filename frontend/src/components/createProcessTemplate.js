@@ -39,8 +39,8 @@ const CreateTemplateButton = ({ onCreate, instanceCreation }) => {
 
   const buttonText = instanceCreation ? "Use Template" : "Save Template";
   const buttonTitle = instanceCreation
-  ? "Use This Process Template"
-  : "Save Template";
+    ? "Use This Process Template"
+    : "Save Template";
 
   return (
     <button
@@ -54,15 +54,14 @@ const CreateTemplateButton = ({ onCreate, instanceCreation }) => {
   );
 };
 
-const GoBackButton = ({instanceCreation }) => {
+const GoBackButton = ({ instanceCreation }) => {
   const navigate = useNavigate();
 
   const handleGoBackClick = () => {
-    if(instanceCreation){
-      navigate('/processManagement/newProcess/processTemplates')
-    }
-    else{
-      navigate('/ProcessTemplateManagement')
+    if (instanceCreation) {
+      navigate("/processManagement/newProcess/processTemplates");
+    } else {
+      navigate("/ProcessTemplateManagement");
     }
   };
 
@@ -206,59 +205,71 @@ const ProcessForm = ({ process, setProcess, createTemplate }) => {
   );
 };
 
-const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate, process }) => {
+const SectionTable = ({
+  sections,
+  setSections,
+  onSaveState,
+  handleSessionUpdate,
+  process,
+}) => {
   console.log(sections);
   const data = sections;
   const navigate = useNavigate();
-  const location = useLocation(); 
-
+  const location = useLocation();
 
   const handleAddSection = () => {
-    console.log('Navigating to add new section');
+    console.log("Navigating to add new section");
     handleSessionUpdate(process, sections); // Save current state before navigating
-    navigate("/AddSectionForm", { state: { isAddingNew: true, url: "/CreateProcessTemplateForm" } });
+    navigate("/AddSectionForm", {
+      state: { isAddingNew: true, url: "/CreateProcessTemplateForm" },
+    });
   };
 
   const handleModifySection = (index) => {
     const sectionToModify = sections[index];
     handleSessionUpdate(process, sections); // Save current state before navigating
-    navigate("/ModifySectionForm", { state: { section: sectionToModify, url: "/CreateProcessTemplateForm"} });
-};
+    navigate("/ModifySectionForm", {
+      state: { section: sectionToModify, url: "/CreateProcessTemplateForm" },
+    });
+  };
 
   const updateSections = debounce((newSection) => {
-    setSections(prevSections => {
-      const nameConflict = prevSections.some(section =>
-        section.sectionName.toLowerCase() === newSection.sectionName.toLowerCase() && 
-        section._id !== newSection._id
+    setSections((prevSections) => {
+      const nameConflict = prevSections.some(
+        (section) =>
+          section.sectionName.toLowerCase() ===
+            newSection.sectionName.toLowerCase() &&
+          section._id !== newSection._id
       );
 
       if (nameConflict) {
         toast.error("A section with the same name already exists.");
-        return prevSections; 
+        return prevSections;
       }
 
-      const sectionIndex = prevSections.findIndex(section => section._id === newSection._id);
-    if (sectionIndex !== -1) {
-      const updatedSections = [...prevSections];
-      updatedSections[sectionIndex] = newSection;
-      handleSessionUpdate(process, updatedSections);
-      toast.success("Section Modified!");
-      return updatedSections;
-    } else {
-      const newSections = [...prevSections, newSection];
-      handleSessionUpdate(process, newSections);
-      toast.success("Section Added!");
-      return newSections;
-    }
+      const sectionIndex = prevSections.findIndex(
+        (section) => section._id === newSection._id
+      );
+      if (sectionIndex !== -1) {
+        const updatedSections = [...prevSections];
+        updatedSections[sectionIndex] = newSection;
+        handleSessionUpdate(process, updatedSections);
+        toast.success("Section Modified!");
+        return updatedSections;
+      } else {
+        const newSections = [...prevSections, newSection];
+        handleSessionUpdate(process, newSections);
+        toast.success("Section Added!");
+        return newSections;
+      }
     });
-  }, 1);  //1 second millisecond delay to avoid rapid re-update of section state on location change. Need to solve underlying issue
-  
+  }, 1); //1 second millisecond delay to avoid rapid re-update of section state on location change. Need to solve underlying issue
+
   useEffect(() => {
     if (location.state?.newSection) {
       updateSections(location.state.newSection);
     }
   }, [location.state?.newSection]);
-
 
   const moveSection = (index, direction) => {
     setSections((currentSections) => {
@@ -287,7 +298,8 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
     });
   };
 
-  const columns = React.useMemo(() => [
+  const columns = React.useMemo(
+    () => [
       {
         Header: "Name",
         accessor: "sectionName",
@@ -326,7 +338,8 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
               justifyContent: "center",
             }}
           >
-            <button className="lg:mr-3"
+            <button
+              className="lg:mr-3"
               onClick={() => moveSection(row.index, "up")}
               style={{
                 background: "none",
@@ -349,9 +362,10 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
                   d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5"
                 />
               </svg>
-            </button >
-            <button className="lg:mr-3"
-            onClick={() => moveSection(row.index, 'down')}
+            </button>
+            <button
+              className="lg:mr-3"
+              onClick={() => moveSection(row.index, "down")}
               style={{
                 background: "none",
                 border: "none",
@@ -374,9 +388,10 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
                 />
               </svg>
             </button>
-            <button className="lg:mr-3"
-                onClick={() => handleModifySection(row.index)}
-                style={{
+            <button
+              className="lg:mr-3"
+              onClick={() => handleModifySection(row.index)}
+              style={{
                 background: "none",
                 border: "none",
                 padding: "0",
@@ -453,7 +468,7 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
           Selected Sections
         </h1>
         <div
-          className="scrollbar1 w-full"
+          className="custom-scrollbar-table w-full"
           style={{
             overflowX: "auto",
 
@@ -462,7 +477,8 @@ const SectionTable = ({ sections, setSections, onSaveState, handleSessionUpdate,
             minHeight: "30vh",
           }}
         >
-          <table className="table-auto lg:table-fixed"
+          <table
+            className="table-auto lg:table-fixed"
             {...getTableProps()}
             style={{
               width: "100%",
@@ -572,7 +588,11 @@ const CreateProcessTemplateForm = () => {
   const [sections, setSections] = useState([]);
   const [incomingUrl, setIncomingUrl] = useState("");
 
-  const { updateProcessTemplate, currentlyCreatingTemplate, setCurrentlyCreatingTemplate } = useProcessCreation();
+  const {
+    updateProcessTemplate,
+    currentlyCreatingTemplate,
+    setCurrentlyCreatingTemplate,
+  } = useProcessCreation();
 
   useEffect(() => {
     if (location.state && location.state.incomingUrl) {
@@ -583,9 +603,10 @@ const CreateProcessTemplateForm = () => {
     }
   }, [location.state]);
 
-
   useEffect(() => {
-    const savedState = JSON.parse(sessionStorage.getItem('processTemplateState'));
+    const savedState = JSON.parse(
+      sessionStorage.getItem("processTemplateState")
+    );
     if (savedState) {
       console.log("session stored");
       setProcess(savedState.process);
@@ -595,20 +616,19 @@ const CreateProcessTemplateForm = () => {
 
   const updateSessionStorage = (newProcess, newSections) => {
     const stateToSave = { process: newProcess, sections: newSections };
-    sessionStorage.setItem('processTemplateState', JSON.stringify(stateToSave));
+    sessionStorage.setItem("processTemplateState", JSON.stringify(stateToSave));
   };
 
   const createTemplate = async () => {
-
-    if(!process.name){
+    if (!process.name) {
       toast.error("Process name is required.");
       return;
     }
-    if(!process.description){
+    if (!process.description) {
       toast.error("A description is required.");
       return;
     }
-    if(sections.length === 0){
+    if (sections.length === 0) {
       toast.error("At least one section is required.");
       return;
     }
@@ -646,7 +666,6 @@ const CreateProcessTemplateForm = () => {
     }
   };
 
-
   return (
     <div>
       <div className="relative mt-6 mb-8 flex flex-col lg:flex-row items-center justify-center">
@@ -655,19 +674,22 @@ const CreateProcessTemplateForm = () => {
         </h1>
         <div className="flex flex-row mt-4 lg:mt-0 lg:flex-row lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 justify-between w-full px-4">
           <div>
-            <GoBackButton instanceCreation={currentlyCreatingTemplate}/>
+            <GoBackButton instanceCreation={currentlyCreatingTemplate} />
           </div>
           <div>
-            <CreateTemplateButton onCreate={createTemplate} instanceCreation={currentlyCreatingTemplate}/>
+            <CreateTemplateButton
+              onCreate={createTemplate}
+              instanceCreation={currentlyCreatingTemplate}
+            />
           </div>
         </div>
       </div>
-      <ProcessForm 
+      <ProcessForm
         process={process}
         setProcess={setProcess}
         createTemplate={createTemplate}
       />
-      <SectionTable 
+      <SectionTable
         handleSessionUpdate={updateSessionStorage}
         sections={sections}
         setSections={setSections}
@@ -676,7 +698,6 @@ const CreateProcessTemplateForm = () => {
       />
     </div>
   );
-  
 };
 
 export default CreateProcessTemplateForm;

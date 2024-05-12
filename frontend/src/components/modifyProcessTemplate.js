@@ -63,15 +63,14 @@ const ModifyTemplateButton = ({ onModify, instanceCreation }) => {
   );
 };
 
-const GoBackButton = ({instanceCreation }) => {
+const GoBackButton = ({ instanceCreation }) => {
   const navigate = useNavigate();
 
   const handleGoBackClick = () => {
-    if(instanceCreation){
-      navigate('/processManagement/newProcess/processTemplates')
-    }
-    else{
-      navigate('/ProcessTemplateManagement')
+    if (instanceCreation) {
+      navigate("/processManagement/newProcess/processTemplates");
+    } else {
+      navigate("/ProcessTemplateManagement");
     }
   };
 
@@ -355,7 +354,8 @@ const SectionTable = ({
               justifyContent: "center",
             }}
           >
-            <button className="lg:mr-3"
+            <button
+              className="lg:mr-3"
               onClick={() => moveSection(row.index, "up")}
               style={{
                 background: "none",
@@ -379,7 +379,8 @@ const SectionTable = ({
                 />
               </svg>
             </button>
-            <button className="lg:mr-3"
+            <button
+              className="lg:mr-3"
               onClick={() => moveSection(row.index, "down")}
               style={{
                 background: "none",
@@ -403,7 +404,8 @@ const SectionTable = ({
                 />
               </svg>
             </button>
-            <button className="lg:mr-3"
+            <button
+              className="lg:mr-3"
               onClick={() => handleModifySection(row.index)}
               style={{
                 background: "none",
@@ -482,7 +484,7 @@ const SectionTable = ({
           Selected Sections
         </h1>
         <div
-          className="scrollbar1"
+          className="custom-scrollbar-table"
           style={{
             overflowX: "auto",
             maxHeight: "30vh",
@@ -490,7 +492,8 @@ const SectionTable = ({
             minHeight: "30vh",
           }}
         >
-          <table className="table-auto lg:table-fixed"
+          <table
+            className="table-auto lg:table-fixed"
             {...getTableProps()}
             style={{
               width: "100%",
@@ -703,10 +706,8 @@ const ModifyProcessTemplateForm = () => {
           Modify Process Template
         </h1>
         <div className="flex flex-row mt-4 lg:mt-0 lg:flex-row lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 justify-between w-full px-4">
-
-          <div >
-            <GoBackButton instanceCreation={currentlyModifyingTemplate}/>
-
+          <div>
+            <GoBackButton instanceCreation={currentlyModifyingTemplate} />
           </div>
           <div>
             <ModifyTemplateButton

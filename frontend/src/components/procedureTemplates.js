@@ -276,7 +276,7 @@ const ProcedureTable = ({ filter, data, setData, isLoading }) => {
         templateName={currentTemplate?.name}
       />
       <div
-        className=" w-full"
+        className="custom-scrollbar-table w-full"
         style={{
           maxWidth: "95%",
           margin: "auto",
