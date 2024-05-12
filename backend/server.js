@@ -129,6 +129,21 @@ io.on("connection", async (socket) => {
     });
   });
 
+  socket.on("join process room", async (processID) => {
+    const processInstance = await ProcessInstance.findOne({
+      processID: processID,
+    });
+    if (!processInstance)
+      return console.log(
+        `user ${socket._uid} attempted to join a room ${processID} that does not exists`
+      );
+
+    socket.join(processID);
+    console.log(
+      `socket asscociated with user ${socket._uid} has joined ${processID}`
+    );
+  });
+
   socket.on("join process chat room", async (processID) => {
     // check process instance existence
     const processInstance = await ProcessInstance.findOne({
@@ -1942,6 +1957,7 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
       io.to(`process-event-${process.processID}`).emit(
         "procedure complete - refresh"
       );
+      io.to(process.processID).emit("notification refresh");
 
       res.send("Procedure marked as complete");
     } else {
@@ -2326,7 +2342,7 @@ app.post("/processInstances", async (req, res) => {
                   unavailableTimes: {
                     start: procedure.startTime,
                     end: procedure.endTime,
-                    reason: procedureInstance._id
+                    reason: procedureInstance._id,
                   },
                 },
               }
@@ -2345,8 +2361,7 @@ app.post("/processInstances", async (req, res) => {
                     unavailableTimes: {
                       start: procedure.startTime,
                       end: procedure.endTime,
-                      reason: procedureInstance._id
-
+                      reason: procedureInstance._id,
                     },
                   },
                 }
@@ -2394,8 +2409,16 @@ app.post("/processInstances", async (req, res) => {
       );
     });
 
-    console.log("sending sockets data: ", Array.from(allUserIds));
-    io.sockets.emit("new process - refresh", Array.from(allUserIds));
+    const arrAUIds = Array.from(allUserIds);
+
+    console.log("sending sockets data: ", arrAUIds);
+    io.sockets.emit("new process - refresh", arrAUIds);
+
+    io.sockets.emit(
+      "trigger join process room",
+      arrAUIds,
+      processInstance.processID
+    );
 
     res.status(201).send(processInstance);
   } catch (error) {
@@ -2409,36 +2432,45 @@ app.post("/processInstances", async (req, res) => {
 app.delete("/processInstances/:id", async (req, res) => {
   const { id } = req.params;
 
- // console.log(`Attempting to delete process instance with ID: ${id}`);
+  // console.log(`Attempting to delete process instance with ID: ${id}`);
+
+  const allUserIds = new Set(); // To store unique user IDs
 
   try {
     // Find by processID instead of _id if processID is the intended identifier
-    const processInstance = await ProcessInstance.findOne({ processID: id }).populate('sectionInstances');
+    const processInstance = await ProcessInstance.findOne({
+      processID: id,
+    }).populate("sectionInstances");
     if (!processInstance) {
-    //  console.log(`Process instance with ID: ${id} not found.`);
+      //  console.log(`Process instance with ID: ${id} not found.`);
       return res.status(404).send({ message: "Process instance not found." });
     }
 
-   // console.log(`Found process instance with ID: ${id}, proceeding with deletion of related sections and procedure instances.`);
+    // console.log(`Found process instance with ID: ${id}, proceeding with deletion of related sections and procedure instances.`);
 
     // Iterate through each section instance to handle their procedure instances
     for (const sectionInstance of processInstance.sectionInstances) {
-      const fullSection = await SectionInstance.findById(sectionInstance._id).populate('procedureInstances');
-     // console.log(`Handling section instance with ID: ${sectionInstance._id}`);
+      const fullSection = await SectionInstance.findById(
+        sectionInstance._id
+      ).populate("procedureInstances");
+      // console.log(`Handling section instance with ID: ${sectionInstance._id}`);
 
       for (const procedureInstance of fullSection.procedureInstances) {
-       // console.log(`Handling procedure instance with ID: ${procedureInstance._id}`);
+        // console.log(`Handling procedure instance with ID: ${procedureInstance._id}`);
 
         // Handle accounts referenced in procedure instances
         for (const roleAssignment of procedureInstance.rolesAssignedPeople) {
-         // console.log(`Updating accounts for role assignments in procedure ID: ${procedureInstance._id}`);
+          // console.log(`Updating accounts for role assignments in procedure ID: ${procedureInstance._id}`);
+          roleAssignment.accounts.forEach((accountId) => {
+            allUserIds.add(accountId.toString());
+          });
           await Account.updateMany(
             { _id: { $in: roleAssignment.accounts } },
             {
               $pull: {
                 assignedProcedures: procedureInstance._id,
-                unavailableTimes: { reason: procedureInstance._id.toString() }
-              }
+                unavailableTimes: { reason: procedureInstance._id.toString() },
+              },
             }
           );
         }
@@ -2449,18 +2481,18 @@ app.delete("/processInstances/:id", async (req, res) => {
           { _id: { $in: procedureInstance.assignedResources } },
           {
             $pull: {
-              unavailableTimes: { reason: procedureInstance._id.toString() }
-            }
+              unavailableTimes: { reason: procedureInstance._id.toString() },
+            },
           }
         );
 
         // Delete the procedure instance
-      //  console.log(`Deleting procedure instance ID: ${procedureInstance._id}`);
+        //  console.log(`Deleting procedure instance ID: ${procedureInstance._id}`);
         await ProcedureInstance.findByIdAndDelete(procedureInstance._id);
       }
 
       // Delete the section instance
-     // console.log(`Deleting section instance ID: ${sectionInstance._id}`);
+      // console.log(`Deleting section instance ID: ${sectionInstance._id}`);
       await SectionInstance.findByIdAndDelete(sectionInstance._id);
     }
 
@@ -2468,17 +2500,48 @@ app.delete("/processInstances/:id", async (req, res) => {
     //console.log(`Deleting process instance ID: ${id}`);
     await ProcessInstance.findOneAndDelete({ processID: id });
 
+    console.log(allUserIds);
+
+    // Send notifications to all unique users
+    const notificationDetails = {
+      type: "alert",
+      title: "Process Deleted",
+      text:
+        "The process " +
+        processInstance.processName +
+        " with process ID " +
+        processInstance.processID +
+        " has been deleted. You are freed from any assigned procedures.",
+      timeCreated: new Date(),
+    };
+
+    allUserIds.forEach(async (userId) => {
+      const notification = new Notification({
+        userId,
+        ...notificationDetails,
+      });
+      await notification.save();
+
+      // Update user's notification box
+      await Account.updateOne(
+        { _id: userId },
+        {
+          $push: { notificationBox: notification._id },
+        }
+      );
+    });
+
+    io.sockets.emit("process deleted - refresh");
     console.log(`Process instance ID: ${id} deleted successfully.`);
     res.send({ message: "Process instance deleted successfully." });
   } catch (error) {
-    console.error('Error deleting process instance:', error);
+    console.error("Error deleting process instance:", error);
     res.status(500).send({
       message: "Failed to delete the process instance",
       error: error.toString(),
     });
   }
 });
-
 
 app.put("/processInstances/:id", async (req, res) => {
   const { id } = req.params;
@@ -2496,50 +2559,33 @@ app.put("/processInstances/:id", async (req, res) => {
 
     // Update patient details if provided
     if (patient && processInstance.patient) {
-      await Patient.findByIdAndUpdate(processInstance.patient._id, patient, { new: true });
+      await Patient.findByIdAndUpdate(processInstance.patient._id, patient, {
+        new: true,
+      });
     }
 
     // Update sections if provided
     if (sections && sections.length > 0) {
-      const updatePromises = sections.map(sectionUpdate => 
-        SectionInstance.findByIdAndUpdate(sectionUpdate._id, {
-          name: sectionUpdate.name,
-          description: sectionUpdate.description
-        }, { new: true })
+      const updatePromises = sections.map((sectionUpdate) =>
+        SectionInstance.findByIdAndUpdate(
+          sectionUpdate._id,
+          {
+            name: sectionUpdate.name,
+            description: sectionUpdate.description,
+          },
+          { new: true }
+        )
       );
 
       const updatedSections = await Promise.all(updatePromises);
-    }
-    console.log(deletedProcedures);
-
-     // Handle deletion of procedures if provided
-     if (deletedProcedures && deletedProcedures.length > 0) {
-      await Promise.all(deletedProcedures.map(async (procedureId) => {
-        const procedureInstance = await ProcedureInstance.findById(procedureId);
-        console.log(procedureInstance);
-        if (!procedureInstance) return;
-
-        // Update accounts
-        await Account.updateMany(
-          { _id: { $in: procedureInstance.rolesAssignedPeople.map(r => r.accounts).flat() }},
-          { $pull: { assignedProcedures: procedureId, unavailableTimes: { reason: procedureId.toString() }}}
-        );
-
-        // Update resources
-        await ResourceInstance.updateMany(
-          { _id: { $in: procedureInstance.assignedResources }},
-          { $pull: { unavailableTimes: { reason: procedureId.toString() }}}
-        );
-
-        await ProcedureInstance.findByIdAndDelete(procedureId);
-      }));
+      console.log("Updated sections:", updatedSections);
     }
 
     // Save the updated process instance
     await processInstance.save();
     res.send(processInstance);
   } catch (error) {
-    console.error('Error updating process instance:', error);
+    console.error("Error updating process instance:", error);
     res.status(500).send({
       message: "Failed to update the process instance",
       error: error.toString(),
