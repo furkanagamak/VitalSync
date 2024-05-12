@@ -300,9 +300,23 @@ export function PendingNewResources() {
     navigate("/processManagement/newProcess/reviewStaffAssignments");
   };
 
+  const checkIfAllProceduresAssigned = () => {
+    return !fetchedSections.some(section => 
+      section.procedureTemplates.some(procedure => 
+        !isFullyAssigned(procedure._id, section._id)  
+      )
+    );
+  };
+
   const handleProceed = () => {
+    if(!checkIfAllProceduresAssigned()){
+      toast.error("Please complete assignments in all procedures before proceeding.");
+      return;
+    }
     navigate("/processManagement/newProcess/reviewResourceAssignments");
   };
+
+
 
   const handleClick = (procedure, sectionId) => {
     setSelectedProcedure(procedure);

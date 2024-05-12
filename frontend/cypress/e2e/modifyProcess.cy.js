@@ -14,9 +14,9 @@ describe('Modify Process Landing Page Tests', () => {
         cy.contains('Process:').should('be.visible');
         cy.contains('Patient:').should('be.visible');
 
-        cy.contains('Review Resource Assignments').first().click();
+        cy.contains('View Resource Assignments').first().click();
         cy.contains("Back").click();
-        cy.contains('Review Staff Assignments').first().click();
+        cy.contains('View Staff Assignments').first().click();
         cy.contains("Back").click();
         cy.get('#editProcessName').click();
         cy.get('#editProcessNameField').type('New Process Name');
