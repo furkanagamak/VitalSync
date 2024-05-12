@@ -55,14 +55,16 @@ const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
 
     socket?.on("procedure complete - refresh", handleNewNotification);
     socket?.on("new chat message - refresh", handleNewNotification);
-    socket?.on("new process - refresh", handleNewProcessEvent);
+    socket?.on("new process - refresh", handleNewNotification);
     socket?.on("notification refresh", handleNewNotification);
+    socket?.on("process deleted - refresh", handleNewNotification);
 
     return () => {
       socket?.off("procedure complete - refresh", handleNewNotification);
       socket?.off("new chat message - refresh", handleNewNotification);
       socket?.off("new process - refresh", handleNewNotification);
       socket?.off("notification refresh", handleNewNotification);
+      socket?.off("process deleted - refresh", handleNewNotification);
     };
   }, [user?.id, socket]);
 
@@ -117,28 +119,40 @@ const NotificationDDItem = ({ notification, closeDropDown }) => {
   const firstSentence = notification.text.split(".")[0];
   const processId = notification.processID;
 
-  return (
+  // Notification content component
+  const notificationContent = (
+    <div
+      title={
+        processId
+          ? "Click to View the Process Details for This Notification"
+          : ""
+      }
+      className="bg-primary text-white p-4 space-y-4"
+    >
+      <section className="grid grid-cols-5">
+        {CurrIcon}
+        <h1 className="col-start-2 col-end-5 mx-auto text-xl">
+          {notification.title}
+        </h1>
+      </section>
+      <section>
+        <p>{firstSentence + "."}</p>
+      </section>
+      <p className="flex justify-end">{timeAgo(notification.timeCreated)}</p>
+    </div>
+  );
+
+  // Conditionally render the Link or plain div based on processId
+  return processId ? (
     <Link
       to={`/processDetails/${processId}`}
       onClick={closeDropDown}
       className="no-underline"
     >
-      <div
-        title="Click to View the Process Details for This Notification"
-        className="bg-primary text-white p-4 space-y-4"
-      >
-        <section className="grid grid-cols-5">
-          {CurrIcon}
-          <h1 className="col-start-2 col-end-5 mx-auto text-xl">
-            {notification.title}
-          </h1>
-        </section>
-        <section>
-          <p>{firstSentence + "."}</p>
-        </section>
-        <p className="flex justify-end">{timeAgo(notification.timeCreated)}</p>
-      </div>
+      {notificationContent}
     </Link>
+  ) : (
+    <div className="no-underline">{notificationContent}</div>
   );
 };
 

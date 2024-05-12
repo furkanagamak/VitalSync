@@ -62,7 +62,7 @@ function ProcessCell({ process, onModifyClick, onViewClick, pid }) {
           </p>
         </div>
       </div>
-      <div className="flex-[2] lg:border-r border-white py-1 pb-2 min-w-0 lg:py-0 lg:px-4 ml-5">
+      <div className="flex-[2] lg:border-r border-white py-1 pb-2 min-w-0 lg:py-0 lg:px-4">
         <div className="space-y-1">
           <p className="truncate">
             <span className="underline">Current Procedure:</span>{" "}
