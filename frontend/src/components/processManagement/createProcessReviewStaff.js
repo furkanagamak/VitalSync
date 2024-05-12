@@ -70,7 +70,7 @@ export function CreateReviewStaffAssignments({ onBack, onProceed }) {
   };
 
   const handleGoBack = () => {
-    navigate(-1);
+    navigate("/processManagement/newProcess/pendingStaffAssignments");
   };
 
   const handleProceed = () => {

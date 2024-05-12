@@ -73,7 +73,7 @@ export function CreateReviewResourceAssignments({ onBack, onProceed }) {
   };
 
   const handleGoBack = () => {
-    navigate(-1);
+    navigate("/processManagement/newProcess/pendingResourceAssignments");
   };
 
   const handleProceed = () => {

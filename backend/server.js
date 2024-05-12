@@ -2482,7 +2482,7 @@ app.delete("/processInstances/:id", async (req, res) => {
 
 app.put("/processInstances/:id", async (req, res) => {
   const { id } = req.params;
-  const { processName, description, patient, sections } = req.body;
+  const { processName, description, patient, sections, deletedProcedures } = req.body;
 
   try {
     const processInstance = await ProcessInstance.findById(id);
@@ -2501,7 +2501,6 @@ app.put("/processInstances/:id", async (req, res) => {
 
     // Update sections if provided
     if (sections && sections.length > 0) {
-      // Assume Section model exists and handles individual sections
       const updatePromises = sections.map(sectionUpdate => 
         SectionInstance.findByIdAndUpdate(sectionUpdate._id, {
           name: sectionUpdate.name,
@@ -2510,7 +2509,30 @@ app.put("/processInstances/:id", async (req, res) => {
       );
 
       const updatedSections = await Promise.all(updatePromises);
-      console.log('Updated sections:', updatedSections);
+    }
+    console.log(deletedProcedures);
+
+     // Handle deletion of procedures if provided
+     if (deletedProcedures && deletedProcedures.length > 0) {
+      await Promise.all(deletedProcedures.map(async (procedureId) => {
+        const procedureInstance = await ProcedureInstance.findById(procedureId);
+        console.log(procedureInstance);
+        if (!procedureInstance) return;
+
+        // Update accounts
+        await Account.updateMany(
+          { _id: { $in: procedureInstance.rolesAssignedPeople.map(r => r.accounts).flat() }},
+          { $pull: { assignedProcedures: procedureId, unavailableTimes: { reason: procedureId.toString() }}}
+        );
+
+        // Update resources
+        await ResourceInstance.updateMany(
+          { _id: { $in: procedureInstance.assignedResources }},
+          { $pull: { unavailableTimes: { reason: procedureId.toString() }}}
+        );
+
+        await ProcedureInstance.findByIdAndDelete(procedureId);
+      }));
     }
 
     // Save the updated process instance
@@ -2524,6 +2546,7 @@ app.put("/processInstances/:id", async (req, res) => {
     });
   }
 });
+
 app.get("/users/:userId/eligibleRoles", async (req, res) => {
   try {
     const userId = req.params.userId;

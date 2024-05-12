@@ -16,6 +16,9 @@ import ReviewStaffAssignments from './modifyProcessReviewStaff'
 import ReviewResourceAssignments from './modifyProcessReviewResources'
 import { ClipLoader } from "react-spinners";
 import axios from 'axios';
+import DeleteIcon from "@mui/icons-material/Delete";
+import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
+import {IconButton} from "@mui/material";
 
 
 
@@ -66,7 +69,8 @@ export function ModifyProcessLanding() {
   const { processID } = useParams();
   const { processInstance, fetchProcessInstance, isLoading, error, updateProcessDescription
   , updateProcessName, editedPatient, saveAllChanges,
-  updateSectionDescription, updateSectionName,getStaffAssignments,staffAssignments } = useProcessModificationContext();
+  updateSectionDescription, updateSectionName,getStaffAssignments,staffAssignments,
+deletedProcedures, markProcedureAsDeleted } = useProcessModificationContext();
 
     
 
@@ -107,7 +111,7 @@ export function ModifyProcessLanding() {
     if (processInstance) {
       setDescription(processInstance.description);
       setProcessName(processInstance.processName);
-      setOpenSections(new Set(processInstance.sectionInstances?.slice(0, 1).map(section => section.name)));
+      setOpenSections(new Set(processInstance.sectionInstances?.map(section => section.name)));
       setSectionInstances(processInstance.sectionInstances || []);
     }
   }, [processInstance]);
@@ -339,10 +343,10 @@ export function ModifyProcessLanding() {
             {/* Left Section- Go Back button and Add Section */}
             <div className="flex flex-col gap-4 w-1/4">
                 <button 
-                    className="w-2/5 ml-10 bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center"
+                    className="w-3/5 ml-10 bg-primary text-white rounded-full px-5 py-5 text-3xl flex items-center drop-shadow-2xl"
                     onClick={handleGoBack}
                 >   
-                    <FaArrowLeft className="mr-3" />Go Back
+                    <FaArrowLeft className="mr-3" /><span className="mx-auto">Go Back</span>
                 </button>
                 {/*<div className="flex items-center ml-12">
                     <h1 className="text-black text-3.5xl font-bold">Add Section</h1>
@@ -491,49 +495,58 @@ export function ModifyProcessLanding() {
                   </div>
                 {/* Middle Section Content */}
                 {section.procedureInstances && (
-                  <div className="mt-6 w-3/5 mr-20">
-                    <p className="text-4xl font-bold mb-4 text-primary underline">Procedures</p>
-                    {section.procedureInstances.map((procedure, index) => (
-                      <div 
-                        key={index} 
-                        className={`flex items-center justify-between border-b-2 border-black}`}>
-                        {/* REORDERING <HiMiniArrowsUpDown className=" text-primary text-3xl" />*/}
-                        <span className="flex-1 text-3xl pl-2 font-bold py-4 mr-10">{procedure.procedureName}</span>
-                       {/*MODIFY ASSIGNMENT BUTTONS <button className="flex items-center text-highlightGreen underline text-xl mr-10" onClick={() => handleModifyStaffAssignments(procedure)}>
-                      <span>Staff Assignments</span>
-                      <BsPencilFill className="ml-2" />
-                    </button>                        
+            <div className="mt-6 w-3/5 mr-20">
+                <p className="text-4xl font-bold mb-4 text-primary underline">Procedures</p>
+                {section.procedureInstances.map((procedure, index) => {
+                    const isDeleted = deletedProcedures.some(deletedSection => 
+                        deletedSection._id === section._id && 
+                        deletedSection.procedureInstances.some(proc => proc._id === procedure._id && proc.deleted)
+                    );
 
-                    <button className="flex items-center text-highlightGreen underline text-xl mr-10" onClick={() => handleModifyResourceAssignments(procedure)}>
-                      <span>Resource Assignments</span>
-                      <BsPencilFill className="ml-2" />
-                    </button>*/}
-                        <span className="flex items-center">
-                          {/*<button disable={true}  className ="text-primary text-2xl ml-2">Modify</button>
-                          <MdOutlineOpenInNew className="text-primary ml-1 mr-6 text-3xl" />
-                    <FaTrashAlt className="text-primary mx-2 text-3xl" />*/}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                    return (
+                        <div 
+                            key={index} 
+                            className={`flex items-center justify-between border-b-2 border-black ${isDeleted ? 'opacity-30' : ''}`}
+                        >
+                            <span className="flex-1 text-3xl pl-2 font-bold py-4 mr-10">{procedure.procedureName}   </span>
+                            <IconButton
+                                onClick={() => markProcedureAsDeleted(section._id, procedure._id)}
+                                color="error"
+                            >
+                                {isDeleted ? (
+                                    <RestoreFromTrashIcon />
+                                ) : (
+                                    <DeleteIcon />
+                                )}
+                            </IconButton>
+                        </div>
+                    );
+                })}
+            </div>
+        )}
 
                 {/* Right Section Content */}
                 <div className="w-1/4  mr-10">
                 <div className="flex flex-col mt-4">
 
-                    <button className="hover:bg-green-600 ml-10 bg-highlightGreen text-white rounded-full px-7 py-2 text-xl flex items-center mb-5"
-                    onClick={() => handleReviewResourcesAssignments(staffAssignments.sections.find(staffSection => staffSection._id === section._id))} >
-                      <MdOutlineOpenInNew className=" text-3xl" />
-                      <span className="mx-auto">
-                      Review Resource Assignments </span>
-                    </button>
-                    <button 
-                    className="hover:bg-green-600 ml-10 bg-highlightGreen text-white rounded-full px-7 py-2 text-xl flex items-center"  onClick={() => handleReviewStaffAssignments(staffAssignments.sections.find(staffSection => staffSection._id === section._id))}
-                    >
-                      <MdOutlineOpenInNew className="mr-2 text-3xl" />
-                      Review Staff Assignments
-                    </button>
+                <button 
+      className="hover:bg-green-600 ml-10 bg-highlightGreen text-white rounded-full px-7 py-2 text-lg flex justify-between items-center mb-5 drop-shadow-xl"
+      onClick={() => handleReviewResourcesAssignments(staffAssignments.sections.find(staffSection => staffSection._id === section._id))}
+    >
+      <span className="text-center flex-auto">
+        View Resource Assignments
+      </span>
+      <MdOutlineOpenInNew className="ml-1 text-xl" />
+    </button>
+    <button 
+      className="hover:bg-green-600 ml-10 bg-highlightGreen text-white rounded-full px-7 py-2 text-lg flex justify-between items-center drop-shadow-xl"
+      onClick={() => handleReviewStaffAssignments(staffAssignments.sections.find(staffSection => staffSection._id === section._id))}
+    >
+      <span className="text-center flex-auto">
+        View Staff Assignments
+      </span>
+      <MdOutlineOpenInNew className="ml-1 text-xl" />
+    </button>
                   </div>
                   {/*<ProcedureDropdown />*/}
                 </div>
@@ -544,12 +557,12 @@ export function ModifyProcessLanding() {
       </div>
       <div className="flex justify-evenly items-center mt-10 p-4 w-2/5 mx-auto">
       <button 
-          className="hover:bg-red-600 flex items-center justify-center bg-highlightRed text-white rounded-3xl px-7 py-5 text-3xl" 
+          className="hover:bg-red-600 flex items-center justify-center bg-highlightRed text-white rounded-3xl px-7 py-5 text-3xl drop-shadow-2xl" 
           onClick={() => setShowDeleteModal(true)}> 
           Delete Process
       </button>
         <button 
-          className="flex items-center justify-center bg-highlightGreen text-white rounded-3xl px-7 py-5 text-3xl hover:bg-green-600" 
+          className="flex items-center justify-center bg-highlightGreen text-white rounded-3xl px-7 py-5 text-3xl hover:bg-green-600 drop-shadow-2xl" 
           onClick={handleSaveChanges}>
           Save Changes
     </button>

@@ -64,7 +64,7 @@ const ProcessDetailsPreview = () => {
   };
   
   const handleGoBack = () => {
-    navigate(-1);
+    navigate('/processManagement/newProcess/reviewResourceAssignments');
   };
 
   const handleConfirm = async () => {
