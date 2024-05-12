@@ -2326,6 +2326,7 @@ app.post("/processInstances", async (req, res) => {
                   unavailableTimes: {
                     start: procedure.startTime,
                     end: procedure.endTime,
+                    reason: procedureInstance._id
                   },
                 },
               }
@@ -2344,6 +2345,8 @@ app.post("/processInstances", async (req, res) => {
                     unavailableTimes: {
                       start: procedure.startTime,
                       end: procedure.endTime,
+                      reason: procedureInstance._id
+
                     },
                   },
                 }
@@ -2403,6 +2406,80 @@ app.post("/processInstances", async (req, res) => {
   }
 });
 
+app.delete("/processInstances/:id", async (req, res) => {
+  const { id } = req.params;
+
+ // console.log(`Attempting to delete process instance with ID: ${id}`);
+
+  try {
+    // Find by processID instead of _id if processID is the intended identifier
+    const processInstance = await ProcessInstance.findOne({ processID: id }).populate('sectionInstances');
+    if (!processInstance) {
+    //  console.log(`Process instance with ID: ${id} not found.`);
+      return res.status(404).send({ message: "Process instance not found." });
+    }
+
+   // console.log(`Found process instance with ID: ${id}, proceeding with deletion of related sections and procedure instances.`);
+
+    // Iterate through each section instance to handle their procedure instances
+    for (const sectionInstance of processInstance.sectionInstances) {
+      const fullSection = await SectionInstance.findById(sectionInstance._id).populate('procedureInstances');
+     // console.log(`Handling section instance with ID: ${sectionInstance._id}`);
+
+      for (const procedureInstance of fullSection.procedureInstances) {
+       // console.log(`Handling procedure instance with ID: ${procedureInstance._id}`);
+
+        // Handle accounts referenced in procedure instances
+        for (const roleAssignment of procedureInstance.rolesAssignedPeople) {
+         // console.log(`Updating accounts for role assignments in procedure ID: ${procedureInstance._id}`);
+          await Account.updateMany(
+            { _id: { $in: roleAssignment.accounts } },
+            {
+              $pull: {
+                assignedProcedures: procedureInstance._id,
+                unavailableTimes: { reason: procedureInstance._id.toString() }
+              }
+            }
+          );
+        }
+
+        // Handle resource instances referenced in procedure instances
+        //console.log(`Updating resource instances for procedure ID: ${procedureInstance._id}`);
+        await ResourceInstance.updateMany(
+          { _id: { $in: procedureInstance.assignedResources } },
+          {
+            $pull: {
+              unavailableTimes: { reason: procedureInstance._id.toString() }
+            }
+          }
+        );
+
+        // Delete the procedure instance
+      //  console.log(`Deleting procedure instance ID: ${procedureInstance._id}`);
+        await ProcedureInstance.findByIdAndDelete(procedureInstance._id);
+      }
+
+      // Delete the section instance
+     // console.log(`Deleting section instance ID: ${sectionInstance._id}`);
+      await SectionInstance.findByIdAndDelete(sectionInstance._id);
+    }
+
+    // Delete the process instance
+    //console.log(`Deleting process instance ID: ${id}`);
+    await ProcessInstance.findOneAndDelete({ processID: id });
+
+    console.log(`Process instance ID: ${id} deleted successfully.`);
+    res.send({ message: "Process instance deleted successfully." });
+  } catch (error) {
+    console.error('Error deleting process instance:', error);
+    res.status(500).send({
+      message: "Failed to delete the process instance",
+      error: error.toString(),
+    });
+  }
+});
+
+
 app.put("/processInstances/:id", async (req, res) => {
   const { id } = req.params;
   const { processName, description, patient, sections } = req.body;
@@ -2413,38 +2490,40 @@ app.put("/processInstances/:id", async (req, res) => {
       return res.status(404).send({ message: "Process instance not found." });
     }
 
+    // Update process instance details
     if (processName) processInstance.processName = processName;
     if (description) processInstance.description = description;
 
-    if (patient && patient._id) {
-      await Patient.findByIdAndUpdate(patient._id, patient, { new: true });
+    // Update patient details if provided
+    if (patient && processInstance.patient) {
+      await Patient.findByIdAndUpdate(processInstance.patient._id, patient, { new: true });
     }
 
+    // Update sections if provided
     if (sections && sections.length > 0) {
-      processInstance.sectionInstances = processInstance.sectionInstances.map(
-        (section) => {
-          const sectionUpdate = sections.find(
-            (s) => s._id.toString() === section._id.toString()
-          );
-          if (sectionUpdate) {
-            return { ...section._doc, ...sectionUpdate };
-          }
-          return section;
-        }
+      // Assume Section model exists and handles individual sections
+      const updatePromises = sections.map(sectionUpdate => 
+        SectionInstance.findByIdAndUpdate(sectionUpdate._id, {
+          name: sectionUpdate.name,
+          description: sectionUpdate.description
+        }, { new: true })
       );
+
+      const updatedSections = await Promise.all(updatePromises);
+      console.log('Updated sections:', updatedSections);
     }
 
     // Save the updated process instance
     await processInstance.save();
     res.send(processInstance);
   } catch (error) {
+    console.error('Error updating process instance:', error);
     res.status(500).send({
       message: "Failed to update the process instance",
       error: error.toString(),
     });
   }
 });
-
 app.get("/users/:userId/eligibleRoles", async (req, res) => {
   try {
     const userId = req.params.userId;

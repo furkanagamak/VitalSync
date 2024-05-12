@@ -48,6 +48,7 @@ import CreateAccount from "./components/CreateAccount";
 import ResourceCreate from "./components/resources/ResourceCreate";
 import NotificationBox from "./components/notifications/NotificationBox";
 
+//Templates
 import ProcedureTemplateManagement from "./components/procedureTemplates.js";
 import ProcessTemplateManagement from "./components/processTemplates.js";
 import CreateProcedureTemplateForm from "./components/createProcedureTemplate.js";
