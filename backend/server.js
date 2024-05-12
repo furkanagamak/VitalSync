@@ -2599,6 +2599,22 @@ app.put("/processInstances/:id", async (req, res) => {
           );
           console.log(procedureInstance);
           if (!procedureInstance) return;
+    // Handle deletion of procedures if provided
+    if (deletedProcedures && deletedProcedures.length > 0) {
+      const allUserIds = new Set(); // To store unique user IDs
+      await Promise.all(
+        deletedProcedures.map(async (procedureId) => {
+          const procedureInstance = await ProcedureInstance.findById(
+            procedureId
+          );
+          console.log(procedureInstance);
+          if (!procedureInstance) return;
+
+          procedureInstance.rolesAssignedPeople.forEach((roleAssignment) => {
+            roleAssignment.accounts.forEach((accountId) => {
+              allUserIds.add(accountId.toString());
+            });
+          });
 
           // Update accounts
           await Account.updateMany(
