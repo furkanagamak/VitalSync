@@ -72,7 +72,7 @@ const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
 
   if (isLoading) return <div>Loading ...</div>;
   return (
-    <div className="w-[450px] h-[600px] bg-secondary p-4 flex flex-col space-y-4 overflow-auto">
+    <div className="lg:w-[450px] h-[600px] bg-secondary p-4 flex flex-col space-y-4 overflow-auto">
       {notifications && notifications.length > 0 ? (
         notifications.map((notification, i) => {
           if (i <= 3)
@@ -86,7 +86,7 @@ const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
           else return null;
         })
       ) : (
-        <div className="text-2xl text-center my-20 text-black">
+        <div className="lg:text-2xl text-center my-20 text-black">
           No new notifications.
         </div>
       )}

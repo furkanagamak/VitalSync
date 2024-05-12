@@ -575,7 +575,7 @@ function ContactInfo({ user, authUser, id }) {
   console.log("profile is", user?.userId);
 
   return (
-    <div className="flex flex-col mt-1.5 text-3xl text-black max-md:mt-10">
+    <div className="flex flex-col mt-1.5 text-xl lg:text-3xl text-black max-md:mt-10">
       <h2 className="text-4xl text-left text-red-800">Contact Information</h2>
       {editMode ? (
         <>
@@ -1309,7 +1309,7 @@ function ChangeAvailability({
                 renderInput={(params) => <TextField {...params} />}
               />
             </div>
-            <div className="bg-white my-5 xl:w-1/3">
+            <div className="bg-white my-5 xl:w-1/2">
               <TextField
                 fullWidth
                 label="Reason for Request"
@@ -1317,40 +1317,51 @@ function ChangeAvailability({
                 onChange={handleStatusChange}
                 variant="outlined"
                 multiline
-                rows={2}
+                rows={3}
               />
             </div>
           </LocalizationProvider>
-          <div className="flex-grow">
-            <h2 className="text-2xl text-primary">Scheduled Time-Offs</h2>
-            <p className="text-md mb-2">Click to mark/unmark for deletion:</p>
-            <ul>
-              {user.unavailableTimes.map((timeOff) => (
-                <li
-                  key={timeOff._id}
-                  style={{
-                    opacity: markedForDeletion.includes(timeOff._id) ? 0.3 : 1,
-                  }}
-                >
-                  <IconButton
-                    onClick={() => handleToggleDeleteTimeOff(timeOff._id)}
-                    color="error"
+            <div className="flex-grow">
+              {user.unavailableTimes.length > 0 && (
+                <>
+                  <h2 className="text-2xl text-primary">Scheduled Time-Offs</h2>
+                  <p className="text-md mb-2">Click to mark/unmark for deletion:</p>
+                </>
+              )}
+
+              <ul>
+                {user.unavailableTimes.map((timeOff) => (
+                  <li
+                    key={timeOff._id}
+                    style={{
+                      opacity: markedForDeletion.includes(timeOff._id) ? 0.3 : 1,
+                    }}
                   >
-                    {markedForDeletion.includes(timeOff._id) ? (
-                      <RestoreFromTrashIcon />
-                    ) : (
-                      <DeleteIcon />
-                    )}
-                  </IconButton>
-                  {`${new Date(timeOff.start).toLocaleString()} - ${new Date(
-                    timeOff.end
-                  ).toLocaleString()}`}
-                  <span className="text-primary text-xl mx-2">| Reason:</span>{" "}
-                  {`${timeOff.reason}`}
-                </li>
-              ))}
-            </ul>
-          </div>
+                    <IconButton
+                      onClick={() => handleToggleDeleteTimeOff(timeOff._id)}
+                      color="error"
+                    >
+                      {markedForDeletion.includes(timeOff._id) ? (
+                        <RestoreFromTrashIcon />
+                      ) : (
+                        <DeleteIcon />
+                      )}
+                    </IconButton>
+                    {`${new Date(timeOff.start).toLocaleString()} - ${new Date(
+                      timeOff.end
+                    ).toLocaleString()}`}
+                    <span className="text-primary text-xl mx-2">| Reason:</span> 
+                    {`${timeOff.reason}`}
+                  </li>
+                ))}
+              </ul>
+              
+              {user.unavailableTimes.length === 0 && (
+                <div className="text-2xl pb-4">
+                  <h2>No scheduled time-offs.</h2>
+                </div>
+              )}
+            </div>
           {errors.msg && <div style={{ color: "red" }}>{errors.msg}</div>}
           <button
             className="my-5 bg-primary text-white px-5 py-2.5 text-lg rounded-full cursor-pointer w-2/5 mx-auto max-w-xs"
