@@ -15,29 +15,9 @@ import CreateStaffAssignments from './modifyProcessAssignStaff';
 import ReviewStaffAssignments from './modifyProcessReviewStaff'
 import ReviewResourceAssignments from './modifyProcessReviewResources'
 import { ClipLoader } from "react-spinners";
+import axios from 'axios';
 
 
-
-const notify = () => toast.success("Process successfully deleted! Affected staff have been notified.");
-
-
-const sections = [
-    {
-      name: "Preoperative",
-      description: "Details about Preoperative section",
-      procedures: ["General Anesthesia", "IV Access", "Laparoscopic Surgery", "Catheter Placement"]
-    },
-    {
-      name: "Intraoperative",
-      description: "Surgical procedure including anesthesia and monitoring.",
-      procedures: ["Monitoring", "Incision", "Tissue Handling"]
-    },
-    {
-      name: "Postoperative",
-      description: "Details about Postoperative section",
-      procedures: ["Pain Management", "Wound Care", "Physical Therapy"]
-    }
-  ];
 
 
 function ProcedureDropdown(){
@@ -148,9 +128,16 @@ export function ModifyProcessLanding() {
     }
   }, [sectionInstances]);
   
-    const handleDelete = () => {
+    const handleDelete = async () => {
       setShowDeleteModal(false);
-      notify();
+      try {
+        const response = await axios.delete(`/processInstances/${processID}`);
+        console.log('Process instance deleted successfully:', response.data);
+        toast.success("Process instance successfully deleted. Affected staff have been notified.")
+      } catch (error) {
+        console.error('Failed to delete the process instance:', error.response ? error.response.data : error.message);
+        toast.error("Failed to delete process instance, please try again.")
+      }
       navigate("/processManagement/modifyProcess/activeProcesses")
     };
   
@@ -166,7 +153,7 @@ export function ModifyProcessLanding() {
 
   const handleSaveChanges = async () => {
     await saveAllChanges();  
-toast.success("Process successfully modified!"); 
+toast.success("Process changes saved!"); 
    navigate("/processManagement/modifyProcess/activeProcesses");
 };
 
@@ -400,18 +387,18 @@ toast.success("Process successfully modified!");
                   className="text-primary mb-2"
                   onClick={handleProcessNameEditClick}
                 >
-                  <BsPencilFill />
+                  <BsPencilFill className="text-2xl"/>
                 </button>
               </>
             )}
           </span>
 
-            <span className="flex items-center pl-15"><span className="text-primary underline font-bold mr-5 mb-4 ">Patient:</span>   {editedPatient ? editedPatient.fullName : 'Loading patient data...'} <BsPencilFill onClick={handlePatientEditClick} className="text-primary ml-3"/></span>
-            <div className="flex items-center pl-15"><span className="text-primary underline font-bold mr-5">Process ID:</span>  {processInstance.processID} </div>
+            <span className="flex items-center pl-15"><span className="text-primary underline font-bold mr-5 ">Patient:</span>   {editedPatient ? editedPatient.fullName : 'Loading patient data...'} <BsPencilFill  onClick={handlePatientEditClick} className=" text-2xl text-primary ml-3"/></span>
+            <div className="flex items-center pl-15 mt-3"><span className="text-primary underline font-bold mr-5">Process ID:</span>  {processInstance.processID} </div>
             </div>
 
         {/* Right Section- Description edit */}
-            <div className="flex flex-col pl-20 w-2/5 mt-5">
+            <div className="flex flex-col pl-20 w-2/5 mt-5 ml-5">
             <div className="flex items-center">
             {editDescriptionMode ? (
           <button onClick={handleProcessDescriptionSave} className="bg-primary text-white px-3 py-1 rounded hover:bg-primary-dark mb-2">
@@ -419,7 +406,7 @@ toast.success("Process successfully modified!");
           </button>
         ) : ( 
           <span className="flex items-center mb-3"> Description 
-          <BsPencilFill onClick={handleProcessDescriptionEditClick} className="ml-4 text-primary cursor-pointer" /></span>
+          <BsPencilFill onClick={handleProcessDescriptionEditClick} className="text-2xl ml-4 text-primary cursor-pointer" /></span>
         )}
             </div>
             <textarea
@@ -464,7 +451,7 @@ toast.success("Process successfully modified!");
             onClick={() => handleSectionEditClick(section._id)}
             className="text-primary ml-4"
           >
-            <BsPencilFill />
+            <BsPencilFill className="text-3xl"/>
           </button></span>
           
         </>
@@ -483,9 +470,9 @@ toast.success("Process successfully modified!");
                 {/* Left Section Content */}
                 <div className="w-1/4 ml-10 mr-8">
                   <div className="flex flex-col w-full mt-5">
-                    <div className="flex items-center">
-                              <p className="text-primary text-3xl font-bold mb-4 underline">Description</p>
-                          <BsPencilFill className="ml-3 text-primary mb-4 text-2xl" onClick={() => handleSectionDescEditClick(section.name)} />
+                    <div className="flex items-center mb-4">
+                              <p className="text-primary text-3xl font-bold  underline">Description</p>
+                          <BsPencilFill className="ml-3 text-primary text-xl" onClick={() => handleSectionDescEditClick(section.name)} />
                         </div>
                         <textarea
                           className="bg-white border-4 border-primary text-primary p-4 rounded text-2xl"
@@ -535,19 +522,19 @@ toast.success("Process successfully modified!");
                 {/* Right Section Content */}
                 <div className="w-1/4  mr-10">
                 <div className="flex flex-col mt-4">
-                    <button className="flex justify-evenly bg-highlightGreen text-white rounded-full px-5 py-2 text-xl flex items-center  mt-5"
+
+                    <button className="hover:bg-green-600 ml-10 bg-highlightGreen text-white rounded-full px-7 py-2 text-xl flex items-center mb-5"
                     onClick={() => handleReviewResourcesAssignments(staffAssignments.sections.find(staffSection => staffSection._id === section._id))} >
-                      <MdOutlineOpenInNew className="mr-2" />
+                      <MdOutlineOpenInNew className=" text-3xl" />
                       <span className="mx-auto">
                       Review Resource Assignments </span>
                     </button>
                     <button 
-  className="bg-highlightGreen text-white rounded-full px-5 py-2 text-xl flex items-center mt-5 mb-5 flex justify-evenly"
-  onClick={() => handleReviewStaffAssignments(staffAssignments.sections.find(staffSection => staffSection._id === section._id))}
->
-  <MdOutlineOpenInNew className="mr-2" />
-  Review Staff Assignments
-</button>
+                    className="hover:bg-green-600 ml-10 bg-highlightGreen text-white rounded-full px-7 py-2 text-xl flex items-center"  onClick={() => handleReviewStaffAssignments(staffAssignments.sections.find(staffSection => staffSection._id === section._id))}
+                    >
+                      <MdOutlineOpenInNew className="mr-2 text-3xl" />
+                      Review Staff Assignments
+                    </button>
                   </div>
                   {/*<ProcedureDropdown />*/}
                 </div>
@@ -557,13 +544,13 @@ toast.success("Process successfully modified!");
         ))}       
       </div>
       <div className="flex justify-evenly items-center mt-10 p-4 w-2/5 mx-auto">
-      {/*<button 
-          className="flex items-center justify-center bg-highlightRed text-white rounded-3xl px-7 py-5 text-3xl" 
+      <button 
+          className="hover:bg-red-600 flex items-center justify-center bg-highlightRed text-white rounded-3xl px-7 py-5 text-3xl" 
           onClick={() => setShowDeleteModal(true)}> 
           Delete Process
-      </button>*/}
+      </button>
         <button 
-          className="flex items-center justify-center bg-highlightGreen text-white rounded-3xl px-7 py-5 text-3xl" 
+          className="flex items-center justify-center bg-highlightGreen text-white rounded-3xl px-7 py-5 text-3xl hover:bg-green-600" 
           onClick={handleSaveChanges}>
           Save Changes
     </button>

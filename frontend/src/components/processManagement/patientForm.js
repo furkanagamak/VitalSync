@@ -438,7 +438,7 @@ function PatientInformationForm() {
             <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
               <button
                 type="submit"
-                className="bg-highlightGreen text-white mx-auto text-2xl py-4 px-16 rounded-3xl mt-10 mb-5"
+                className="hover:bg-green-600 bg-highlightGreen text-white mx-auto text-2xl py-4 px-16 rounded-3xl mt-10 mb-5"
               >
                 Proceed
               </button>
