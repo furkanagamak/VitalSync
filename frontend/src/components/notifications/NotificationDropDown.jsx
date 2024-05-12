@@ -45,9 +45,17 @@ const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
       }
     };
 
+    const handleNewProcessEvent = (involvedUser) => {
+      console.log("involved users", involvedUser);
+      console.log("current user");
+      if (user && involvedUser.includes(user.id)) {
+        fetchNotifications();
+      }
+    };
+
     socket?.on("procedure complete - refresh", handleNewNotification);
     socket?.on("new chat message - refresh", handleNewNotification);
-    socket?.on("new process - refresh", handleNewNotification);
+    socket?.on("new process - refresh", handleNewProcessEvent);
     socket?.on("notification refresh", handleNewNotification);
 
     return () => {

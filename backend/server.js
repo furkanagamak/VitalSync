@@ -901,7 +901,9 @@ app.put("/user/:userId", async (req, res) => {
 
     if (unavailableTimes || deletedTimes) {
       if (deletedTimes && deletedTimes.length > 0) {
-        user.unavailableTimes = user.unavailableTimes.filter(time => !deletedTimes.includes(time._id.toString()));
+        user.unavailableTimes = user.unavailableTimes.filter(
+          (time) => !deletedTimes.includes(time._id.toString())
+        );
       }
 
       if (unavailableTimes && unavailableTimes.length > 0) {
@@ -922,7 +924,9 @@ app.put("/user/:userId", async (req, res) => {
     }
   } catch (error) {
     console.error("Error updating user:", error);
-    res.status(500).json({ message: "Error updating user", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error updating user", error: error.message });
   }
 });
 
@@ -2390,7 +2394,8 @@ app.post("/processInstances", async (req, res) => {
       );
     });
 
-    io.sockets.emit("new process - refresh");
+    console.log("sending sockets data: ", Array.from(allUserIds));
+    io.sockets.emit("new process - refresh", Array.from(allUserIds));
 
     res.status(201).send(processInstance);
   } catch (error) {

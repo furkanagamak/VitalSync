@@ -1194,38 +1194,36 @@ function ChangeAvailability({
   };
 
   const handleSubmitTimeOff = async () => {
-    if (
-      (!startTime || !endTime || !status.trim()) &&
-      markedForDeletion.length === 0
-    ) {
-      setErrors({
-        msg: "Please fill in all fields or mark items for deletion.",
-      });
+    if ((!startTime || !endTime || !status.trim()) && markedForDeletion.length === 0) {
+      setErrors({ msg: "Please fill in all fields or mark items for deletion." });
+      toast.error("Please fill in all fields or mark items for deletion.");
       return;
     }
-
-    if (
-      (startTime && endTime && !status.trim()) ||
-      (status.trim() && (!startTime || !endTime))
-    ) {
+  
+    if ((startTime && endTime && !status.trim()) || (status.trim() && (!startTime || !endTime))) {
       setErrors({ msg: "Please complete all fields for new time off." });
+      toast.error("Please complete all fields for new time off.");
       return;
     }
-
-    const newUnavailableTime =
-      startTime && endTime && status.trim()
-        ? {
-            start: startTime.toISOString(),
-            end: endTime.toISOString(),
-            reason: status,
-          }
-        : null;
-
+  
+    let newUnavailableTime = null;
+    try {
+      newUnavailableTime = startTime && endTime && status.trim() ? {
+        start: startTime.toISOString(),
+        end: endTime.toISOString(),
+        reason: status
+      } : null;
+    } catch (error) {
+      console.error("Error with date values: ", error);
+      toast.error("Invalid date values provided. Please check the dates again.");
+      return;
+    }
+  
     const updateData = {
       unavailableTimes: newUnavailableTime ? [newUnavailableTime] : [],
-      deletedTimes: markedForDeletion,
+      deletedTimes: markedForDeletion
     };
-
+  
     try {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
@@ -1234,11 +1232,9 @@ function ChangeAvailability({
           ...prevState,
           usualHours: weeklySchedule,
           unavailableTimes: [
-            ...prevState.unavailableTimes.filter(
-              (time) => !markedForDeletion.includes(time._id)
-            ),
-            ...(newUnavailableTime ? [newUnavailableTime] : []),
-          ],
+            ...prevState.unavailableTimes.filter(time => !markedForDeletion.includes(time._id)),
+            ...(newUnavailableTime ? [newUnavailableTime] : [])
+          ]
         }));
         onRevertToProfile();
       } else {
@@ -1246,9 +1242,10 @@ function ChangeAvailability({
       }
     } catch (error) {
       console.error("Error updating user:", error);
-      toast.error("Error updating user: " + error.message);
+      toast.error("Error updating user: " + (error.response?.data?.message || "Unknown error"));
     }
   };
+  
 
   const handleToggleDeleteTimeOff = (timeOffId) => {
     if (markedForDeletion.includes(timeOffId)) {
