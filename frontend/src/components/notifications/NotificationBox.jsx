@@ -58,6 +58,7 @@ const NotificationBox = () => {
     socket?.on("new process - refresh", handleNewNotification);
     socket?.on("notification refresh", handleNewNotification);
     socket?.on("process deleted - refresh", handleNewNotification);
+    socket?.on("procedure deleted - refresh", handleNewNotification);
 
     return () => {
       socket?.off("procedure complete - refresh", handleNewNotification);
@@ -65,6 +66,7 @@ const NotificationBox = () => {
       socket?.off("new process - refresh", handleNewNotification);
       socket?.off("notification refresh", handleNewNotification);
       socket?.off("process deleted - refresh", handleNewNotification);
+      socket?.off("procedure deleted - refresh", handleNewNotification);
     };
   }, [user?.id, socket]);
 

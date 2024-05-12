@@ -2545,7 +2545,8 @@ app.delete("/processInstances/:id", async (req, res) => {
 
 app.put("/processInstances/:id", async (req, res) => {
   const { id } = req.params;
-  const { processName, description, patient, sections, deletedProcedures } = req.body;
+  const { processName, description, patient, sections, deletedProcedures } =
+    req.body;
 
   try {
     const processInstance = await ProcessInstance.findById(id);
@@ -2583,27 +2584,83 @@ app.put("/processInstances/:id", async (req, res) => {
 
     console.log(deletedProcedures);
 
-     // Handle deletion of procedures if provided
-     if (deletedProcedures && deletedProcedures.length > 0) {
-      await Promise.all(deletedProcedures.map(async (procedureId) => {
-        const procedureInstance = await ProcedureInstance.findById(procedureId);
-        console.log(procedureInstance);
-        if (!procedureInstance) return;
+    // Handle deletion of procedures if provided
+    if (deletedProcedures && deletedProcedures.length > 0) {
+      const allUserIds = new Set(); // To store unique user IDs
+      await Promise.all(
+        deletedProcedures.map(async (procedureId) => {
+          const procedureInstance = await ProcedureInstance.findById(
+            procedureId
+          );
+          console.log(procedureInstance);
+          if (!procedureInstance) return;
 
-        // Update accounts
-        await Account.updateMany(
-          { _id: { $in: procedureInstance.rolesAssignedPeople.map(r => r.accounts).flat() }},
-          { $pull: { assignedProcedures: procedureId, unavailableTimes: { reason: procedureId.toString() }}}
-        );
+          procedureInstance.rolesAssignedPeople.forEach((roleAssignment) => {
+            roleAssignment.accounts.forEach((accountId) => {
+              allUserIds.add(accountId.toString());
+            });
+          });
 
-        // Update resources
-        await ResourceInstance.updateMany(
-          { _id: { $in: procedureInstance.assignedResources }},
-          { $pull: { unavailableTimes: { reason: procedureId.toString() }}}
-        );
+          // Update accounts
+          await Account.updateMany(
+            {
+              _id: {
+                $in: procedureInstance.rolesAssignedPeople
+                  .map((r) => r.accounts)
+                  .flat(),
+              },
+            },
+            {
+              $pull: {
+                assignedProcedures: procedureId,
+                unavailableTimes: { reason: procedureId.toString() },
+              },
+            }
+          );
 
-        await ProcedureInstance.findByIdAndDelete(procedureId);
-      }));
+          // Update resources
+          await ResourceInstance.updateMany(
+            { _id: { $in: procedureInstance.assignedResources } },
+            { $pull: { unavailableTimes: { reason: procedureId.toString() } } }
+          );
+
+          await ProcedureInstance.findByIdAndDelete(procedureId);
+
+          console.log(allUserIds);
+          // Send notifications to all unique users
+          const notificationDetails = {
+            type: "alert",
+            title: "Procedure Deleted",
+            text:
+              "The procedure " +
+              procedureInstance.procedureName +
+              " has been deleted from the process " +
+              processInstance.processName +
+              " with process ID " +
+              processInstance.processID +
+              ". You are freed from this assigned procedure.",
+            timeCreated: new Date(),
+          };
+
+          allUserIds.forEach(async (userId) => {
+            const notification = new Notification({
+              userId,
+              ...notificationDetails,
+            });
+            await notification.save();
+
+            // Update user's notification box
+            await Account.updateOne(
+              { _id: userId },
+              {
+                $push: { notificationBox: notification._id },
+              }
+            );
+          });
+
+          io.sockets.emit("procedure deleted - refresh");
+        })
+      );
     }
 
     // Save the updated process instance
