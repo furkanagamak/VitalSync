@@ -201,7 +201,7 @@ const Process = ({ process, socket }) => {
           <h1 className="underline mr-4">Patient:</h1>
           <p>{process.patientName}</p>
         </div>
-        <div className="flex ">
+        <div className="flex mt-2 lg:mt-0">
           <h1 className="underline mr-2">Process:</h1>
           <p>{process.processName}</p>
         </div>

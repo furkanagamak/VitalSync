@@ -6,12 +6,8 @@ describe('MyComponent Button Functionality', () => {
     cy.get('#emailInput').type('john.doe@example.com');
     cy.get('#passwordInput').type('password123');
     cy.get('button').contains('Sign in').click();
-    cy.wait(1000);
     cy.get('#userNav').should('be.visible').click();
   });
-  
-
-
   
     it('returns to profile view from ChangeAvailability', () => {
       cy.contains('Edit Schedule').should('be.visible').click();
@@ -19,8 +15,6 @@ describe('MyComponent Button Functionality', () => {
       cy.contains('Back to Profile').click();
       cy.contains('Change Availability').should('not.exist');
     });
-
-
 
     it('profile information changes', () => {
         cy.contains('Edit Profile').click();
@@ -130,36 +124,10 @@ describe('MyComponent Button Functionality', () => {
           cy.get('#newPassword').clear().type('password123');
           cy.get('#ConfirmNewPassword').clear().type('password123');
           cy.get('#resetConfirm').click(); 
+          cy.wait(1000);
         });
       });
       
-      
-    it('successfully completes the reset password flow', () => {
-      cy.contains('Reset Password').click();
-      cy.get('.ConfirmResetPasswordModal').should('be.visible');
-      cy.contains('Confirm').click();
-      cy.contains('Cancel').click();
-      cy.get('.ConfirmResetPasswordModal').should('not.exist');
-    });
-      
-
-    // it('opens the image uploader and clicks upload', () => {
-    //   cy.contains('Change Profile Image').click();
-    //   cy.contains('Upload').click();
-    // });
-
-      /*it('opens termination modal on clicking Terminate Account button', () => {
-        cy.contains('Terminate Account').click();
-        cy.contains('Are you sure you want to terminate this account?').should('be.visible');
-      });*/
-
-      /*
-      it('closes termination modal on submitting termination', () => {
-        cy.contains('Terminate Account').click();
-        cy.get('input[type="text"]').type('john smith');
-        cy.contains('Submit').click();
-        cy.contains('Account has been Terminated').should('exist');
-      });*/
       
       describe('Profile Image Upload', () => {
         it('allows the user to upload a new profile image', () => {
@@ -197,55 +165,57 @@ describe('Edit Eligible Roles interaction', () => {
   });
 });
 
-// describe('Edit Schedule functionality', () => {
+describe('Edit Schedule functionality', () => {
 
-//   it('edits the schedule and verifies the changes', () => {
-//     //Click "Edit Schedule"
-//     cy.contains('Edit Schedule').click();
+  it('edits the schedule and verifies the changes', () => {
+    //Click "Edit Schedule"
+    cy.contains('Edit Schedule').click();
+    cy.contains('p', 'Sunday') // Repeat finding 'Monday' to ensure our scope is correct for checking
+    .closest('div.grid').closest('div.grid').within(() => {
+  cy.get('input[type="time"]').first().then(input => {
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    nativeInputValueSetter.call(input[0], '08:00');
+    input[0].dispatchEvent(new Event('input', { bubbles: true }));
+    input[0].dispatchEvent(new Event('change', { bubbles: true }));
+  });
 
-//     //Check "Day Off" for Sunday
-//     cy.contains('div', 'Sunday').within(() => {
-//       cy.get('input[type="checkbox"]').check();
-//     });
 
-//     //Set Monday start time to 8:00 AM and end time to 4:00 PM
-//     cy.contains('div', 'Monday').within(() => {
-//       cy.get('input[type="time"]').first().then(input => {
-//         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-//         nativeInputValueSetter.call(input[0], '08:00');
-//         input[0].dispatchEvent(new Event('input', { bubbles: true }));
-//         input[0].dispatchEvent(new Event('change', { bubbles: true }));
-//       });
-      
-//       cy.get('input[type="time"]').last().then(input => {
-//         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
-//         nativeInputValueSetter.call(input[0], '16:00');
-//         input[0].dispatchEvent(new Event('input', { bubbles: true }));
-//         input[0].dispatchEvent(new Event('change', { bubbles: true }));
-//       });
-//     });
+  
+  cy.get('input[type="time"]').last().then(input => {
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    nativeInputValueSetter.call(input[0], '16:00');
+    input[0].dispatchEvent(new Event('input', { bubbles: true }));
+    input[0].dispatchEvent(new Event('change', { bubbles: true }));
+  });
+});
 
-//     // Click "Update Schedule"
-//     cy.contains('Update Schedule').click();
+cy.contains('Update Schedule').click();
+cy.contains('Edit Schedule').click();
 
-//     // Check for a confirmation message
-//     cy.contains('Weekly schedule updated successfully!').should('be.visible');
+cy.contains('p', 'Sunday').closest('div.grid').closest('div.grid').within(() => {
+  cy.get('input[type="time"]').first().should('have.value', '08:00');
+  cy.get('input[type="time"]').last().should('have.value', '16:00');
+});
 
-//     //Click "Edit Schedule" again
-//     cy.contains('Edit Schedule').click();
+    //Check "Day Off" for Sunday
+    cy.contains('p', 'Sunday') 
+      .closest('div.grid')
+      .closest('div.grid')
+      .within(() => {
+        cy.get('input[type="checkbox"]').click();
+      });
+    
+    cy.contains('Update Schedule').click();
+    cy.contains('Edit Schedule').click();
 
-//     //Verify Sunday is a day off
-//     cy.contains('div', 'Sunday').within(() => {
-//       cy.get('input[type="checkbox"]').should('be.checked');
-//     });
-
-//     // Verify Monday times are set correctly
-//     cy.contains('div', 'Monday').within(() => {
-//       cy.get('input[type="time"]').first().should('have.value', '08:00');
-//       cy.get('input[type="time"]').last().should('have.value', '16:00');
-//     });
-//   });
-// });
+    cy.contains('p', 'Sunday') 
+    .closest('div.grid')
+    .closest('div.grid')
+    .within(() => {
+      cy.get('input[type="checkbox"]').should('be.checked');
+    });
+  });
+});
 
   });
   

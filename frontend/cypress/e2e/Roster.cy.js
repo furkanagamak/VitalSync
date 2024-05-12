@@ -68,6 +68,87 @@ describe('MyComponent Button Functionality', () => {
     });
   });
 
+  describe('Edit Eligible Roles interaction', () => {
+    it('checks all roles, saves changes, and verifies all remain checked', () => {
+      cy.get('input[placeholder="Search..."]').type('James Test');
+
+      cy.get('table tbody tr').first().click();
+      // Click the "Edit Eligible Roles" button
+      cy.contains('Edit Eligible Roles').click();
+  
+      //  all checkboxes
+      cy.get('input[type="checkbox"]').should('be.visible').each(($el) => {
+        cy.wrap($el).check(); 
+      });
+  
+      // Click "Save Changes" button
+      cy.contains('Save Changes').click(); 
+  
+      cy.contains('Roles successfully updated.').should('be.visible');
+  
+      // Re-open the Edit roles modal to verify
+      cy.contains('Edit Eligible Roles').click();
+  
+      // Verify that all checkboxes remain checked
+      cy.get('input[type="checkbox"]').should('be.checked');
+    });
+  });
+  
+  describe('Edit Schedule functionality', () => {
+  
+    it('edits the schedule and verifies the changes', () => {
+      cy.get('input[placeholder="Search..."]').type('James Test');
+
+      cy.get('table tbody tr').first().click();
+      //Click "Edit Schedule"
+      cy.contains('Edit Schedule').click();
+      cy.contains('p', 'Sunday')
+      .closest('div.grid').closest('div.grid').within(() => {
+    cy.get('input[type="time"]').first().then(input => {
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+      nativeInputValueSetter.call(input[0], '08:00');
+      input[0].dispatchEvent(new Event('input', { bubbles: true }));
+      input[0].dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  
+  
+    
+    cy.get('input[type="time"]').last().then(input => {
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+      nativeInputValueSetter.call(input[0], '16:00');
+      input[0].dispatchEvent(new Event('input', { bubbles: true }));
+      input[0].dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  });
+  
+  cy.contains('Update Schedule').click();
+  cy.contains('Edit Schedule').click();
+  
+  cy.contains('p', 'Sunday').closest('div.grid').closest('div.grid').within(() => {
+    cy.get('input[type="time"]').first().should('have.value', '08:00');
+    cy.get('input[type="time"]').last().should('have.value', '16:00');
+  });
+  
+      //Check "Day Off" for Sunday
+      cy.contains('p', 'Sunday') 
+        .closest('div.grid')
+        .closest('div.grid')
+        .within(() => {
+          cy.get('input[type="checkbox"]').click();
+        });
+      
+      cy.contains('Update Schedule').click();
+      cy.contains('Edit Schedule').click();
+  
+      cy.contains('p', 'Sunday') 
+      .closest('div.grid')
+      .closest('div.grid')
+      .within(() => {
+        cy.get('input[type="checkbox"]').should('be.checked');
+      });
+    });
+  });
+
   // describe('Termination test', () => {
   //   it('Try wrong email when termiation', () => {
 
