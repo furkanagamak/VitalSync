@@ -19,25 +19,27 @@ const AssignedProcesses = () => {
     setRefreshTick((refreshTick) => !refreshTick);
   };
 
-  // fethces assigned processes
-  useEffect(() => {
-    const fetchAssignedProcesses = async () => {
-      const res = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL}/assignedProcesses`,
-        {
-          credentials: "include",
-        }
-      );
-      if (!res.ok) {
-        console.log("assigned processes fetch failed");
-        console.log(await res.text());
-      } else {
-        const data = await res.json();
-        console.log("Received process");
-        console.log(data);
-        setAssignedProcesses(data);
+  const fetchAssignedProcesses = async () => {
+    console.log("fetching for new assigned processes");
+    const res = await fetch(
+      `${process.env.REACT_APP_API_BASE_URL}/assignedProcesses`,
+      {
+        credentials: "include",
       }
-    };
+    );
+    if (!res.ok) {
+      console.log("assigned processes fetch failed");
+      console.log(await res.text());
+    } else {
+      const data = await res.json();
+      console.log("Received process");
+      console.log(data);
+      setAssignedProcesses(data);
+    }
+  };
+
+  // fetches assigned processes
+  useEffect(() => {
     fetchAssignedProcesses();
   }, [refreshTick]);
 
@@ -54,7 +56,7 @@ const AssignedProcesses = () => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("procedure complete - refresh", triggerRefresh);
+    socket.on("procedure complete - refresh", fetchAssignedProcesses);
 
     const processNewRefreshCb = (involvedUser) => {
       console.log("involved users", involvedUser);
@@ -85,12 +87,12 @@ const AssignedProcesses = () => {
     socket.on("process modify - refresh", processModifyRedirectCb);
 
     return () => {
-      socket.off("procedure complete - refresh", triggerRefresh);
+      socket.off("procedure complete - refresh", fetchAssignedProcesses);
       socket.off("new process - refresh", processNewRefreshCb);
       socket.off("process deleted - refresh", processDeleteRedirectCb);
       socket.off("process modify - refresh", processModifyRedirectCb);
     };
-  }, [socket]);
+  }, [user, socket]);
 
   const handleNextPage = () => {
     setTablePage((prevPage) => prevPage + 1);

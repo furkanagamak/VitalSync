@@ -119,8 +119,9 @@ io.on("connection", async (socket) => {
       `User login! Associating socket id ${socket.id} with user: ${userId}`
     );
     const currUser = await Account.findOne({ _id: userId });
-    if (!currUser)
-      throw new Error("Could not find account associated to user", userId);
+    if (!currUser) {
+      return console.log("Could not find account associated to user", userId);
+    }
 
     const assignedProcesses = await getAssignedProcessesByUser(currUser);
     assignedProcesses.forEach((process) => {
@@ -176,11 +177,11 @@ io.on("connection", async (socket) => {
     // checks for valid userId and processID
     const messageUser = await Account.findOne({ _id: userId });
     if (!messageUser)
-      throw new Error(`User ${userId} sending message does not exists`);
+      return console.log(`User ${userId} sending message does not exists`);
     const process = await ProcessInstance.findOne({ processID: processID });
-    if (!process) throw new Error(`Process ${processID} does not exists`);
+    if (!process) return console.log(`Process ${processID} does not exists`);
     if (process.currentProcedure === null)
-      throw new Error(
+      return console.log(
         `User ${messageUser._id} attempted to chat in an completed process`
       );
     // creates new message and add them to message history
@@ -1569,11 +1570,12 @@ const getAssignedProcessesByUser = async (user) => {
       .populate("currentProcedure")
       .populate("patient");
 
+    if (!processInstance) {
+      console.log(`A process with processID ${processID} does not exists!`);
+      continue;
+    }
     // skip completed processes
     if (processInstance.currentProcedure === null) continue;
-
-    if (!processInstance)
-      throw new Error(`Process ID ${processID} does not exists!`);
 
     // Step 4: Resolve incomplete procedureInstances for each sectionInstance
     const procedureInstances = await getIncompleteProcedureInProcess(
@@ -1642,17 +1644,26 @@ const getAssignedProcessesByUser = async (user) => {
 };
 
 app.get("/assignedProcesses", async (req, res) => {
-  const accountId = req.cookies.accountId;
-  if (!accountId) return res.status(401).send("User not logged in");
-  const currUser = await Account.findOne({ _id: accountId });
-  if (!currUser)
-    return res
-      .status(404)
-      .send("User does not exist! Malformed session, please login again!");
+  try {
+    const accountId = req.cookies.accountId;
+    if (!accountId) return res.status(401).send("User not logged in");
+    const currUser = await Account.findOne({ _id: accountId });
+    if (!currUser)
+      return res
+        .status(404)
+        .send("User does not exist! Malformed session, please login again!");
 
-  if (currUser.assignedProcedures.length === 0) return res.status(200).json([]);
-  const data = await getAssignedProcessesByUser(currUser);
-  return res.status(200).json(data);
+    console.log("Processing assigned process for user: ", currUser._id);
+    if (currUser.assignedProcedures.length === 0)
+      return res.status(200).json([]);
+    const data = await getAssignedProcessesByUser(currUser);
+    return res.status(200).json(data);
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(500)
+      .send("server side error when fetching your assigned processes");
+  }
 });
 
 app.get("/processInstance/:processID", async (req, res) => {
@@ -1839,11 +1850,6 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
       sectionInstances: section._id,
     });
 
-    // signals to frontend of the current procedure update
-    io.to(`process-event-${process.processID}`).emit(
-      "procedure complete - refresh"
-    );
-
     if (assignedCount === completedCount) {
       const procedureIndex = section.procedureInstances.indexOf(procedure._id);
       let nextProcedureId = null;
@@ -1958,18 +1964,13 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
       );
 
       // signals to frontend of the current procedure update
-      const newCurrentProcedure = await ProcedureInstance.findOne({
-        _id: nextProcedureId,
-      });
-      io.to(`process-event-${process.processID}`).emit(
-        "procedure complete - refresh"
-      );
       io.to(process.processID).emit("notification refresh");
-
-      res.send("Procedure marked as complete");
-    } else {
-      res.send("Procedure marked as complete");
     }
+
+    // signals to frontend of the current procedure update
+    io.to(process.processID).emit("procedure complete - refresh");
+
+    res.send("Procedure marked as complete");
   } catch (error) {
     console.error("Error updating procedure instance:", error);
     res.status(500).send("Internal server error");
@@ -2018,26 +2019,33 @@ const getBoardProcessInfo = async (process) => {
 };
 
 app.get("/boardProcess/:id", async (req, res) => {
-  const processID = req.params.id;
-  const accountId = req.cookies.accountId;
-  if (!accountId) return res.status(401).send("User not logged in");
-  const currUser = await Account.findOne({ _id: accountId });
-  if (!currUser)
-    return res
-      .status(404)
-      .send("User does not exist! Malformed session, please login again!");
+  try {
+    const processID = req.params.id;
+    const accountId = req.cookies.accountId;
+    if (!accountId) return res.status(401).send("User not logged in");
+    const currUser = await Account.findOne({ _id: accountId });
+    if (!currUser)
+      return res
+        .status(404)
+        .send("User does not exist! Malformed session, please login again!");
 
-  // process existence check
-  const process = await ProcessInstance.findOne({ processID: processID });
-  if (!process)
-    return res
-      .status(404)
-      .send(
-        "The provided process ID is not associated with any process instance!"
-      );
+    // process existence check
+    const process = await ProcessInstance.findOne({ processID: processID });
+    if (!process)
+      return res
+        .status(404)
+        .send(
+          "The provided process ID is not associated with any process instance!"
+        );
 
-  const data = await getBoardProcessInfo(process);
-  return res.status(200).json(data);
+    const data = await getBoardProcessInfo(process);
+    return res.status(200).json(data);
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(500)
+      .status("server side error when process board process");
+  }
 });
 
 app.get("/users/:userId/notifications", async (req, res) => {
@@ -2788,6 +2796,26 @@ app.put("/updateRoles/:userId", async (req, res) => {
     if (!roles.every((roleId) => mongoose.Types.ObjectId.isValid(roleId))) {
       return res.status(400).send("Invalid role ID provided.");
     }
+
+    // checks if the user is assigned to any ongoing procedures
+    const procedures = await ProcedureInstance.find({
+      rolesAssignedPeople: {
+        $elemMatch: { accounts: userId },
+      },
+    });
+    const isInOnGoingProcedure = procedures.some((procedure) => {
+      return (
+        procedure.peopleMarkAsCompleted.length !==
+        procedure.rolesAssignedPeople.length
+      );
+    });
+
+    if (isInOnGoingProcedure)
+      return res
+        .status(409)
+        .send(
+          "This user is currently assigned to one or more procedure that has not been completed!"
+        );
 
     const updatedAccount = await Account.findByIdAndUpdate(
       userId,
