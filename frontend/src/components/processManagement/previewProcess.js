@@ -21,7 +21,7 @@ const ProcessDetailsPreview = () => {
     console.log(patientInformation);
 
     if (!location.state || location.state.from !== '/processManagement/newProcess/reviewResourceAssignments') {
-      navigate("/processManagement/newProcess/processTemplates");
+      navigate("/processManagement/newProcess/processTemplates", { replace: true });
     }
 
     const fetchUserData = async () => {

@@ -31,7 +31,7 @@ export function CreateReviewResourceAssignments({ onBack, onProceed }) {
   useEffect(() => {
     console.log(fetchedSections);
     if(fetchedSections.length < 1){
-      navigate("/processManagement/newProcess/processTemplates");
+      navigate("/processManagement/newProcess/processTemplates", { replace: true });
     }
     const fetchResourceDetails = async () => {
       // Extract IDs from resources

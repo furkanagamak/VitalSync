@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useProcessCreation } from '../../providers/ProcessCreationProvider';
 import { ThemeProvider, createTheme } from "@mui/material/styles";
@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 
 
 function ProcessStartTime() {
-  const { setStartTime, setFetchedSections } = useProcessCreation();
+  const { setStartTime, setFetchedSections, patientInformation } = useProcessCreation();
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -18,6 +18,10 @@ function ProcessStartTime() {
   const oneHourLater = new Date(now.getTime() + 3600000);
   const [selectedTime, setSelectedTime] = useState(oneHourLater);
 
+  useEffect(() => {
+    if (!(patientInformation.firstName)) {
+      navigate("/processManagement/newProcess/processTemplates", { replace: true });    }
+  }, []);
 
 
   const handleGoBack = () => {

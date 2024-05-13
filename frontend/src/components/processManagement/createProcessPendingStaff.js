@@ -356,7 +356,7 @@ function NavButtons({ onBack, onProceed, allAssigned }) {
 }
 
 export function PendingNewStaff() {
-  const { fetchedSections } = useProcessCreation(); 
+  const { fetchedSections, patientInformation } = useProcessCreation(); 
   const [openSections, setOpenSections] = useState(() => new Set(fetchedSections.map(section => section.name)));
   const navigate = useNavigate();
   const [viewAlternateComponent, setViewAlternateComponent] = useState(false);  //change name
@@ -365,6 +365,8 @@ export function PendingNewStaff() {
   const [assignmentCompletion, setAssignmentCompletion] = useState({});
 
   useEffect(() => {
+    if (!(patientInformation.firstName)) {
+      navigate("/processManagement/newProcess/processTemplates", { replace: true });    }
 
     setOpenSections(new Set(fetchedSections.map(section => section.sectionName)));
   }, [fetchedSections]);

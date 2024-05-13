@@ -34,12 +34,10 @@ const states = [
 
 
 function PatientInformationForm() {
-  const { patientInformation, setPatientInformation } = useProcessCreation();
+  const { patientInformation, setPatientInformation, processTemplate } = useProcessCreation();
   const { processInstance, editedPatient, updateProcessPatient } = useProcessModificationContext();
   const location = useLocation();
-  const shouldRedirect = !location.state;
-
-
+  const shouldRedirect = ((!(patientInformation.firstName) )&& (!location.state));
 
   const [patientInfo, setPatientInfo] = useState({
     firstName: '',
@@ -299,14 +297,15 @@ function PatientInformationForm() {
   return (
     <ThemeProvider theme={theme}>
       <div className="p-8">
-        <div className="flex justify-between items-center mb-6"> 
-          <button className="bg-primary text-white rounded-full px-5 py-2 text-xl flex items-center" onClick={handleGoBack}>
+      <button className="bg-primary text-white rounded-full px-5 py-2 text-xl flex " onClick={handleGoBack}>
                 <FaArrowLeft className="mr-2" />
                 Go Back
             </button>
+        <div className="flex  mb-6"> 
+            <div className="mx-auto">
           <Typography variant="h4" component="h2" color="primary.main" fontWeight="bold">
             Patient Information
-          </Typography>
+          </Typography></div>
           <div></div>
         </div>
         
