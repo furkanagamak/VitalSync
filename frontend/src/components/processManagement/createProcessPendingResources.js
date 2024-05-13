@@ -15,8 +15,17 @@ export function ResourceDropdownContent({ requiredResource, eligibleResources, a
   const handleAssign = (resource) => {
     assignResources(requiredResource.uniqueId, resource);
   };
+  const [searchTerm, setSearchTerm] = useState('');
 
-  console.log(eligibleResources);
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredResources = eligibleResources.filter(resource =>
+    resource.uniqueIdentifier.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  //console.log(eligibleResources);
 
   return (
     <div className="flex mx-10 mb-5">
@@ -28,7 +37,14 @@ export function ResourceDropdownContent({ requiredResource, eligibleResources, a
       </div>
       <div className="w-3/5 ml-5">
         <p className="text-highlightGreen text-2xl mb-3 mt-5">Available Resources:</p>
-        {eligibleResources.length > 0 ? (
+        <input
+          type="text"
+          placeholder="Search by Identifier..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          className="mb-3 px-2 py-1 border-gray-400 border-2 rounded"
+        />
+        {filteredResources.length > 0 ? (
           <div className="border-gray-400 border-2 rounded-lg p-3 overflow-y-auto" style={{ maxHeight: '12rem' }}>
             <table className="w-full text-left">
               <thead className="border-b border-primary">
@@ -38,12 +54,12 @@ export function ResourceDropdownContent({ requiredResource, eligibleResources, a
                 </tr>
               </thead>
               <tbody>
-                {eligibleResources.map((resource, index) => (
+                {filteredResources.map((resource, index) => (
                   <tr key={index} style={{ borderBottom: '1px solid black' }}>
                     <td className="py-2 text-2xl">{resource.uniqueIdentifier}</td>
                     <td>
                       <button 
-                        className="text-xl bg-green-500 hover:bg-green-700 mt-2 text-white rounded-full px-3 py-1"
+                        className="mb-1 text-xl bg-green-500 hover:bg-green-700 mt-2 text-white rounded-full px-3 py-1"
                         onClick={() => handleAssign(resource)}
                       >
                         Assign
@@ -69,7 +85,12 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
   const [eligibleResources, setEligibleResources] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [assignedResources, setAssignedResources] = useState({});
-  const { assignResourceToRequiredResource } = useProcessCreation(); // This function needs to be defined in your context provider
+  const { assignResourceToRequiredResource } = useProcessCreation();
+
+  useEffect(() => {
+    const allResourceIds = new Set(requiredResources.map(requiredResource => requiredResource.uniqueId));
+    setOpenResources(allResourceIds);
+  }, [requiredResources]);
 
   useEffect(() => {
     const fetchEligibleResources = async () => {
@@ -116,7 +137,6 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
       return acc;
     }, {});
   
-    // If there was previously assigned resource, add it back to the eligible lists where appropriate
     if (previouslyAssignedResource) {
       const updatedEligibleResources = { ...updatedResources };
       console.log("Debug: Starting to re-add previously assigned resource if not present.");
@@ -196,6 +216,22 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
     setEligibleResources(updatedEligibleResources);
 };
 
+const startDate = new Date(startTime);
+const endDate = new Date(endTime);
+
+// Define options for displaying date and time
+const options = {
+  day: '2-digit',      
+  month: '2-digit',    
+  year: 'numeric',    
+  hour: '2-digit',     
+  minute: '2-digit',   
+  hour12: false     
+};
+
+const formattedStartTime = startDate.toLocaleString('en-US', options);
+const formattedEndTime = endDate.toLocaleString('en-US', options);
+
   if (isLoading) return <div></div>;
 
   return (
@@ -217,9 +253,15 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
         </button>
       </div>
       <div className="container mx-auto p-8">
-        <div className="pb-4 mb-4 border-b-2 border-black">
-          <h2 className="text-4xl font-bold">{procedureName} - Complete Resource Assignments</h2>
+      <div className="pb-4 mb-4 border-b-2 border-black">
+          <h2 className="text-4xl font-bold mb-5 ">{procedureName}<span className="text-primary" > - Complete Resource Assignments</span></h2>
+          <div className="flex flex-col text-lg my-2 text-primary font-bold">
+          <span>Start Time: {formattedStartTime}</span>
+          <span>End Time: {formattedEndTime}</span>
+          </div>
         </div>
+        <p className="mt-1 text-highlightRed text-lg">Please note that auto-assigning may result in incomplete assignments based on resource availability at scheduled time. </p>
+
         <div>
           {requiredResources.map((resource) => (
             <div key={resource.uniqueId} className="py-10 border-b border-primary">
