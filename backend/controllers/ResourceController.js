@@ -287,7 +287,7 @@ async function deleteResource(req, res) {
           "The role you are trying to delete is assigned to one or more procedure templates!"
         );
     await Role.deleteOne({ uniqueIdentifier: uniqueIdentifier });
-    return res.status(200).send("The role has been delete!");
+    return res.status(200).send("The role has been deleted!");
   }
 
   // non-role resources
@@ -326,7 +326,7 @@ async function deleteResource(req, res) {
     await ResourceTemplate.deleteOne({ name: targetResource.name });
   }
 
-  return res.status(200).send("The resource has been delete!");
+  return res.status(200).send("The resource has been deleted!");
 }
 
 module.exports = { createResource, updateResource, deleteResource };
