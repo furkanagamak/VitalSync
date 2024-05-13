@@ -1650,6 +1650,7 @@ app.get("/assignedProcesses", async (req, res) => {
       .status(404)
       .send("User does not exist! Malformed session, please login again!");
 
+  console.log("Processing assigned process for user: ", currUser._id);
   if (currUser.assignedProcedures.length === 0) return res.status(200).json([]);
   const data = await getAssignedProcessesByUser(currUser);
   return res.status(200).json(data);
@@ -1957,9 +1958,7 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
     }
 
     // signals to frontend of the current procedure update
-    io.to(`process-event-${process.processID}`).emit(
-      "procedure complete - refresh"
-    );
+    io.to(process.processID).emit("procedure complete - refresh");
 
     res.send("Procedure marked as complete");
   } catch (error) {
