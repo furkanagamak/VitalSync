@@ -480,7 +480,7 @@ const SectionTable = ({ procedures, onMoveProcedure, onDeleteProcedure }) => {
           Selected Procedures
         </h1>
         <div
-          className="custom-scrollbar-table w-full"
+          className="custom-scrollbar-table w-full capitalize"
           style={{
             overflowX: "auto",
             maxHeight: "28vh",
