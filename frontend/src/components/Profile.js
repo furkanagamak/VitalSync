@@ -1195,8 +1195,9 @@ function ChangeAvailability({
 
   const handleSubmitTimeOff = async () => {
     if ((!startTime || !endTime || !status.trim()) && markedForDeletion.length === 0) {
-      setErrors({ msg: "Please fill in all fields or mark items for deletion." });
-      toast.error("Please fill in all fields or mark items for deletion.");
+      toast.error("Please fill in all fields or mark items for deletion.",{
+        id: "profileFailure",
+      });
       return;
     }
   

@@ -83,6 +83,9 @@ function PatientInformationForm() {
   
     const emergencyContact1 = emergencyContacts[0] || {};
     const emergencyContact2 = emergencyContacts[1] || {};
+
+    const transformedDOB = new Date(dob)
+    console.log(transformedDOB)
   
     const transformedPatient = {
       firstName: firstName || '',
@@ -91,7 +94,7 @@ function PatientInformationForm() {
       city: city || '',
       state: state || '',
       zip: zip || '',
-      dob: dob || '',
+      dob: transformedDOB || '',
       sex: sex || '',
       phone: phone || '',
       emergencyContact1Name: emergencyContact1.name || '',
@@ -145,6 +148,7 @@ function PatientInformationForm() {
   };
 
   const restructurePatientInfoForContext = (patientInfo) => {
+
     const {
         firstName,
         lastName,
@@ -168,6 +172,7 @@ function PatientInformationForm() {
         insurancePolicy
 
     } = patientInfo;
+    
 
     return {
         fullName: `${firstName} ${lastName}`,
@@ -204,6 +209,7 @@ function PatientInformationForm() {
   };
 
   const handleChange = (event) => {
+
     const { name, value } = event.target;
     console.log(name,value);
   

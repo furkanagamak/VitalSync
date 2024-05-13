@@ -415,6 +415,7 @@ export function PendingNewResources() {
                     <div className={`flex items-center text-2xl font-bold ${isFullyAssigned(procedure._id, section._id) ? 'text-green-500' : 'text-highlightRed underline'}`}>
                       <button
                         className="flex items-center text-current p-0 border-none bg-transparent"
+                        title="Assign Resources"
                         onClick={() => handleClick(procedure, section._id)}
                       >
                         {isFullyAssigned(procedure._id, section._id) ? (
