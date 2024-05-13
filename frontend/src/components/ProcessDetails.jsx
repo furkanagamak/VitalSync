@@ -26,10 +26,12 @@ const ProcessDetails = () => {
 
   useEffect(() => {
     const fetchProcessDetail = async () => {
+      console.log("refetching process details");
       try {
         const response = await axios.get(`/processInstance/${id}`);
         setProcess(response.data);
-        console.log(response.data);
+        console.log("got process details data", response.data);
+        // console.log(response.data);
       } catch (error) {
         console.error("Failed to fetch process details:", error);
       }
@@ -43,7 +45,11 @@ const ProcessDetails = () => {
     if (!socket) return;
     socket.emit("join process event room", id);
 
-    socket.on("procedure complete - refresh", triggerRefresh);
+    const processRefreshCb = () => {
+      console.log("procedure completed refresh!");
+      triggerRefresh();
+    };
+    socket.on("procedure complete - refresh", processRefreshCb);
 
     const processDeleteRedirectCb = (deletedPID) => {
       if (id === deletedPID) {
@@ -69,10 +75,10 @@ const ProcessDetails = () => {
     return () => {
       socket.emit("leave process event room", id);
       socket.off("process deleted - redirect", processDeleteRedirectCb);
-      socket.off("procedure complete - refresh", triggerRefresh);
+      socket.off("procedure complete - refresh", processRefreshCb);
       socket.off("process modify - refresh", processModifyRefreshCb);
     };
-  }, [socket]);
+  }, [id, socket]);
 
   if (!process || !user)
     return (

@@ -1839,11 +1839,6 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
       sectionInstances: section._id,
     });
 
-    // signals to frontend of the current procedure update
-    io.to(`process-event-${process.processID}`).emit(
-      "procedure complete - refresh"
-    );
-
     if (assignedCount === completedCount) {
       const procedureIndex = section.procedureInstances.indexOf(procedure._id);
       let nextProcedureId = null;
@@ -1958,18 +1953,15 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
       );
 
       // signals to frontend of the current procedure update
-      const newCurrentProcedure = await ProcedureInstance.findOne({
-        _id: nextProcedureId,
-      });
-      io.to(`process-event-${process.processID}`).emit(
-        "procedure complete - refresh"
-      );
       io.to(process.processID).emit("notification refresh");
-
-      res.send("Procedure marked as complete");
-    } else {
-      res.send("Procedure marked as complete");
     }
+
+    // signals to frontend of the current procedure update
+    io.to(`process-event-${process.processID}`).emit(
+      "procedure complete - refresh"
+    );
+
+    res.send("Procedure marked as complete");
   } catch (error) {
     console.error("Error updating procedure instance:", error);
     res.status(500).send("Internal server error");

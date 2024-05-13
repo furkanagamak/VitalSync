@@ -39,27 +39,35 @@ const BoardProcessView = () => {
     setBoardProcessPage("chat");
   };
 
+  const fetchBoardProcess = async () => {
+    console.log("refetching BoardProcess");
+    const res = await fetch(`${apiUrl}/boardProcess/${id}`, {
+      credentials: "include",
+    });
+    if (!res.ok) {
+      console.log("assigned processes fetch failed");
+      toast.error(await res.text());
+    } else {
+      const data = await res.json();
+      setProcess(data);
+      console.log("Got board process data", data);
+    }
+  };
+
   useEffect(() => {
-    const fetchBoardProcess = async () => {
-      const res = await fetch(`${apiUrl}/boardProcess/${id}`, {
-        credentials: "include",
-      });
-      if (!res.ok) {
-        console.log("assigned processes fetch failed");
-        toast.error(await res.text());
-      } else {
-        const data = await res.json();
-        setProcess(data);
-        console.log(data);
-      }
-    };
     fetchBoardProcess();
-  }, [refreshTick]);
+  }, [id, refreshTick]);
 
   // socket events
   useEffect(() => {
     if (!socket) return;
-    socket.on("procedure complete - refresh", triggerRefresh);
+
+    const processRefreshCb = () => {
+      console.log("procedure completed refresh!");
+      fetchBoardProcess();
+    };
+    socket.on("procedure complete - refresh", processRefreshCb);
+    socket.on("procedure complete - refresh", processRefreshCb);
 
     const processDeleteRedirectCb = (deletedPID) => {
       if (id === deletedPID) {
@@ -90,7 +98,7 @@ const BoardProcessView = () => {
       socket.off("procedure complete - refresh", triggerRefresh);
       socket.off("process modify - refresh", processModifyRefreshCb);
     };
-  }, [socket]);
+  }, [id, socket]);
 
   if (!process)
     return (
