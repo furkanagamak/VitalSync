@@ -24,6 +24,11 @@ const ResourceView = ({ resources, setResources, navToEditResource }) => {
   const [displayingResources, setDisplayingResources] = useState([]);
 
   const removeResourceById = (uniqueIdentifier) => {
+    if (tabFilter === "Personnel") {
+      setRoles((currentRoles) =>
+        currentRoles.filter(role => role.uniqueIdentifier !== uniqueIdentifier)
+      );
+    } 
     if (resources)
       setResources((resources) =>
         resources.filter(
