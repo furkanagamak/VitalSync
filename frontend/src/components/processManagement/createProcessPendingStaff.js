@@ -61,7 +61,7 @@ export function RoleDropdownContent({ role, eligibleStaff, assignStaff, assigned
                     <td className="text-2xl">{staff.position}</td>
                     <td>
                       <button 
-                        className="text-xl bg-green-500 hover:bg-green-700 text-white rounded-full px-3 py-1"
+                        className="mb-1 text-xl bg-green-500 hover:bg-green-700 text-white rounded-full px-3 py-1"
                         onClick={() => handleAssign(staff)}
                       >
                         Assign
@@ -254,6 +254,22 @@ const autoAssignStaff = () => {
     setEligibleStaff(updatedEligibleStaff);
 };
 
+const startDate = new Date(startTime);
+const endDate = new Date(endTime);
+
+// Define options for displaying date and time
+const options = {
+  day: '2-digit',      
+  month: '2-digit',    
+  year: 'numeric',    
+  hour: '2-digit',     
+  minute: '2-digit',   
+  hour12: false     
+};
+
+const formattedStartTime = startDate.toLocaleString('en-US', options);
+const formattedEndTime = endDate.toLocaleString('en-US', options);
+
 
   return (
     <div className="bg-secondary min-h-screen">
@@ -282,8 +298,13 @@ const autoAssignStaff = () => {
 
       <div className="container mx-auto p-8">
         <div className="pb-4 mb-4 border-b-2 border-black">
-          <h2 className="text-4xl font-bold">{procedureName}<span className="text-primary" > - Complete Staff Assignments</span></h2>
+          <h2 className="text-4xl font-bold mb-5 ">{procedureName}<span className="text-primary" > - Complete Staff Assignments</span></h2>
+          <div className="flex flex-col text-lg my-2 text-primary font-bold">
+          <span>Start Time: {formattedStartTime}</span>
+          <span>End Time: {formattedEndTime}</span>
+          </div>
         </div>
+        <p className="mt-1 text-highlightRed text-lg">Please note that auto-assigning may result in incomplete assignments based on staff availability at scheduled time. </p>
 
         <div>
           {roles.map((role) => (

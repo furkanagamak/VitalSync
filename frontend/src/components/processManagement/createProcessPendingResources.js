@@ -59,7 +59,7 @@ export function ResourceDropdownContent({ requiredResource, eligibleResources, a
                     <td className="py-2 text-2xl">{resource.uniqueIdentifier}</td>
                     <td>
                       <button 
-                        className="text-xl bg-green-500 hover:bg-green-700 mt-2 text-white rounded-full px-3 py-1"
+                        className="mb-1 text-xl bg-green-500 hover:bg-green-700 mt-2 text-white rounded-full px-3 py-1"
                         onClick={() => handleAssign(resource)}
                       >
                         Assign
@@ -216,6 +216,22 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
     setEligibleResources(updatedEligibleResources);
 };
 
+const startDate = new Date(startTime);
+const endDate = new Date(endTime);
+
+// Define options for displaying date and time
+const options = {
+  day: '2-digit',      
+  month: '2-digit',    
+  year: 'numeric',    
+  hour: '2-digit',     
+  minute: '2-digit',   
+  hour12: false     
+};
+
+const formattedStartTime = startDate.toLocaleString('en-US', options);
+const formattedEndTime = endDate.toLocaleString('en-US', options);
+
   if (isLoading) return <div></div>;
 
   return (
@@ -237,9 +253,15 @@ export function CreateResourcesAssignments({ sectionId, procedureId, procedureNa
         </button>
       </div>
       <div className="container mx-auto p-8">
-        <div className="pb-4 mb-4 border-b-2 border-black">
-          <h2 className="text-4xl font-bold">{procedureName} - Complete Resource Assignments</h2>
+      <div className="pb-4 mb-4 border-b-2 border-black">
+          <h2 className="text-4xl font-bold mb-5 ">{procedureName}<span className="text-primary" > - Complete Resource Assignments</span></h2>
+          <div className="flex flex-col text-lg my-2 text-primary font-bold">
+          <span>Start Time: {formattedStartTime}</span>
+          <span>End Time: {formattedEndTime}</span>
+          </div>
         </div>
+        <p className="mt-1 text-highlightRed text-lg">Please note that auto-assigning may result in incomplete assignments based on resource availability at scheduled time. </p>
+
         <div>
           {requiredResources.map((resource) => (
             <div key={resource.uniqueId} className="py-10 border-b border-primary">
