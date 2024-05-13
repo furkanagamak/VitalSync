@@ -1275,6 +1275,8 @@ function ChangeAvailability({
     }
   };
 
+  const validUnavailableTimes = user.unavailableTimes.filter(timeOff => timeOff.reason !== undefined);
+
   return (
     <div className="flex flex-col px-8 pt-10 pb-8 bg-white">
       <button
@@ -1321,22 +1323,17 @@ function ChangeAvailability({
               />
             </div>
           </LocalizationProvider>
-            <div className="flex-grow">
-              {user.unavailableTimes.length > 0 && (
-                <>
-                  <h2 className="text-2xl text-primary">Scheduled Time-Offs</h2>
-                  <p className="text-md mb-2">Click to mark/unmark for deletion:</p>
-                </>
-              )}
-
-              <ul>
-                {user.unavailableTimes.map((timeOff) => (
-                  <li
-                    key={timeOff._id}
-                    style={{
-                      opacity: markedForDeletion.includes(timeOff._id) ? 0.3 : 1,
-                    }}
-                  >
+          <div className="flex-grow">
+            <h2 className="text-2xl text-primary">Scheduled Time-Offs</h2>
+            <p className="text-md mb-2">Click to mark/unmark for deletion:</p>
+            <ul>
+              {validUnavailableTimes.map((timeOff) => (
+                <li
+                  key={timeOff._id}
+                  style={{
+                    opacity: markedForDeletion.includes(timeOff._id) ? 0.3 : 1,
+                  }}
+                >
                     <IconButton
                       onClick={() => handleToggleDeleteTimeOff(timeOff._id)}
                       color="error"

@@ -12,10 +12,22 @@ import moment from 'moment';
 
 
 export function RoleDropdownContent({ role, eligibleStaff, assignStaff, assignedStaff  }) {
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleAssign = (staff) => {
     assignStaff(role.uniqueId, staff);
   };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredStaff = eligibleStaff.filter(staff =>
+    `${staff.firstName.toLowerCase()} ${staff.lastName.toLowerCase()}`.includes(searchTerm.toLowerCase()) ||
+    staff.position.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  
 
   return (
     <div className="flex mx-10 mb-5">
@@ -25,7 +37,14 @@ export function RoleDropdownContent({ role, eligibleStaff, assignStaff, assigned
       </div>
       <div className="w-3/5 ml-5">
         <p className="text-highlightGreen text-2xl mb-3 mt-5">Available Qualified Staff:</p>
-        {eligibleStaff.length > 0 ? (
+        <input
+          type="text"
+          placeholder="Search by Name or Position..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          className="mb-3 px-2 py-1 border-gray-400 border-2 rounded w-2/5"
+        />
+        {filteredStaff.length > 0 ? (
           <div className="border-gray-400 border-2 rounded-lg p-3 overflow-y-auto" style={{ maxHeight: '12rem' }}>
             <table className="w-full text-left">
               <thead className="border-b border-primary">
@@ -36,13 +55,13 @@ export function RoleDropdownContent({ role, eligibleStaff, assignStaff, assigned
                 </tr>
               </thead>
               <tbody>
-                {eligibleStaff.map((staff, index) => (
+                {filteredStaff.map((staff, index) => (
                   <tr key={index} style={{ borderBottom: '1px solid black' }}>
                     <td className="py-2 text-2xl">{staff.firstName} {staff.lastName}</td>
                     <td className="text-2xl">{staff.position}</td>
                     <td>
                       <button 
-                        className="text-xl bg-green-500 hover:bg-green-700 text-white rounded-full px-3 py-1"
+                        className="mb-1 text-xl bg-green-500 hover:bg-green-700 text-white rounded-full px-3 py-1"
                         onClick={() => handleAssign(staff)}
                       >
                         Assign
@@ -88,6 +107,11 @@ export function CreateStaffAssignments({ sectionId, procedureId, procedureName, 
     }
 ]
 '2024-05-03T02:57:00.000Z'*/
+
+useEffect(() => {
+  const allRoleIds = new Set(roles.map(role => role.uniqueId));
+  setOpenRoles(allRoleIds);
+}, [roles]);
 
   useEffect(() => {
     if (!roles.length) return;
@@ -230,6 +254,22 @@ const autoAssignStaff = () => {
     setEligibleStaff(updatedEligibleStaff);
 };
 
+const startDate = new Date(startTime);
+const endDate = new Date(endTime);
+
+// Define options for displaying date and time
+const options = {
+  day: '2-digit',      
+  month: '2-digit',    
+  year: 'numeric',    
+  hour: '2-digit',     
+  minute: '2-digit',   
+  hour12: false     
+};
+
+const formattedStartTime = startDate.toLocaleString('en-US', options);
+const formattedEndTime = endDate.toLocaleString('en-US', options);
+
 
   return (
     <div className="bg-secondary min-h-screen">
@@ -258,8 +298,13 @@ const autoAssignStaff = () => {
 
       <div className="container mx-auto p-8">
         <div className="pb-4 mb-4 border-b-2 border-black">
-          <h2 className="text-4xl font-bold">{procedureName}<span className="text-primary" > - Complete Staff Assignments</span></h2>
+          <h2 className="text-4xl font-bold mb-5 ">{procedureName}<span className="text-primary" > - Complete Staff Assignments</span></h2>
+          <div className="flex flex-col text-lg my-2 text-primary font-bold">
+          <span>Start Time: {formattedStartTime}</span>
+          <span>End Time: {formattedEndTime}</span>
+          </div>
         </div>
+        <p className="mt-1 text-highlightRed text-lg">Please note that auto-assigning may result in incomplete assignments based on staff availability at scheduled time. </p>
 
         <div>
           {roles.map((role) => (
