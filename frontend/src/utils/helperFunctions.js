@@ -67,7 +67,7 @@ export function calculateTimeUntilDate(targetDate) {
   } 
   
   else if (minutes < 0 ) {
-    return `Procedure in progress`;
+    return `Procedure In Progress`;
   }
   
   else {

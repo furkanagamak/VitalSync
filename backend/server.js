@@ -2049,6 +2049,9 @@ app.get("/users/:userId/notifications", async (req, res) => {
       options: { sort: { timeCreated: -1 } },
     });
 
+    console.log("user notifications");
+    console.log(user);
+
     if (!user) {
       return res.status(404).send("User not found");
     }
@@ -2393,35 +2396,34 @@ app.post("/processInstances", async (req, res) => {
       processID: processInstance.processID,
     };
 
-    allUserIds.forEach(async (userId) => {
-      const notification = new Notification({
-        userId,
-        ...notificationDetails,
-      });
-      await notification.save();
+    await Promise.all(
+      Array.from(allUserIds).forEach(async (userId) => {
+        const notification = new Notification({
+          userId,
+          ...notificationDetails,
+        });
+        await notification.save();
 
-      // Update user's notification box
-      await Account.updateOne(
-        { _id: userId },
-        {
-          $push: { notificationBox: notification._id },
-        }
-      );
-    });
+        // Update user's notification box
+        await Account.updateOne(
+          { _id: userId },
+          {
+            $push: { notificationBox: notification._id },
+          }
+        );
+      })
+    );
 
     const arrAUIds = Array.from(allUserIds);
 
     console.log("sending sockets data: ", arrAUIds);
-    io.sockets.emit("new process - refresh", arrAUIds);
+    io.emit("new process - refresh", arrAUIds);
 
-    io.sockets.emit(
-      "trigger join process room",
-      arrAUIds,
-      processInstance.processID
-    );
+    io.emit("trigger join process room", arrAUIds, processInstance.processID);
 
     res.status(201).send(processInstance);
   } catch (error) {
+    console.log(error);
     res.status(500).send({
       message: "Failed to create process instance",
       error: error.toString(),
@@ -2515,24 +2517,25 @@ app.delete("/processInstances/:id", async (req, res) => {
       timeCreated: new Date(),
     };
 
-    allUserIds.forEach(async (userId) => {
-      const notification = new Notification({
-        userId,
-        ...notificationDetails,
-      });
-      await notification.save();
+    await Promise.all(
+      Array.from(allUserIds).map(async (userId) => {
+        const notification = new Notification({
+          userId,
+          ...notificationDetails,
+        });
+        await notification.save();
 
-      // Update user's notification box
-      await Account.updateOne(
-        { _id: userId },
-        {
-          $push: { notificationBox: notification._id },
-        }
-      );
-    });
+        // Update user's notification box
+        await Account.updateOne(
+          { _id: userId },
+          {
+            $push: { notificationBox: notification._id },
+          }
+        );
+      })
+    );
 
-    //io.to(processInstance.processID).sockets.emit("process deleted - refresh");
-
+    io.to(processInstance.processID).emit("process deleted - refresh");
     io.to(processInstance.processID).emit(
       "process deleted - redirect",
       processInstance.processID
@@ -2556,8 +2559,8 @@ app.put("/processInstances/:id", async (req, res) => {
 
   try {
     const processInstance = await ProcessInstance.findById(id).populate({
-      path: 'sectionInstances',
-      populate: { path: 'procedureInstances' }
+      path: "sectionInstances",
+      populate: { path: "procedureInstances" },
     });
 
     if (!processInstance) {
@@ -2595,51 +2598,135 @@ app.put("/processInstances/:id", async (req, res) => {
 
     console.log(deletedProcedures);
 
-// Handle deletion of procedures if provided
-let currentProcedureUpdated = false;
-if (deletedProcedures && deletedProcedures.length > 0) {
-  await Promise.all(deletedProcedures.map(async (procedureId) => {
-    const procedureInstance = await ProcedureInstance.findById(procedureId);
-    if (!procedureInstance) return;
+    // Handle deletion of procedures if provided
+    let currentProcedureUpdated = false;
+    if (deletedProcedures && deletedProcedures.length > 0) {
+      const allUserIds = new Set();
+      await Promise.all(
+        deletedProcedures.map(async (procedureId) => {
+          const procedureInstance = await ProcedureInstance.findById(
+            procedureId
+          );
+          if (!procedureInstance) return;
 
-    // Check if the current procedure is being deleted
-    if (processInstance.currentProcedure && processInstance.currentProcedure.toString() === procedureId) {
-      currentProcedureUpdated = true;
+          procedureInstance.rolesAssignedPeople.forEach((roleAssignment) => {
+            roleAssignment.accounts.forEach((accountId) => {
+              allUserIds.add(accountId.toString());
+            });
+          });
+
+          // Update accounts
+          await Account.updateMany(
+            {
+              _id: {
+                $in: procedureInstance.rolesAssignedPeople
+                  .map((r) => r.accounts)
+                  .flat(),
+              },
+            },
+            {
+              $pull: {
+                assignedProcedures: procedureId,
+                unavailableTimes: { reason: procedureId.toString() },
+              },
+            }
+          );
+
+          // Update resources
+          await ResourceInstance.updateMany(
+            { _id: { $in: procedureInstance.assignedResources } },
+            { $pull: { unavailableTimes: { reason: procedureId.toString() } } }
+          );
+
+          await ProcedureInstance.findByIdAndDelete(procedureId);
+
+          console.log(allUserIds);
+          // Send notifications to all unique users
+          const notificationDetails = {
+            type: "alert",
+            title: "Procedure Deleted",
+            text:
+              "The procedure " +
+              procedureInstance.procedureName +
+              " has been deleted from the process " +
+              processInstance.processName +
+              " with process ID " +
+              processInstance.processID +
+              ". You are freed from this assigned procedure.",
+            timeCreated: new Date(),
+          };
+
+          await Promise.all(
+            Array.from(allUserIds).map(async (userId) => {
+              const notification = new Notification({
+                userId,
+                ...notificationDetails,
+              });
+              await notification.save();
+
+              // Update user's notification box
+              await Account.updateOne(
+                { _id: userId },
+                {
+                  $push: { notificationBox: notification._id },
+                }
+              );
+            })
+          );
+
+          io.sockets.emit("procedure deleted - refresh");
+          console.log("emitted: procedure deleted - refresh ");
+
+          // Check if the current procedure is being deleted
+          if (
+            processInstance.currentProcedure &&
+            processInstance.currentProcedure.toString() === procedureId
+          ) {
+            currentProcedureUpdated = true;
+          }
+
+          // Update accounts and resources
+          await Account.updateMany(
+            { assignedProcedures: procedureId },
+            {
+              $pull: {
+                assignedProcedures: procedureId,
+                unavailableTimes: { reason: procedureId.toString() },
+              },
+            }
+          );
+
+          await ResourceInstance.updateMany(
+            { assignedResources: procedureId },
+            { $pull: { unavailableTimes: { reason: procedureId.toString() } } }
+          );
+
+          await ProcedureInstance.findByIdAndDelete(procedureId);
+        })
+      );
     }
 
-    // Update accounts and resources
-    await Account.updateMany(
-      { 'assignedProcedures': procedureId },
-      { $pull: { 'assignedProcedures': procedureId, 'unavailableTimes': { reason: procedureId.toString() }}}
-    );
+    if (currentProcedureUpdated) {
+      // Select the next available procedure as the current procedure
+      const nextProcedure = processInstance.sectionInstances
+        .flatMap((section) => section.procedureInstances)
+        .find((proc) => !deletedProcedures.includes(proc._id.toString()));
 
-    await ResourceInstance.updateMany(
-      { 'assignedResources': procedureId },
-      { $pull: { 'unavailableTimes': { reason: procedureId.toString() }}}
-    );
+      processInstance.currentProcedure = nextProcedure
+        ? nextProcedure._id
+        : null;
+    }
 
-    await ProcedureInstance.findByIdAndDelete(procedureId);
-  }));
-}
-
-if (currentProcedureUpdated) {
-  // Select the next available procedure as the current procedure
-  const nextProcedure = processInstance.sectionInstances.flatMap(section => section.procedureInstances)
-    .find(proc => !deletedProcedures.includes(proc._id.toString()));
-  
-  processInstance.currentProcedure = nextProcedure ? nextProcedure._id : null;
-}
-
-// Save the updated process instance
-await processInstance.save();
-res.send(processInstance);
-} catch (error) {
-console.error("Error updating process instance:", error);
-res.status(500).send({
-  message: "Failed to update the process instance",
-  error: error.toString(),
-});
-}
+    // Save the updated process instance
+    await processInstance.save();
+    res.send(processInstance);
+  } catch (error) {
+    console.error("Error updating process instance:", error);
+    res.status(500).send({
+      message: "Failed to update the process instance",
+      error: error.toString(),
+    });
+  }
 });
 
 app.get("/users/:userId/eligibleRoles", async (req, res) => {

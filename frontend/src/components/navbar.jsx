@@ -1,5 +1,5 @@
 import { BsBell } from "react-icons/bs";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { IoMenu } from "react-icons/io5";
 import NotificationDropDown from "./notifications/NotificationDropDown";
 import { useNavigate } from "react-router-dom";
@@ -133,9 +133,28 @@ const UserNav = ({ id, firstName, lastName, profileUrl, fetchImg }) => {
 
 const Notifications = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
   const flickDropDown = () => {
     setIsOpen((isOpen) => !isOpen);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false); 
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+  
 
   return (
     <>
@@ -148,7 +167,7 @@ const Notifications = () => {
         <BsBell className="h-12 w-12 text-black bg-white rounded-full p-1.5" />
       </button>
       {isOpen && (
-        <div className="absolute right-0 top-20 z-10">
+        <div className="absolute right-0 top-20 z-10" ref={dropdownRef}>
           <NotificationDropDown closeDropDown={() => setIsOpen(false)} />
         </div>
       )}
@@ -183,6 +202,23 @@ const LogoutButton = () => {
 
 const Menu = ({ userType }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false); 
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
   const triggerIsOpen = () => {
     setIsOpen((isOpen) => !isOpen);
@@ -200,7 +236,7 @@ const Menu = ({ userType }) => {
 
   return (
     <>
-      <button className="md:hidden mr-2" onClick={triggerIsOpen}>
+      <button className="md:hidden mr-2" onClick={triggerIsOpen} ref={dropdownRef}>
         <IoMenu className="w-12 h-12 text-white" />
       </button>
       {isOpen && (
