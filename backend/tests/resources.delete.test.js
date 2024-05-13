@@ -277,7 +277,7 @@ describe("DELETE /resources for deleting resources", () => {
         uniqueIdentifier: "t-900",
       });
     expect(roleRes.status).toEqual(200);
-    expect(roleRes.text).toEqual("The role has been delete!");
+    expect(roleRes.text).toEqual("The role has been deleted!");
 
     const findDeletedRole = await Role.findOne({ uniqueIdentifier: "t-900" });
     expect(findDeletedRole).toBeNull();
@@ -291,7 +291,7 @@ describe("DELETE /resources for deleting resources", () => {
         uniqueIdentifier: "t-123",
       });
     expect(equipmentRes.status).toEqual(200);
-    expect(equipmentRes.text).toEqual("The resource has been delete!");
+    expect(equipmentRes.text).toEqual("The resource has been deleted!");
 
     const findDeletedEquipment = await ResourceInstance.findOne({
       uniqueIdentifier: "t-123",
@@ -319,7 +319,7 @@ describe("DELETE /resources for deleting resources", () => {
         uniqueIdentifier: "t-124",
       });
     expect(spacesRes.status).toEqual(200);
-    expect(spacesRes.text).toEqual("The resource has been delete!");
+    expect(spacesRes.text).toEqual("The resource has been deleted!");
 
     const findDeletedSpace = await ResourceInstance.findOne({
       uniqueIdentifier: "t-124",

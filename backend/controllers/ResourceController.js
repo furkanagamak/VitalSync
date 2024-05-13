@@ -3,6 +3,8 @@ const Role = require("../models/role.js");
 const ResourceTemplate = require("../models/resourceTemplate.js");
 const ResourceInstance = require("../models/resourceInstance.js");
 const ProcedureTemplate = require("../models/procedureTemplate.js");
+const ProcedureInstance = require("../models/procedureInstance.js");
+const ProcessInstance = require("../models/processInstance.js");
 
 function generateRandomString(length) {
   const chars =
@@ -274,6 +276,7 @@ async function deleteResource(req, res) {
         .send(
           "The role you are trying to delete is assigned to one or more accounts!"
         );
+
     // Check if resource is used in any procedureTemplate
     const procedureTemplateAssigned = await ProcedureTemplate.findOne({
       roles: {
@@ -287,7 +290,7 @@ async function deleteResource(req, res) {
           "The role you are trying to delete is assigned to one or more procedure templates!"
         );
     await Role.deleteOne({ uniqueIdentifier: uniqueIdentifier });
-    return res.status(200).send("The role has been delete!");
+    return res.status(200).send("The role has been deleted!");
   }
 
   // non-role resources
@@ -315,6 +318,25 @@ async function deleteResource(req, res) {
       .send(
         "The resource you are trying to delete is assigned to one or more procedure templates!"
       );
+
+  const procedureInstancesAssigned = await ProcedureInstance.find({
+    assignedResources: { $in: [targetResource._id] },
+  });
+  const assignedToProcInstance = await Promise.all(
+    procedureInstancesAssigned.map(async (proce) => {
+      const respectiveProcess = await ProcessInstance.findOne({
+        processID: proce.processID,
+      });
+      return respectiveProcess.currentProcedure !== null;
+    })
+  );
+  if (assignedToProcInstance.some((proce) => proce))
+    return res
+      .status(409)
+      .send(
+        "The resource you are trying to delete is assigned to one or more procedure instances!"
+      );
+
   // delete resource
   await ResourceInstance.deleteOne({ uniqueIdentifier: uniqueIdentifier });
 
@@ -326,7 +348,7 @@ async function deleteResource(req, res) {
     await ResourceTemplate.deleteOne({ name: targetResource.name });
   }
 
-  return res.status(200).send("The resource has been delete!");
+  return res.status(200).send("The resource has been deleted!");
 }
 
 module.exports = { createResource, updateResource, deleteResource };
