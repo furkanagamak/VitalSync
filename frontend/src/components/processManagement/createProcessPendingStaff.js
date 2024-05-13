@@ -303,7 +303,7 @@ const formattedEndTime = endDate.toLocaleString('en-US', options);
           <span>End Time: {formattedEndTime}</span>
           </div>
         </div>
-        <p className="mt-1 text-highlightRed text-lg">Please note that auto-assigning may result in incomplete assignments based on staff availability at scheduled time. </p>
+        <p className="mt-1 text-highlightRed text-lg">Please note that auto-assigning may result in incomplete assignments based on staff eligible roles and availability at scheduled time. </p>
 
         <div>
           {roles.map((role) => (
@@ -462,6 +462,7 @@ export function PendingNewStaff() {
                 <span className='text-2xl'>{procedure.procedureName}</span>
     <div className={`flex items-center text-2xl font-bold ${isFullyAssigned(procedure._id, section._id) ? 'text-green-500' : 'text-highlightRed underline'}`}>
                   <button
+                  title="Assign Staff"
                     className="flex items-center text-current p-0 border-none bg-transparent"
                     onClick={() => handleClick(procedure, section._id)}  // Pass the current section ID
                   >

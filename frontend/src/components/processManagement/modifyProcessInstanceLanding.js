@@ -38,11 +38,12 @@ function ProcedureDropdown(){
   return (
     <div className="relative mr-5">
       <button
+      title="Open Section"
         onClick={() => setIsOpen(!isOpen)}
         className="bg-primary text-white flex justify-between items-center rounded-t-2xl px-4 py-2 w-full mt-10 text-3xl"
       >
         Add Procedure
-        <BsChevronDown className="text-white cursor-pointer" />
+        <BsChevronDown title="Open Section" className="text-white cursor-pointer" />
       </button>
 
       {isOpen && (
@@ -347,6 +348,7 @@ deletedProcedures, markProcedureAsDeleted } = useProcessModificationContext();
                 <button 
                     className="w-3/5 ml-10 bg-primary text-white rounded-full px-5 py-5 text-3xl flex items-center drop-shadow-2xl"
                     onClick={handleGoBack}
+                    title="Go Back"
                 >   
                     <FaArrowLeft className="mr-3" /><span className="mx-auto">Go Back</span>
                 </button>
@@ -376,7 +378,7 @@ deletedProcedures, markProcedureAsDeleted } = useProcessModificationContext();
                 />
                 <button
                                   id="editProcessNameSave"
-
+                  title="Save Process Name"
                   className="bg-primary text-white px-3 py-1 rounded hover:bg-primary-dark"
                   onClick={handleProcessNameSave}
                 >
@@ -391,6 +393,8 @@ deletedProcedures, markProcedureAsDeleted } = useProcessModificationContext();
                   id="editProcessName"
                   className="text-primary mb-2"
                   onClick={handleProcessNameEditClick}
+                  title="Edit Process Name"
+
                 >
                   <BsPencilFill className="text-2xl"/>
                 </button>
@@ -398,7 +402,7 @@ deletedProcedures, markProcedureAsDeleted } = useProcessModificationContext();
             )}
           </span>
 
-            <span className="flex items-center pl-15"><span className="text-primary underline font-bold mr-5 ">Patient:</span>   {editedPatient ? editedPatient.fullName : 'Loading patient data...'} <BsPencilFill  onClick={handlePatientEditClick} className=" text-2xl text-primary ml-3"/></span>
+            <span className="flex items-center pl-15"><span className="text-primary underline font-bold mr-5 ">Patient:</span>   {editedPatient ? editedPatient.fullName : 'Loading patient data...'} <BsPencilFill  title="Edit Patient Info" onClick={handlePatientEditClick} className=" text-2xl text-primary ml-3"/></span>
             <div className="flex items-center pl-15 mt-3"><span className="text-primary underline font-bold mr-5">Process ID:</span>  {processInstance.processID} </div>
             </div>
 
@@ -406,12 +410,13 @@ deletedProcedures, markProcedureAsDeleted } = useProcessModificationContext();
             <div className="flex flex-col pl-20 w-2/5 mt-5 ml-5">
             <div className="flex items-center">
             {editDescriptionMode ? (
-          <button onClick={handleProcessDescriptionSave} className="bg-primary text-white px-3 py-1 rounded hover:bg-primary-dark mb-2">
+          <button onClick={handleProcessDescriptionSave}                   title="Save Process Description"
+          className="bg-primary text-white px-3 py-1 rounded hover:bg-primary-dark mb-2">
             Save
           </button>
         ) : ( 
           <span className="flex items-center mb-3"> Description 
-          <BsPencilFill onClick={handleProcessDescriptionEditClick} className="text-2xl ml-4 text-primary cursor-pointer" /></span>
+          <BsPencilFill onClick={handleProcessDescriptionEditClick} title="Edit Process Description" className="text-2xl ml-4 text-primary cursor-pointer" /></span>
         )}
             </div>
             <textarea
@@ -443,6 +448,7 @@ deletedProcedures, markProcedureAsDeleted } = useProcessModificationContext();
           />
           <button
             onClick={() => handleSectionNameSave(section._id)}
+            title="Save Section Name"
             className="bg-primary text-white px-3 py-1 rounded hover:bg-primary-dark mx-5"
           >
             Save
@@ -455,6 +461,7 @@ deletedProcedures, markProcedureAsDeleted } = useProcessModificationContext();
           <button
             onClick={() => handleSectionEditClick(section._id)}
             className="text-primary ml-4"
+            title="Edit Section Name"
           >
             <BsPencilFill className="text-3xl"/>
           </button></span>
@@ -463,8 +470,8 @@ deletedProcedures, markProcedureAsDeleted } = useProcessModificationContext();
       )}
                               
               <div className="flex items-center">
-                <button id="openSection" onClick={() => toggleSection(section.name)} className="flex items-center">
-                  {openSections.has(section.name) ? <BsChevronUp className="text-4xl cursor-pointer" /> : <BsChevronDown className="text-4xl cursor-pointer" />}
+                <button id="openSection" onClick={() => toggleSection(section.name)} className="flex items-center" >
+                  {openSections.has(section.name) ? <BsChevronUp title="Close Section" className="text-4xl cursor-pointer" /> : <BsChevronDown title="Open Section" className="text-4xl cursor-pointer" />}
                 </button>
                 {/*<FaTrashAlt className="text-3xl ml-10 text-primary" />*/}
               </div>
@@ -477,7 +484,7 @@ deletedProcedures, markProcedureAsDeleted } = useProcessModificationContext();
                   <div className="flex flex-col w-full mt-5">
                     <div className="flex items-center mb-4">
                               <p className="text-primary text-3xl font-bold  underline">Description</p>
-                          <BsPencilFill className="ml-3 text-primary text-xl" onClick={() => handleSectionDescEditClick(section.name)} />
+                          <BsPencilFill className="ml-3 text-primary text-xl" title="Edit Section Description" onClick={() => handleSectionDescEditClick(section.name)} />
                         </div>
                         <textarea
                           className="bg-white border-4 border-primary text-primary p-4 rounded text-2xl"
@@ -487,7 +494,7 @@ deletedProcedures, markProcedureAsDeleted } = useProcessModificationContext();
                           readOnly={!sectionDescriptions[section.name]?.editMode}
                         />
                         {sectionDescriptions[section.name]?.editMode && (
-                          <button onClick={() => handleSaveSectionDesc(section.name)} className="bg-primary text-white px-3 py-1 rounded hover:bg-primary-dark mt-2">
+                          <button onClick={() => handleSaveSectionDesc(section.name)} title="Save Section Description" className="bg-primary text-white px-3 py-1 rounded hover:bg-primary-dark mt-2">
                             Save
                           </button>
                         )}
@@ -529,6 +536,7 @@ deletedProcedures, markProcedureAsDeleted } = useProcessModificationContext();
                         <IconButton
                             onClick={() => markProcedureAsDeleted(section._id, procedure._id)}
                             color="error"
+                            title="Mark/Unmark for Deletion"
                         >
                             {isDeleted ? (
                                 <RestoreFromTrashIcon />
