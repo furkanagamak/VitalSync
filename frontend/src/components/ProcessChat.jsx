@@ -49,7 +49,7 @@ const ProcessChat = ({ id }) => {
       newSocket.emit("leave process chat room", id);
       newSocket.disconnect();
     };
-  }, []);
+  }, [id]);
 
   // Scroll to the bottom when messages change
   useEffect(() => {
@@ -77,7 +77,7 @@ const ProcessChat = ({ id }) => {
       socket.on("procedure complete - refresh", () => {
         fetchCheckCompletedProcess();
       });
-  }, [socket]);
+  }, [socket, id]);
 
   // fetch messages
   useEffect(() => {
@@ -109,7 +109,7 @@ const ProcessChat = ({ id }) => {
       }
     };
     fetchMessages();
-  }, [refreshTick]);
+  }, [refreshTick, id]);
 
   if (!user || !socket || !messages)
     return (
