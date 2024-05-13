@@ -1775,6 +1775,13 @@ app.put("/markProcedureComplete/:procedureId", async (req, res) => {
   const procedureInstanceId = req.params.procedureId;
   const accountId = req.cookies.accountId;
 
+  console.log(
+    "got mark procedure complete for procedure id",
+    procedureInstanceId,
+    " and user ",
+    accountId
+  );
+
   try {
     const account = await Account.findById(accountId);
     if (!account) {
@@ -2397,7 +2404,7 @@ app.post("/processInstances", async (req, res) => {
     };
 
     await Promise.all(
-      Array.from(allUserIds).forEach(async (userId) => {
+      Array.from(allUserIds).map(async (userId) => {
         const notification = new Notification({
           userId,
           ...notificationDetails,
@@ -2710,7 +2717,13 @@ app.put("/processInstances/:id", async (req, res) => {
       // Select the next available procedure as the current procedure
       const nextProcedure = processInstance.sectionInstances
         .flatMap((section) => section.procedureInstances)
-        .find((proc) => !deletedProcedures.includes(proc._id.toString()));
+        .find((proc) => {
+          return (
+            proc.rolesAssignedPeople.length !==
+              proc.peopleMarkAsCompleted.length &&
+            !deletedProcedures.includes(proc._id.toString())
+          );
+        });
 
       processInstance.currentProcedure = nextProcedure
         ? nextProcedure._id
@@ -2719,6 +2732,8 @@ app.put("/processInstances/:id", async (req, res) => {
 
     // Save the updated process instance
     await processInstance.save();
+
+    io.to(processInstance.processID).emit("process modify - refresh");
     res.send(processInstance);
   } catch (error) {
     console.error("Error updating process instance:", error);
