@@ -742,7 +742,12 @@ const EditRolesModal = ({ isOpen, onRequestClose, userId }) => {
       setInitialSelectedRoles(selectedRoles); // Update initial state
       onRequestClose(); // Close the modal
     } catch (error) {
-      toast.error("Failed to update roles: " + error.message);
+      if (error.response && error.response.status === 409) {
+        const errorMessage = error.response.data; // Extract the error message from the response
+        toast.error("Failed to update roles: " + errorMessage);
+      } else {
+        toast.error("Failed to update roles: " + error.message);
+      }
     }
   };
 
@@ -1111,8 +1116,22 @@ function ScheduleCalendar({ user, onScheduleChange, preview, authUser, id }) {
           navigationLabel={({ label }) => (
             <div style={customStyles.monthYearHeader}>{label}</div>
           )}
-          prevLabel={<div className="xl:min-w-[300px]" style={customStyles.navigationButton}>‹</div>}
-          nextLabel={<div className="xl:min-w-[300px]" style={customStyles.navigationButton}>›</div>}
+          prevLabel={
+            <div
+              className="xl:min-w-[300px]"
+              style={customStyles.navigationButton}
+            >
+              ‹
+            </div>
+          }
+          nextLabel={
+            <div
+              className="xl:min-w-[300px]"
+              style={customStyles.navigationButton}
+            >
+              ›
+            </div>
+          }
         />
       </div>
     </div>
@@ -1194,37 +1213,48 @@ function ChangeAvailability({
   };
 
   const handleSubmitTimeOff = async () => {
-    if ((!startTime || !endTime || !status.trim()) && markedForDeletion.length === 0) {
-      toast.error("Please fill in all fields or mark items for deletion.",{
+    if (
+      (!startTime || !endTime || !status.trim()) &&
+      markedForDeletion.length === 0
+    ) {
+      toast.error("Please fill in all fields or mark items for deletion.", {
         id: "profileFailure",
       });
       return;
     }
-  
-    if ((startTime && endTime && !status.trim()) || (status.trim() && (!startTime || !endTime))) {
+
+    if (
+      (startTime && endTime && !status.trim()) ||
+      (status.trim() && (!startTime || !endTime))
+    ) {
       setErrors({ msg: "Please complete all fields for new time off." });
       toast.error("Please complete all fields for new time off.");
       return;
     }
-  
+
     let newUnavailableTime = null;
     try {
-      newUnavailableTime = startTime && endTime && status.trim() ? {
-        start: startTime.toISOString(),
-        end: endTime.toISOString(),
-        reason: status
-      } : null;
+      newUnavailableTime =
+        startTime && endTime && status.trim()
+          ? {
+              start: startTime.toISOString(),
+              end: endTime.toISOString(),
+              reason: status,
+            }
+          : null;
     } catch (error) {
       console.error("Error with date values: ", error);
-      toast.error("Invalid date values provided. Please check the dates again.");
+      toast.error(
+        "Invalid date values provided. Please check the dates again."
+      );
       return;
     }
-  
+
     const updateData = {
       unavailableTimes: newUnavailableTime ? [newUnavailableTime] : [],
-      deletedTimes: markedForDeletion
+      deletedTimes: markedForDeletion,
     };
-  
+
     try {
       const response = await axios.put(`/user/${user.userId}`, updateData);
       if (response.status === 200) {
@@ -1233,9 +1263,11 @@ function ChangeAvailability({
           ...prevState,
           usualHours: weeklySchedule,
           unavailableTimes: [
-            ...prevState.unavailableTimes.filter(time => !markedForDeletion.includes(time._id)),
-            ...(newUnavailableTime ? [newUnavailableTime] : [])
-          ]
+            ...prevState.unavailableTimes.filter(
+              (time) => !markedForDeletion.includes(time._id)
+            ),
+            ...(newUnavailableTime ? [newUnavailableTime] : []),
+          ],
         }));
         onRevertToProfile();
       } else {
@@ -1243,10 +1275,12 @@ function ChangeAvailability({
       }
     } catch (error) {
       console.error("Error updating user:", error);
-      toast.error("Error updating user: " + (error.response?.data?.message || "Unknown error"));
+      toast.error(
+        "Error updating user: " +
+          (error.response?.data?.message || "Unknown error")
+      );
     }
   };
-  
 
   const handleToggleDeleteTimeOff = (timeOffId) => {
     if (markedForDeletion.includes(timeOffId)) {
@@ -1276,7 +1310,9 @@ function ChangeAvailability({
     }
   };
 
-  const validUnavailableTimes = user.unavailableTimes.filter(timeOff => timeOff.reason !== undefined);
+  const validUnavailableTimes = user.unavailableTimes.filter(
+    (timeOff) => timeOff.reason !== undefined
+  );
 
   return (
     <div className="flex flex-col px-8 pt-10 pb-8 bg-white">
@@ -1335,31 +1371,31 @@ function ChangeAvailability({
                     opacity: markedForDeletion.includes(timeOff._id) ? 0.3 : 1,
                   }}
                 >
-                    <IconButton
-                      onClick={() => handleToggleDeleteTimeOff(timeOff._id)}
-                      color="error"
-                    >
-                      {markedForDeletion.includes(timeOff._id) ? (
-                        <RestoreFromTrashIcon />
-                      ) : (
-                        <DeleteIcon />
-                      )}
-                    </IconButton>
-                    {`${new Date(timeOff.start).toLocaleString()} - ${new Date(
-                      timeOff.end
-                    ).toLocaleString()}`}
-                    <span className="text-primary text-xl mx-2">| Reason:</span> 
-                    {`${timeOff.reason}`}
-                  </li>
-                ))}
-              </ul>
-              
-              {user.unavailableTimes.length === 0 && (
-                <div className="text-2xl pb-4">
-                  <h2>No scheduled time-offs.</h2>
-                </div>
-              )}
-            </div>
+                  <IconButton
+                    onClick={() => handleToggleDeleteTimeOff(timeOff._id)}
+                    color="error"
+                  >
+                    {markedForDeletion.includes(timeOff._id) ? (
+                      <RestoreFromTrashIcon />
+                    ) : (
+                      <DeleteIcon />
+                    )}
+                  </IconButton>
+                  {`${new Date(timeOff.start).toLocaleString()} - ${new Date(
+                    timeOff.end
+                  ).toLocaleString()}`}
+                  <span className="text-primary text-xl mx-2">| Reason:</span>
+                  {`${timeOff.reason}`}
+                </li>
+              ))}
+            </ul>
+
+            {user.unavailableTimes.length === 0 && (
+              <div className="text-2xl pb-4">
+                <h2>No scheduled time-offs.</h2>
+              </div>
+            )}
+          </div>
           {errors.msg && <div style={{ color: "red" }}>{errors.msg}</div>}
           <button
             className="my-5 bg-primary text-white px-5 py-2.5 text-lg rounded-full cursor-pointer w-2/5 mx-auto max-w-xs"
@@ -1379,7 +1415,10 @@ function ChangeAvailability({
         </header>
         <div className="flex flex-col mt-4 space-y-6">
           {weeklySchedule.map((schedule, index) => (
-            <div key={index} className="grid grid-cols-1 xl:grid-cols-4 gap-4 items-center">
+            <div
+              key={index}
+              className="grid grid-cols-1 xl:grid-cols-4 gap-4 items-center"
+            >
               <div className="col-span-1 xl:col-span-1">
                 <p className="text-2xl">{schedule.day}</p>
               </div>
@@ -1420,7 +1459,9 @@ function ChangeAvailability({
                   control={
                     <Checkbox
                       className="ml-5 xl:ml-0"
-                      checked={schedule.start === "0:00" && schedule.end === "0:00"}
+                      checked={
+                        schedule.start === "0:00" && schedule.end === "0:00"
+                      }
                       onChange={() => handleToggleDayOff(schedule.day)}
                     />
                   }

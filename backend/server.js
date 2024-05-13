@@ -2789,6 +2789,26 @@ app.put("/updateRoles/:userId", async (req, res) => {
       return res.status(400).send("Invalid role ID provided.");
     }
 
+    // checks if the user is assigned to any ongoing procedures
+    const procedures = await ProcedureInstance.find({
+      rolesAssignedPeople: {
+        $elemMatch: { accounts: userId },
+      },
+    });
+    const isInOnGoingProcedure = procedures.some((procedure) => {
+      return (
+        procedure.peopleMarkAsCompleted.length !==
+        procedure.rolesAssignedPeople.length
+      );
+    });
+
+    if (isInOnGoingProcedure)
+      return res
+        .status(409)
+        .send(
+          "This user is currently assigned to one or more procedure that has not been completed!"
+        );
+
     const updatedAccount = await Account.findByIdAndUpdate(
       userId,
       { $set: { eligibleRoles: roles } },
