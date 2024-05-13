@@ -120,53 +120,52 @@ useEffect(() => {
       const dayOfWeek = procedureDate.format('dddd');
       
       const roleIds = roles.map(role => role._id);
-      try {
-        const responses = await Promise.all(roleIds.map(id => axios.get(`/users/accountsByRole/${id}`)));
-        const initialStaff = responses.reduce((acc, res, index) => {
-          acc[roles[index].uniqueId] = res.data.filter(staff => {
-            if (staff.isTerminated) return false;
-            
-            // Exclude staff already assigned to any role in this procedure
-            const assignedInProcedure = Object.values(assignedStaff).some(assigned => assigned._id === staff._id);
-            if (assignedInProcedure) return false;
-  
-            const userUsualHours = staff.usualHours.find(uh => uh.day === dayOfWeek);
-            if (!userUsualHours) return false;
-  
-            // Convert usual work hours to datetime on the procedure date
-            const workStart = moment(`${procedureDate.format('YYYY-MM-DD')}T${userUsualHours.start}`);
-            const workEnd = moment(`${procedureDate.format('YYYY-MM-DD')}T${userUsualHours.end}`);
-            if (workEnd.isBefore(workStart)) {
-              // Adjust for overnight shift ending on the next day
-              workEnd.add(1, 'days');
-            }
-  
-            const procStart = moment(startTime);
-            const procEnd = moment(endTime);
-            if (procEnd.isBefore(procStart)) {
-              // Adjust for procedures ending on the next day
-              procEnd.add(1, 'days');
-            }
-  
-            // Check if work hours fully encompass the procedure time
-            if (!workStart.isBefore(procStart) || !workEnd.isAfter(procEnd)) {
-              console.log("Work hours didn't cover", staff.firstName, workStart.format(), procStart.format(), workEnd.format(), procEnd.format());
-              return false;
-            }
-  
-            // Check for unavailable times overlapping with procedure time
-            return !staff.unavailableTimes.some(unavailable => {
-              const unavailableStart = moment(unavailable.start);
-              const unavailableEnd = moment(unavailable.end);
-              return procStart.isBefore(unavailableEnd) && procEnd.isAfter(unavailableStart);
-            });
-          });
-          return acc;
-        }, {});
-        setEligibleStaff(initialStaff);
-      } catch (error) {
-        console.error("Failed to fetch staff:", error);
+try {
+  const responses = await Promise.all(roleIds.map(id => axios.get(`/users/accountsByRole/${id}`)));
+  const initialStaff = responses.reduce((acc, res, index) => {
+    acc[roles[index].uniqueId] = res.data.filter(staff => {
+      if (staff.isTerminated) return false;
+      const assignedInProcedure = Object.values(assignedStaff).some(assigned => assigned._id === staff._id);
+      if (assignedInProcedure) return false;
+
+      const userUsualHours = staff.usualHours.find(uh => uh.day === dayOfWeek);
+      if (!userUsualHours) return false;
+
+      const workStart = moment(`${procedureDate.format('YYYY-MM-DD')}T${userUsualHours.start}`);
+      let workEnd = moment(`${procedureDate.format('YYYY-MM-DD')}T${userUsualHours.end}`);
+
+      if (userUsualHours.end === "23:59") {
+        workEnd = workEnd.add(20, 'minutes');
       }
+
+      if (workEnd.isBefore(workStart)) {
+        workEnd = workEnd.add(1, 'days');
+      }
+
+      const procStart = moment(startTime);
+      let procEnd = moment(endTime);
+      if (procEnd.isBefore(procStart)) {
+        procEnd = procEnd.add(1, 'days');
+      }
+
+      const gracePeriod = moment.duration(20, 'minutes');
+      if (!workStart.isBefore(procStart) || !workEnd.clone().add(gracePeriod).isAfter(procEnd)) {
+        //console.log("Work hours didn't cover", staff.firstName, workStart.format(), procStart.format(), workEnd.format(), procEnd.format());
+        return false;
+      }
+
+      return !staff.unavailableTimes.some(unavailable => {
+        const unavailableStart = moment(unavailable.start);
+        const unavailableEnd = moment(unavailable.end);
+        return procStart.isBefore(unavailableEnd) && procEnd.isAfter(unavailableStart);
+      });
+    });
+    return acc;
+  }, {});
+  setEligibleStaff(initialStaff);
+} catch (error) {
+  console.error("Failed to fetch staff:", error);
+}
       setIsLoading(false);
     };
     fetchEligibleStaff();
@@ -366,6 +365,7 @@ export function PendingNewStaff() {
   const [assignmentCompletion, setAssignmentCompletion] = useState({});
 
   useEffect(() => {
+
     setOpenSections(new Set(fetchedSections.map(section => section.sectionName)));
   }, [fetchedSections]);
 
@@ -399,6 +399,7 @@ export function PendingNewStaff() {
   };
 
   useEffect(() => {
+
     const newAssignmentCompletion = {};
     fetchedSections.forEach(section => {
       section.procedureTemplates.forEach(procedure => {

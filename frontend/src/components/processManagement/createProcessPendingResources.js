@@ -322,6 +322,9 @@ export function PendingNewResources() {
   const [assignmentCompletion, setAssignmentCompletion] = useState({});
 
   useEffect(() => {
+    if(fetchedSections.length < 1){
+      navigate("/processManagement/newProcess/processTemplates");
+    }
     const newAssignmentCompletion = {};
     fetchedSections.forEach(section => {
       section.procedureTemplates.forEach(procedure => {
