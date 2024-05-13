@@ -134,18 +134,25 @@ const UserNav = ({ id, firstName, lastName, profileUrl, fetchImg }) => {
 const Notifications = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);  // Reference to the button
 
-  const flickDropDown = () => {
-    setIsOpen((isOpen) => !isOpen);
+  const toggleDropdown = () => {
+    setIsOpen(prev => !prev);
+  };
+
+  const handleButtonClick = (e) => {
+    e.stopPropagation();  // Prevent the event from bubbling up
+    toggleDropdown();
   };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false); 
+      if (!dropdownRef.current.contains(event.target) && !buttonRef.current.contains(event.target)) {
+        setIsOpen(false);
       }
     };
 
+    // Attach the event listener only if the dropdown is open
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
@@ -154,7 +161,6 @@ const Notifications = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
-  
 
   return (
     <>
@@ -162,7 +168,8 @@ const Notifications = () => {
         title="View Your Notifications"
         id="notificationsBtn"
         className="flex items-center ml-2 mr-4"
-        onClick={flickDropDown}
+        onClick={handleButtonClick}
+        ref={buttonRef}  // Attach the ref here
       >
         <BsBell className="h-12 w-12 text-black bg-white rounded-full p-1.5" />
       </button>
@@ -203,14 +210,16 @@ const LogoutButton = () => {
 const Menu = ({ userType }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false); 
+      if (!dropdownRef.current.contains(event.target) && !buttonRef.current.contains(event.target)) {
+        setIsOpen(false);
       }
     };
 
+    // Attach the handler if the dropdown is open
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
@@ -220,8 +229,11 @@ const Menu = ({ userType }) => {
     };
   }, [isOpen]);
 
-  const triggerIsOpen = () => {
-    setIsOpen((isOpen) => !isOpen);
+  const toggleDropdown = () => {
+    // Delay the toggle to ensure it doesn't conflict with the outside click listener
+    setTimeout(() => {
+      setIsOpen(prev => !prev);
+    }, 10);
   };
 
   const navigate = useNavigate();
@@ -236,7 +248,7 @@ const Menu = ({ userType }) => {
 
   return (
     <>
-      <button className="md:hidden mr-2" onClick={triggerIsOpen} >
+      <button className="md:hidden mr-2" onClick={toggleDropdown} ref={buttonRef}>
         <IoMenu className="w-12 h-12 text-white" />
       </button>
       {isOpen && (
@@ -260,5 +272,7 @@ const Menu = ({ userType }) => {
     </>
   );
 };
+
+
 
 export default Navbar;
