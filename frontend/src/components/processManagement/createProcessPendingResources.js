@@ -323,7 +323,7 @@ export function PendingNewResources() {
 
   useEffect(() => {
     if(fetchedSections.length < 1){
-      navigate("/processManagement/newProcess/processTemplates");
+      navigate("/processManagement/newProcess/processTemplates", { replace: true } );
     }
     const newAssignmentCompletion = {};
     fetchedSections.forEach(section => {

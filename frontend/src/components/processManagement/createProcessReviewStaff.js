@@ -28,7 +28,7 @@ export function CreateReviewStaffAssignments({ onBack, onProceed }) {
 
   useEffect(() => {
     if(fetchedSections.length < 1){
-      navigate("/processManagement/newProcess/processTemplates");
+      navigate("/processManagement/newProcess/processTemplates", { replace: true });
     }
 
     const fetchStaffDetails = async () => {
