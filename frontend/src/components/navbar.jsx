@@ -236,11 +236,11 @@ const Menu = ({ userType }) => {
 
   return (
     <>
-      <button className="md:hidden mr-2" onClick={triggerIsOpen} ref={dropdownRef}>
+      <button className="md:hidden mr-2" onClick={triggerIsOpen} >
         <IoMenu className="w-12 h-12 text-white" />
       </button>
       {isOpen && (
-        <div className="md:hidden absolute right-0 top-20 bg-highlightRed text-2xl text-center z-10 flex flex-col p-4 space-y-4">
+        <div className="md:hidden absolute right-0 top-20 bg-highlightRed text-2xl text-center z-10 flex flex-col p-4 space-y-4" ref={dropdownRef}>
           <button
             onClick={navigateToRoster}
             className="hover:underline underline-offset-8 w-fit m-auto rosterNav"
