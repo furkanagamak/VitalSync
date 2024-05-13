@@ -12,7 +12,7 @@ function NavButtons({ onBack, onProceed }) {
         <FaArrowLeft className="mr-2" />
         Go Back
       </button>
-      <h1 className="text-primary text-3xl font-bold">Review Staff Assignments</h1>
+      <h1 className="text-primary text-4xl font-bold">Review Staff Assignments</h1>
       <button className=" hover:bg-green-600 flex items-center justify-center bg-highlightGreen text-white rounded-3xl px-7 py-5 text-3xl" onClick={onProceed}>
                 Proceed
             </button>
@@ -27,6 +27,10 @@ export function CreateReviewStaffAssignments({ onBack, onProceed }) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if(fetchedSections.length < 1){
+      navigate("/processManagement/newProcess/processTemplates");
+    }
+
     const fetchStaffDetails = async () => {
       // Extract IDs from roles
       const staffIds = new Set(fetchedSections.flatMap(
