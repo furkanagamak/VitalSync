@@ -195,6 +195,9 @@ const BoardProcessProcedures = ({ procedures, currUser, currentProcedure }) => {
         </h1>
       </section>
       <section className="flex flex-col space-y-8">
+        {procedures.length === 0 && (
+          <div className="text-center">This process is completed!</div>
+        )}
         {procedures.map((procedure, i) => {
           return (
             <Procedure
