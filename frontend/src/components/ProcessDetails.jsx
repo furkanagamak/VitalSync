@@ -123,6 +123,10 @@ const ProcessDetails = () => {
               </h1>
               <p id="processDetailTotalProceElem">{process.totalProcedures}</p>
             </div>
+            <div className="flex space-x-2">
+              <h1 className="underline underline-offset-4">Description:</h1>
+              <p id="processDetailTotalProceElem">{process.description}</p>
+            </div>
           </section>
           <section className="md:w-1/2">
             <ProcessChat id={id} />
