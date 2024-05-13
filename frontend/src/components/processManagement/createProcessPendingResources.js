@@ -7,6 +7,8 @@ import { useProcessCreation } from '../../providers/ProcessCreationProvider';
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import moment from 'moment'; 
+import { ClipLoader } from "react-spinners";
+
 
 
 
@@ -232,7 +234,13 @@ const options = {
 const formattedStartTime = startDate.toLocaleString('en-US', options);
 const formattedEndTime = endDate.toLocaleString('en-US', options);
 
-  if (isLoading) return <div></div>;
+if (isLoading) {
+  return (
+    <div className="flex justify-center items-center h-screen">
+      <ClipLoader size={150} color={"#8E0000"} />
+    </div>
+  );
+}
 
   return (
     <div className="bg-secondary min-h-screen">

@@ -7,6 +7,8 @@ import { useProcessCreation } from '../../providers/ProcessCreationProvider';
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import moment from 'moment'; 
+import { ClipLoader } from "react-spinners";
+
 
 
 
@@ -229,7 +231,13 @@ try {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader size={150} color={"#8E0000"} />
+      </div>
+    );
+  }
 
 const autoAssignStaff = () => {
     let updatedEligibleStaff = { ...eligibleStaff };
