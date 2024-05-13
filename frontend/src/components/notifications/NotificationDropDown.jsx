@@ -26,6 +26,7 @@ const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
     const fetchNotifications = async () => {
       try {
         const response = await axios.get(`/users/${user?.id}/notifications`);
+        console.log("Got data", response.data);
         setNotifications(response.data);
       } catch (error) {
         console.error("Failed to fetch notifications:", error);
@@ -40,8 +41,12 @@ const NotificationDropDown = ({ navToNotificationBox, closeDropDown }) => {
     }
 
     const handleNewNotification = () => {
+      console.log("handleNewNotification called!");
+      console.log("curr user", user);
       if (user?.id) {
         fetchNotifications();
+      } else {
+        console.log("did not call fetch notification");
       }
     };
 

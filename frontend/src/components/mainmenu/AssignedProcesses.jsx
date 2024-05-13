@@ -55,7 +55,18 @@ const AssignedProcesses = () => {
     if (!socket) return;
 
     socket.on("procedure complete - refresh", triggerRefresh);
-    socket.on("new process - refresh", triggerRefresh);
+
+    const processNewRefreshCb = (involvedUser) => {
+      console.log("involved users", involvedUser);
+      console.log("current user");
+      if (user && involvedUser.includes(user.id)) {
+        triggerRefresh();
+        toast("A new process has been assigned to you!", {
+          icon: "⚠️",
+        });
+      }
+    };
+    socket.on("new process - refresh", processNewRefreshCb);
 
     const processDeleteRedirectCb = () => {
       triggerRefresh();
@@ -75,7 +86,7 @@ const AssignedProcesses = () => {
 
     return () => {
       socket.off("procedure complete - refresh", triggerRefresh);
-      socket.off("new process - refresh", triggerRefresh);
+      socket.off("new process - refresh", processNewRefreshCb);
       socket.off("process deleted - refresh", processDeleteRedirectCb);
       socket.off("process modify - refresh", processModifyRedirectCb);
     };
